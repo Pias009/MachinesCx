@@ -1,0 +1,29 @@
+{
+  "skill_name": "emilkowalski",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Add a bottom drawer to my Next.js app that slides up when the user taps a 'Filters' button. It should have the little drag handle bar at the top and feel smooth on mobile.",
+      "expected_output": "Installs vaul, creates a Drawer component with Drawer.Root/Trigger/Portal/Overlay/Content, includes the h-1.5 w-12 rounded-full drag handle, uses rounded-t-[10px], and follows Vaul's API correctly.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I want toast notifications when my form saves. Something minimal and polished — not the big ugly library ones. Should show loading while saving, then success or error.",
+      "expected_output": "Installs sonner, adds <Toaster /> to layout, uses toast.promise() for the async save action with loading/success/error strings, keeps copy short.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Build me a cmd+k command palette for navigating between pages in my app. Users should be able to type to search and hit enter to go to a page.",
+      "expected_output": "Installs cmdk, uses Command.Dialog with Command.Input/List/Empty/Group/Item, wires up keyboard shortcut via useEffect, uses router.push in onSelect.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Make this card component feel more like Emil Kowalski's design style — clean, minimal, with a subtle border and nice hover animation.",
+      "expected_output": "Applies zinc color palette, rounded-[10px] border border-zinc-200 bg-white, subtle shadow-sm, and spring-style hover/active transitions. Avoids heavy shadows or blue-gray colors.",
+      "files": []
+    }
+  ]
+}

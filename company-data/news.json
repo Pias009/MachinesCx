@@ -1,0 +1,77 @@
+[
+  {
+    "slug": "abcde-2200-five-layer-launch",
+    "title": "ABCDE-2200 Five-Layer Co-extrusion Line Now Shipping",
+    "date": "2025-11-15",
+    "category": "Product Launch",
+    "excerpt": "Our flagship ABCDE-2200 reaches a new benchmark: 400 kg/h output, 2,100 mm web width, and a five-layer die head for advanced barrier film.",
+    "image": "/machines/abcde-2200.png",
+    "tags": ["Film Blowing", "Co-extrusion", "New Product"],
+    "links": [
+      { "label": "Full specification", "url": "/products/film-blowing/abcde-2200" },
+      { "label": "Request a quote", "url": "/contact" }
+    ]
+  },
+  {
+    "slug": "pbat-pla-biodegradable-bag-making",
+    "title": "Running PBAT+PLA on Heat-Seal Converters: What You Need to Know",
+    "date": "2025-10-03",
+    "category": "Technical",
+    "excerpt": "Biodegradable PBAT+PLA blends behave differently from standard PE on heat-seal bag machines. Our engineers share the setup tips that matter.",
+    "image": "/machines/t-pro-heatseal.png",
+    "tags": ["Bag Making", "Biodegradable", "Technical Guide"],
+    "links": [
+      { "label": "T-PRO heat-seal converter", "url": "/products/bag-making/t-pro-heatseal" },
+      { "label": "Contact engineering", "url": "/contact" }
+    ]
+  },
+  {
+    "slug": "cx-recycling-pelletizing-line",
+    "title": "CX Recycling Line: Closing the Loop on Edge Trim",
+    "date": "2025-09-10",
+    "category": "Sustainability",
+    "excerpt": "Post-industrial PE edge trim and start-up scrap can be converted back to usable pellets on-site.",
+    "image": "/machines/cx-pelletizing.png",
+    "tags": ["Recycling", "Sustainability", "Pelletizing"],
+    "links": [
+      { "label": "CX pelletizing line specs", "url": "/products/recycling/cx-pelletizing" }
+    ]
+  },
+  {
+    "slug": "abc-multilayer-wide-web",
+    "title": "ABC Multi-layer Line Now Available to 2,300 mm",
+    "date": "2025-07-22",
+    "category": "Product Update",
+    "excerpt": "The ABC line family has been extended to 2,300 mm lay-flat width, making it suitable for agricultural mulch film, geomembrane, and heavy-duty sacks.",
+    "image": "/machines/abc-multilayer-large.png",
+    "tags": ["Film Blowing", "Wide Web", "Product Update"],
+    "links": [
+      { "label": "ABC 1500/1800/2300 specs", "url": "/products/film-blowing/abc-multilayer-large" }
+    ]
+  },
+  {
+    "slug": "canton-fair-2026",
+    "title": "Meet Us at Canton Fair 2026 — Hall 9.1, Booth A14",
+    "date": "2025-06-01",
+    "category": "Events",
+    "excerpt": "Wenzhou Ashal Innomach Technology will exhibit at the 139th Canton Fair in Guangzhou.",
+    "image": "/machines/s-wide.png",
+    "tags": ["Events", "Canton Fair", "Exhibition"],
+    "links": [
+      { "label": "Register for Canton Fair", "url": "https://www.cantonfair.org.cn" },
+      { "label": "Book a meeting", "url": "/contact" }
+    ]
+  },
+  {
+    "slug": "roll-bag-machine-rgb-update",
+    "title": "RGB Roll-Bag Machine: New Motorised Width Adjustment",
+    "date": "2025-04-18",
+    "category": "Product Update",
+    "excerpt": "The CX-RGB roll-bag machine now ships with motorised width adjustment and a digital position readout.",
+    "image": "/machines/rgb-rollbag.png",
+    "tags": ["Bag Making", "Roll Bag", "Product Update"],
+    "links": [
+      { "label": "RGB roll-bag machine specs", "url": "/products/bag-making/rgb-rollbag" }
+    ]
+  }
+]

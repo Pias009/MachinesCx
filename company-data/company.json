@@ -1,0 +1,35 @@
+{
+  "company": {
+    "name": "Wenzhou Ashal Innomach Technology Co., Ltd.",
+    "brand": "ASHAL INNOMACH",
+    "founded": 2008,
+    "location": "Wenzhou, Zhejiang, China",
+    "factorySize": "12,000 m²",
+    "countriesServed": "60+",
+    "machineFamilies": "18+",
+    "maxOutput": "400 kg/h",
+    "tagline": "Engineered. Proven. Supported.",
+    "description": "Designs and manufactures blown-film lines, bag-making converters, and recycling systems for polymer film processors across six continents.",
+    "values": [
+      { "title": "Engineering first", "description": "Every machine starts on the drawing board, not the sales brochure. We over-engineer where it matters — drive trains, die heads, frame rigidity — and simplify everything else." },
+      { "title": "Long-term support", "description": "We supply spare parts and provide remote process support for every machine we have ever built." },
+      { "title": "Material agnostic", "description": "Our lines run LDPE, LLDPE, HDPE, PP, PBAT+PLA and blends." },
+      { "title": "Factory transparency", "description": "Buyers are welcome on the production floor at any stage of a build." }
+    ],
+    "timeline": [
+      { "year": 2008, "event": "Company founded in Wenzhou, Zhejiang. First single-layer blown-film line." },
+      { "year": 2011, "event": "ABA three-layer co-extrusion line introduced. First export orders to Southeast Asia." },
+      { "year": 2014, "event": "Bag-making division launched with the F-PRO bottom-seal converter." },
+      { "year": 2017, "event": "ABC multi-layer line certified for PBAT+PLA biodegradable resin. European CE marking achieved." },
+      { "year": 2019, "event": "CX recycling and pelletizing line released. Factory floor expanded to 12,000 m²." },
+      { "year": 2022, "event": "Five-layer ABCDE-2200 enters development. Sales offices opened in Germany and Vietnam." },
+      { "year": 2025, "event": "ABCDE-2200 begins shipping. RGB roll-bag machine updated with motorised width adjustment." }
+    ],
+    "stats": {
+      "founded": 2008,
+      "countriesServed": "60+",
+      "maxOutputKgh": 400,
+      "machineFamilies": "18+"
+    }
+  }
+}

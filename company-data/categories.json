@@ -1,0 +1,26 @@
+[
+  {
+    "slug": "film-blowing",
+    "name": "Film Blowing Machines",
+    "tagline": "Pellet to film",
+    "description": "Mono- and multi-layer blown-film lines, from compact single-screw units to five-layer co-extrusion towers running to 2,300 mm and 400 kg/h."
+  },
+  {
+    "slug": "bag-making",
+    "name": "Bag Making Machines",
+    "tagline": "Film to bag",
+    "description": "Heat-seal, bottom-seal, roll-bag and vest-bag converters for PE and biodegradable PBAT film, at speeds to 300 pcs/min."
+  },
+  {
+    "slug": "recycling",
+    "name": "Recycling & Lab Lines",
+    "tagline": "Scrap to pellet",
+    "description": "Pelletizing and recycling lines that return edge-trim and scrap film to usable resin, plus a benchtop machine for lab and trial runs."
+  },
+  {
+    "slug": "printing",
+    "name": "Flexographic Printing Machines",
+    "tagline": "Film to print",
+    "description": "Premium CI flexographic printing lines from 2 to 8 colours, web widths 500–2000 mm, speeds to 350 m/min. Full servo gearless drive with ±0.1 mm registration on PE, PP, PET, BOPP and paper substrates."
+  }
+]

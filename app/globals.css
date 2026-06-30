@@ -2427,29 +2427,33 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 /* two-col layout */
 .pdv2-hero__cols {
   display: grid;
-  grid-template-columns: 1.35fr 1fr;
-  gap: clamp(2rem, 4vw, 3.5rem);
-  align-items: stretch;
+  grid-template-columns: 1.4fr 1fr;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  align-items: start;
 }
 
 /* ── LEFT: gallery ── */
 .pdv2-gallery {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  grid-template-rows: 1fr;
   gap: 0.65rem;
-  height: 100%;
 }
 .pdv2-thumbs {
-  display: flex; gap: 0.5rem; order: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  grid-column: 1;
+  grid-row: 1;
 }
 .pdv2-thumb {
-  width: 56px; height: 56px;
+  width: 80px; height: 80px;
   border: 2px solid var(--bg-line);
   background: var(--bg-surface);
   overflow: hidden; cursor: pointer;
   transition: border-color 0.18s;
   display: flex; align-items: center; justify-content: center;
-  padding: 0.25rem;
+  padding: 0.3rem;
   flex-shrink: 0;
 }
 .pdv2-thumb img { width: 100%; height: 100%; object-fit: contain; }
@@ -2460,10 +2464,12 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   position: relative;
   background: var(--bg-surface);
   border: 1px solid var(--bg-line);
-  flex: 1;
+  grid-column: 2;
+  grid-row: 1;
+  aspect-ratio: 4 / 3;
+  width: 100%;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
-  min-height: 380px;
 }
 .pdv2-main-img__teal-bar {
   position: absolute; top: 0; left: 0; right: 0; height: 3px;
@@ -2471,7 +2477,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   z-index: 2;
 }
 .pdv2-main-img img {
-  width: 88%; height: 88%; object-fit: contain;
+  width: 90%; height: 90%; object-fit: contain;
   filter: drop-shadow(0 24px 56px rgba(0,0,0,0.55));
   transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
   animation: pdv2-img-in 0.35s cubic-bezier(0.16,1,0.3,1);
@@ -3015,7 +3021,9 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 /* ── RESPONSIVE ── */
 @media (max-width: 960px) {
   .pdv2-hero__cols { grid-template-columns: 1fr; }
-  .pdv2-gallery { grid-template-columns: 60px 1fr; }
+  /* keep thumbs on left, main image filling remaining width */
+  .pdv2-gallery { grid-template-columns: 72px 1fr; }
+  .pdv2-thumb { width: 72px; height: 72px; }
   .pdv2-video-layout { grid-template-columns: 1fr; }
   .pdv2-video-list { flex-direction: row; overflow-x: auto; }
   .pdv2-vlist-item { flex-shrink: 0; width: 220px; }
@@ -3032,9 +3040,11 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   .pdv2-cta-band__img-side { min-height: 200px; }
 }
 @media (max-width: 600px) {
-  .pdv2-gallery { grid-template-columns: 1fr; }
-  .pdv2-thumbs { flex-direction: row; }
-  .pdv2-thumb { width: 60px; height: 60px; }
+  /* on small screens: thumbs go below the image as a horizontal strip */
+  .pdv2-gallery { grid-template-columns: 1fr; grid-template-rows: auto auto; }
+  .pdv2-thumbs { flex-direction: row; grid-column: 1; grid-row: 2; }
+  .pdv2-thumb { width: 64px; height: 64px; }
+  .pdv2-main-img { grid-column: 1; grid-row: 1; }
   .pdv2-related-grid { grid-template-columns: 1fr 1fr; }
   .pdv2-review-card { padding: 1.25rem; }
   .pdv2-cta-band__form-side { padding: 2rem 1.25rem; }

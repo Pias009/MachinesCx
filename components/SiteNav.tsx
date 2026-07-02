@@ -235,7 +235,7 @@ export default function SiteNav() {
         }
         .sn__dd-tag {
           display: block; font-family: var(--ff-body); font-size: 0.72rem;
-          color: rgba(255,255,255,0.45); margin-top: 0.2rem; line-height: 1.4;
+          color: rgba(255,255,255,0.7); margin-top: 0.2rem; line-height: 1.4;
         }
 
         /* Dropdown preview panel */

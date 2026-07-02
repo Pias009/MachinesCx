@@ -270,10 +270,10 @@ export default function PrintingShowcase() {
           }
           [data-theme="light"] .ps-model-name   { color: #0d2220 !important; }
           [data-theme="light"] .ps-series-label { color: var(--brand-teal) !important; }
-          [data-theme="light"] .ps-spec-label   { color: rgba(13,34,32,0.38) !important; }
+          [data-theme="light"] .ps-spec-label   { color: rgba(13,34,32,0.6) !important; }
           [data-theme="light"] .ps-spec-val     { color: #0d2220 !important; }
-          [data-theme="light"] .ps-brand-label  { color: rgba(13,34,32,0.45) !important; }
-          [data-theme="light"] .ps-counter      { color: rgba(13,34,32,0.28) !important; }
+          [data-theme="light"] .ps-brand-label  { color: rgba(13,34,32,0.65) !important; }
+          [data-theme="light"] .ps-counter      { color: rgba(13,34,32,0.55) !important; }
           [data-theme="light"] .ps-view-all     { color: rgba(13,34,32,0.72) !important; }
           [data-theme="light"] .ps-dot-active   { background: var(--brand-teal) !important; }
           [data-theme="light"] .ps-dot-inactive { background: rgba(13,34,32,0.22) !important; }
@@ -294,8 +294,8 @@ export default function PrintingShowcase() {
             border-color: var(--brand-teal) !important;
           }
           [data-theme="light"] .ps-col-label { color: #0d2220 !important; }
-          [data-theme="light"] .ps-col-num   { color: rgba(13,34,32,0.35) !important; }
-          [data-theme="light"] .ps-col-speed { color: rgba(13,34,32,0.28) !important; }
+          [data-theme="light"] .ps-col-num   { color: rgba(13,34,32,0.6) !important; }
+          [data-theme="light"] .ps-col-speed { color: rgba(13,34,32,0.55) !important; }
         `}</style>
 
         <div className="ps-ghost-wrap">
@@ -334,10 +334,10 @@ export default function PrintingShowcase() {
 
           <div className="ps-counter" style={{
             fontFamily:    "var(--ff-mono)",
-            fontSize:      "clamp(0.55rem, 1vw, 0.68rem)",
+            fontSize:      "clamp(0.66rem, 1vw, 0.68rem)",
             letterSpacing: "0.2em",
             textTransform: "uppercase",
-            color:         "rgba(255,255,255,0.42)",
+            color:         "rgba(255,255,255,0.7)",
             display:       "flex",
             alignItems:    "center",
             gap:           "0.6rem",
@@ -409,7 +409,7 @@ export default function PrintingShowcase() {
           </p>
           <p className="ps-series-label" style={{
             fontFamily:    "var(--ff-mono)",
-            fontSize:      "0.62rem",
+            fontSize:      "0.7rem",
             letterSpacing: "0.22em",
             textTransform: "uppercase",
             color:         m.accent,
@@ -432,7 +432,7 @@ export default function PrintingShowcase() {
                 { label: "Substrates", value: "9 types" },
               ].map(kv => (
                 <div key={kv.label}>
-                  <div className="ps-spec-label" style={{ fontFamily:"var(--ff-mono)", fontSize:".52rem", letterSpacing:".18em", textTransform:"uppercase", color:"rgba(255,255,255,.3)", marginBottom:".2rem" }}>{kv.label}</div>
+                  <div className="ps-spec-label" style={{ fontFamily:"var(--ff-mono)", fontSize:"0.64rem", letterSpacing:".18em", textTransform:"uppercase", color:"rgba(255,255,255,0.6)", marginBottom:".2rem" }}>{kv.label}</div>
                   <div className="ps-spec-val" style={{ fontFamily:"var(--ff-display)", fontSize:"1.1rem", color:"rgba(255,255,255,.85)", lineHeight:1 }}>{kv.value}</div>
                 </div>
               ))}
@@ -546,7 +546,7 @@ export default function PrintingShowcase() {
                   }}
                 >
                   <span className="ps-col-num" style={{
-                    fontFamily: "var(--ff-mono)", fontSize: "0.48rem",
+                    fontFamily: "var(--ff-mono)", fontSize: "0.62rem",
                     letterSpacing: "0.14em", textTransform: "uppercase",
                     color: i === active ? "var(--brand-teal)" : "rgba(255,255,255,0.35)",
                     display: "block", minWidth: 28,
@@ -563,8 +563,8 @@ export default function PrintingShowcase() {
                     {mac.model}
                   </span>
                   <span style={{
-                    fontFamily: "var(--ff-mono)", fontSize: "0.42rem",
-                    color: "rgba(255,255,255,0.28)", letterSpacing: "0.1em",
+                    fontFamily: "var(--ff-mono)", fontSize: "0.62rem",
+                    color: "rgba(255,255,255,0.6)", letterSpacing: "0.1em",
                     marginLeft: "auto", textTransform: "uppercase",
                   }}>
                     {mac.series.split(" ")[0]}

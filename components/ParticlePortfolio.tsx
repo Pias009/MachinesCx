@@ -223,7 +223,7 @@ export default function ParticlePortfolio(){
 
         /* headline */
         [data-theme="light"] .pp-headline    { color: #0d2220 !important; }
-        [data-theme="light"] .pp-sub         { color: rgba(13,34,32,0.5) !important; }
+        [data-theme="light"] .pp-sub         { color: rgba(13,34,32,0.7) !important; }
         [data-theme="light"] .pp-stat-val    { color: #0d2220 !important; }
         [data-theme="light"] .pp-stat-label  { color: rgba(43,191,179,0.8) !important; }
         [data-theme="light"] .pp-stat-pill   {
@@ -238,20 +238,20 @@ export default function ParticlePortfolio(){
           border-color: rgba(43,191,179,0.2) !important;
           backdrop-filter: blur(12px);
         }
-        [data-theme="light"] .pp-ticker-item { color: rgba(13,34,32,0.55) !important; }
+        [data-theme="light"] .pp-ticker-item { color: rgba(13,34,32,0.72) !important; }
 
         /* showcase left panel */
         [data-theme="light"] .pp-showcase-divider { border-color: rgba(43,191,179,0.15) !important; }
         [data-theme="light"] .pp-machine-img      { filter: drop-shadow(0 8px 32px rgba(43,191,179,0.15)) drop-shadow(0 4px 16px rgba(0,0,0,0.12)) !important; }
-        [data-theme="light"] .pp-counter-text     { color: rgba(13,34,32,0.3) !important; }
+        [data-theme="light"] .pp-counter-text     { color: rgba(13,34,32,0.55) !important; }
 
         /* showcase right panel */
         [data-theme="light"] .pp-machine-name     { color: #0d2220 !important; }
-        [data-theme="light"] .pp-machine-tagline  { color: rgba(13,34,32,0.5) !important; }
-        [data-theme="light"] .pp-spec-label       { color: rgba(13,34,32,0.4) !important; }
+        [data-theme="light"] .pp-machine-tagline  { color: rgba(13,34,32,0.7) !important; }
+        [data-theme="light"] .pp-spec-label       { color: rgba(13,34,32,0.65) !important; }
         [data-theme="light"] .pp-spec-val         { color: #0d2220 !important; }
         [data-theme="light"] .pp-progress-track   { background: rgba(13,34,32,0.08) !important; }
-        [data-theme="light"] .pp-progress-meta    { color: rgba(13,34,32,0.3) !important; }
+        [data-theme="light"] .pp-progress-meta    { color: rgba(13,34,32,0.55) !important; }
 
         /* vignette hidden in light mode */
         [data-theme="light"] .pp-vignette { opacity: 0 !important; }
@@ -262,13 +262,13 @@ export default function ParticlePortfolio(){
           border-color: rgba(43,191,179,0.15) !important;
         }
         [data-theme="light"] .pp-mobile-headline { color: #0d2220 !important; }
-        [data-theme="light"] .pp-mobile-sub      { color: rgba(13,34,32,0.48) !important; }
+        [data-theme="light"] .pp-mobile-sub      { color: rgba(13,34,32,0.7) !important; }
         [data-theme="light"] .pp-mobile-card     { background: #fff !important; }
         [data-theme="light"] .pp-mobile-cat      { color: var(--brand-teal) !important; }
         [data-theme="light"] .pp-mobile-name     { color: #0d2220 !important; }
         [data-theme="light"] .pp-mobile-img      { filter: drop-shadow(0 2px 8px rgba(0,0,0,0.1)) !important; }
         [data-theme="light"] .pp-mobile-stat-v   { color: var(--brand-teal) !important; }
-        [data-theme="light"] .pp-mobile-stat-l   { color: rgba(13,34,32,0.38) !important; }
+        [data-theme="light"] .pp-mobile-stat-l   { color: rgba(13,34,32,0.6) !important; }
         [data-theme="light"] .pp-mobile-stats    {
           background: rgba(43,191,179,0.06) !important;
           border-color: rgba(43,191,179,0.15) !important;
@@ -291,7 +291,7 @@ export default function ParticlePortfolio(){
           background:"radial-gradient(ellipse at 50% 0%,rgba(43,191,179,0.12) 0%,transparent 70%)",
         }}/>
         <div style={{position:"relative",zIndex:1,marginBottom:"2rem"}}>
-          <div style={{fontFamily:"var(--ff-mono)",fontSize:"0.6rem",letterSpacing:"0.2em",
+          <div style={{fontFamily:"var(--ff-mono)",fontSize:"0.7rem",letterSpacing:"0.2em",
             textTransform:"uppercase",color:"var(--brand-teal)",marginBottom:"0.75rem"}}>
             Engineered · Proven · Supported
           </div>
@@ -300,7 +300,7 @@ export default function ParticlePortfolio(){
             Built for<br/><span style={{color:"var(--brand-teal)"}}>the floor.</span>
           </h2>
           <p className="pp-mobile-sub" style={{fontFamily:"var(--ff-body)",fontSize:"0.9rem",
-            color:"rgba(255,255,255,0.45)",lineHeight:1.7,maxWidth:"38ch",margin:0}}>
+            color:"rgba(255,255,255,0.7)",lineHeight:1.7,maxWidth:"38ch",margin:0}}>
             Industrial plastic-processing lines engineered in Wenzhou, proven across 80+ countries, supported for life.
           </p>
         </div>
@@ -316,7 +316,7 @@ export default function ParticlePortfolio(){
                 style={{width:"72px",height:"56px",objectFit:"contain",
                   filter:"drop-shadow(0 2px 8px rgba(0,0,0,0.8))",flexShrink:0}}/>
               <div>
-                <div className="pp-mobile-cat" style={{fontFamily:"var(--ff-mono)",fontSize:"0.5rem",
+                <div className="pp-mobile-cat" style={{fontFamily:"var(--ff-mono)",fontSize:"0.64rem",
                   letterSpacing:"0.12em",textTransform:"uppercase",
                   color:"var(--brand-teal)",marginBottom:"0.2rem"}}>{m.cat}</div>
                 <div className="pp-mobile-name" style={{fontFamily:"var(--ff-display)",fontSize:"0.95rem",
@@ -332,9 +332,9 @@ export default function ParticlePortfolio(){
               borderRight:i<2?"1px solid rgba(43,191,179,0.1)":"none"}}>
               <div className="pp-mobile-stat-v" style={{fontFamily:"var(--ff-display)",fontSize:"1.6rem",
                 color:"var(--brand-teal)",lineHeight:1,letterSpacing:"-0.02em"}}>{s.v}</div>
-              <div className="pp-mobile-stat-l" style={{fontFamily:"var(--ff-mono)",fontSize:"0.48rem",
+              <div className="pp-mobile-stat-l" style={{fontFamily:"var(--ff-mono)",fontSize:"0.62rem",
                 letterSpacing:"0.12em",textTransform:"uppercase",
-                color:"rgba(255,255,255,0.38)",marginTop:"0.3rem"}}>{s.l}</div>
+                color:"rgba(255,255,255,0.65)",marginTop:"0.3rem"}}>{s.l}</div>
             </div>
           ))}
         </div>
@@ -362,7 +362,7 @@ export default function ParticlePortfolio(){
         }}>
           <div style={{
             display:"flex",alignItems:"center",gap:"0.9rem",
-            fontFamily:"var(--ff-mono)",fontSize:"0.62rem",
+            fontFamily:"var(--ff-mono)",fontSize:"0.7rem",
             letterSpacing:"0.22em",textTransform:"uppercase",
             color:"var(--brand-teal)",marginBottom:"1.75rem",
           }}>
@@ -384,7 +384,7 @@ export default function ParticlePortfolio(){
           <p className="pp-sub" style={{
             fontFamily:"var(--ff-body)",
             fontSize:"clamp(0.9rem,1.2vw,1.05rem)",
-            color:"rgba(255,255,255,0.42)",
+            color:"rgba(255,255,255,0.7)",
             lineHeight:1.7,maxWidth:"44ch",margin:"2rem 0 0",
             letterSpacing:"0.01em",
           }}>
@@ -408,7 +408,7 @@ export default function ParticlePortfolio(){
               }}>
                 <div className="pp-stat-val" style={{fontFamily:"var(--ff-display)",fontSize:"clamp(1.4rem,2.5vw,2rem)",
                   color:"#fff",lineHeight:1,letterSpacing:"-0.02em"}}>{s.v}</div>
-                <div className="pp-stat-label" style={{fontFamily:"var(--ff-mono)",fontSize:"0.55rem",
+                <div className="pp-stat-label" style={{fontFamily:"var(--ff-mono)",fontSize:"0.66rem",
                   letterSpacing:"0.14em",textTransform:"uppercase",
                   color:"rgba(43,191,179,0.6)",marginTop:"0.3rem"}}>{s.l}</div>
               </div>
@@ -433,9 +433,9 @@ export default function ParticlePortfolio(){
                 padding:"0 2rem",
                 fontFamily:"var(--ff-mono)",fontSize:"0.65rem",
                 letterSpacing:"0.16em",textTransform:"uppercase",
-                color:"rgba(255,255,255,0.5)",whiteSpace:"nowrap",
+                color:"rgba(255,255,255,0.75)",whiteSpace:"nowrap",
               }}>
-                <span style={{color:"var(--brand-teal)",fontSize:"0.5rem"}}>◆</span>
+                <span style={{color:"var(--brand-teal)",fontSize:"0.64rem"}}>◆</span>
                 {item}
               </span>
             ))}
@@ -458,7 +458,7 @@ export default function ParticlePortfolio(){
           }}>
             <div style={{
               position:"absolute",top:"2rem",left:"clamp(1.5rem,4vw,3rem)",
-              fontFamily:"var(--ff-mono)",fontSize:"0.58rem",
+              fontFamily:"var(--ff-mono)",fontSize:"0.68rem",
               letterSpacing:"0.18em",textTransform:"uppercase",
               color:"var(--brand-teal)",
               display:"flex",alignItems:"center",gap:"0.6rem",
@@ -478,8 +478,8 @@ export default function ParticlePortfolio(){
 
             <div className="pp-counter-text" style={{
               position:"absolute",bottom:"2.5rem",right:"clamp(1.5rem,4vw,3rem)",
-              fontFamily:"var(--ff-mono)",fontSize:"0.58rem",
-              letterSpacing:"0.1em",color:"rgba(255,255,255,0.25)",
+              fontFamily:"var(--ff-mono)",fontSize:"0.68rem",
+              letterSpacing:"0.1em",color:"rgba(255,255,255,0.55)",
             }}>
               {String(activeIdx+1).padStart(2,"0")} / {String(MACHINES.length).padStart(2,"0")}
             </div>
@@ -514,7 +514,7 @@ export default function ParticlePortfolio(){
               <p className="pp-machine-tagline" style={{
                 fontFamily:"var(--ff-body)",
                 fontSize:"clamp(0.82rem,1vw,0.92rem)",
-                color:"rgba(255,255,255,0.42)",
+                color:"rgba(255,255,255,0.7)",
                 lineHeight:1.72,margin:0,maxWidth:"36ch",
               }}>
                 {machine.tagline}
@@ -525,9 +525,9 @@ export default function ParticlePortfolio(){
               {machine.specs.map(([label,value])=>(
                 <div key={label} className="pp-spec-row">
                   <span className="pp-spec-label" style={{
-                    fontFamily:"var(--ff-mono)",fontSize:"0.6rem",
+                    fontFamily:"var(--ff-mono)",fontSize:"0.7rem",
                     letterSpacing:"0.12em",textTransform:"uppercase",
-                    color:"rgba(255,255,255,0.35)",
+                    color:"rgba(255,255,255,0.65)",
                   }}>{label}</span>
                   <span className="pp-spec-val" style={{
                     fontFamily:"var(--ff-display)",fontSize:"clamp(1.1rem,1.8vw,1.5rem)",
@@ -540,9 +540,9 @@ export default function ParticlePortfolio(){
             <div style={{marginBottom:"2rem"}}>
               <div className="pp-progress-meta" style={{
                 display:"flex",justifyContent:"space-between",
-                fontFamily:"var(--ff-mono)",fontSize:"0.52rem",
+                fontFamily:"var(--ff-mono)",fontSize:"0.64rem",
                 letterSpacing:"0.12em",textTransform:"uppercase",
-                color:"rgba(255,255,255,0.25)",marginBottom:"0.5rem",
+                color:"rgba(255,255,255,0.55)",marginBottom:"0.5rem",
               }}>
                 <span>Catalogue</span>
                 <span>{activeIdx+1} of {MACHINES.length}</span>

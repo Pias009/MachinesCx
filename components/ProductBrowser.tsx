@@ -482,7 +482,7 @@ export default function ProductBrowser() {
           background: var(--brand-red); border-color: var(--brand-red); color: #fff;
         }
         .pb-count {
-          font-family: var(--ff-mono); font-size: 0.62rem;
+          font-family: var(--ff-mono); font-size: 0.7rem;
           letter-spacing: 0.1em; color: var(--slate-30);
           margin-left: auto; white-space: nowrap;
         }
@@ -586,7 +586,7 @@ export default function ProductBrowser() {
           transition: opacity 0.2s ease;
         }
         .pb-card__cat {
-          font-family: var(--ff-mono); font-size: 0.55rem;
+          font-family: var(--ff-mono); font-size: 0.66rem;
           letter-spacing: 0.16em; text-transform: uppercase;
           color: var(--brand-red); display: block; margin-bottom: 0.35rem;
           flex-shrink: 0;
@@ -606,7 +606,7 @@ export default function ProductBrowser() {
           -webkit-box-orient: vertical; overflow: hidden;
         }
         .pb-card__cta {
-          font-family: var(--ff-mono); font-size: 0.62rem;
+          font-family: var(--ff-mono); font-size: 0.7rem;
           letter-spacing: 0.1em; text-transform: uppercase;
           color: var(--brand-red); display: inline-flex;
           align-items: center; gap: 0.4rem; margin-top: 0.85rem;
@@ -794,7 +794,7 @@ export default function ProductBrowser() {
           border-left: 1px solid var(--line);
         }
         .qv-cat {
-          font-family: var(--ff-mono); font-size: 0.58rem;
+          font-family: var(--ff-mono); font-size: 0.68rem;
           letter-spacing: 0.16em; text-transform: uppercase;
           color: var(--brand-red); display: block; margin-bottom: 0.5rem;
         }
@@ -822,7 +822,7 @@ export default function ProductBrowser() {
           gap: 0.5rem; padding: 0.5rem 0; border-bottom: 1px solid var(--line);
         }
         .qv-spec-label {
-          font-family: var(--ff-mono); font-size: 0.58rem;
+          font-family: var(--ff-mono); font-size: 0.68rem;
           letter-spacing: 0.1em; text-transform: uppercase;
           color: var(--slate-60); flex-shrink: 0;
         }

@@ -105,7 +105,7 @@ export default function AboutPage() {
               <span style={{
                 fontFamily: "var(--ff-mono)", fontSize: "0.65rem",
                 letterSpacing: "0.16em", textTransform: "uppercase",
-                color: "rgba(255,255,255,0.45)", display: "block", marginTop: "0.5rem",
+                color: "rgba(255,255,255,0.7)", display: "block", marginTop: "0.5rem",
               }}>{s.label}</span>
             </div>
           ))}
@@ -178,7 +178,7 @@ export default function AboutPage() {
                     outline: `1px solid ${i === TIMELINE.length - 1 ? "var(--brand-red)" : "var(--slate-30)"}`,
                   }} />
                   <span style={{
-                    fontFamily: "var(--ff-mono)", fontSize: "0.62rem",
+                    fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
                     letterSpacing: "0.14em", textTransform: "uppercase",
                     color: "var(--brand-red)", display: "block", marginBottom: "0.25rem",
                   }}>{t.year}</span>

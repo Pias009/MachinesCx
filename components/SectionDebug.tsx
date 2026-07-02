@@ -87,7 +87,7 @@ export default function SectionDebug() {
         }
         .scd-sub {
           font-family: var(--ff-mono);
-          font-size: 0.48rem;
+          font-size: 0.62rem;
           letter-spacing: 0.18em;
           text-transform: uppercase;
           color: var(--brand-teal);

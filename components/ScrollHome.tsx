@@ -515,7 +515,7 @@ export default function ScrollHome() {
 
           <p style={{
             fontFamily: "var(--ff-body)", fontSize: "1.08rem", fontWeight: 400,
-            color: "rgba(255,255,255,0.5)", maxWidth: "44ch", marginTop: "1.5rem",
+            color: "rgba(255,255,255,0.75)", maxWidth: "44ch", marginTop: "1.5rem",
             lineHeight: 1.72, letterSpacing: "0.01em",
           }}>
             Multi-lane heat-seal and bottom-seal converters for PE and biodegradable PBAT+PLA film.
@@ -529,7 +529,7 @@ export default function ScrollHome() {
               display: "inline-flex", alignItems: "center", gap: "0.5rem",
               fontFamily: "var(--ff-mono)", fontSize: "0.78rem", letterSpacing: "0.08em",
               textTransform: "uppercase", padding: "0.85rem 1.5rem",
-              border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.6)",
+              border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.78)",
               transition: "border-color 0.2s, color 0.2s",
               textDecoration: "none",
             }}>
@@ -584,7 +584,7 @@ export default function ScrollHome() {
 
           <p style={{
             fontFamily: "var(--ff-body)", fontSize: "1.05rem", fontWeight: 400,
-            color: "rgba(255,255,255,0.5)", maxWidth: "42ch", lineHeight: 1.75,
+            color: "rgba(255,255,255,0.75)", maxWidth: "42ch", lineHeight: 1.75,
             letterSpacing: "0.01em", marginBottom: "2rem",
           }}>
             Heat-seal flat bags, bottom-seal bags and roll bags — all from the
@@ -603,9 +603,9 @@ export default function ScrollHome() {
                 padding: "0.6rem 0", borderBottom: "1px solid rgba(255,255,255,0.07)",
               }}>
                 <span style={{
-                  fontFamily: "var(--ff-mono)", fontSize: "0.62rem",
+                  fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
                   letterSpacing: "0.1em", textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.35)",
+                  color: "rgba(255,255,255,0.65)",
                 }}>{s.label}</span>
                 <span style={{
                   fontFamily: "var(--ff-display)", fontSize: "1.05rem",
@@ -671,7 +671,7 @@ export default function ScrollHome() {
             }}>
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
-            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.48rem", letterSpacing: "0.16em", color: "rgba(255,255,255,0.3)", textTransform: "uppercase" }}>
+            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.62rem", letterSpacing: "0.16em", color: "rgba(255,255,255,0.6)", textTransform: "uppercase" }}>
               {String(mobileIdx + 1).padStart(2,"0")} / {String(CARDS.length).padStart(2,"0")}
             </span>
             <button onClick={mobileNext} aria-label="Next machine" style={{
@@ -714,7 +714,7 @@ export default function ScrollHome() {
                   }}
                 />
                 <span style={{
-                  fontFamily: "var(--ff-mono)", fontSize: "0.42rem",
+                  fontFamily: "var(--ff-mono)", fontSize: "0.62rem",
                   letterSpacing: "0.1em", textTransform: "uppercase",
                   color: i === mobileIdx ? "var(--brand-teal)" : "rgba(255,255,255,0.3)",
                   textAlign: "center", lineHeight: 1.3,
@@ -730,7 +730,7 @@ export default function ScrollHome() {
           <div style={{ padding: "1.25rem 1.25rem 2rem" }}>
             {/* Name */}
             <div style={{
-              fontFamily: "var(--ff-mono)", fontSize: "0.5rem",
+              fontFamily: "var(--ff-mono)", fontSize: "0.64rem",
               letterSpacing: "0.2em", textTransform: "uppercase",
               color: "var(--brand-teal)", marginBottom: "0.3rem",
             }}>Hot Machine</div>
@@ -748,7 +748,7 @@ export default function ScrollHome() {
                   display: "flex", justifyContent: "space-between", alignItems: "baseline",
                   padding: "0.5rem 0", borderBottom: "1px solid rgba(255,255,255,0.07)",
                 }}>
-                  <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.55rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>{row.label}</span>
+                  <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.66rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)" }}>{row.label}</span>
                   <span style={{ fontFamily: "var(--ff-display)", fontSize: "0.88rem", color: "rgba(255,255,255,0.88)" }}>{row.value}</span>
                 </div>
               ))}
@@ -764,7 +764,7 @@ export default function ScrollHome() {
                   border: "1px solid rgba(255,255,255,0.07)",
                 }}>
                   <span style={{ fontFamily: "var(--ff-display)", fontSize: "0.92rem", color: "rgba(255,255,255,0.9)", display: "block" }}>{f.head}</span>
-                  <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.76rem", color: "rgba(255,255,255,0.4)", lineHeight: 1.6, display: "block", marginTop: "0.15rem" }}>{f.body}</span>
+                  <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.76rem", color: "rgba(255,255,255,0.7)", lineHeight: 1.6, display: "block", marginTop: "0.15rem" }}>{f.body}</span>
                 </div>
               ))}
             </div>
@@ -795,7 +795,7 @@ export default function ScrollHome() {
           {/* LEFT — specifications */}
           <div ref={sec3LeftRef} className="sh-sec" style={{ width: "30%" }}>
             <p style={{
-              fontFamily: "var(--ff-mono)", fontSize: "0.62rem",
+              fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
               letterSpacing: "0.16em", textTransform: "uppercase",
               color: "var(--brand-teal)", marginBottom: "1.75rem",
             }}>Specifications</p>
@@ -807,9 +807,9 @@ export default function ScrollHome() {
                 padding: "0.65rem 0", borderBottom: "1px solid rgba(255,255,255,0.07)",
               }}>
                 <span style={{
-                  fontFamily: "var(--ff-mono)", fontSize: "0.62rem",
+                  fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
                   letterSpacing: "0.1em", textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.35)", flexShrink: 0,
+                  color: "rgba(255,255,255,0.65)", flexShrink: 0,
                 }}>{row.label}</span>
                 <span style={{
                   fontFamily: "var(--ff-display)", fontSize: "0.95rem",
@@ -825,7 +825,7 @@ export default function ScrollHome() {
           {/* RIGHT — key features */}
           <div ref={sec3RightRef} className="sh-sec" style={{ width: "30%" }}>
             <p style={{
-              fontFamily: "var(--ff-mono)", fontSize: "0.62rem",
+              fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
               letterSpacing: "0.16em", textTransform: "uppercase",
               color: "var(--brand-teal)", marginBottom: "1.75rem",
             }}>Key features</p>
@@ -843,7 +843,7 @@ export default function ScrollHome() {
                 }}>{f.head}</span>
                 <span style={{
                   fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 400,
-                  color: "rgba(255,255,255,0.45)", lineHeight: 1.65,
+                  color: "rgba(255,255,255,0.7)", lineHeight: 1.65,
                   display: "block", marginTop: "0.25rem",
                 }}>{f.body}</span>
               </div>
@@ -950,7 +950,7 @@ export default function ScrollHome() {
           width: 42px; height: 42px; border-radius: 0;
           background: rgba(255,255,255,0.05);
           border: 1px solid rgba(255,255,255,0.12);
-          color: rgba(255,255,255,0.6);
+          color: rgba(255,255,255,0.78);
           display: flex; align-items: center; justify-content: center;
           cursor: pointer; z-index: 5;
           transition: background 0.18s, color 0.18s, border-color 0.18s;

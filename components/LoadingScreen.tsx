@@ -209,7 +209,7 @@ export default function LoadingScreen() {
 
           {/* Subtitle */}
           <div style={{
-            fontSize: "clamp(0.55rem,0.9vw,0.72rem)",
+            fontSize: "clamp(0.66rem,0.9vw,0.72rem)",
             letterSpacing: "0.22em", textTransform: "uppercase",
             color: "rgba(225,29,72,0.7)", marginTop: "0.3rem",
             animation: "ls-rise 1.0s 0.95s cubic-bezier(0.22,1,0.36,1) both",
@@ -227,9 +227,9 @@ export default function LoadingScreen() {
 
           {/* Tagline */}
           <div style={{
-            fontSize: "clamp(0.4rem,0.6vw,0.5rem)",
+            fontSize: "clamp(0.62rem,0.6vw,0.64rem)",
             letterSpacing: "0.18em", textTransform: "uppercase",
-            color: "rgba(255,255,255,0.18)", marginTop: "0.5rem",
+            color: "rgba(255,255,255,0.55)", marginTop: "0.5rem",
             animation: "ls-rise 1.0s 1.4s cubic-bezier(0.22,1,0.36,1) both",
           }}>
             Film Blowing · Bag Making · Recycling · Flexo Print
@@ -242,7 +242,7 @@ export default function LoadingScreen() {
           animation: "ls-rise 1.0s 1.7s cubic-bezier(0.22,1,0.36,1) both",
         }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.45rem" }}>
-            <span style={{ fontSize: "0.44rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.15)" }}>
+            <span style={{ fontSize: "0.62rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
               {pct < 100 ? "Initialising" : label}
             </span>
             <span style={{
@@ -296,7 +296,7 @@ export default function LoadingScreen() {
           padding: "0 clamp(1.5rem,4vw,3rem)", zIndex: 10,
           animation: "ls-bar-up 1.0s 2.0s cubic-bezier(0.22,1,0.36,1) both",
         }}>
-          <span style={{ fontSize: "0.4rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.1)" }}>
+          <span style={{ fontSize: "0.62rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.1)" }}>
             Wenzhou · China · Est. 2008
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
@@ -305,7 +305,7 @@ export default function LoadingScreen() {
               background: pct === 100 ? "#4ade80" : "#2bbfb3", transition: "background 0.6s",
               animation: "ls-pulse 1.4s ease-in-out infinite",
             }} />
-            <span style={{ fontSize: "0.4rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.1)" }}>
+            <span style={{ fontSize: "0.62rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.1)" }}>
               {pct === 100 ? "Ready" : "Loading"}
             </span>
           </div>

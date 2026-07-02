@@ -53,13 +53,13 @@ export default function NewsIndexPage() {
           <div className="news-featured__body">
             <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginBottom: "1rem" }}>
               <span style={{
-                fontFamily: "var(--ff-mono)", fontSize: "0.6rem",
+                fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
                 letterSpacing: "0.16em", textTransform: "uppercase",
                 color: "#fff", background: "var(--brand-red)",
                 padding: "0.25rem 0.6rem",
               }}>{featured.category}</span>
               <span style={{
-                fontFamily: "var(--ff-mono)", fontSize: "0.6rem",
+                fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
                 letterSpacing: "0.1em", color: "var(--slate-30)",
               }}>{fmt(featured.date)}</span>
             </div>
@@ -166,11 +166,11 @@ export default function NewsIndexPage() {
         .ns-card:hover .ns-card__img { transform: scale(1.06) translateY(-2%); }
         .ns-card__body { padding: 1.1rem 1.1rem 1.4rem; display: flex; flex-direction: column; flex: 1; }
         .ns-card__meta { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem; }
-        .ns-card__cat { font-family: var(--ff-mono); font-size: 0.55rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand-red); }
-        .ns-card__date { font-family: var(--ff-mono); font-size: 0.55rem; letter-spacing: 0.1em; color: var(--slate-30); }
+        .ns-card__cat { font-family: var(--ff-mono); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand-red); }
+        .ns-card__date { font-family: var(--ff-mono); font-size: 0.66rem; letter-spacing: 0.1em; color: var(--slate-30); }
         .ns-card__title { font-family: var(--ff-display); font-size: clamp(1rem,1.8vw,1.2rem); color: var(--slate); line-height: 1.15; letter-spacing: 0.01em; margin-bottom: 0.6rem; }
         .ns-card__excerpt { font-family: var(--ff-body); font-size: 0.82rem; font-weight: 400; color: var(--slate-60); line-height: 1.6; flex: 1; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .ns-card__cta { font-family: var(--ff-mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand-red); }
+        .ns-card__cta { font-family: var(--ff-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand-red); }
       `}</style>
     </>
   );

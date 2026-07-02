@@ -67,9 +67,9 @@ export default function FlexoPrintingPage() {
           background:rgba(225,29,72,0.04) !important;
         }
         .fp-tier-label { font-family:var(--ff-display); font-size:1.35rem; letter-spacing:.02em; color:var(--slate); line-height:1; }
-        .fp-tier-sub   { font-family:var(--ff-mono); font-size:.58rem; letter-spacing:.12em; text-transform:uppercase; color:var(--slate-60); }
+        .fp-tier-sub   { font-family:var(--ff-mono); font-size:0.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--slate-60); }
         .fp-tier-badge {
-          font-family:var(--ff-mono); font-size:.5rem; letter-spacing:.18em;
+          font-family:var(--ff-mono); font-size:0.64rem; letter-spacing:.18em;
           text-transform:uppercase; padding:.15rem .4rem;
           background:var(--brand-red); color:#fff; border-radius:2px;
         }
@@ -98,7 +98,7 @@ export default function FlexoPrintingPage() {
         .fp-gallery-thumb--active { border-color:var(--brand-red) !important; opacity:1 !important; }
 
         .fp-kv { display:flex; flex-direction:column; gap:.25rem; }
-        .fp-kv__label { font-family:var(--ff-mono); font-size:.58rem; letter-spacing:.18em; text-transform:uppercase; color:var(--slate-30); }
+        .fp-kv__label { font-family:var(--ff-mono); font-size:0.68rem; letter-spacing:.18em; text-transform:uppercase; color:var(--slate-30); }
         .fp-kv__value { font-family:var(--ff-display); font-size:1.45rem; color:var(--slate); line-height:1; }
       `}</style>
 
@@ -111,10 +111,10 @@ export default function FlexoPrintingPage() {
         <div className="wrap" style={{ display:"flex", flexDirection:"column", gap:"2rem" }}>
 
           {/* breadcrumb */}
-          <p style={{ fontFamily:"var(--ff-mono)", fontSize:".72rem", letterSpacing:".1em", textTransform:"uppercase", color:"rgba(255,255,255,.35)" }}>
-            <Link href="/" style={{ color:"rgba(255,255,255,.35)" }}>Home</Link> /&nbsp;
-            <Link href="/products" style={{ color:"rgba(255,255,255,.35)" }}>Catalogue</Link> /&nbsp;
-            <span style={{ color:"rgba(255,255,255,.6)" }}>Flexographic Printing</span>
+          <p style={{ fontFamily:"var(--ff-mono)", fontSize:".72rem", letterSpacing:".1em", textTransform:"uppercase", color:"rgba(255,255,255,0.65)" }}>
+            <Link href="/" style={{ color:"rgba(255,255,255,0.65)" }}>Home</Link> /&nbsp;
+            <Link href="/products" style={{ color:"rgba(255,255,255,0.65)" }}>Catalogue</Link> /&nbsp;
+            <span style={{ color:"rgba(255,255,255,0.78)" }}>Flexographic Printing</span>
           </p>
 
           <div style={{ display:"grid", gridTemplateColumns:"1fr clamp(260px,34vw,480px)", gap:"3rem", alignItems:"end" }}>
@@ -140,13 +140,13 @@ export default function FlexoPrintingPage() {
 
             {/* hero text */}
             <div style={{ paddingBottom:"2.5rem", display:"flex", flexDirection:"column", gap:"1.2rem" }}>
-              <span style={{ fontFamily:"var(--ff-mono)", fontSize:".62rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--brand-red)" }}>
+              <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--brand-red)" }}>
                 Flexographic Printing
               </span>
               <h1 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(2.4rem,4.5vw,3.8rem)", color:"#fff", lineHeight:.9, letterSpacing:".01em" }}>
                 AI Series<br />Flexo Press
               </h1>
-              <p style={{ fontFamily:"var(--ff-body)", fontSize:".95rem", lineHeight:1.7, color:"rgba(255,255,255,.55)", maxWidth:"38ch" }}>
+              <p style={{ fontFamily:"var(--ff-body)", fontSize:".95rem", lineHeight:1.7, color:"rgba(255,255,255,0.75)", maxWidth:"38ch" }}>
                 2 to 8 printing colours. Web widths 500–2000 mm. Full servo gearless drive with ±0.1 mm registration on PE, PP, PET, BOPP, paper and non-woven substrates.
               </p>
 
@@ -179,7 +179,7 @@ export default function FlexoPrintingPage() {
           {/* heading */}
           <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"space-between", flexWrap:"wrap", gap:"1rem" }}>
             <div>
-              <span style={{ fontFamily:"var(--ff-mono)", fontSize:".6rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--slate-60)", display:"block", marginBottom:".4rem" }}>
+              <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--slate-60)", display:"block", marginBottom:".4rem" }}>
                 Select configuration
               </span>
               <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.8rem,3vw,2.6rem)", color:"var(--slate)", lineHeight:.95 }}>
@@ -190,7 +190,7 @@ export default function FlexoPrintingPage() {
 
           {/* colour tier cards */}
           <div>
-            <div style={{ fontFamily:"var(--ff-mono)", fontSize:".58rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--slate-30)", marginBottom:".8rem" }}>
+            <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.68rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--slate-30)", marginBottom:".8rem" }}>
               Printing colours
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:".75rem" }}>
@@ -207,7 +207,7 @@ export default function FlexoPrintingPage() {
 
           {/* width selector */}
           <div>
-            <div style={{ fontFamily:"var(--ff-mono)", fontSize:".58rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--slate-30)", marginBottom:".8rem" }}>
+            <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.68rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--slate-30)", marginBottom:".8rem" }}>
               Max web width
             </div>
             <div style={{ display:"flex", flexWrap:"wrap", gap:".5rem" }}>
@@ -233,7 +233,7 @@ export default function FlexoPrintingPage() {
               { label:"Drive System",     value: ks.drive },
             ].map(kv => (
               <div key={kv.label} style={{ background:"var(--surface)", padding:"1.4rem 1.6rem" }}>
-                <div style={{ fontFamily:"var(--ff-mono)", fontSize:".58rem", letterSpacing:".18em", textTransform:"uppercase", color:"var(--slate-60)", marginBottom:".4rem" }}>{kv.label}</div>
+                <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.68rem", letterSpacing:".18em", textTransform:"uppercase", color:"var(--slate-60)", marginBottom:".4rem" }}>{kv.label}</div>
                 <div style={{ fontFamily:"var(--ff-display)", fontSize:"1.2rem", color:"var(--slate)", lineHeight:1 }}>{kv.value}</div>
               </div>
             ))}
@@ -241,7 +241,7 @@ export default function FlexoPrintingPage() {
 
           {/* full spec table for selected model */}
           <div>
-            <div style={{ fontFamily:"var(--ff-mono)", fontSize:".58rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--slate-30)", marginBottom:"1rem" }}>
+            <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.68rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--slate-30)", marginBottom:"1rem" }}>
               Full specification — {singleModel.models[0]}
             </div>
             <SpecTable family={singleModel} />
@@ -253,7 +253,7 @@ export default function FlexoPrintingPage() {
       {/* ── ALL SERIES OVERVIEW ── */}
       <section style={{ background:"var(--surface)", borderTop:"1px solid var(--line)", padding:"5rem 0" }}>
         <div className="wrap">
-          <span style={{ fontFamily:"var(--ff-mono)", fontSize:".6rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--slate-60)", display:"block", marginBottom:".6rem" }}>
+          <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--slate-60)", display:"block", marginBottom:".6rem" }}>
             Complete range
           </span>
           <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.8rem,3vw,2.6rem)", color:"var(--slate)", lineHeight:.95, marginBottom:"3rem" }}>
@@ -274,14 +274,14 @@ export default function FlexoPrintingPage() {
                     style={{ width:"100%", aspectRatio:"4/3", objectFit:"contain", background:"#f1f5f9", padding:"1rem" }}
                   />
                   <div>
-                    <span style={{ fontFamily:"var(--ff-mono)", fontSize:".55rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--brand-red)", display:"block", marginBottom:".3rem" }}>{f.series}</span>
+                    <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.66rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--brand-red)", display:"block", marginBottom:".3rem" }}>{f.series}</span>
                     <h3 style={{ fontFamily:"var(--ff-display)", fontSize:"1.4rem", color:"var(--slate)", lineHeight:1, marginBottom:".5rem" }}>{f.name}</h3>
                     <p style={{ fontFamily:"var(--ff-body)", fontSize:".88rem", color:"var(--slate-60)", lineHeight:1.6 }}>{f.tagline}</p>
                   </div>
                   <div style={{ display:"flex", flexWrap:"wrap", gap:".35rem" }}>
                     {f.models.map(m => (
                       <span key={m} style={{
-                        fontFamily:"var(--ff-mono)", fontSize:".58rem", letterSpacing:".1em",
+                        fontFamily:"var(--ff-mono)", fontSize:"0.68rem", letterSpacing:".1em",
                         padding:".25rem .55rem", border:"1px solid var(--line)",
                         color:"var(--slate-60)", background:"var(--canvas-bg)",
                       }}>{m}</span>
@@ -302,13 +302,13 @@ export default function FlexoPrintingPage() {
         <div className="wrap">
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4rem", alignItems:"center" }}>
             <div>
-              <span style={{ fontFamily:"var(--ff-mono)", fontSize:".6rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--brand-red)", display:"block", marginBottom:".6rem" }}>
+              <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--brand-red)", display:"block", marginBottom:".6rem" }}>
                 Substrate compatibility
               </span>
               <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.8rem,3vw,2.6rem)", color:"#fff", lineHeight:.95, marginBottom:"1.5rem" }}>
                 Prints on virtually<br />any flexible substrate
               </h2>
-              <p style={{ fontFamily:"var(--ff-body)", fontSize:".95rem", lineHeight:1.7, color:"rgba(255,255,255,.5)", marginBottom:"2rem", maxWidth:"42ch" }}>
+              <p style={{ fontFamily:"var(--ff-body)", fontSize:".95rem", lineHeight:1.7, color:"rgba(255,255,255,0.75)", marginBottom:"2rem", maxWidth:"42ch" }}>
                 Ceramic anilox rollers at 200–600 LPI deliver consistent ink transfer across thin film, paper and woven materials. Independent IR drying per colour station prevents back-bleed.
               </p>
               <AetherBtn><Link href="/contact">Talk to a print specialist →</Link></AetherBtn>
@@ -319,7 +319,7 @@ export default function FlexoPrintingPage() {
                   background:"#0d1614", padding:"1.1rem 1.3rem",
                   fontFamily:"var(--ff-mono)", fontSize:".72rem",
                   letterSpacing:".1em", textTransform:"uppercase",
-                  color:"rgba(255,255,255,.5)",
+                  color:"rgba(255,255,255,0.75)",
                   display:"flex", alignItems:"center", gap:".6rem",
                 }}>
                   <span style={{ width:5, height:5, borderRadius:"50%", background:"var(--brand-red)", flexShrink:0 }} />

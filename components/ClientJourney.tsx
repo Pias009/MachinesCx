@@ -289,9 +289,9 @@ export default function ClientJourney() {
           line-height: 1; letter-spacing: -.04em; color: rgba(43,191,179,0.15);
         }
         .cj__count-label {
-          font-family: var(--ff-mono); font-size: .6rem;
+          font-family: var(--ff-mono); font-size: 0.7rem;
           letter-spacing: .14em; text-transform: uppercase;
-          color: rgba(255,255,255,.25);
+          color: rgba(255,255,255,0.55);
         }
 
         /* ── Pipeline nodes ── */
@@ -336,7 +336,7 @@ export default function ClientJourney() {
           clip-path: polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
           background: rgba(8,18,16,0.9);
           border: none;
-          color: rgba(255,255,255,0.3);
+          color: rgba(255,255,255,0.6);
           transition: color .22s, background .22s;
         }
         .cj__node-hex::before {
@@ -385,7 +385,7 @@ export default function ClientJourney() {
         }
 
         .cj__node-num {
-          font-family: var(--ff-mono); font-size: .58rem;
+          font-family: var(--ff-mono); font-size: 0.68rem;
           letter-spacing: .18em; text-transform: uppercase;
           color: rgba(43,191,179,0.55); transition: color .2s;
         }
@@ -395,7 +395,7 @@ export default function ClientJourney() {
         .cj__node-label {
           font-family: var(--ff-display); font-size: .78rem;
           letter-spacing: .04em; text-transform: uppercase;
-          color: rgba(255,255,255,0.42); text-align: center;
+          color: rgba(255,255,255,0.7); text-align: center;
           line-height: 1.2; transition: color .2s;
         }
         .cj__node--active .cj__node-label,
@@ -486,7 +486,7 @@ export default function ClientJourney() {
           line-height: 1; letter-spacing: -.02em; color: #fff;
         }
         .cj__metric-label {
-          font-family: var(--ff-mono); font-size: .62rem;
+          font-family: var(--ff-mono); font-size: 0.7rem;
           letter-spacing: .14em; text-transform: uppercase;
           color: rgba(43,191,179,.75); margin-top: .35rem;
           display: block;
@@ -522,7 +522,7 @@ export default function ClientJourney() {
           display: flex; align-items: center; justify-content: center;
           clip-path: polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
           background: rgba(43,191,179,0.06);
-          color: rgba(255,255,255,.25);
+          color: rgba(255,255,255,0.55);
           flex-shrink: 0;
           transition: background .18s, color .18s;
         }
@@ -532,14 +532,14 @@ export default function ClientJourney() {
           color: var(--brand-teal);
         }
         .cj__nav-num {
-          font-family: var(--ff-mono); font-size: .55rem;
+          font-family: var(--ff-mono); font-size: 0.66rem;
           letter-spacing: .16em; text-transform: uppercase;
           color: rgba(43,191,179,.6); display: block;
         }
         .cj__nav-label {
           font-family: var(--ff-display); font-size: 1rem;
           letter-spacing: .02em; text-transform: uppercase;
-          color: rgba(255,255,255,.45);
+          color: rgba(255,255,255,0.7);
           transition: color .15s; display: block;
         }
         .cj__nav-item--active .cj__nav-label,
@@ -554,7 +554,7 @@ export default function ClientJourney() {
         .cj__footer-text {
           font-family: var(--ff-mono); font-size: .72rem;
           letter-spacing: .1em; text-transform: uppercase;
-          color: rgba(255,255,255,.45);
+          color: rgba(255,255,255,0.7);
         }
         .cj__footer-text strong { color: var(--brand-teal); font-size: .78rem; }
         .cj__cta {
@@ -604,18 +604,18 @@ export default function ClientJourney() {
         [data-theme="light"] .cj__col-desc,
         [data-theme="light"] .cj__col-nav { background: #fff; }
         [data-theme="light"] .cj__step-heading { color: #0d2220; }
-        [data-theme="light"] .cj__step-tagline { color: rgba(13,34,32,.5); }
-        [data-theme="light"] .cj__step-desc { color: rgba(13,34,32,.55); }
+        [data-theme="light"] .cj__step-tagline { color: rgba(13,34,32,0.7); }
+        [data-theme="light"] .cj__step-desc { color: rgba(13,34,32,0.72); }
         [data-theme="light"] .cj__metric { background: rgba(43,191,179,0.05); }
         [data-theme="light"] .cj__metric-val { color: #0d2220; }
-        [data-theme="light"] .cj__node-label { color: rgba(13,34,32,.4); }
+        [data-theme="light"] .cj__node-label { color: rgba(13,34,32,0.65); }
         [data-theme="light"] .cj__node--active .cj__node-label,
         [data-theme="light"] .cj__node:hover .cj__node-label { color: #0d2220; }
-        [data-theme="light"] .cj__nav-label { color: rgba(13,34,32,.4); }
+        [data-theme="light"] .cj__nav-label { color: rgba(13,34,32,0.65); }
         [data-theme="light"] .cj__nav-item--active .cj__nav-label,
         [data-theme="light"] .cj__nav-item:hover .cj__nav-label { color: #0d2220; }
         [data-theme="light"] .cj__nav-item { border-color: rgba(13,34,32,.07); }
-        [data-theme="light"] .cj__footer-text { color: rgba(13,34,32,.35); }
+        [data-theme="light"] .cj__footer-text { color: rgba(13,34,32,0.6); }
       `}</style>
 
       <section className="cj" ref={sectionRef} aria-label="Our process — inquiry to production">

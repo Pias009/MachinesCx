@@ -149,7 +149,7 @@ export default function ServicesSection() {
         .sv__title em { font-style:normal; color:#e11d48; }
         .sv__sub {
           font-size: clamp(.875rem,1.1vw,.975rem);
-          color: rgba(248,250,252,.42);
+          color: rgba(248,250,252,0.7);
           line-height: 1.8; max-width: 50ch;
         }
 
@@ -205,9 +205,9 @@ export default function ServicesSection() {
           border-color: rgba(225,29,72,.45);
         }
         .sv-card__num {
-          font-family: var(--ff-mono); font-size: .6rem;
+          font-family: var(--ff-mono); font-size: 0.7rem;
           letter-spacing: .18em; text-transform: uppercase;
-          color: rgba(248,250,252,.2);
+          color: rgba(248,250,252,0.55);
           padding-top: .2rem;
         }
         .sv-card__title {
@@ -218,16 +218,16 @@ export default function ServicesSection() {
         }
         .sv-card__desc {
           font-size: .875rem;
-          color: rgba(248,250,252,.45);
+          color: rgba(248,250,252,0.7);
           line-height: 1.75; margin: 0 0 1.4rem;
         }
         .sv-card__tags {
           display: flex; flex-wrap: wrap; gap: .4rem;
         }
         .sv-card__tag {
-          font-family: var(--ff-mono); font-size: .58rem;
+          font-family: var(--ff-mono); font-size: 0.68rem;
           letter-spacing: .1em; text-transform: uppercase;
-          color: rgba(248,250,252,.4);
+          color: rgba(248,250,252,0.7);
           background: rgba(255,255,255,.05);
           border: 1px solid rgba(255,255,255,.08);
           border-radius: .375rem;

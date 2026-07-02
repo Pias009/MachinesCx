@@ -284,7 +284,7 @@ export default function NewsStrip() {
           display: flex; align-items: center; gap: 0.6rem;
         }
         .ns2-cat {
-          font-family: var(--ff-mono); font-size: 0.5rem;
+          font-family: var(--ff-mono); font-size: 0.64rem;
           letter-spacing: 0.18em; text-transform: uppercase;
           color: var(--brand-red);
         }
@@ -293,8 +293,8 @@ export default function NewsStrip() {
           background: rgba(255,255,255,0.12);
         }
         .ns2-date {
-          font-family: var(--ff-mono); font-size: 0.5rem;
-          letter-spacing: 0.1em; color: rgba(255,255,255,0.22);
+          font-family: var(--ff-mono); font-size: 0.64rem;
+          letter-spacing: 0.1em; color: rgba(255,255,255,0.55);
         }
         .ns2-title {
           font-family: var(--ff-body);
@@ -305,14 +305,14 @@ export default function NewsStrip() {
         }
         .ns2-excerpt {
           font-family: var(--ff-body); font-size: 0.78rem; font-weight: 400;
-          color: rgba(255,255,255,0.32); line-height: 1.65;
+          color: rgba(255,255,255,0.65); line-height: 1.65;
           display: -webkit-box; -webkit-line-clamp: 2;
           -webkit-box-orient: vertical; overflow: hidden;
           flex: 1;
         }
         .ns2-cta {
           display: inline-flex; align-items: center; gap: 0.4rem;
-          font-family: var(--ff-mono); font-size: 0.55rem;
+          font-family: var(--ff-mono); font-size: 0.66rem;
           letter-spacing: 0.12em; text-transform: uppercase;
           color: var(--brand-red); margin-top: 0.4rem;
           opacity: 0; transform: translateX(-8px);
@@ -350,7 +350,7 @@ export default function NewsStrip() {
               <h2 style={{
                 fontFamily: "var(--ff-display)",
                 fontSize: "clamp(2.8rem,6vw,5rem)",
-                lineHeight: 0.92, color: "#fff",
+                lineHeight: 0.92, color: "var(--ink)",
                 letterSpacing: "0.01em", margin: 0,
               }}>
                 From the factory<br />
@@ -369,16 +369,16 @@ export default function NewsStrip() {
                 animation: "ns2-pulse 1.6s ease-in-out infinite",
               }} />
               <span style={{
-                fontFamily: "var(--ff-mono)", fontSize: "0.52rem",
+                fontFamily: "var(--ff-mono)", fontSize: "0.64rem",
                 letterSpacing: "0.16em", textTransform: "uppercase",
-                color: "rgba(255,255,255,0.3)",
+                color: "var(--ink-60)",
               }}>Auto-scrolling</span>
             </div>
             <Link href="/news" style={{
               display: "inline-flex", alignItems: "center", gap: "0.5rem",
               fontFamily: "var(--ff-mono)", fontSize: "0.72rem", letterSpacing: "0.08em",
               textTransform: "uppercase", padding: "0.75rem 1.4rem",
-              border: "1px solid rgba(255,255,255,0.16)", color: "rgba(255,255,255,0.55)",
+              border: "1px solid var(--ink-15)", color: "var(--ink-60)",
               textDecoration: "none", transition: "border-color 0.2s, color 0.2s",
               flexShrink: 0,
             }}>

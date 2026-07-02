@@ -255,12 +255,12 @@ export default function FlexoStrip() {
           border-top: 1px solid rgba(255,255,255,.06);
           display: flex; flex-direction: column; gap: .3rem;
         }
-        .fls-card__series { font-family: var(--ff-mono); font-size: .48rem; letter-spacing: .2em; text-transform: uppercase; color: var(--brand-red); }
+        .fls-card__series { font-family: var(--ff-mono); font-size: 0.62rem; letter-spacing: .2em; text-transform: uppercase; color: var(--brand-red); }
         .fls-card__name   { font-family: var(--ff-display); font-size: 1.45rem; color: #fff; line-height: 1; }
-        .fls-card__tag    { font-family: var(--ff-mono); font-size: .48rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); }
+        .fls-card__tag    { font-family: var(--ff-mono); font-size: 0.62rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
 
         /* Badge */
-        .fls-badge { position:absolute; top:.8rem; left:.8rem; z-index:6; font-family:var(--ff-mono); font-size:.44rem; letter-spacing:.18em; text-transform:uppercase; padding:.22rem .5rem; }
+        .fls-badge { position:absolute; top:.8rem; left:.8rem; z-index:6; font-family:var(--ff-mono); font-size:0.62rem; letter-spacing:.18em; text-transform:uppercase; padding:.22rem .5rem; }
         .fls-badge--hot      { background:var(--brand-red); color:#fff; }
         .fls-badge--flagship { background:#fff; color:var(--bg-base); }
 
@@ -274,8 +274,8 @@ export default function FlexoStrip() {
           padding: .6rem 0; border-bottom: 1px solid rgba(255,255,255,.07);
         }
         .fls-spec-label {
-          font-family: var(--ff-mono); font-size: .55rem; letter-spacing: .14em;
-          text-transform: uppercase; color: rgba(255,255,255,.3);
+          font-family: var(--ff-mono); font-size: 0.66rem; letter-spacing: .14em;
+          text-transform: uppercase; color: rgba(255,255,255,0.6);
         }
         .fls-spec-val {
           font-family: var(--ff-display); font-size: 1rem; color: rgba(255,255,255,.88);
@@ -289,8 +289,8 @@ export default function FlexoStrip() {
           display: flex; align-items: center; gap: .55rem;
           padding: .5rem .9rem;
           border: 1px solid rgba(255,255,255,.1);
-          background: transparent; color: rgba(255,255,255,.45);
-          font-family: var(--ff-mono); font-size: .58rem; letter-spacing: .1em;
+          background: transparent; color: rgba(255,255,255,0.7);
+          font-family: var(--ff-mono); font-size: 0.68rem; letter-spacing: .1em;
           text-transform: uppercase; cursor: pointer;
           transition: border-color .2s, color .2s, background .2s;
         }
@@ -352,9 +352,9 @@ export default function FlexoStrip() {
           .fls-mobile-card img { width:100%; aspect-ratio:4/3; object-fit:contain; padding:.6rem; background:#0d1614; }
           .fls-mobile-card-label {
             padding: .4rem .6rem .55rem;
-            font-family: var(--ff-mono); font-size: .5rem;
+            font-family: var(--ff-mono); font-size: 0.64rem;
             letter-spacing: .12em; text-transform: uppercase;
-            color: rgba(255,255,255,.4);
+            color: rgba(255,255,255,0.7);
           }
           .fls-mobile-card--active .fls-mobile-card-label { color: var(--brand-teal); }
 
@@ -362,7 +362,7 @@ export default function FlexoStrip() {
           .fls-title-clip h2 { font-size: clamp(2rem, 9vw, 3.2rem) !important; }
           .fls-spec-row { flex-direction: column; gap: .15rem; }
           .fls-spec-val { font-size: .85rem; }
-          .fls-dot-btn  { padding: .4rem .65rem; font-size: .55rem; }
+          .fls-dot-btn  { padding: .4rem .65rem; font-size: 0.66rem; }
           .fls-detail-icon { width: 72px; height: 72px; }
           .fls-detail-icon::before { inset: -4px; }
           .fls-detail-heading { font-size: clamp(1.5rem, 8vw, 2.2rem) !important; }
@@ -379,7 +379,7 @@ export default function FlexoStrip() {
         <div ref={headerRef} style={{ marginBottom:"clamp(2.5rem,5vw,4rem)" }}>
           <span ref={eyebrowRef} style={{
             display:"inline-flex", alignItems:"center", gap:".75rem",
-            fontFamily:"var(--ff-mono)", fontSize:".6rem",
+            fontFamily:"var(--ff-mono)", fontSize:"0.7rem",
             letterSpacing:".22em", textTransform:"uppercase",
             color:"var(--brand-red)", marginBottom:".75rem",
             opacity:0,
@@ -392,7 +392,7 @@ export default function FlexoStrip() {
             <h2 ref={titleRef} style={{
               fontFamily:"var(--ff-display)",
               fontSize:"clamp(3rem,6vw,6rem)",
-              color:"#fff", lineHeight:.88,
+              color:"var(--ink)", lineHeight:.88,
               letterSpacing:".01em", margin:0,
               perspective:"600px",
             }}>
@@ -409,7 +409,7 @@ export default function FlexoStrip() {
           <span style={{
             fontFamily:"var(--ff-display)",
             fontSize:"clamp(1.1rem,2vw,1.65rem)",
-            color:"rgba(255,255,255,.28)", display:"block",
+            color:"var(--ink-60)", display:"block",
           }}>
             2 to 8 colours, 500–2000 mm.
           </span>
@@ -478,7 +478,7 @@ export default function FlexoStrip() {
 
             {/* Model selector dots */}
             <div>
-              <div style={{ fontFamily:"var(--ff-mono)", fontSize:".52rem", letterSpacing:".18em", textTransform:"uppercase", color:"rgba(255,255,255,.3)", marginBottom:".75rem" }}>
+              <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.64rem", letterSpacing:".18em", textTransform:"uppercase", color:"var(--ink-60)", marginBottom:".75rem" }}>
                 Select model
               </div>
               <div className="fls-dots">
@@ -497,13 +497,13 @@ export default function FlexoStrip() {
 
             {/* Active model headline */}
             <div>
-              <div style={{ fontFamily:"var(--ff-mono)", fontSize:".52rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--brand-red)", marginBottom:".4rem" }}>
+              <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.64rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--brand-red)", marginBottom:".4rem" }}>
                 AI Series · {m.colours}-colour
               </div>
-              <div style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(2.4rem,4vw,3.6rem)", color:"#fff", lineHeight:.92, letterSpacing:".01em" }}>
+              <div style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(2.4rem,4vw,3.6rem)", color:"var(--ink)", lineHeight:.92, letterSpacing:".01em" }}>
                 {m.label}
               </div>
-              <div style={{ fontFamily:"var(--ff-mono)", fontSize:".6rem", letterSpacing:".1em", textTransform:"uppercase", color:"rgba(255,255,255,.3)", marginTop:".4rem" }}>
+              <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".1em", textTransform:"uppercase", color:"var(--ink-60)", marginTop:".4rem" }}>
                 {m.tag}
               </div>
 
@@ -550,8 +550,8 @@ export default function FlexoStrip() {
               <TransitionLink
                 href="/products/printing"
                 style={{
-                  fontFamily:"var(--ff-mono)", fontSize:".62rem", letterSpacing:".14em",
-                  textTransform:"uppercase", color:"rgba(255,255,255,.4)",
+                  fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".14em",
+                  textTransform:"uppercase", color:"rgba(255,255,255,0.7)",
                   borderBottom:"1px solid rgba(255,255,255,.16)", paddingBottom:"1px",
                   textDecoration:"none",
                 }}
@@ -574,8 +574,8 @@ export default function FlexoStrip() {
           <div style={{ display:"flex", gap:"clamp(1.5rem,3vw,3rem)", flexWrap:"wrap" }}>
             {SPECS.map(kv => (
               <div key={kv.label} style={{ display:"flex", flexDirection:"column", gap:".2rem" }}>
-                <span style={{ fontFamily:"var(--ff-mono)", fontSize:".5rem", letterSpacing:".18em", textTransform:"uppercase", color:"rgba(255,255,255,.25)" }}>{kv.label}</span>
-                <span style={{ fontFamily:"var(--ff-mono)", fontSize:".65rem", letterSpacing:".06em", color:"rgba(255,255,255,.55)" }}>{kv.value}</span>
+                <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.64rem", letterSpacing:".18em", textTransform:"uppercase", color:"rgba(255,255,255,0.55)" }}>{kv.label}</span>
+                <span style={{ fontFamily:"var(--ff-mono)", fontSize:".65rem", letterSpacing:".06em", color:"rgba(255,255,255,0.75)" }}>{kv.value}</span>
               </div>
             ))}
           </div>

@@ -233,7 +233,7 @@ export default function TrustSection() {
         }
         .ts-headline em{font-style:normal;color:var(--brand-teal);}
         .ts-desc {
-          color: rgba(248,250,252,.52);
+          color: rgba(248,250,252,0.75);
           font-size: clamp(.88rem, 1.15vw, 1rem);
           line-height: 1.75; max-width: 42ch; align-self: end;
         }
@@ -266,7 +266,7 @@ export default function TrustSection() {
           line-height: 1; color: #f8fafc; letter-spacing: -.01em;
         }
         .ts-stat__label{font-size:.8rem;font-weight:600;color:rgba(248,250,252,.8);letter-spacing:.02em;}
-        .ts-stat__sub{font-family:var(--ff-mono);font-size:.62rem;color:rgba(248,250,252,.3);letter-spacing:.08em;text-transform:uppercase;}
+        .ts-stat__sub{font-family:var(--ff-mono);font-size:0.7rem;color:rgba(248,250,252,0.6);letter-spacing:.08em;text-transform:uppercase;}
 
         /* ── bottom fade — blends into next section ── */
         .ts-fade {
@@ -297,10 +297,10 @@ export default function TrustSection() {
         [data-theme="light"] .ts-kicker::before { background: var(--brand-teal); }
         [data-theme="light"] .ts-headline   { color: #0d2220; }
         [data-theme="light"] .ts-headline em { color: var(--brand-teal); }
-        [data-theme="light"] .ts-desc       { color: rgba(13,34,32,0.55); }
+        [data-theme="light"] .ts-desc       { color: rgba(13,34,32,0.72); }
         [data-theme="light"] .ts-stat__val   { color: #0d2220; }
         [data-theme="light"] .ts-stat__label { color: rgba(13,34,32,0.72); }
-        [data-theme="light"] .ts-stat__sub   { color: rgba(13,34,32,0.38); }
+        [data-theme="light"] .ts-stat__sub   { color: rgba(13,34,32,0.6); }
         [data-theme="light"] .ts-stats       { border-color: rgba(43,191,179,0.2); }
         [data-theme="light"] .ts-stat        { border-right-color: rgba(43,191,179,0.15); }
         [data-theme="light"] .ts-header      { border-bottom-color: rgba(43,191,179,0.18); }

@@ -105,7 +105,7 @@ export default function ConfiguratorCTA() {
         .cc__title em { font-style:normal; color:var(--brand-teal); }
         .cc__desc {
           font-size: clamp(.9rem,1.1vw,1rem);
-          color: rgba(248,250,252,.42);
+          color: rgba(248,250,252,0.7);
           line-height: 1.75; max-width: 42ch; margin: 0 0 2.75rem;
         }
         .cc__cta {
@@ -137,15 +137,15 @@ export default function ConfiguratorCTA() {
         }
         .cc__hint-step {
           display: flex; align-items: center; gap: .45rem;
-          font-family: var(--ff-mono); font-size: .6rem;
+          font-family: var(--ff-mono); font-size: 0.7rem;
           letter-spacing: .1em; text-transform: uppercase;
-          color: rgba(248,250,252,.28);
+          color: rgba(248,250,252,0.6);
         }
         .cc__hint-num {
           width: 18px; height: 18px; border-radius: 0;
           border: 1px solid rgba(255,255,255,.12);
           display:flex; align-items:center; justify-content:center;
-          font-size: .52rem; color: rgba(248,250,252,.35); flex-shrink:0;
+          font-size: 0.64rem; color: rgba(248,250,252,0.65); flex-shrink:0;
         }
         .cc__hint-sep { width:20px; height:1px; background:rgba(255,255,255,.1); }
         .cc__wave {

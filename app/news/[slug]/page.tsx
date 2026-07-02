@@ -53,9 +53,9 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
             display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap",
           }}>
             <Link href="/" style={{ color: "#475569" }}>Home</Link>
-            <span style={{ color: "#94a3b8" }}>›</span>
+            <span style={{ color: "#b8c5d6" }}>›</span>
             <Link href="/news" style={{ color: "#475569" }}>News</Link>
-            <span style={{ color: "#94a3b8" }}>›</span>
+            <span style={{ color: "#b8c5d6" }}>›</span>
             <span style={{ color: "#0f172a" }}>{a.category}</span>
           </p>
 
@@ -70,14 +70,14 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
             <div style={{ maxWidth: "64ch" }}>
               <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginBottom: "1.25rem", flexWrap: "wrap" }}>
                 <span style={{
-                  fontFamily: "var(--ff-mono)", fontSize: "0.6rem",
+                  fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
                   letterSpacing: "0.16em", textTransform: "uppercase",
                   color: "#fff", background: "var(--brand-red)",
                   padding: "0.28rem 0.7rem",
                 }}>{a.category}</span>
                 <span style={{
-                  fontFamily: "var(--ff-mono)", fontSize: "0.6rem",
-                  letterSpacing: "0.1em", color: "#94a3b8",
+                  fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
+                  letterSpacing: "0.1em", color: "#b8c5d6",
                 }}>{fmt(a.date)}</span>
               </div>
               <h1 style={{
@@ -95,7 +95,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
               <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginTop: "1.5rem" }}>
                 {a.tags.map((t) => (
                   <span key={t} style={{
-                    fontFamily: "var(--ff-mono)", fontSize: "0.58rem",
+                    fontFamily: "var(--ff-mono)", fontSize: "0.68rem",
                     letterSpacing: "0.1em", textTransform: "uppercase",
                     padding: "0.3rem 0.65rem",
                     border: "1px solid #e2e8f0",
@@ -161,9 +161,9 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
               marginBottom: "1.5rem",
             }}>
               <span style={{
-                fontFamily: "var(--ff-mono)", fontSize: "0.6rem",
+                fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
                 letterSpacing: "0.16em", textTransform: "uppercase",
-                color: "#94a3b8", display: "block", marginBottom: "1rem",
+                color: "#b8c5d6", display: "block", marginBottom: "1rem",
               }}>Related links</span>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                 {a.links.map((l) => (
@@ -197,14 +197,14 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
             padding: "1.25rem",
           }}>
             <span style={{
-              fontFamily: "var(--ff-mono)", fontSize: "0.6rem",
+              fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
               letterSpacing: "0.16em", textTransform: "uppercase",
-              color: "#94a3b8", display: "block", marginBottom: "0.75rem",
+              color: "#b8c5d6", display: "block", marginBottom: "0.75rem",
             }}>Tags</span>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
               {a.tags.map((t) => (
                 <span key={t} style={{
-                  fontFamily: "var(--ff-mono)", fontSize: "0.55rem",
+                  fontFamily: "var(--ff-mono)", fontSize: "0.66rem",
                   letterSpacing: "0.1em", textTransform: "uppercase",
                   padding: "0.28rem 0.6rem",
                   border: "1px solid #e2e8f0",
@@ -301,11 +301,11 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
         .ns-card:hover .ns-card__img { transform: scale(1.06) translateY(-2%); }
         .ns-card__body { padding: 1.1rem 1.1rem 1.4rem; display: flex; flex-direction: column; flex: 1; }
         .ns-card__meta { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem; }
-        .ns-card__cat { font-family: var(--ff-mono); font-size: 0.55rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand-red); }
-        .ns-card__date { font-family: var(--ff-mono); font-size: 0.55rem; letter-spacing: 0.1em; color: #94a3b8; }
+        .ns-card__cat { font-family: var(--ff-mono); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand-red); }
+        .ns-card__date { font-family: var(--ff-mono); font-size: 0.66rem; letter-spacing: 0.1em; color: #b8c5d6; }
         .ns-card__title { font-family: var(--ff-display); font-size: clamp(1rem,1.8vw,1.2rem); color: #0f172a; line-height: 1.15; letter-spacing: 0.01em; margin-bottom: 0.6rem; }
         .ns-card__excerpt { font-family: var(--ff-body); font-size: 0.82rem; font-weight: 400; color: #475569; line-height: 1.6; flex: 1; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .ns-card__cta { font-family: var(--ff-mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand-red); }
+        .ns-card__cta { font-family: var(--ff-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand-red); }
 
         @media (max-width: 768px) {
           .article-body + aside { display: none; }

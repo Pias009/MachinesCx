@@ -99,7 +99,7 @@ export default function MachineCatalogSection() {
         }
         .mcs__badge {
           display: inline-flex; align-items: center; gap: .45rem;
-          font-family: var(--ff-mono); font-size: .62rem;
+          font-family: var(--ff-mono); font-size: 0.7rem;
           letter-spacing: .14em; text-transform: uppercase;
           color: var(--brand-red); margin-bottom: .75rem;
         }
@@ -166,7 +166,7 @@ export default function MachineCatalogSection() {
         }
         .mcs__tab-icon { font-size: .75rem; opacity: .7; }
         .mcs__tab-count {
-          font-size: .55rem;
+          font-size: 0.66rem;
           background: rgba(255,255,255,0.08);
           padding: .15rem .4rem;
           border-radius: 2px;
@@ -262,13 +262,13 @@ export default function MachineCatalogSection() {
 
         .mcs-card__top {}
         .mcs-card__cat {
-          font-family: var(--ff-mono); font-size: .55rem;
+          font-family: var(--ff-mono); font-size: 0.66rem;
           letter-spacing: .14em; text-transform: uppercase;
           color: var(--brand-teal); opacity: .7;
           margin-bottom: .4rem;
         }
         .mcs-card__series {
-          font-family: var(--ff-mono); font-size: .6rem;
+          font-family: var(--ff-mono); font-size: 0.7rem;
           letter-spacing: .1em; text-transform: uppercase;
           color: var(--brand-red);
           margin-bottom: .35rem;
@@ -289,7 +289,7 @@ export default function MachineCatalogSection() {
           line-height: 1; color: var(--ink); letter-spacing: -.02em;
         }
         .mcs-card__stat-label {
-          font-family: var(--ff-mono); font-size: .55rem;
+          font-family: var(--ff-mono); font-size: 0.66rem;
           letter-spacing: .1em; text-transform: uppercase;
           color: var(--ink-60); display: block; margin-top: .15rem;
         }
@@ -367,13 +367,13 @@ export default function MachineCatalogSection() {
         /* ── Light mode ── */
         [data-theme="light"] .mcs { background: #f5f8f8; }
         [data-theme="light"] .mcs__title { color: #0d2220; }
-        [data-theme="light"] .mcs__sub   { color: rgba(13,34,32,0.5); }
+        [data-theme="light"] .mcs__sub   { color: rgba(13,34,32,0.7); }
         [data-theme="light"] .mcs__badge { color: var(--brand-red); }
-        [data-theme="light"] .mcs__tab   { color: rgba(13,34,32,0.5); }
+        [data-theme="light"] .mcs__tab   { color: rgba(13,34,32,0.7); }
         [data-theme="light"] .mcs__tab:hover { color: #0d2220; }
         [data-theme="light"] .mcs-card__name { color: #0d2220; }
         [data-theme="light"] .mcs-card__stat { color: #0d2220; }
-        [data-theme="light"] .mcs-card__stat-label { color: rgba(13,34,32,0.5); }
+        [data-theme="light"] .mcs-card__stat-label { color: rgba(13,34,32,0.7); }
       `}</style>
 
       <section className="mcs" aria-label="Machine catalogue">

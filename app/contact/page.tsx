@@ -360,7 +360,7 @@ function ContactPageInner() {
         .iq-h1 em { font-style:normal; color:#e11d48; }
         .iq-sub {
           font-size: clamp(.875rem,1.1vw,1rem);
-          color: rgba(248,250,252,.45); line-height:1.7; max-width:52ch;
+          color: rgba(248,250,252,0.7); line-height:1.7; max-width:52ch;
         }
 
         /* ── step indicator ── */
@@ -380,8 +380,8 @@ function ContactPageInner() {
           border: 1.5px solid rgba(255,255,255,.15);
           background: rgba(255,255,255,.04);
           display: flex; align-items:center; justify-content:center;
-          font-family: var(--ff-mono); font-size: .6rem;
-          color: rgba(248,250,252,.35);
+          font-family: var(--ff-mono); font-size: 0.7rem;
+          color: rgba(248,250,252,0.65);
           flex-shrink: 0;
         }
         .iq-step--active .iq-step__dot {
@@ -394,10 +394,10 @@ function ContactPageInner() {
         .iq-step__label {
           font-family: var(--ff-mono); font-size: .65rem;
           letter-spacing: .1em; text-transform: uppercase;
-          color: rgba(248,250,252,.3); white-space: nowrap;
+          color: rgba(248,250,252,0.6); white-space: nowrap;
         }
         .iq-step--active .iq-step__label { color: #f8fafc; }
-        .iq-step--done .iq-step__label { color: rgba(248,250,252,.55); }
+        .iq-step--done .iq-step__label { color: rgba(248,250,252,0.75); }
         .iq-step__line {
           width: 2.5rem; height: 1px;
           background: rgba(255,255,255,.1);
@@ -426,7 +426,7 @@ function ContactPageInner() {
           background: rgba(255,255,255,.04);
           font-family: var(--ff-mono); font-size: .65rem;
           letter-spacing: .08em; text-transform: uppercase;
-          color: rgba(248,250,252,.45); cursor: pointer;
+          color: rgba(248,250,252,0.7); cursor: pointer;
           white-space: nowrap;
         }
         .iq-cattab:hover { border-color: rgba(255,255,255,.2); color: rgba(248,250,252,.8); }
@@ -469,7 +469,7 @@ function ContactPageInner() {
           background: #e11d48; border-color: #e11d48;
         }
         .iq-fcard__series {
-          font-family: var(--ff-mono); font-size: .58rem;
+          font-family: var(--ff-mono); font-size: 0.68rem;
           letter-spacing: .16em; text-transform: uppercase;
           color: #e11d48; margin-bottom: .4rem;
         }
@@ -478,13 +478,13 @@ function ContactPageInner() {
           color: #f8fafc; line-height: 1.1; margin-bottom: .5rem;
         }
         .iq-fcard__tagline {
-          font-size: .8rem; color: rgba(248,250,252,.42);
+          font-size: .8rem; color: rgba(248,250,252,0.7);
           line-height: 1.5; margin-bottom: .75rem;
         }
         .iq-fcard__models {
-          font-family: var(--ff-mono); font-size: .58rem;
+          font-family: var(--ff-mono); font-size: 0.68rem;
           letter-spacing: .1em; text-transform: uppercase;
-          color: rgba(248,250,252,.25);
+          color: rgba(248,250,252,0.55);
         }
 
         .iq-sel-count {
@@ -509,7 +509,7 @@ function ContactPageInner() {
           border-bottom: 1px solid rgba(255,255,255,.07);
         }
         .iq-cfg__series {
-          font-family: var(--ff-mono); font-size: .58rem;
+          font-family: var(--ff-mono); font-size: 0.68rem;
           letter-spacing: .16em; text-transform: uppercase; color: #e11d48;
         }
         .iq-cfg__name {
@@ -517,9 +517,9 @@ function ContactPageInner() {
           color: #f8fafc; line-height: 1.1;
         }
         .iq-cfg__label {
-          font-family: var(--ff-mono); font-size: .62rem;
+          font-family: var(--ff-mono); font-size: 0.7rem;
           letter-spacing: .12em; text-transform: uppercase;
-          color: rgba(248,250,252,.35); display: block; margin-bottom: .6rem;
+          color: rgba(248,250,252,0.65); display: block; margin-bottom: .6rem;
         }
         .iq-cfg__row { margin-bottom: .5rem; }
 
@@ -529,7 +529,7 @@ function ContactPageInner() {
           border: 1px solid rgba(255,255,255,.1);
           background: rgba(255,255,255,.04);
           font-family: var(--ff-mono); font-size: .65rem;
-          letter-spacing: .06em; color: rgba(248,250,252,.5);
+          letter-spacing: .06em; color: rgba(248,250,252,0.75);
           cursor: pointer; white-space: nowrap;
         }
         .iq-mpill:hover { border-color: rgba(255,255,255,.22); color: rgba(248,250,252,.9); }
@@ -550,9 +550,9 @@ function ContactPageInner() {
         @media(max-width:600px){ .iq-cfg__specs{ grid-template-columns:1fr; } }
         .iq-cfg__spec { display: flex; flex-direction: column; gap: .15rem; }
         .iq-cfg__spec-label {
-          font-family: var(--ff-mono); font-size: .56rem;
+          font-family: var(--ff-mono); font-size: 0.66rem;
           letter-spacing: .1em; text-transform: uppercase;
-          color: rgba(248,250,252,.28);
+          color: rgba(248,250,252,0.6);
         }
         .iq-cfg__spec-val {
           font-family: var(--ff-mono); font-size: .78rem;
@@ -561,7 +561,7 @@ function ContactPageInner() {
 
         .iq-cfg__matval {
           font-family: var(--ff-mono); font-size: .75rem;
-          color: rgba(248,250,252,.6);
+          color: rgba(248,250,252,0.78);
         }
 
         .iq-qty {
@@ -572,7 +572,7 @@ function ContactPageInner() {
         .iq-qty__btn {
           width: 36px; height: 36px;
           background: rgba(255,255,255,.05);
-          color: rgba(248,250,252,.6);
+          color: rgba(248,250,252,0.78);
           font-size: 1.1rem; line-height:1;
           border: none; cursor: pointer;
         }
@@ -591,9 +591,9 @@ function ContactPageInner() {
         @media(max-width:600px){ .iq-grid2{ grid-template-columns:1fr; } }
         .iq-field { display: flex; flex-direction:column; gap: .4rem; }
         .iq-field label {
-          font-family: var(--ff-mono); font-size: .62rem;
+          font-family: var(--ff-mono); font-size: 0.7rem;
           letter-spacing: .12em; text-transform: uppercase;
-          color: rgba(248,250,252,.38);
+          color: rgba(248,250,252,0.65);
         }
         .iq-field input {
           background: rgba(255,255,255,.05);
@@ -603,7 +603,7 @@ function ContactPageInner() {
           font-family: var(--ff-body); font-size: .95rem;
           outline: none; width: 100%;
         }
-        .iq-field input::placeholder { color: rgba(248,250,252,.22); }
+        .iq-field input::placeholder { color: rgba(248,250,252,0.55); }
         .iq-field input:focus { border-color: rgba(225,29,72,.45); }
         .iq-textarea {
           background: rgba(255,255,255,.05);
@@ -613,7 +613,7 @@ function ContactPageInner() {
           font-family: var(--ff-body); font-size: .9rem;
           resize: vertical; outline: none;
         }
-        .iq-textarea::placeholder { color: rgba(248,250,252,.22); }
+        .iq-textarea::placeholder { color: rgba(248,250,252,0.55); }
         .iq-textarea:focus { border-color: rgba(225,29,72,.45); }
 
         /* ── step 4 review ── */
@@ -625,7 +625,7 @@ function ContactPageInner() {
           margin-bottom: 1.25rem;
         }
         .iq-review-title {
-          font-family: var(--ff-mono); font-size: .6rem;
+          font-family: var(--ff-mono); font-size: 0.7rem;
           letter-spacing: .18em; text-transform: uppercase;
           color: #e11d48; margin-bottom: 1rem;
         }
@@ -638,19 +638,19 @@ function ContactPageInner() {
         }
         .iq-review-machine__meta {
           font-family: var(--ff-mono); font-size: .72rem;
-          color: rgba(248,250,252,.45);
+          color: rgba(248,250,252,0.7);
         }
         .iq-review-machine__meta strong { color: rgba(248,250,252,.8); }
         .iq-review-machine__notes {
           margin-top: .5rem; font-size: .85rem;
-          color: rgba(248,250,252,.38); font-style: italic;
+          color: rgba(248,250,252,0.65); font-style: italic;
         }
         .iq-review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem 2rem; }
         .iq-review-row { display: flex; flex-direction: column; gap: .15rem; }
         .iq-review-key {
-          font-family: var(--ff-mono); font-size: .56rem;
+          font-family: var(--ff-mono); font-size: 0.66rem;
           letter-spacing: .1em; text-transform: uppercase;
-          color: rgba(248,250,252,.28);
+          color: rgba(248,250,252,0.6);
         }
         .iq-review-val { font-size: .9rem; color: #f8fafc; }
 
@@ -664,7 +664,7 @@ function ContactPageInner() {
           display: flex; align-items: center; gap: .5rem;
           font-family: var(--ff-mono); font-size: .68rem;
           letter-spacing: .1em; text-transform: uppercase;
-          color: rgba(248,250,252,.4); cursor: pointer; background: none; border: none;
+          color: rgba(248,250,252,0.7); cursor: pointer; background: none; border: none;
         }
         .iq-back:hover { color: rgba(248,250,252,.75); }
 
@@ -685,7 +685,7 @@ function ContactPageInner() {
           color: #f8fafc; margin: 0 0 1rem; line-height:.95;
         }
         .iq-success__sub {
-          color: rgba(248,250,252,.45); font-size: .95rem;
+          color: rgba(248,250,252,0.7); font-size: .95rem;
           line-height: 1.7; max-width: 40ch; margin: 0 auto;
         }
       `}</style>

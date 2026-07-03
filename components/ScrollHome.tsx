@@ -30,7 +30,7 @@ const PRODUCT_DATA: Record<string, ProductDetail> = {
       { label: "Series",     value: "T-PRO"               },
       { label: "Type",       value: "Heat-seal converter"  },
       { label: "Film width", value: "750 – 1150 mm"       },
-      { label: "Speed",      value: "300 pcs / min"       },
+      { label: "Speed",      value: "600 pcs / min"       },
       { label: "Lanes",      value: "Up to 6"             },
       { label: "Material",   value: "PE · PBAT+PLA"       },
       { label: "Drive",      value: "Servo + frequency"   },
@@ -588,13 +588,13 @@ export default function ScrollHome() {
             letterSpacing: "0.01em", marginBottom: "2rem",
           }}>
             Heat-seal flat bags, bottom-seal bags and roll bags — all from the
-            same platform. Up to 6 lanes, 300 pieces per minute.
+            same platform. Up to 6 lanes, 600 pieces per minute.
           </p>
 
           {/* Inline spec list — no hero-metric grid */}
           <div style={{ display: "flex", flexDirection: "column", gap: "0", marginBottom: "2rem" }}>
             {[
-              { label: "Output",    value: "300 pcs / min" },
+              { label: "Output",    value: "600 pcs / min" },
               { label: "Film width", value: "750 – 1150 mm" },
               { label: "Lanes",     value: "Up to 6"        },
             ].map((s) => (

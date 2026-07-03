@@ -385,7 +385,7 @@ export default function MachineCatalogSection() {
               <div className="mcs__badge">Machine Catalogue</div>
               <h2 className="mcs__title">
                 Every machine.<br />
-                <em>Find yours.</em>
+                <em>Find your perfect fit.</em>
               </h2>
               <p className="mcs__sub">
                 {totalFamilies} product families · {totalModels}+ models · shipped to 80+ countries

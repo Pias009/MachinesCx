@@ -64,29 +64,8 @@ export default function ForgeBackground({ scrollProgress = 0 }: { scrollProgress
     );
     grid.position.y = 0.01;
     (grid.material as THREE.LineBasicMaterial).transparent = true;
-    (grid.material as THREE.LineBasicMaterial).opacity = isLight ? 0.45 : 0.55;
+    (grid.material as THREE.LineBasicMaterial).opacity = isLight ? 0.3 : 0.32;
     scene.add(grid);
-
-    // ── Center accent line ──
-    const centerLine = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(0, 0.02, 10),
-        new THREE.Vector3(0, 0.02, -40),
-      ]),
-      new THREE.LineBasicMaterial({ color: 0x2bbfb3, transparent: true, opacity: isLight ? 0.6 : 0.4 })
-    );
-    scene.add(centerLine);
-
-    // ── Side accent lines ──
-    [-4, 4].forEach(x => {
-      scene.add(new THREE.Line(
-        new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(x, 0.02, 10),
-          new THREE.Vector3(x, 0.02, -40),
-        ]),
-        new THREE.LineBasicMaterial({ color: isLight ? 0x5bbfb8 : 0x1a5550, transparent: true, opacity: 0.3 })
-      ));
-    });
 
     // ── Columns ──
     const colMat = new THREE.MeshStandardMaterial({

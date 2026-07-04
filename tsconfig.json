@@ -17,5 +17,5 @@
     "paths": { "@/*": ["./*"] }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "vectrol-twisting-tower"]
+  "exclude": ["node_modules", "vectrol-twisting-tower", "vectrol-twisting-tower (2)"]
 }

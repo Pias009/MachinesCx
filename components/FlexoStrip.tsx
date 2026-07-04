@@ -5,8 +5,9 @@ import Link from "next/link";
 import AetherBtn from "@/components/AetherBtn";
 import { CldImage } from "next-cloudinary";
 import TransitionLink from "@/components/TransitionLink";
+import { useCms } from "@/lib/useCms";
 
-const MODELS = [
+const DEFAULT_MODELS = [
   { slug:"flexo-2c", label:"AI-2C",  colours:2, speed:"120", reg:"±0.2mm",  img:"cx-machinery/printing/flexo-1", tag:"Entry CI Press" },
   { slug:"flexo-4c", label:"AI-4C",  colours:4, speed:"200", reg:"±0.15mm", img:"cx-machinery/printing/flexo-2", tag:"Mid-range · Hot Model", hot:true },
   { slug:"flexo-6c", label:"AI-6C",  colours:6, speed:"260", reg:"±0.1mm",  img:"cx-machinery/printing/flexo-4", tag:"High-speed CI Press" },
@@ -29,6 +30,10 @@ const LAYERS = [
 ];
 
 export default function FlexoStrip() {
+  // live CMS content (admin panel) with hardcoded fallback
+  const cms = useCms<{ items: typeof DEFAULT_MODELS }>("flexo-strip", { items: DEFAULT_MODELS });
+  const MODELS = cms.items && cms.items.length ? cms.items : DEFAULT_MODELS;
+
   const sectionRef  = useRef<HTMLElement>(null);
   const headerRef   = useRef<HTMLDivElement>(null);
   const stageRef    = useRef<HTMLDivElement>(null);

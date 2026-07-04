@@ -1,0 +1,156 @@
+{
+  "headline1": "Every machine.",
+  "headline2": "Find your perfect fit.",
+  "items": [
+    {
+      "slug": "abcde-2200",
+      "stat": "400 kg/h",
+      "label": "Max output"
+    },
+    {
+      "slug": "abc-multilayer-small",
+      "stat": "3-layer",
+      "label": "Co-extrusion"
+    },
+    {
+      "slug": "abc-multilayer-large",
+      "stat": "5-layer",
+      "label": "Co-extrusion"
+    },
+    {
+      "slug": "abc-cx-series",
+      "stat": "3-layer",
+      "label": "Multi-layer"
+    },
+    {
+      "slug": "aba-1000-1500",
+      "stat": "3-layer",
+      "label": "ABA"
+    },
+    {
+      "slug": "aba-800-1200",
+      "stat": "4-screw",
+      "label": "ABA"
+    },
+    {
+      "slug": "aba-cx-series",
+      "stat": "3-layer",
+      "label": "CX Series"
+    },
+    {
+      "slug": "s-mini-double",
+      "stat": "×2 heads",
+      "label": "Double-head"
+    },
+    {
+      "slug": "s-wide",
+      "stat": "2100 mm",
+      "label": "Roller width"
+    },
+    {
+      "slug": "s-standard",
+      "stat": "1000 mm",
+      "label": "Max width"
+    },
+    {
+      "slug": "sb-printing-line",
+      "stat": "6-colour",
+      "label": "Blow + print"
+    },
+    {
+      "slug": "cx-25-lab",
+      "stat": "25 mm",
+      "label": "Benchtop"
+    },
+    {
+      "slug": "t-pro-heatseal",
+      "stat": "300 pcs/min",
+      "label": "Throughput"
+    },
+    {
+      "slug": "tg-pro",
+      "stat": "500 mm",
+      "label": "Bag width"
+    },
+    {
+      "slug": "tb-320",
+      "stat": "×6 lanes",
+      "label": "Multi-lane"
+    },
+    {
+      "slug": "f-pro-bottomseal",
+      "stat": "1600 mm",
+      "label": "Max width"
+    },
+    {
+      "slug": "heatseal-750-1150",
+      "stat": "1150 mm",
+      "label": "Max width"
+    },
+    {
+      "slug": "heatseal-750-1150-hd",
+      "stat": "Heavy",
+      "label": "Duty grade"
+    },
+    {
+      "slug": "heatseal-narrow",
+      "stat": "450 mm",
+      "label": "Max width"
+    },
+    {
+      "slug": "rb-vegetable",
+      "stat": "×2 lanes",
+      "label": "Vest & veg"
+    },
+    {
+      "slug": "rgb-rollbag",
+      "stat": "1200 mm",
+      "label": "Roll bag"
+    },
+    {
+      "slug": "rollbag-continuous",
+      "stat": "Continuous",
+      "label": "Roll bag"
+    },
+    {
+      "slug": "sb-pe-pbat",
+      "stat": "PE/PBAT",
+      "label": "Material"
+    },
+    {
+      "slug": "cx-260",
+      "stat": "260 mm",
+      "label": "Width"
+    },
+    {
+      "slug": "gb-garbage",
+      "stat": "1200 mm",
+      "label": "Roll bag"
+    },
+    {
+      "slug": "cx-pelletizing",
+      "stat": "99%",
+      "label": "Resin recovery"
+    },
+    {
+      "slug": "flexo-2c",
+      "stat": "2-colour",
+      "label": "CI flexo"
+    },
+    {
+      "slug": "flexo-4c",
+      "stat": "4-colour",
+      "label": "CI flexo"
+    },
+    {
+      "slug": "flexo-6c",
+      "stat": "260 m/min",
+      "label": "Print speed"
+    },
+    {
+      "slug": "flexo-8c",
+      "stat": "8-colour",
+      "label": "CI flexo"
+    }
+  ]
+}

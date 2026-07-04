@@ -2,7 +2,7 @@ node_modules/
 .next/
 *.node
 data.zip
-data/
+# data/ — CMS content (data/*.json) must be committed; was previously ignored
 tsconfig.tsbuildinfo
 *.tsbuildinfo
 .env

@@ -5,6 +5,7 @@ import Link from "next/link";
 import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
 import type { Category, ProductFamily } from "@/lib/products";
+import { familyImage } from "@/lib/products";
 
 /* ── per-category feature badges ─────────────────────────────────── */
 const CATEGORY_FEATURES: Record<string, { icon: string; label: string }[]> = {
@@ -234,7 +235,7 @@ export default function CategoryPageClient({ category, families, allCategories }
                     <span className="ccp-card__badge">{f.series}</span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={`/machines/${f.slug}.png`}
+                      src={familyImage(f)}
                       alt={f.name}
                       loading="lazy"
                     />

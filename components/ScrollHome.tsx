@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import TransitionLink from "@/components/TransitionLink";
 import AetherBtn from "@/components/AetherBtn";
+import { useCms } from "@/lib/useCms";
 
 // Machine cards shown at the bottom of §3
 const CARDS = [
@@ -24,7 +25,7 @@ type ProductDetail = {
   features: Feature[];
 };
 
-const PRODUCT_DATA: Record<string, ProductDetail> = {
+const DEFAULT_PRODUCT_DATA: Record<string, ProductDetail> = {
   "t-pro-heatseal": {
     specs: [
       { label: "Series",     value: "T-PRO"               },
@@ -167,6 +168,12 @@ const PRODUCT_DATA: Record<string, ProductDetail> = {
 // §1 → 75vw × 50vh  |  §2 → 25vw × 50vh  |  §3 → 50vw × 50vh
 
 export default function ScrollHome() {
+  // live CMS content (admin panel) with hardcoded fallback
+  const cmsBags = useCms<{ items: ({ slug: string } & ProductDetail)[] }>("scrollhome-bags", { items: [] });
+  const PRODUCT_DATA: Record<string, ProductDetail> =
+    cmsBags.items && cmsBags.items.length
+      ? Object.fromEntries(cmsBags.items.map(({ slug, ...rest }) => [slug, rest]))
+      : DEFAULT_PRODUCT_DATA;
   const machineRef   = useRef<HTMLDivElement>(null);
   const sec1Ref      = useRef<HTMLElement>(null);
   const sec2Ref      = useRef<HTMLDivElement>(null);

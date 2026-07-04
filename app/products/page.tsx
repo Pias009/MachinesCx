@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { categories, familiesByCategory } from "@/lib/products";
+import { categories, familiesByCategory, familyImage } from "@/lib/products";
 
 export const metadata = { title: "Full Catalogue — Ashal Innomach" };
 
@@ -45,7 +45,7 @@ export default function ProductsIndex() {
                 <Link key={f.slug} href={`/products/${f.category}#${f.slug}`} className="fam-card">
                   <div className="machine-stage">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={`/machines/${f.slug}.png`} alt={f.name} loading="lazy" />
+                    <img src={familyImage(f)} alt={f.name} loading="lazy" />
                   </div>
                   <div className="fam-card__body">
                     <span className="fam-card__series">{f.series}</span>

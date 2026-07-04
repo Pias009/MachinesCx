@@ -4,7 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
+import ProcessIcon, { resolveIcon, type IconName } from "@/components/ProcessIcon";
 import type { ProductFamily, Category } from "@/lib/products";
+import { familyImage, familyImages } from "@/lib/products";
 
 interface Props {
   family: ProductFamily;
@@ -53,6 +55,44 @@ const CATEGORY_VIDEOS: Record<string, { id: string; title: string }[]> = {
   ],
 };
 
+/* ── tab labels + output-sample copy per category (bag-making genuinely
+   makes bags; other categories get an honest "what it produces" label
+   instead of pretending everything is a bag) ── */
+const SAMPLE_TAB: Record<string, { label: string; heading: string; blurb: string; img: string }> = {
+  "film-blowing": { label: "Film Output", heading: "What This Line Produces", blurb: "Continuous blown film rolls, ready for bag-making, lamination or printing downstream.", img: "/machines/s-wide.png" },
+  "bag-making":   { label: "Bag Sample Size", heading: "Bag Types This Machine Makes", blurb: "Finished bags straight off the line — heat-sealed, cut and stacked, ready to pack.", img: "/machines/bag-samples.png" },
+  "recycling":    { label: "Pellet Output", heading: "What This Line Produces", blurb: "Recycled resin pellets, consistent size and quality, ready to feed back into production.", img: "/machines/cx-pelletizing.png" },
+  "printing":     { label: "Print Sample", heading: "What This Press Produces", blurb: "Multi-colour printed film, registered and dried, ready for bag-making or lamination.", img: "/machines/flexo-6c-nobg.png" },
+};
+
+/* ── "Part N" breakdown rows — same real product photo, cropped/zoomed to
+   3 different regions per part via CSS object-position + scale. This
+   mirrors the reference site's component-photo rows without fabricating
+   distinct component photography we don't actually have. ── */
+interface PartDef { title: string; detail: string; icon: IconName; crops: { pos: string; zoom: number }[] }
+const PART_CROPS: Record<string, PartDef[]> = {
+  "film-blowing": [
+    { title: "Extrusion & Screw", icon: "power",       detail: "Multi-screw co-extrusion feeds molten resin into the die head at controlled temperature zones.", crops: [{ pos: "20% 40%", zoom: 2.2 }, { pos: "35% 30%", zoom: 2.6 }, { pos: "15% 55%", zoom: 2.0 }] },
+    { title: "Die Head & Bubble", icon: "calibration", detail: "The film bubble forms above the die, cooled by the air ring for consistent gauge.", crops: [{ pos: "50% 15%", zoom: 1.8 }, { pos: "50% 5%",  zoom: 2.0 }, { pos: "45% 25%", zoom: 1.9 }] },
+    { title: "Haul-Off & Winding", icon: "assembly",   detail: "Collapsed film is drawn up the tower and wound into finished rolls.", crops: [{ pos: "60% 70%", zoom: 1.7 }, { pos: "75% 80%", zoom: 1.9 }, { pos: "65% 60%", zoom: 1.8 }] },
+  ],
+  "bag-making": [
+    { title: "Unwind & Feeding",  icon: "power",       detail: "Photocell-tracked unwind feeds film into the machine at controlled tension.", crops: [{ pos: "15% 50%", zoom: 2.1 }, { pos: "25% 60%", zoom: 2.3 }, { pos: "10% 40%", zoom: 2.0 }] },
+    { title: "Sealing & Cutting", icon: "assembly",    detail: "Heat-seal bars and rotary cutters form and separate each bag at speed.", crops: [{ pos: "50% 45%", zoom: 2.0 }, { pos: "55% 55%", zoom: 2.2 }, { pos: "45% 35%", zoom: 1.9 }] },
+    { title: "Control Panel",     icon: "calibration", detail: "PLC touchscreen sets bag length, seal temperature and lane speed.", crops: [{ pos: "80% 30%", zoom: 2.4 }, { pos: "85% 20%", zoom: 2.6 }, { pos: "75% 40%", zoom: 2.2 }] },
+  ],
+  "recycling": [
+    { title: "Crusher & Feeding", icon: "power",       detail: "Scrap film and edge trim are crushed and fed into the extruder at a controlled rate.", crops: [{ pos: "20% 45%", zoom: 2.0 }, { pos: "30% 55%", zoom: 2.2 }, { pos: "15% 35%", zoom: 1.9 }] },
+    { title: "Screen Changer",    icon: "assembly",    detail: "Auto screen-changer filters contamination without stopping the line.", crops: [{ pos: "50% 40%", zoom: 2.1 }, { pos: "55% 50%", zoom: 2.3 }, { pos: "45% 30%", zoom: 2.0 }] },
+    { title: "Pelletizing Head",  icon: "calibration", detail: "Molten resin is cut into uniform pellets and cooled for reuse.", crops: [{ pos: "75% 60%", zoom: 2.2 }, { pos: "80% 70%", zoom: 2.4 }, { pos: "70% 50%", zoom: 2.1 }] },
+  ],
+  "printing": [
+    { title: "Unwind & Registration", icon: "power",       detail: "Web tension and registration marks are tracked before the film reaches the first print station.", crops: [{ pos: "15% 45%", zoom: 2.0 }, { pos: "25% 55%", zoom: 2.2 }, { pos: "10% 35%", zoom: 1.9 }] },
+    { title: "CI Print Drum",         icon: "assembly",    detail: "Each colour station transfers ink from the anilox roller onto the central impression drum.", crops: [{ pos: "50% 40%", zoom: 2.1 }, { pos: "55% 30%", zoom: 2.3 }, { pos: "45% 50%", zoom: 2.0 }] },
+    { title: "Drying & Rewind",       icon: "calibration", detail: "Inline dryers set each colour before the finished print is wound onto the rewind shaft.", crops: [{ pos: "80% 55%", zoom: 2.2 }, { pos: "85% 65%", zoom: 2.4 }, { pos: "75% 45%", zoom: 2.1 }] },
+  ],
+};
+
 /* ── extract top specs for the panel ── */
 const PANEL_SPEC_KEYS: Record<string, string[]> = {
   "film-blowing": ["Film Width", "Max Extrusion Output", "Total Power", "Screw Diameter", "Roller Width"],
@@ -60,6 +100,20 @@ const PANEL_SPEC_KEYS: Record<string, string[]> = {
   "recycling":    ["Max Extrusion Output", "Screw Diameter", "Main Motor", "Dimension / Weight"],
   "printing":     ["Max Web Width", "Max Mechanical Speed", "Registration Accuracy", "Drive System", "Anilox Roller"],
 };
+
+/* ── callout pins on the product photo — 4 fixed positions (x%, y% of the
+   image frame) matched to the 4 specs that matter most per category. This
+   turns the wall-of-spec-text into a visual diagram anchored on the real
+   product photo, instead of adding fake component photography we don't have. */
+const CALLOUT_SPECS: Record<string, string[]> = {
+  "film-blowing": ["Screw Diameter", "Die Head", "Film Width", "Total Power"],
+  "bag-making":   ["Max Unwind Roll Dia.", "Bag Making Speed", "Max Bag Width", "Total Power"],
+  "recycling":    ["Screw Diameter", "Main Motor", "Max Extrusion Output", "Gear Box"],
+  "printing":     ["Anilox Roller", "Registration Accuracy", "Max Web Width", "Drive System"],
+};
+const CALLOUT_POS = [
+  { x: 12, y: 22 }, { x: 82, y: 18 }, { x: 16, y: 78 }, { x: 80, y: 76 },
+];
 
 function StarRating({ n }: { n: number }) {
   return (
@@ -82,28 +136,50 @@ function InquiryButton({ slug, name }: { slug: string; name: string }) {
   );
 }
 
+const TABS = ["details", "sample", "packing"] as const;
+type TabKey = (typeof TABS)[number];
+
 export default function ProductDetail({ family, category, related }: Props) {
   const [activeModel,  setActiveModel]  = useState(0);
-  const [activeThumb,  setActiveThumb]  = useState(0);
   const [activeVideo,  setActiveVideo]  = useState(0);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [reviewIdx,    setReviewIdx]    = useState(0);
+  const [activeTab,    setActiveTab]    = useState<TabKey>("details");
+  const [activePhoto,  setActivePhoto]  = useState(0);
 
   const videos   = CATEGORY_VIDEOS[family.category] ?? CATEGORY_VIDEOS["film-blowing"];
   const specKeys = PANEL_SPEC_KEYS[family.category]  ?? PANEL_SPEC_KEYS["film-blowing"];
+  const sample    = SAMPLE_TAB[family.category] ?? SAMPLE_TAB["film-blowing"];
+  const parts     = PART_CROPS[family.category] ?? PART_CROPS["film-blowing"];
   const hasModels = family.models.length > 1;
   const materials = family.materials?.split(",").map(s => s.trim()) ?? [];
+  const photos    = familyImages(family);
+  const heroImg = photos[Math.min(activePhoto, photos.length - 1)];
 
-  /* thumbnail list — main image + related angles (reuse same image for demo) */
-  const thumbs = [
-    `/machines/${family.slug}.png`,
-    `/machines/${family.slug}.png`,
-    `/machines/${family.slug}.png`,
-  ];
+  /* facility strip — 3 diagonal panels of real machines from this category
+     (this one + up to 2 related), standing in for a factory-floor collage
+     without fabricating photography we don't have */
+  const collagePool = [family, ...related].slice(0, 3);
+  while (collagePool.length < 3) collagePool.push(family);
+
+  /* find a spec row by label — exact match first, falling back to a prefix
+     match only when nothing exact exists (avoids e.g. "Max Bag Width"
+     shadowing "Max Unwind Roll Dia." just because both start with "Max") */
+  const findSpec = (key: string) =>
+    family.specs.find(s => s.label === key) ??
+    family.specs.find(s => s.label.startsWith(key.split(" ")[0]));
+
+  /* callout pins — same "top spec" pattern as the panel, positioned on the photo */
+  const calloutKeys = CALLOUT_SPECS[family.category] ?? CALLOUT_SPECS["film-blowing"];
+  const callouts = calloutKeys.flatMap((key, i) => {
+    const row = findSpec(key);
+    if (!row) return [];
+    return [{ label: row.label, value: row.values[Math.min(activeModel, row.values.length - 1)], pos: CALLOUT_POS[i] }];
+  });
 
   /* panel specs for active model */
   const panelSpecs = specKeys.flatMap(key => {
-    const row = family.specs.find(s => s.label === key || s.label.startsWith(key.split(" ")[0]));
+    const row = findSpec(key);
     if (!row) return [];
     return [{ label: row.label, value: row.values[Math.min(activeModel, row.values.length - 1)] }];
   });
@@ -135,6 +211,16 @@ export default function ProductDetail({ family, category, related }: Props) {
         {/* grid bg */}
         <div className="pdv2-hero__grid" aria-hidden="true" />
 
+        {/* facility strip — diagonal 3-panel collage of the category's machines */}
+        <div className="pdv2-collage" aria-hidden="true">
+          {collagePool.map((f, i) => (
+            <div key={`${f.slug}-${i}`} className="pdv2-collage__panel">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={familyImage(f)} alt="" />
+            </div>
+          ))}
+        </div>
+
         <div className="pdv2-wrap">
 
           {/* breadcrumb */}
@@ -157,36 +243,31 @@ export default function ProductDetail({ family, category, related }: Props) {
 
           <div className="pdv2-hero__cols">
 
-            {/* ── LEFT: thumbnail strip + main image ── */}
+            {/* ── LEFT: product photo gallery (unlimited photos) ── */}
             <div className="pdv2-gallery" data-reveal>
-              {/* thumbnail strip */}
-              <div className="pdv2-thumbs">
-                {thumbs.map((src, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <button
-                    key={i}
-                    className={`pdv2-thumb${activeThumb === i ? " pdv2-thumb--active" : ""}`}
-                    onClick={() => setActiveThumb(i)}
-                    aria-label={`View image ${i + 1}`}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt="" />
-                  </button>
-                ))}
-              </div>
-
-              {/* main image */}
-              <div className="pdv2-main-img">
+              <div className="pdv2-main-img pdv2-main-img--solo">
                 <div className="pdv2-main-img__teal-bar" aria-hidden="true" />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={thumbs[activeThumb]}
-                  alt={family.name}
-                  key={activeThumb}
-                />
-                {/* series badge */}
+                <img src={heroImg} alt={family.name} key={activePhoto} />
                 <span className="pdv2-main-img__badge">{family.series}</span>
               </div>
+              {photos.length > 1 && (
+                <div className="pdv2-thumbs" role="tablist" aria-label="Product photos">
+                  {photos.map((p, i) => (
+                    <button
+                      key={i}
+                      role="tab"
+                      aria-selected={activePhoto === i}
+                      className={`pdv2-thumb${activePhoto === i ? " pdv2-thumb--on" : ""}`}
+                      onClick={() => setActivePhoto(i)}
+                      aria-label={`Photo ${i + 1} of ${photos.length}`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={p} alt="" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* ── RIGHT: info card ── */}
@@ -265,48 +346,7 @@ export default function ProductDetail({ family, category, related }: Props) {
       </section>
 
       {/* ══════════════════════════════════════════════════
-          FULL SPEC TABLE
-      ══════════════════════════════════════════════════ */}
-      <section className="pdv2-specs-section" aria-label="Full specifications">
-        <div className="pdv2-wrap">
-          <div className="pdv2-section-head" data-reveal>
-            <span className="pdv2-section-head__line" />
-            <h2>Full <em>Specifications</em></h2>
-            {hasModels && <span className="pdv2-section-head__note">Click a column to highlight</span>}
-          </div>
-
-          <div className="pdv2-table-wrap" data-reveal>
-            <table className="pdv2-table">
-              <thead>
-                <tr>
-                  <th>Specification</th>
-                  {family.models.map((m, i) => (
-                    <th
-                      key={m}
-                      className={hasModels && i === activeModel ? "pdv2-col--on" : ""}
-                      onClick={() => hasModels && setActiveModel(i)}
-                      style={hasModels ? { cursor: "pointer" } : undefined}
-                    >{m}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {family.specs.map(row => (
-                  <tr key={row.label}>
-                    <td className="pdv2-table__label">{row.label}</td>
-                    {row.values.map((v, i) => (
-                      <td key={i} className={hasModels ? i === activeModel ? "pdv2-col--on" : "pdv2-col--dim" : ""}>{v}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════
-          VIDEO SECTION
+          VIDEO — sits above the tabs, like the reference page
       ══════════════════════════════════════════════════ */}
       <section className="pdv2-video-section" aria-label="Product videos">
         <div className="pdv2-wrap">
@@ -375,6 +415,205 @@ export default function ProductDetail({ family, category, related }: Props) {
               </div>
             )}
           </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════
+          TABS — Product Details / Output Sample / Packing & Shipping
+      ══════════════════════════════════════════════════ */}
+      <section className="pdv2-tabsection" aria-label="Product information tabs">
+        <div className="pdv2-wrap">
+          <div className="pdv2-tabbar" role="tablist" data-reveal>
+            <button role="tab" aria-selected={activeTab === "details"} className={`pdv2-tab${activeTab === "details" ? " pdv2-tab--on" : ""}`} onClick={() => setActiveTab("details")}>Product Details</button>
+            <button role="tab" aria-selected={activeTab === "sample"} className={`pdv2-tab${activeTab === "sample" ? " pdv2-tab--on" : ""}`} onClick={() => setActiveTab("sample")}>{sample.label}</button>
+            <button role="tab" aria-selected={activeTab === "packing"} className={`pdv2-tab${activeTab === "packing" ? " pdv2-tab--on" : ""}`} onClick={() => setActiveTab("packing")}>Packing &amp; Shipping</button>
+          </div>
+
+          {/* ── Product Details ── */}
+          {activeTab === "details" && (
+            <div className="pdv2-tabpane">
+
+              {/* machine breakdown — callout pins on the photo */}
+              {callouts.length > 0 && (
+                <div className="pdv2-breakdown-frame" data-reveal>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={heroImg} alt={family.name} className="pdv2-breakdown-frame__img" />
+                  {callouts.map((c) => (
+                    <div key={c.label} className="pdv2-pin" style={{ left: `${c.pos.x}%`, top: `${c.pos.y}%` }}>
+                      <span className="pdv2-pin__dot" aria-hidden="true" />
+                      <div className="pdv2-pin__card">
+                        <span className="pdv2-pin__label">{c.label}</span>
+                        <span className="pdv2-pin__value">{c.value}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Part N breakdown — real photo, cropped/zoomed per part, not fabricated component shots */}
+              {parts.map((part, i) => (
+                <div key={part.title} className="pdv2-part" data-reveal>
+                  <div className="pdv2-part__head">Part {i + 1} — {part.title}</div>
+                  <div className="pdv2-part__row">
+                    {part.crops.map((crop, ci) => (
+                      <div key={ci} className="pdv2-part__shot">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={heroImg} alt={`${family.name} — ${part.title}`} style={{ objectPosition: crop.pos, transform: `scale(${crop.zoom})` }} />
+                        <span className="pdv2-part__icon"><ProcessIcon name={part.icon} size={22} /></span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="pdv2-part__detail">{part.detail}</p>
+                </div>
+              ))}
+
+              {/* installation steps */}
+              {family.installation && family.installation.length > 0 && (
+                <>
+                  <div className="pdv2-section-head pdv2-section-head--tab" data-reveal>
+                    <span className="pdv2-section-head__line" />
+                    <h3>Setup &amp; Installation</h3>
+                  </div>
+                  <div className="pdv2-install-grid" data-reveal>
+                    {family.installation.map((step, i) => (
+                      <div key={i} className="pdv2-install-step">
+                        <div className="pdv2-install-step__head">
+                          <span className="pico-badge">
+                            <ProcessIcon name={resolveIcon(step.title)} />
+                          </span>
+                          <span className="pdv2-install-step__num">{String(i + 1).padStart(2, "0")}</span>
+                        </div>
+                        <h3 className="pdv2-install-step__title">{step.title}</h3>
+                        <p className="pdv2-install-step__detail">{step.detail}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* full spec table */}
+              <div className="pdv2-section-head pdv2-section-head--tab" data-reveal>
+                <span className="pdv2-section-head__line" />
+                <h3>Full Specifications</h3>
+                {hasModels && <span className="pdv2-section-head__note">Click a column to highlight</span>}
+              </div>
+              <div className="pdv2-table-wrap" data-reveal>
+                <table className="pdv2-table">
+                  <thead>
+                    <tr>
+                      <th>Specification</th>
+                      {family.models.map((m, i) => (
+                        <th
+                          key={m}
+                          className={hasModels && i === activeModel ? "pdv2-col--on" : ""}
+                          onClick={() => hasModels && setActiveModel(i)}
+                          style={hasModels ? { cursor: "pointer" } : undefined}
+                        >{m}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {family.specs.map(row => (
+                      <tr key={row.label}>
+                        <td className="pdv2-table__label">{row.label}</td>
+                        {row.values.map((v, i) => (
+                          <td key={i} className={hasModels ? i === activeModel ? "pdv2-col--on" : "pdv2-col--dim" : ""}>{v}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* ── Output Sample ── */}
+          {activeTab === "sample" && (
+            <div className="pdv2-tabpane">
+              <div className="pdv2-sample" data-reveal>
+                <div className="pdv2-sample__img">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={sample.img} alt={sample.heading} />
+                </div>
+                <div className="pdv2-sample__body">
+                  <h3>{sample.heading}</h3>
+                  <p>{sample.blurb}</p>
+                  {materials.length > 0 && (
+                    <div className="pdv2-mats">
+                      <span className="pdv2-mats__label">Compatible materials</span>
+                      <div className="pdv2-mats__tags">
+                        {materials.map(m => <span key={m} className="pdv2-mat-tag">{m}</span>)}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Packing & Shipping ── */}
+          {activeTab === "packing" && (
+            <div className="pdv2-tabpane">
+              {family.deliveryGuide && family.deliveryGuide.length > 0 && (
+                <>
+                  {/* visual pictogram band — packing → shipping → install, at a glance */}
+                  <div className="pdv2-delivery-visual" data-reveal aria-hidden="true">
+                    <div className="pdv2-dv-item">
+                      <span className="pdv2-dv-icon"><ProcessIcon name="shipping" size={36} /></span>
+                      <span>Export Packing</span>
+                    </div>
+                    <span className="pdv2-dv-connector" />
+                    <div className="pdv2-dv-item">
+                      <span className="pdv2-dv-icon"><ProcessIcon name="factory" size={36} /></span>
+                      <span>Ocean / Air Freight</span>
+                    </div>
+                    <span className="pdv2-dv-connector" />
+                    <div className="pdv2-dv-item">
+                      <span className="pdv2-dv-icon"><ProcessIcon name="install" size={36} /></span>
+                      <span>On-Site Install</span>
+                    </div>
+                  </div>
+
+                  <div className="pdv2-delivery-timeline" data-reveal>
+                    {family.deliveryGuide.map((phase, i) => (
+                      <div key={i} className="pdv2-delivery-phase">
+                        <span className="pdv2-delivery-phase__dot">
+                          <span className="pico-badge">
+                            <ProcessIcon name={resolveIcon(phase.label)} />
+                          </span>
+                        </span>
+                        <div className="pdv2-delivery-phase__body">
+                          <h3 className="pdv2-delivery-phase__label">{phase.label}</h3>
+                          <p className="pdv2-delivery-phase__detail">{phase.detail}</p>
+                        </div>
+                        <span className="pdv2-delivery-phase__duration">{phase.duration}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {family.gallery && family.gallery.length > 0 && (
+                <>
+                  <div className="pdv2-section-head pdv2-section-head--tab" data-reveal>
+                    <span className="pdv2-section-head__line" />
+                    <h3>On the Factory Floor</h3>
+                  </div>
+                  <div className="pdv2-gallery-grid" data-reveal>
+                    {family.gallery.map((img, i) => (
+                      <div key={i} className="pdv2-gallery-cell">
+                        <div className="pdv2-gallery-cell__img">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={img.src} alt={img.caption} loading="lazy" />
+                        </div>
+                        <span className="pdv2-gallery-cell__caption">{img.caption}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
@@ -458,12 +697,11 @@ export default function ProductDetail({ family, category, related }: Props) {
                 <Link key={r.slug} href={`/products/${r.category}/${r.slug}`} className="pdv2-rel-card">
                   <div className="pdv2-rel-card__img">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={`/machines/${r.slug}.png`} alt={r.name} loading="lazy" />
+                    <img src={familyImage(r)} alt={r.name} loading="lazy" />
                   </div>
                   <div className="pdv2-rel-card__body">
                     <span className="pdv2-rel-card__series">{r.series}</span>
                     <span className="pdv2-rel-card__name">{r.name.length > 48 ? r.name.slice(0,48)+"…" : r.name}</span>
-                    <span className="pdv2-rel-card__cta">View Details →</span>
                   </div>
                 </Link>
               ))}
@@ -499,6 +737,37 @@ export default function ProductDetail({ family, category, related }: Props) {
           </div>
         </div>
       </section>
+
+      {/* ══════════════════════════════════════════════════
+          FLOATING CONTACT STACK (persistent, right-anchored)
+      ══════════════════════════════════════════════════ */}
+      <div className="pdv2-float" aria-label="Quick contact">
+        <button
+          className="pdv2-float__icn"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Back to top"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+        <a
+          className="pdv2-float__icn pdv2-float__icn--whatsapp"
+          href="https://wa.me/8657788888888"
+          target="_blank" rel="noopener noreferrer"
+          aria-label="Chat on WhatsApp"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm5.8 14.06c-.24.68-1.4 1.3-1.93 1.35-.5.05-1.03.24-3.43-.72-2.9-1.16-4.76-4.13-4.9-4.32-.14-.19-1.17-1.56-1.17-2.98 0-1.42.75-2.11 1.02-2.4.27-.29.58-.36.78-.36.2 0 .39.002.56.01.18.008.42-.07.66.5.24.58.82 2 .89 2.14.07.14.12.31.02.5-.1.19-.15.31-.3.47-.15.17-.31.37-.44.5-.15.14-.3.3-.13.59.17.3.76 1.25 1.63 2.02 1.12.99 2.06 1.3 2.36 1.45.3.14.47.12.65-.07.18-.19.75-.88.95-1.18.2-.3.4-.25.66-.15.27.1 1.71.81 2 .96.29.14.48.21.55.33.07.12.07.68-.17 1.36Z"/></svg>
+        </a>
+        <a className="pdv2-float__icn" href="tel:+8657788888888" aria-label="Call us">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </a>
+        <button
+          className="pdv2-float__icn pdv2-float__icn--quote"
+          onClick={() => document.querySelector(".pdv2-info-card")?.scrollIntoView({ behavior: "smooth", block: "center" })}
+          aria-label="Jump to request a quote"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16v12H8l-4 4V4Z"/></svg>
+        </button>
+      </div>
 
     </div>
   );

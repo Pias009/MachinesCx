@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import TransitionLink from "@/components/TransitionLink";
-import { families, categories } from "@/lib/products";
+import { families, categories, familyImage } from "@/lib/products";
 import type { CategorySlug, ProductFamily } from "@/lib/products";
 
 const ALL = "all" as const;
@@ -228,7 +228,7 @@ function ElectricCard({ f, delay, onQuickView }: { f: (typeof families)[number];
       <TransitionLink href={`/products/${f.category}/${f.slug}`} className="pb-card pb-card--front">
         <div className="pb-card__img-wrap">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`/machines/${f.slug}.png`} alt={f.series} className="pb-card__img" />
+          <img src={familyImage(f)} alt={f.series} className="pb-card__img" />
         </div>
         <div className="pb-card__body">
           <span ref={catRef}    className="pb-card__cat">{catLabel}</span>
@@ -241,7 +241,7 @@ function ElectricCard({ f, delay, onQuickView }: { f: (typeof families)[number];
       {/* BACK — absolute overlay, dissolves in on hover */}
       <div className="pb-card pb-card--back">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={`/machines/${f.slug}.png`} alt="" className="pb-back__bg-img" />
+        <img src={familyImage(f)} alt="" className="pb-back__bg-img" />
         <div className="pb-back__overlay" />
         <div className="pb-back__actions">
           <button className="pb-back__btn pb-back__btn--quick" onClick={onQuickView}>
@@ -310,7 +310,7 @@ function QuickViewModal({ f, onClose }: { f: ProductFamily; onClose: () => void 
         <div className="qv-img-wrap">
           <div className="qv-img-accent" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`/machines/${f.slug}.png`} alt={f.series} className="qv-img" />
+          <img src={familyImage(f)} alt={f.series} className="qv-img" />
         </div>
 
         {/* info */}

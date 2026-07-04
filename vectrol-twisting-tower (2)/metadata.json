@@ -1,0 +1,6 @@
+{
+  "name": "Vectrol Twisting Tower",
+  "description": "Interactive 3D procedural twisting tower architecture showcase and geometry lab built with React, Vite, and Three.js.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

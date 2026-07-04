@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { families, categories } from "@/lib/products";
+import { families, categories, familyImage } from "@/lib/products";
+import { useCms } from "@/lib/useCms";
 
 const CAT_LABELS: Record<string, string> = {
   "film-blowing": "Film Blowing",
@@ -18,20 +19,7 @@ const CAT_ICONS: Record<string, string> = {
 };
 
 /* quick key specs pulled from family data */
-/* slug → actual image filename when it doesn't match 1:1 */
-const IMG_OVERRIDE: Record<string, string> = {
-  "flexo-2c": "flexo-1",
-  "flexo-4c": "flexo-2",
-  "flexo-6c": "flexo-6c-nobg",
-  "flexo-8c": "flexo-4",
-};
-
-function machineImg(slug: string) {
-  const name = IMG_OVERRIDE[slug] ?? slug;
-  return `/machines/${name}.png`;
-}
-
-const KEY_SPECS: Record<string, { stat: string; label: string }> = {
+const DEFAULT_KEY_SPECS: Record<string, { stat: string; label: string }> = {
   "abcde-2200":         { stat: "400 kg/h",   label: "Max output"     },
   "abc-multilayer-small":{ stat: "3-layer",   label: "Co-extrusion"   },
   "abc-multilayer-large":{ stat: "5-layer",   label: "Co-extrusion"   },
@@ -64,7 +52,23 @@ const KEY_SPECS: Record<string, { stat: string; label: string }> = {
   "flexo-8c":           { stat: "8-colour",   label: "CI flexo"       },
 };
 
+interface CatalogCms {
+  headline1: string;
+  headline2: string;
+  items: { slug: string; stat: string; label: string }[];
+}
+
 export default function MachineCatalogSection() {
+  // live CMS content (admin panel) with hardcoded fallback
+  const cms = useCms<CatalogCms>("machine-catalog", {
+    headline1: "Every machine.",
+    headline2: "Find your perfect fit.",
+    items: [],
+  });
+  const KEY_SPECS: Record<string, { stat: string; label: string }> =
+    cms.items && cms.items.length
+      ? Object.fromEntries(cms.items.map(i => [i.slug, { stat: i.stat, label: i.label }]))
+      : DEFAULT_KEY_SPECS;
   const [activeTab, setActiveTab] = useState<string>("all");
 
   const totalFamilies = families.length;
@@ -384,8 +388,8 @@ export default function MachineCatalogSection() {
             <div>
               <div className="mcs__badge">Machine Catalogue</div>
               <h2 className="mcs__title">
-                Every machine.<br />
-                <em>Find your perfect fit.</em>
+                {cms.headline1}<br />
+                <em>{cms.headline2}</em>
               </h2>
               <p className="mcs__sub">
                 {totalFamilies} product families · {totalModels}+ models · shipped to 80+ countries
@@ -437,7 +441,7 @@ export default function MachineCatalogSection() {
                   style={{ animationDelay: `${Math.min(i, 15) * 28}ms` }}
                 >
                   <div className="mcs-card__bg" aria-hidden="true">
-                    <img src={machineImg(fam.slug)} alt="" loading="lazy" />
+                    <img src={familyImage(fam)} alt="" loading="lazy" />
                   </div>
                   <div className="mcs-card__scrim" aria-hidden="true" />
                   <div className="mcs-card__top" style={{ position: "relative", zIndex: 1 }}>

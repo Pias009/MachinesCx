@@ -1,0 +1,69 @@
+{
+  "items": [
+    {
+      "slug": "abcde-2200",
+      "img": "/machines/abcde-2200.png",
+      "cat": "film-blowing",
+      "stage": "Film Extrusion",
+      "name": "ABCDE-2200 Five-Layer",
+      "role": "The line starts here — resin is melted and blown into a 5-layer co-extruded film, 2100 mm wide.",
+      "quality": [
+        ["Thickness tolerance", "±2%"],
+        ["Output", "400 kg/h"],
+        ["Layers", "5"]
+      ]
+    },
+    {
+      "slug": "flexo-6c",
+      "img": "/machines/flexo-6c-nobg.png",
+      "cat": "printing",
+      "stage": "Flexo Printing",
+      "name": "AI-6C CI Flexo Press",
+      "role": "The blown film is printed in up to 6 colours on the central-impression drum at 260 m/min.",
+      "quality": [
+        ["Registration", "±0.1 mm"],
+        ["Print speed", "260 m/min"],
+        ["Colours", "6"]
+      ]
+    },
+    {
+      "slug": "t-pro-heatseal",
+      "img": "/machines/t-pro-heatseal.png",
+      "cat": "bag-making",
+      "stage": "Bag Converting",
+      "name": "T-PRO Heat-Seal Machine",
+      "role": "Printed film is sealed and cut into finished bags across multiple lanes at production speed.",
+      "quality": [
+        ["Seal speed", "300 pcs/min"],
+        ["Lanes", "2–3"],
+        ["Bag width", "500–600 mm"]
+      ]
+    },
+    {
+      "slug": "rgb-rollbag",
+      "img": "/machines/rgb-rollbag.png",
+      "cat": "bag-making",
+      "stage": "Roll Winding",
+      "name": "CX-RGB Roll Bag Machine",
+      "role": "Bags are perforated and wound onto rolls with automatic core cutting for retail-ready packs.",
+      "quality": [
+        ["Roll width", "1000–1200 mm"],
+        ["Perforation", "Inline"],
+        ["Core", "Auto-cut"]
+      ]
+    },
+    {
+      "slug": "cx-pelletizing",
+      "img": "/machines/cx-pelletizing.png",
+      "cat": "recycling",
+      "stage": "Closed-Loop Recycling",
+      "name": "CX Pelletizing Line",
+      "role": "Edge trim and scrap from every stage return here — recovered into resin and fed back to step 01.",
+      "quality": [
+        ["Resin recovery", "99%"],
+        ["Output", "100–120 kg/h"],
+        ["Screen", "Auto-changer"]
+      ]
+    }
+  ]
+}

@@ -276,10 +276,12 @@ function ContactPageInner() {
   const [machines, setMachines] = useState<SelectedMachine[]>([]);
   const [form, setForm] = useState<FormData>({ name: "", company: "", email: "", phone: "", country: "", message: "" });
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState("");
 
   // Pre-fill from ?machine=slug query param (comes from product detail page)
   useEffect(() => {
-    const slug = searchParams.get("machine");
+    const slug = searchParams?.get("machine");
     if (!slug) return;
     const fam = families.find(f => f.slug === slug);
     if (!fam) return;
@@ -307,14 +309,50 @@ function ContactPageInner() {
   }
 
   function canAdvance() {
+    if (sending) return false;
     if (step === 0) return selectedSlugs.length > 0;
     if (step === 2) return !!form.name && !!form.email;
     return true;
   }
 
+  async function submitInquiry() {
+    setSending(true); setSendError("");
+    try {
+      const res = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          company: form.company,
+          email: form.email,
+          phone: form.phone,
+          country: form.country,
+          message: form.message,
+          machines: machines.map(m => ({
+            slug: m.family.slug,
+            name: m.family.name,
+            series: m.family.series,
+            model: m.family.models[m.modelIdx],
+            qty: m.qty,
+            notes: m.notes,
+          })),
+        }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error ?? "Failed to send inquiry");
+      }
+      setSent(true);
+    } catch (e) {
+      setSendError((e as Error).message || "Something went wrong — please try again.");
+    } finally {
+      setSending(false);
+    }
+  }
+
   function advance() {
     if (step === 0) { goToStep2(); return; }
-    if (step === STEPS.length - 1) { setSent(true); return; }
+    if (step === STEPS.length - 1) { submitInquiry(); return; }
     setStep(s => s + 1);
   }
 
@@ -654,6 +692,15 @@ function ContactPageInner() {
         }
         .iq-review-val { font-size: .9rem; color: #f8fafc; }
 
+        /* ── send error ── */
+        .iq-send-error {
+          margin-top: 1.5rem; padding: .85rem 1.1rem;
+          background: rgba(225,29,72,.12);
+          border: 1px solid rgba(225,29,72,.35);
+          border-radius: .625rem;
+          color: #ffb4c2; font-size: .88rem; line-height: 1.5;
+        }
+
         /* ── nav row ── */
         .iq-nav {
           display: flex; align-items: center;
@@ -738,9 +785,13 @@ function ContactPageInner() {
                 {step === 3 && <Step4 machines={machines} form={form} />}
               </div>
 
+              {sendError && (
+                <div className="iq-send-error" role="alert">{sendError}</div>
+              )}
+
               <div className="iq-nav">
                 {step > 0
-                  ? <button className="iq-back" onClick={() => setStep(s => s - 1)}>
+                  ? <button className="iq-back" onClick={() => setStep(s => s - 1)} disabled={sending}>
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       Back
                     </button>
@@ -753,7 +804,9 @@ function ContactPageInner() {
                     style={{ opacity: canAdvance() ? 1 : 0.4, cursor: canAdvance() ? "pointer" : "default" }}
                     onClick={advance}
                   >
-                    {step === STEPS.length - 1 ? "Send inquiry →" : step === 0 ? `Configure ${selectedSlugs.length || ""} line${selectedSlugs.length !== 1 ? "s" : ""} →` : "Continue →"}
+                    {sending
+                      ? "Sending…"
+                      : step === STEPS.length - 1 ? "Send inquiry →" : step === 0 ? `Configure ${selectedSlugs.length || ""} line${selectedSlugs.length !== 1 ? "s" : ""} →` : "Continue →"}
                   </button>
                 </AetherBtn>
               </div>

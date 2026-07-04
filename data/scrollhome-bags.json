@@ -1,0 +1,412 @@
+{
+  "items": [
+    {
+      "slug": "t-pro-heatseal",
+      "specs": [
+        {
+          "label": "Series",
+          "value": "T-PRO"
+        },
+        {
+          "label": "Type",
+          "value": "Heat-seal converter"
+        },
+        {
+          "label": "Film width",
+          "value": "750 – 1150 mm"
+        },
+        {
+          "label": "Speed",
+          "value": "600 pcs / min"
+        },
+        {
+          "label": "Lanes",
+          "value": "Up to 6"
+        },
+        {
+          "label": "Material",
+          "value": "PE · PBAT+PLA"
+        },
+        {
+          "label": "Drive",
+          "value": "Servo + frequency"
+        }
+      ],
+      "features": [
+        {
+          "head": "Multi-lane",
+          "body": "Up to 6 lanes for high-volume simultaneous output."
+        },
+        {
+          "head": "Biodegradable ready",
+          "body": "Compatible with PBAT+PLA blends out of the box."
+        },
+        {
+          "head": "Servo precision",
+          "body": "±0.5 mm sealing repeat accuracy across all lanes."
+        },
+        {
+          "head": "Fast changeover",
+          "body": "Tool-free width adjustment in under 15 minutes."
+        }
+      ]
+    },
+    {
+      "slug": "f-pro-bottomseal",
+      "specs": [
+        {
+          "label": "Series",
+          "value": "F-PRO"
+        },
+        {
+          "label": "Type",
+          "value": "Bottom-seal converter"
+        },
+        {
+          "label": "Film width",
+          "value": "600 – 1000 mm"
+        },
+        {
+          "label": "Speed",
+          "value": "280 pcs / min"
+        },
+        {
+          "label": "Lanes",
+          "value": "Up to 4"
+        },
+        {
+          "label": "Material",
+          "value": "PE · PP"
+        },
+        {
+          "label": "Drive",
+          "value": "Servo driven"
+        }
+      ],
+      "features": [
+        {
+          "head": "Bottom seal",
+          "body": "Continuous bottom-seal for flat bags with precision tension control."
+        },
+        {
+          "head": "Compact footprint",
+          "body": "Space-saving design for medium-volume production lines."
+        },
+        {
+          "head": "Easy operation",
+          "body": "Touchscreen HMI with recipe memory for quick batch switching."
+        },
+        {
+          "head": "Low maintenance",
+          "body": "Fewer moving parts with sealed bearing assemblies throughout."
+        }
+      ]
+    },
+    {
+      "slug": "rgb-rollbag",
+      "specs": [
+        {
+          "label": "Series",
+          "value": "RGB"
+        },
+        {
+          "label": "Type",
+          "value": "Roll-bag machine"
+        },
+        {
+          "label": "Film width",
+          "value": "500 – 900 mm"
+        },
+        {
+          "label": "Speed",
+          "value": "200 pcs / min"
+        },
+        {
+          "label": "Lanes",
+          "value": "Up to 3"
+        },
+        {
+          "label": "Material",
+          "value": "PE · LDPE"
+        },
+        {
+          "label": "Drive",
+          "value": "Inverter + servo"
+        }
+      ],
+      "features": [
+        {
+          "head": "Roll format",
+          "body": "Produces perforated roll bags for automatic dispensing systems."
+        },
+        {
+          "head": "Perforation unit",
+          "body": "Integrated blade perforation with adjustable pitch and depth."
+        },
+        {
+          "head": "Winding system",
+          "body": "Automatic roll winding with tension control for uniform rolls."
+        },
+        {
+          "head": "Quick sizing",
+          "body": "Motorized width adjustment with digital position readout."
+        }
+      ]
+    },
+    {
+      "slug": "rb-vegetable",
+      "specs": [
+        {
+          "label": "Series",
+          "value": "RB"
+        },
+        {
+          "label": "Type",
+          "value": "Vest-bag machine"
+        },
+        {
+          "label": "Film width",
+          "value": "800 – 1200 mm"
+        },
+        {
+          "label": "Speed",
+          "value": "250 pcs / min"
+        },
+        {
+          "label": "Lanes",
+          "value": "Up to 4"
+        },
+        {
+          "label": "Material",
+          "value": "HDPE · MDPE"
+        },
+        {
+          "label": "Drive",
+          "value": "Full servo"
+        }
+      ],
+      "features": [
+        {
+          "head": "T-shirt bags",
+          "body": "Designed for vest/T-shirt bags with reinforced die-cut handles."
+        },
+        {
+          "head": "Die-cut unit",
+          "body": "Integrated punch module for consistent handle cutouts."
+        },
+        {
+          "head": "Stacking conveyor",
+          "body": "Automated counting and stacking for pack-ready output."
+        },
+        {
+          "head": "High throughput",
+          "body": "Up to 250 bags per minute with multi-lane parallel processing."
+        }
+      ]
+    },
+    {
+      "slug": "abcde-2200",
+      "specs": [
+        {
+          "label": "Series",
+          "value": "ABCDE-2200"
+        },
+        {
+          "label": "Type",
+          "value": "5-layer co-ex line"
+        },
+        {
+          "label": "Film width",
+          "value": "2200 mm max"
+        },
+        {
+          "label": "Output",
+          "value": "350 kg / h"
+        },
+        {
+          "label": "Layers",
+          "value": "5"
+        },
+        {
+          "label": "Material",
+          "value": "PE · PP · PA · EVOH"
+        },
+        {
+          "label": "Drive",
+          "value": "AC vector"
+        }
+      ],
+      "features": [
+        {
+          "head": "Multi-layer",
+          "body": "5-layer co-extrusion for advanced barrier and seal properties."
+        },
+        {
+          "head": "High output",
+          "body": "350 kg/h throughput with internal bubble cooling system."
+        },
+        {
+          "head": "Web width",
+          "body": "2200 mm lay-flat for large-format film applications."
+        },
+        {
+          "head": "Precision gauging",
+          "body": "Online thickness measurement with closed-loop auto adjustment."
+        }
+      ]
+    },
+    {
+      "slug": "abc-multilayer-large",
+      "specs": [
+        {
+          "label": "Series",
+          "value": "ABC"
+        },
+        {
+          "label": "Type",
+          "value": "Multi-layer blown film"
+        },
+        {
+          "label": "Film width",
+          "value": "1800 mm max"
+        },
+        {
+          "label": "Output",
+          "value": "280 kg / h"
+        },
+        {
+          "label": "Layers",
+          "value": "3"
+        },
+        {
+          "label": "Material",
+          "value": "PE · PP"
+        },
+        {
+          "label": "Drive",
+          "value": "AC vector"
+        }
+      ],
+      "features": [
+        {
+          "head": "3-layer co-ex",
+          "body": "High-performance 3-layer blown film for general packaging."
+        },
+        {
+          "head": "Energy efficient",
+          "body": "Low-energy IBC design with optimized air ring technology."
+        },
+        {
+          "head": "Consistent gauge",
+          "body": "Auto-profiled die gap for uniform film thickness across the web."
+        },
+        {
+          "head": "User-friendly",
+          "body": "Recipe-based controls with touch panel and data logging."
+        }
+      ]
+    },
+    {
+      "slug": "s-wide",
+      "specs": [
+        {
+          "label": "Series",
+          "value": "S"
+        },
+        {
+          "label": "Type",
+          "value": "Single-layer wide"
+        },
+        {
+          "label": "Film width",
+          "value": "2500 mm max"
+        },
+        {
+          "label": "Output",
+          "value": "200 kg / h"
+        },
+        {
+          "label": "Layers",
+          "value": "1"
+        },
+        {
+          "label": "Material",
+          "value": "LDPE · LLDPE"
+        },
+        {
+          "label": "Drive",
+          "value": "AC inverter"
+        }
+      ],
+      "features": [
+        {
+          "head": "Ultra-wide",
+          "body": "2500 mm lay-flat width for industrial film applications."
+        },
+        {
+          "head": "Simple operation",
+          "body": "Single-layer extrusion with minimal operator training required."
+        },
+        {
+          "head": "Low investment",
+          "body": "Cost-effective solution for high-volume commodity film production."
+        },
+        {
+          "head": "Flexible output",
+          "body": "Runs LDPE and LLDPE with quick resin changeover."
+        }
+      ]
+    },
+    {
+      "slug": "cx-pelletizing",
+      "specs": [
+        {
+          "label": "Series",
+          "value": "CX"
+        },
+        {
+          "label": "Type",
+          "value": "Recycling pelletizer"
+        },
+        {
+          "label": "Output",
+          "value": "150 – 300 kg / h"
+        },
+        {
+          "label": "Material",
+          "value": "PE · PP · Pet"
+        },
+        {
+          "label": "Pellet size",
+          "value": "3 – 4 mm"
+        },
+        {
+          "label": "Power",
+          "value": "75 – 160 kW"
+        },
+        {
+          "label": "Drive",
+          "value": "AC vector + servo"
+        }
+      ],
+      "features": [
+        {
+          "head": "Closed-loop",
+          "body": "Converts post-industrial waste into high-quality reusable pellets."
+        },
+        {
+          "head": "Integrated cutter",
+          "body": "Hot-face die-face cutting with underwater pelletizing system."
+        },
+        {
+          "head": "Filtration",
+          "body": "Continuous melt filtration with automatic screen changer."
+        },
+        {
+          "head": "Energy recovery",
+          "body": "Integrated heat recovery system reduces total power consumption."
+        }
+      ]
+    }
+  ]
+}

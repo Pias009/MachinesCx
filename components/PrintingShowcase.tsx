@@ -3,8 +3,9 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import TransitionLink from "@/components/TransitionLink";
+import { useCms } from "@/lib/useCms";
 
-const MACHINES = [
+const DEFAULT_MACHINES = [
   {
     src:    "/machines/flexo-2-nobg.png",
     model:  "AI-4C",
@@ -39,10 +40,14 @@ const MACHINES = [
   },
 ];
 
-const N = MACHINES.length;
 const DURATION = 650;
 
 export default function PrintingShowcase() {
+  // live CMS content (admin panel) with hardcoded fallback
+  const cms = useCms<{ items: typeof DEFAULT_MACHINES }>("printing-showcase", { items: DEFAULT_MACHINES });
+  const MACHINES = cms.items && cms.items.length ? cms.items : DEFAULT_MACHINES;
+  const N = MACHINES.length;
+
   const [active,      setActive]      = useState(0);
   const [displayed,   setDisplayed]   = useState(0);   // what's currently shown
   const [exiting,     setExiting]     = useState(false); // true = drop-out playing

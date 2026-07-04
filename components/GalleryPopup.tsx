@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { families } from "@/lib/products";
+import { families, familyImage } from "@/lib/products";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -28,7 +28,7 @@ function FloorTile({ slug, index }: { slug: string; index: number }) {
     <div className="fc-tile" style={{ "--tile-i": index } as React.CSSProperties}>
       <div className="fc-tile__inner">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={`/machines/${slug}.png`} alt={fam?.series ?? slug} className="fc-tile__img" />
+        <img src={fam ? familyImage(fam) : `/machines/${slug}.png`} alt={fam?.series ?? slug} className="fc-tile__img" />
         <div className="fc-tile__shine" aria-hidden />
         <div className="fc-tile__label">
           <span className="fc-tile__series">{fam?.series ?? slug}</span>

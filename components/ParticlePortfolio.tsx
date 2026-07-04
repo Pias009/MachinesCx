@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ForgeBackground from "@/components/ForgeBackground";
+import { useCms } from "@/lib/useCms";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,7 +18,7 @@ interface Step {
   quality: [string, string][]; // quality details
 }
 
-const STEPS: Step[] = [
+const DEFAULT_STEPS: Step[] = [
   {
     slug: "abcde-2200", img: "/machines/abcde-2200.png", cat: "film-blowing",
     stage: "Film Extrusion",
@@ -55,13 +56,16 @@ const STEPS: Step[] = [
   },
 ];
 
-const N = STEPS.length;
-
 // ─── Component ─────────────────────────────────────────────
 export default function ParticlePortfolio(){
   const sectionRef = useRef<HTMLDivElement>(null!);
   const scrollRef  = useRef(0);
   const [active, setActive] = useState(0);
+
+  // live CMS content (editable in the admin panel) with hardcoded fallback
+  const cms   = useCms<{ items: Step[] }>("production-line", { items: DEFAULT_STEPS });
+  const STEPS = cms.items && cms.items.length ? cms.items : DEFAULT_STEPS;
+  const N     = STEPS.length;
 
   const heroRef  = useRef<HTMLDivElement>(null);
   const ringRef  = useRef<HTMLDivElement>(null);
@@ -98,7 +102,8 @@ export default function ParticlePortfolio(){
     });
 
     return ()=>{ camST.kill(); master.kill(); };
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [N]);
 
   // Animate info panel swap on step change
   useEffect(()=>{
@@ -109,20 +114,23 @@ export default function ParticlePortfolio(){
 
   const step = STEPS[active];
 
-  // ── pipeline geometry: fixed roadmap points, left → right S-curve ──
-  // last point (PROD) is the finished-product node at the end of the line
-  const NODES: {x:number;y:number}[] = [
-    { x:  8, y: 48 },
-    { x: 25, y: 30 },
-    { x: 42, y: 50 },
-    { x: 59, y: 30 },
-    { x: 74, y: 48 },
-  ];
+  // ── pipeline geometry: roadmap points generated for any step count ──
+  // machines alternate low/high across the floor; PROD ends the line
+  const NODES = STEPS.map((_, i) => ({
+    x: 8 + (N > 1 ? (66 * i) / (N - 1) : 0),
+    y: i % 2 === 0 ? 48 : 30,
+  }));
   const PROD = { x: 90, y: 32 };
-  const PIPE_D =
-    "M 8 48 C 14 48 19 30 25 30 S 36 50 42 50 S 53 30 59 30 S 68 48 74 48 C 80 48 86 38 90 32";
-  // lit portion of the pipe — each machine sits ~20% further along the path
-  const progress = active === N - 1 ? 100 : active * 20 + 8;
+  const pts = [...NODES, PROD];
+  // smooth S-curve: horizontal tangents at every node
+  const PIPE_D = pts.map((p, i) => {
+    if (i === 0) return `M ${p.x} ${p.y}`;
+    const prev = pts[i - 1];
+    const dx = (p.x - prev.x) / 2;
+    return `C ${(prev.x + dx).toFixed(1)} ${prev.y} ${(p.x - dx).toFixed(1)} ${p.y} ${p.x} ${p.y}`;
+  }).join(" ");
+  // lit portion of the pipe — node i sits ~i/N of the way along the path
+  const progress = active === N - 1 ? 100 : ((active + 0.4) / N) * 100;
 
   return(
     <section ref={sectionRef} className="pp-section" style={{height:"600vh", position:"relative"}}>

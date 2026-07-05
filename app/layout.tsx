@@ -7,7 +7,7 @@ import PageTransitionOverlay from "@/components/PageTransitionOverlay";
 import PageMountTrigger from "@/components/PageMountTrigger";
 import LoadingScreen from "@/components/LoadingScreen";
 import SectionAnimator from "@/components/SectionAnimator";
-import ThreeBackground from "@/components/ThreeBackground";
+import ChatWidget from "@/components/ChatWidget";
 import { BRAND } from "@/lib/products";
 
 const bebas = Bebas_Neue({
@@ -74,13 +74,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <LoadingScreen />
-        <ThreeBackground />
         <SectionAnimator />
         <PageTransitionOverlay />
         <PageMountTrigger />
         <SiteNav />
         <main>{children}</main>
         <SiteFooter />
+        <ChatWidget />
       </body>
     </html>
   );

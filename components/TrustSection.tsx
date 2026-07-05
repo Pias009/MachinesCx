@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect, useMemo } from "react";
+import React, { useRef, useEffect, useMemo, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -169,6 +169,41 @@ function StatItem({value,label,sub}:{value:string;label:string;sub:string}) {
 }
 
 // ─────────────────────────────────────────────
+// ROLLING WORDS — fixed lead-in text + one word/phrase that rolls
+// vertically in place, cycling through what the brand actually does.
+// ─────────────────────────────────────────────
+const ROLL_WORDS = [
+  "Film Blowing.",
+  "Bag Making.",
+  "Recycling Lines.",
+  "Flexographic Printing.",
+  "80+ Countries.",
+  "Lifetime Support.",
+];
+
+function RollingWords() {
+  const [i, setI] = useState(0);
+
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+    const id = setInterval(() => setI(n => (n + 1) % ROLL_WORDS.length), 2200);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <span className="ts-roll" aria-live="off">
+      <span className="ts-roll__track" style={{ transform: `translateY(-${i * 100}%)` }}>
+        {ROLL_WORDS.map((w, idx) => (
+          <span className="ts-roll__word" key={idx} aria-hidden={idx !== i}>{w}</span>
+        ))}
+      </span>
+      <span className="sr-only">{ROLL_WORDS[i]}</span>
+    </span>
+  );
+}
+
+// ─────────────────────────────────────────────
 // MAIN
 // ─────────────────────────────────────────────
 export default function TrustSection() {
@@ -237,6 +272,26 @@ export default function TrustSection() {
           font-size: clamp(.88rem, 1.15vw, 1rem);
           line-height: 1.75; max-width: 42ch; align-self: end;
         }
+        .ts-roll {
+          display: block;
+          height: clamp(1.7rem, 2.6vw, 2.2rem);
+          overflow: hidden;
+          margin-top: .3rem;
+        }
+        .ts-roll__track {
+          display: flex; flex-direction: column;
+          transition: transform .6s cubic-bezier(0.16,1,0.3,1);
+        }
+        .ts-roll__word {
+          display: block;
+          height: clamp(1.7rem, 2.6vw, 2.2rem);
+          line-height: clamp(1.7rem, 2.6vw, 2.2rem);
+          font-family: var(--ff-display);
+          font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+          letter-spacing: .01em;
+          color: var(--brand-teal);
+          white-space: nowrap;
+        }
 
         /* ── stats ── */
         .ts-stats {
@@ -289,6 +344,7 @@ export default function TrustSection() {
         @media(prefers-reduced-motion:reduce){
           .ts-header{opacity:1!important;transform:none!important;transition:none!important;}
           .ts-stat::after{display:none;}
+          .ts-roll__track{transition:none!important;}
         }
 
         /* ── Light mode ── */
@@ -325,10 +381,8 @@ export default function TrustSection() {
               </h2>
             </div>
             <p className="ts-desc">
-              Wenzhou Asal Innomach Technology designs and builds industrial
-              plastic-processing lines — film blowing, bag making, recycling,
-              and flexographic printing. Deployed across 80+ countries, backed
-              by lifetime technical support.
+              Wenzhou Asal Innomach Technology, trusted in
+              <br/><RollingWords />
             </p>
           </div>
 

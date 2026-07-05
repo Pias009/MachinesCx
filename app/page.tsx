@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic";
 import HeroSplash from "@/components/HeroSplash";
+import AiAgentBanner from "@/components/AiAgentBanner";
 import ScrollHome from "@/components/ScrollHome";
 
 /* ── Heavy sections: all loaded lazily, no SSR where not needed ── */
@@ -18,6 +19,9 @@ export default function Home() {
     <>
       {/* Splash hero */}
       <HeroSplash />
+
+      {/* AI machine assistant marketing strip */}
+      <AiAgentBanner />
 
       {/* Original hero */}
       <ScrollHome />

@@ -5,8 +5,11 @@ import Link from "next/link";
 import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
 import ProcessIcon, { resolveIcon, type IconName } from "@/components/ProcessIcon";
+import DeliveryStageIcon, { resolveDeliveryStage } from "@/components/DeliveryStageIcon";
+import CustomSections from "@/components/CustomSections";
+import MachineParts from "@/components/MachineParts";
 import type { ProductFamily, Category } from "@/lib/products";
-import { familyImage, familyImages } from "@/lib/products";
+import { familyImage, familyImages, parseYouTubeId } from "@/lib/products";
 
 interface Props {
   family: ProductFamily;
@@ -14,46 +17,13 @@ interface Props {
   related: ProductFamily[];
 }
 
-/* ── static testimonials ── */
-const TESTIMONIALS = [
-  {
-    name: "Mark Hamill",
-    title: "Production Director, PackTech GmbH",
-    rating: 5,
-    text: "The ABC multi-layer line exceeded our output targets from week one. Registration accuracy is exactly as spec'd — we've had zero downtime in six months.",
-  },
-  {
-    name: "Liu Wei",
-    title: "Plant Manager, SinoFilm Co.",
-    rating: 5,
-    text: "After-sales support is what sets Ashal Innomach apart. Engineers responded within the hour and resolved our screw alignment issue remotely.",
-  },
-  {
-    name: "Ahmed Al-Rashid",
-    title: "CEO, Gulf Packaging Industries",
-    rating: 5,
-    text: "We ordered two lines simultaneously. Both arrived on schedule, commissioning was smooth, and film quality is consistent across both units.",
-  },
+/* ── fixed 3-stage delivery proof boxes — packing / freight / install ── */
+const DELIVERY_STAGES: { key: "packing" | "freight" | "install"; label: string; icon: IconName }[] = [
+  { key: "packing", label: "Export Packing", icon: "shipping" },
+  { key: "freight", label: "Ocean / Air Freight", icon: "factory" },
+  { key: "install", label: "On-Site Install", icon: "install" },
 ];
 
-/* ── YouTube video IDs per category (placeholder) ── */
-const CATEGORY_VIDEOS: Record<string, { id: string; title: string }[]> = {
-  "film-blowing": [
-    { id: "dQw4w9WgXcQ", title: "ABC Multi-layer Film Blowing Line — Live Run" },
-    { id: "dQw4w9WgXcQ", title: "Five-Layer Co-extrusion Setup Walkthrough" },
-  ],
-  "bag-making": [
-    { id: "dQw4w9WgXcQ", title: "T-PRO Heat-Seal Converter — 300 pcs/min" },
-    { id: "dQw4w9WgXcQ", title: "Vest Bag Machine Production Demo" },
-  ],
-  "recycling": [
-    { id: "dQw4w9WgXcQ", title: "CX Pelletizing Line — Edge Trim Recovery" },
-  ],
-  "printing": [
-    { id: "dQw4w9WgXcQ", title: "AI-8C Flexo Press — 350 m/min Production Run" },
-    { id: "dQw4w9WgXcQ", title: "8-Colour Registration Demonstration" },
-  ],
-};
 
 /* ── tab labels + output-sample copy per category (bag-making genuinely
    makes bags; other categories get an honest "what it produces" label
@@ -147,7 +117,11 @@ export default function ProductDetail({ family, category, related }: Props) {
   const [activeTab,    setActiveTab]    = useState<TabKey>("details");
   const [activePhoto,  setActivePhoto]  = useState(0);
 
-  const videos   = CATEGORY_VIDEOS[family.category] ?? CATEGORY_VIDEOS["film-blowing"];
+  /* real videos only — an unset/invalid URL never falls back to a fake
+     placeholder video, it just means the section shows "coming soon" */
+  const videos = (family.videos ?? [])
+    .map(v => ({ id: parseYouTubeId(v.url), title: v.title || "Product demo" }))
+    .filter((v): v is { id: string; title: string } => !!v.id);
   const specKeys = PANEL_SPEC_KEYS[family.category]  ?? PANEL_SPEC_KEYS["film-blowing"];
   const sample    = SAMPLE_TAB[family.category] ?? SAMPLE_TAB["film-blowing"];
   const parts     = PART_CROPS[family.category] ?? PART_CROPS["film-blowing"];
@@ -156,11 +130,55 @@ export default function ProductDetail({ family, category, related }: Props) {
   const photos    = familyImages(family);
   const heroImg = photos[Math.min(activePhoto, photos.length - 1)];
 
+  /* subtle parallax on the hero product photo — image drifts slower than
+     the page as it scrolls past. Transform-only (GPU-composited), and the
+     rAF loop only runs while the hero is actually in view. */
+  const heroImgRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const el = heroImgRef.current;
+    if (reduced || !el) return;
+    let raf = 0;
+    let inView = false;
+    const tick = () => {
+      const rect = el.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2 - window.innerHeight / 2;
+      const offset = Math.max(-24, Math.min(24, mid * -0.06));
+      el.style.transform = `translateY(${offset}px)`;
+      if (inView) raf = requestAnimationFrame(tick);
+    };
+    const obs = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      if (inView) raf = requestAnimationFrame(tick);
+      else cancelAnimationFrame(raf);
+    });
+    obs.observe(el);
+    return () => { obs.disconnect(); cancelAnimationFrame(raf); };
+  }, [activePhoto]);
+
   /* facility strip — 3 diagonal panels of real machines from this category
      (this one + up to 2 related), standing in for a factory-floor collage
      without fabricating photography we don't have */
   const collagePool = [family, ...related].slice(0, 3);
   while (collagePool.length < 3) collagePool.push(family);
+
+  /* real reviews only — rating average and star-distribution bars are
+     computed from actual admin-entered reviews, never a fixed fake number */
+  const reviews = family.reviews ?? [];
+  const avgRating = reviews.length
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    : 0;
+  const ratingCounts = [5, 4, 3, 2, 1].map(
+    s => reviews.filter(r => Math.round(r.rating) === s).length
+  );
+
+  /* dedupe factory-floor gallery photos by src — the same image reused
+     under different captions is misleading, not a real gallery */
+  const uniqueGalleryPhotos = (family.gallery ?? []).filter(
+    (img, i, arr) => arr.findIndex(x => x.src === img.src) === i
+  );
+
+  const deliveryStagePhotos = family.deliveryStagePhotos ?? {};
 
   /* find a spec row by label — exact match first, falling back to a prefix
      match only when nothing exact exists (avoids e.g. "Max Bag Width"
@@ -184,21 +202,58 @@ export default function ProductDetail({ family, category, related }: Props) {
     return [{ label: row.label, value: row.values[Math.min(activeModel, row.values.length - 1)] }];
   });
 
-  /* entrance animation */
+  /* entrance animation — each section reveals as it scrolls into view,
+     not all at once on mount. `data-reveal` value picks the motion:
+     "scale" for photos/frames, "blur" for hero text, default = fade-up. */
   const rootRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced || !rootRef.current) return;
-    const els = rootRef.current.querySelectorAll<HTMLElement>("[data-reveal]");
-    els.forEach((el, i) => {
-      el.style.opacity = "0";
-      el.style.transform = "translateY(22px)";
-      el.style.transition = `opacity 0.6s cubic-bezier(0.16,1,0.3,1) ${i*0.08}s, transform 0.6s cubic-bezier(0.16,1,0.3,1) ${i*0.08}s`;
+    const els = Array.from(rootRef.current.querySelectorAll<HTMLElement>("[data-reveal]"));
+
+    const HIDDEN: Record<string, { opacity: string; transform: string; filter?: string }> = {
+      scale: { opacity: "0", transform: "scale(0.94)" },
+      blur:  { opacity: "0", transform: "translateY(16px)", filter: "blur(6px)" },
+      default: { opacity: "0", transform: "translateY(22px)" },
+    };
+
+    els.forEach(el => {
+      const kind = el.dataset.reveal || "default";
+      const hidden = HIDDEN[kind] ?? HIDDEN.default;
+      el.style.opacity = hidden.opacity;
+      el.style.transform = hidden.transform;
+      if (hidden.filter) el.style.filter = hidden.filter;
+      el.style.transition = "opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1), filter 0.7s cubic-bezier(0.16,1,0.3,1)";
     });
-    const raf = requestAnimationFrame(() => requestAnimationFrame(() => {
-      els.forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; });
-    }));
-    return () => cancelAnimationFrame(raf);
+
+    const groups = new Map<Element, HTMLElement[]>();
+    els.forEach(el => {
+      const parent = el.parentElement ?? el;
+      if (!groups.has(parent)) groups.set(parent, []);
+      groups.get(parent)!.push(el);
+    });
+
+    const seen = new WeakSet<HTMLElement>();
+    const obs = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          const el = entry.target as HTMLElement;
+          if (!entry.isIntersecting || seen.has(el)) return;
+          seen.add(el);
+          const siblings = groups.get(el.parentElement ?? el) ?? [el];
+          const idx = siblings.indexOf(el);
+          const delay = Math.max(0, idx) * 0.08;
+          el.style.transitionDelay = `${delay}s`;
+          el.style.opacity = "1";
+          el.style.transform = "none";
+          el.style.filter = "none";
+          obs.unobserve(el);
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -8% 0px" }
+    );
+    els.forEach(el => obs.observe(el));
+    return () => obs.disconnect();
   }, []);
 
   return (
@@ -235,7 +290,7 @@ export default function ProductDetail({ family, category, related }: Props) {
           </nav>
 
           {/* ── TITLE BLOCK — above columns ── */}
-          <div className="pdv2-title-block" data-reveal>
+          <div className="pdv2-title-block" data-reveal="blur">
             <p className="pdv2-title-block__cat">{category.tagline}</p>
             <h1 className="pdv2-title-block__h1">{family.name}</h1>
             <p className="pdv2-title-block__tagline">{family.tagline}</p>
@@ -244,11 +299,13 @@ export default function ProductDetail({ family, category, related }: Props) {
           <div className="pdv2-hero__cols">
 
             {/* ── LEFT: product photo gallery (unlimited photos) ── */}
-            <div className="pdv2-gallery" data-reveal>
+            <div className="pdv2-gallery" data-reveal="scale">
               <div className="pdv2-main-img pdv2-main-img--solo">
                 <div className="pdv2-main-img__teal-bar" aria-hidden="true" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={heroImg} alt={family.name} key={activePhoto} />
+                <div className="pdv2-main-img__parallax" ref={heroImgRef}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={heroImg} alt={family.name} key={activePhoto} />
+                </div>
                 <span className="pdv2-main-img__badge">{family.series}</span>
               </div>
               {photos.length > 1 && (
@@ -327,15 +384,15 @@ export default function ProductDetail({ family, category, related }: Props) {
               {/* trust row */}
               <div className="pdv2-trust-row">
                 <div className="pdv2-trust-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="24" height="24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                   <span>ISO Certified</span>
                 </div>
                 <div className="pdv2-trust-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="24" height="24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   <span>Ships Worldwide</span>
                 </div>
                 <div className="pdv2-trust-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="24" height="24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                   <span>24 h Support</span>
                 </div>
               </div>
@@ -355,6 +412,17 @@ export default function ProductDetail({ family, category, related }: Props) {
             <h2>See it <em>in Action</em></h2>
           </div>
 
+          {videos.length === 0 ? (
+            /* honest empty state — never falls back to a fake/placeholder video */
+            <div className="pdv2-video-empty" data-reveal>
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2.5" y="5" width="19" height="14" rx="2" />
+                <path d="M9.5 9.5v5l5-2.5z" fill="currentColor" stroke="none" />
+              </svg>
+              <p><strong>Production video coming soon.</strong><br />Ask us for a live video call demo or on-site footage from a recent install.</p>
+              <InquiryButton slug={family.slug} name={family.name} />
+            </div>
+          ) : (
           <div className="pdv2-video-layout" data-reveal>
             {/* main video */}
             <div className="pdv2-video-main">
@@ -415,6 +483,7 @@ export default function ProductDetail({ family, category, related }: Props) {
               </div>
             )}
           </div>
+          )}
         </div>
       </section>
 
@@ -426,7 +495,9 @@ export default function ProductDetail({ family, category, related }: Props) {
           <div className="pdv2-tabbar" role="tablist" data-reveal>
             <button role="tab" aria-selected={activeTab === "details"} className={`pdv2-tab${activeTab === "details" ? " pdv2-tab--on" : ""}`} onClick={() => setActiveTab("details")}>Product Details</button>
             <button role="tab" aria-selected={activeTab === "sample"} className={`pdv2-tab${activeTab === "sample" ? " pdv2-tab--on" : ""}`} onClick={() => setActiveTab("sample")}>{sample.label}</button>
-            <button role="tab" aria-selected={activeTab === "packing"} className={`pdv2-tab${activeTab === "packing" ? " pdv2-tab--on" : ""}`} onClick={() => setActiveTab("packing")}>Packing &amp; Shipping</button>
+            {uniqueGalleryPhotos.length > 1 && (
+              <button role="tab" aria-selected={activeTab === "packing"} className={`pdv2-tab${activeTab === "packing" ? " pdv2-tab--on" : ""}`} onClick={() => setActiveTab("packing")}>Packing &amp; Shipping</button>
+            )}
           </div>
 
           {/* ── Product Details ── */}
@@ -435,7 +506,7 @@ export default function ProductDetail({ family, category, related }: Props) {
 
               {/* machine breakdown — callout pins on the photo */}
               {callouts.length > 0 && (
-                <div className="pdv2-breakdown-frame" data-reveal>
+                <div className="pdv2-breakdown-frame" data-reveal="scale">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={heroImg} alt={family.name} className="pdv2-breakdown-frame__img" />
                   {callouts.map((c) => (
@@ -459,7 +530,7 @@ export default function ProductDetail({ family, category, related }: Props) {
                       <div key={ci} className="pdv2-part__shot">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={heroImg} alt={`${family.name} — ${part.title}`} style={{ objectPosition: crop.pos, transform: `scale(${crop.zoom})` }} />
-                        <span className="pdv2-part__icon"><ProcessIcon name={part.icon} size={22} /></span>
+                        <span className="pdv2-part__icon"><ProcessIcon name={part.icon} size={26} /></span>
                       </div>
                     ))}
                   </div>
@@ -467,24 +538,33 @@ export default function ProductDetail({ family, category, related }: Props) {
                 </div>
               ))}
 
-              {/* installation steps */}
+              {/* installation guide — visual, image-led cards instead of a
+                  text grid. Each step's photo/diagram is admin-controlled;
+                  falls back to a large icon tile when no photo is set. */}
               {family.installation && family.installation.length > 0 && (
                 <>
                   <div className="pdv2-section-head pdv2-section-head--tab" data-reveal>
                     <span className="pdv2-section-head__line" />
-                    <h3>Setup &amp; Installation</h3>
+                    <h3>Setup &amp; Installation Guide</h3>
                   </div>
-                  <div className="pdv2-install-grid" data-reveal>
+                  <div className="pdv2-guide-grid" data-reveal="scale">
                     {family.installation.map((step, i) => (
-                      <div key={i} className="pdv2-install-step">
-                        <div className="pdv2-install-step__head">
-                          <span className="pico-badge">
-                            <ProcessIcon name={resolveIcon(step.title)} />
-                          </span>
-                          <span className="pdv2-install-step__num">{String(i + 1).padStart(2, "0")}</span>
+                      <div key={i} className="pdv2-guide-card">
+                        <div className="pdv2-guide-card__media">
+                          {step.image ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={step.image} alt={step.title} loading="lazy" />
+                          ) : (
+                            <span className="pdv2-guide-card__icon">
+                              <ProcessIcon name={resolveIcon(step.title)} size={40} />
+                            </span>
+                          )}
+                          <span className="pdv2-guide-card__num">{String(i + 1).padStart(2, "0")}</span>
                         </div>
-                        <h3 className="pdv2-install-step__title">{step.title}</h3>
-                        <p className="pdv2-install-step__detail">{step.detail}</p>
+                        <div className="pdv2-guide-card__body">
+                          <h3 className="pdv2-guide-card__title">{step.title}</h3>
+                          <p className="pdv2-guide-card__detail">{step.detail}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -530,7 +610,7 @@ export default function ProductDetail({ family, category, related }: Props) {
           {/* ── Output Sample ── */}
           {activeTab === "sample" && (
             <div className="pdv2-tabpane">
-              <div className="pdv2-sample" data-reveal>
+              <div className="pdv2-sample" data-reveal="scale">
                 <div className="pdv2-sample__img">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={sample.img} alt={sample.heading} />
@@ -554,53 +634,17 @@ export default function ProductDetail({ family, category, related }: Props) {
           {/* ── Packing & Shipping ── */}
           {activeTab === "packing" && (
             <div className="pdv2-tabpane">
-              {family.deliveryGuide && family.deliveryGuide.length > 0 && (
-                <>
-                  {/* visual pictogram band — packing → shipping → install, at a glance */}
-                  <div className="pdv2-delivery-visual" data-reveal aria-hidden="true">
-                    <div className="pdv2-dv-item">
-                      <span className="pdv2-dv-icon"><ProcessIcon name="shipping" size={36} /></span>
-                      <span>Export Packing</span>
-                    </div>
-                    <span className="pdv2-dv-connector" />
-                    <div className="pdv2-dv-item">
-                      <span className="pdv2-dv-icon"><ProcessIcon name="factory" size={36} /></span>
-                      <span>Ocean / Air Freight</span>
-                    </div>
-                    <span className="pdv2-dv-connector" />
-                    <div className="pdv2-dv-item">
-                      <span className="pdv2-dv-icon"><ProcessIcon name="install" size={36} /></span>
-                      <span>On-Site Install</span>
-                    </div>
-                  </div>
-
-                  <div className="pdv2-delivery-timeline" data-reveal>
-                    {family.deliveryGuide.map((phase, i) => (
-                      <div key={i} className="pdv2-delivery-phase">
-                        <span className="pdv2-delivery-phase__dot">
-                          <span className="pico-badge">
-                            <ProcessIcon name={resolveIcon(phase.label)} />
-                          </span>
-                        </span>
-                        <div className="pdv2-delivery-phase__body">
-                          <h3 className="pdv2-delivery-phase__label">{phase.label}</h3>
-                          <p className="pdv2-delivery-phase__detail">{phase.detail}</p>
-                        </div>
-                        <span className="pdv2-delivery-phase__duration">{phase.duration}</span>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {family.gallery && family.gallery.length > 0 && (
+              {/* only real, distinct photos — the same image reused under
+                  different captions reads as fake to a buyer, so this
+                  section stays hidden until there are 2+ unique photos */}
+              {uniqueGalleryPhotos.length > 1 && (
                 <>
                   <div className="pdv2-section-head pdv2-section-head--tab" data-reveal>
                     <span className="pdv2-section-head__line" />
                     <h3>On the Factory Floor</h3>
                   </div>
                   <div className="pdv2-gallery-grid" data-reveal>
-                    {family.gallery.map((img, i) => (
+                    {uniqueGalleryPhotos.map((img, i) => (
                       <div key={i} className="pdv2-gallery-cell">
                         <div className="pdv2-gallery-cell__img">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -618,26 +662,110 @@ export default function ProductDetail({ family, category, related }: Props) {
       </section>
 
       {/* ══════════════════════════════════════════════════
-          TESTIMONIALS
+          DELIVERY & INSTALLATION — always visible, not gated behind a
+          tab click. Lead time is a top-of-mind decision factor for a
+          capital-equipment buyer, so it stays in view by default.
       ══════════════════════════════════════════════════ */}
-      <section className="pdv2-reviews" aria-label="Customer reviews">
+      {family.deliveryGuide && family.deliveryGuide.length > 0 && (
+        <section className="pdv2-delivery" aria-label="Delivery and installation timeline">
+          <div className="pdv2-wrap">
+            <div className="pdv2-section-head" data-reveal>
+              <span className="pdv2-section-head__line" />
+              <h2>Delivery &amp; <em>Installation</em></h2>
+            </div>
+          </div>
+
+          {/* proof sections — packing / freight / install, each its own
+              full-width banner: title on top, full-bleed photo below.
+              Falls back to the technical icon until a real photo is
+              uploaded per stage from the admin panel. */}
+          {DELIVERY_STAGES.map(stage => {
+            const photo = deliveryStagePhotos[stage.key];
+            return (
+              <div key={stage.key} className="pdv2-dv-box" data-reveal="scale">
+                <div className="pdv2-wrap">
+                  <span className="pdv2-dv-box__label">{stage.label}</span>
+                </div>
+                <div className="pdv2-dv-box__media">
+                  {photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={photo} alt={stage.label} loading="lazy" />
+                  ) : (
+                    <span className="pdv2-dv-box__icon">
+                      <ProcessIcon name={stage.icon} size={44} />
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+
+          <div className="pdv2-wrap">
+            <div className="pdv2-delivery-timeline" data-reveal>
+              {/* continuous rail running through every icon — a real
+                  connected sequence, not a list of floating badges */}
+              <span className="pdv2-delivery-rail" aria-hidden="true" />
+              {family.deliveryGuide.map((phase, i) => (
+                <div key={i} className="pdv2-delivery-phase">
+                  <span className="pdv2-delivery-phase__dot">
+                    <DeliveryStageIcon name={resolveDeliveryStage(phase.label)} size={56} />
+                  </span>
+                  <div className="pdv2-delivery-phase__body">
+                    <h3 className="pdv2-delivery-phase__label">{phase.label}</h3>
+                    <p className="pdv2-delivery-phase__detail">{phase.detail}</p>
+                  </div>
+                  <span className="pdv2-delivery-phase__duration">{phase.duration}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ══════════════════════════════════════════════════
+          MACHINE PARTS — real, admin-added components, each with its
+          own photos and an optional install-step sequence. Renders
+          nothing until an admin actually adds a part.
+      ══════════════════════════════════════════════════ */}
+      <MachineParts parts={family.parts} />
+
+      {/* ══════════════════════════════════════════════════
+          CUSTOM SECTIONS — admin-authored, fixed safe templates.
+          Renders automatically from the admin panel; empty array
+          renders nothing.
+      ══════════════════════════════════════════════════ */}
+      <CustomSections sections={family.customSections} />
+
+      {/* ══════════════════════════════════════════════════
+          REVIEWS — real, admin-entered reviews only. No fabricated
+          rating or testimonials; an honest empty state otherwise.
+      ══════════════════════════════════════════════════ */}
+      <section className={`pdv2-reviews${reviews.length === 0 ? " pdv2-reviews--empty" : ""}`} aria-label="Customer reviews">
         <div className="pdv2-reviews__bg" aria-hidden="true" />
         <div className="pdv2-wrap pdv2-reviews__inner">
 
+          {reviews.length === 0 ? (
+            <div className="pdv2-reviews-empty" data-reveal>
+              <h2 className="pdv2-reviews__h2">Be the first to <em>review this machine</em></h2>
+              <p>We haven't published a review for this specific model yet. Ask us to connect you with an existing customer running this line, or check back after your installation.</p>
+              <InquiryButton slug={family.slug} name={family.name} />
+            </div>
+          ) : (
+          <>
           {/* left — overall rating */}
           <div className="pdv2-rating-block" data-reveal>
-            <div className="pdv2-rating-block__score">4.8</div>
-            <div className="pdv2-rating-block__stars"><StarRating n={5} /></div>
+            <div className="pdv2-rating-block__score">{avgRating.toFixed(1)}</div>
+            <div className="pdv2-rating-block__stars"><StarRating n={Math.round(avgRating)} /></div>
             <p className="pdv2-rating-block__label">Overall Rating</p>
-            <p className="pdv2-rating-block__sub">Based on verified buyer reviews</p>
+            <p className="pdv2-rating-block__sub">Based on {reviews.length} verified buyer review{reviews.length === 1 ? "" : "s"}</p>
             <div className="pdv2-rating-bars">
               {[5,4,3,2,1].map((s, i) => (
                 <div key={s} className="pdv2-rating-bar">
                   <span>{s}</span>
                   <div className="pdv2-rating-bar__track">
-                    <div className="pdv2-rating-bar__fill" style={{ width: `${[92,5,2,1,0][i]}%` }} />
+                    <div className="pdv2-rating-bar__fill" style={{ width: `${Math.round((ratingCounts[i] / reviews.length) * 100)}%` }} />
                   </div>
-                  <span className="pdv2-rating-bar__pct">{[92,5,2,1,0][i]}%</span>
+                  <span className="pdv2-rating-bar__pct">{Math.round((ratingCounts[i] / reviews.length) * 100)}%</span>
                 </div>
               ))}
             </div>
@@ -649,33 +777,37 @@ export default function ProductDetail({ family, category, related }: Props) {
 
             <div className="pdv2-review-card">
               <div className="pdv2-review-card__quote">"</div>
-              <p className="pdv2-review-card__text">{TESTIMONIALS[reviewIdx].text}</p>
+              <p className="pdv2-review-card__text">{reviews[reviewIdx % reviews.length].text}</p>
               <div className="pdv2-review-card__author">
                 <div className="pdv2-review-card__avatar" aria-hidden="true">
-                  {TESTIMONIALS[reviewIdx].name.charAt(0)}
+                  {reviews[reviewIdx % reviews.length].name.charAt(0)}
                 </div>
-                <div>
-                  <strong className="pdv2-review-card__name">{TESTIMONIALS[reviewIdx].name}</strong>
-                  <span className="pdv2-review-card__title">{TESTIMONIALS[reviewIdx].title}</span>
+                <div className="pdv2-review-card__meta">
+                  <strong className="pdv2-review-card__name">{reviews[reviewIdx % reviews.length].name}</strong>
+                  <span className="pdv2-review-card__title">{reviews[reviewIdx % reviews.length].title}</span>
                 </div>
-                <div className="pdv2-review-card__stars"><StarRating n={TESTIMONIALS[reviewIdx].rating} /></div>
+                <div className="pdv2-review-card__stars"><StarRating n={reviews[reviewIdx % reviews.length].rating} /></div>
               </div>
             </div>
 
-            <div className="pdv2-review-nav">
-              <button
-                className="pdv2-review-nav__btn"
-                onClick={() => setReviewIdx(i => (i - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)}
-                aria-label="Previous review"
-              >←</button>
-              <span className="pdv2-review-nav__count">{reviewIdx + 1} / {TESTIMONIALS.length}</span>
-              <button
-                className="pdv2-review-nav__btn pdv2-review-nav__btn--next"
-                onClick={() => setReviewIdx(i => (i + 1) % TESTIMONIALS.length)}
-                aria-label="Next review"
-              >→</button>
-            </div>
+            {reviews.length > 1 && (
+              <div className="pdv2-review-nav">
+                <button
+                  className="pdv2-review-nav__btn"
+                  onClick={() => setReviewIdx(i => (i - 1 + reviews.length) % reviews.length)}
+                  aria-label="Previous review"
+                >←</button>
+                <span className="pdv2-review-nav__count">{(reviewIdx % reviews.length) + 1} / {reviews.length}</span>
+                <button
+                  className="pdv2-review-nav__btn pdv2-review-nav__btn--next"
+                  onClick={() => setReviewIdx(i => (i + 1) % reviews.length)}
+                  aria-label="Next review"
+                >→</button>
+              </div>
+            )}
           </div>
+          </>
+          )}
         </div>
       </section>
 
@@ -747,7 +879,7 @@ export default function ProductDetail({ family, category, related }: Props) {
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           aria-label="Back to top"
         >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
         </button>
         <a
           className="pdv2-float__icn pdv2-float__icn--whatsapp"
@@ -758,14 +890,14 @@ export default function ProductDetail({ family, category, related }: Props) {
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm5.8 14.06c-.24.68-1.4 1.3-1.93 1.35-.5.05-1.03.24-3.43-.72-2.9-1.16-4.76-4.13-4.9-4.32-.14-.19-1.17-1.56-1.17-2.98 0-1.42.75-2.11 1.02-2.4.27-.29.58-.36.78-.36.2 0 .39.002.56.01.18.008.42-.07.66.5.24.58.82 2 .89 2.14.07.14.12.31.02.5-.1.19-.15.31-.3.47-.15.17-.31.37-.44.5-.15.14-.3.3-.13.59.17.3.76 1.25 1.63 2.02 1.12.99 2.06 1.3 2.36 1.45.3.14.47.12.65-.07.18-.19.75-.88.95-1.18.2-.3.4-.25.66-.15.27.1 1.71.81 2 .96.29.14.48.21.55.33.07.12.07.68-.17 1.36Z"/></svg>
         </a>
         <a className="pdv2-float__icn" href="tel:+8657788888888" aria-label="Call us">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         </a>
         <button
           className="pdv2-float__icn pdv2-float__icn--quote"
           onClick={() => document.querySelector(".pdv2-info-card")?.scrollIntoView({ behavior: "smooth", block: "center" })}
           aria-label="Jump to request a quote"
         >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16v12H8l-4 4V4Z"/></svg>
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16v12H8l-4 4V4Z"/></svg>
         </button>
       </div>
 

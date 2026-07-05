@@ -19,7 +19,12 @@ export type FieldKind =
   | "specs"       // {label, values[]}[] — values aligned to the item's `models`
   | "steps"       // {title, detail}[] rows — installation steps
   | "phases"      // {label, duration, detail}[] rows — delivery guide timeline
-  | "gallery";    // {src, caption}[] rows — image + local upload + caption
+  | "gallery"     // {src, caption}[] rows — image + local upload + caption
+  | "videos"      // {url, title}[] rows — YouTube URL/ID + title
+  | "reviews"     // {name, title, rating, text}[] rows — real buyer reviews
+  | "stagePhotos" // {packing?, freight?, install?} — 3 fixed delivery-stage proof photos
+  | "customSections" // {kind, title, image?, text?, imageSide?, photos?}[] — admin-authored extra sections, fixed safe templates
+  | "parts";      // {name, detail, images?, installation?}[] rows — real machine parts, each with its own optional install steps
 
 export interface Field {
   key: string;
@@ -64,14 +69,19 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
         label: "Product families",
         titleKeys: ["series", "name"],
         canAdd: true,
-        groups: ["📝 Basic Info", "📸 Photos", "📊 Specifications", "🚚 Setup & Delivery"],
+        groups: ["📝 Basic Info", "📸 Photos", "🎬 Videos", "📊 Specifications", "🔩 Parts", "🚚 Setup & Delivery", "⭐ Reviews", "➕ Custom Sections"],
         template: {
           slug: "new-machine", category: "film-blowing", series: "NEW",
           name: "New machine", tagline: "", models: ["Model-1"],
           materials: "", images: [], specs: [{ label: "Spec", values: [""] }],
-          installation: [{ title: "", detail: "" }],
+          installation: [{ title: "", detail: "", image: "" }],
           deliveryGuide: [{ label: "", duration: "", detail: "" }],
           gallery: [{ src: "", caption: "" }],
+          videos: [],
+          reviews: [],
+          deliveryStagePhotos: { packing: "", freight: "", install: "" },
+          customSections: [],
+          parts: [],
         },
         fields: [
           { key: "name", label: "Name", kind: "text", group: "📝 Basic Info" },
@@ -84,10 +94,19 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
           { key: "images", label: "Product photos", kind: "images", hint: "upload as many as you like — the first one is used as the main photo everywhere this machine appears", group: "📸 Photos" },
           { key: "gallery", label: "Site gallery photos", kind: "gallery", hint: "real installation / factory / delivery photos, shown further down the product page", group: "📸 Photos" },
 
+          { key: "videos", label: "Product demo videos", kind: "videos", hint: "paste a real YouTube link or video ID — leave empty to show a 'video coming soon' placeholder instead of a broken/fake video", group: "🎬 Videos" },
+
           { key: "specs", label: "Spec table", kind: "specs", hint: "model columns are added/renamed/removed directly in this table", group: "📊 Specifications" },
 
-          { key: "installation", label: "Installation / setup steps", kind: "steps", hint: "auto-picks an icon from words like foundation / power / assembly / calibration / training in the title", group: "🚚 Setup & Delivery" },
+          { key: "parts", label: "Machine parts / components", kind: "parts", hint: "add one or more real parts of this machine — name, detail text, real photos. Give a part its own install steps only if it needs a separate installation sequence.", group: "🔩 Parts" },
+
+          { key: "installation", label: "Installation / setup steps", kind: "steps", hint: "add a photo or diagram per step — auto-picks an icon from words like foundation / power / assembly / calibration / training in the title", group: "🚚 Setup & Delivery" },
           { key: "deliveryGuide", label: "Delivery guide (timeline)", kind: "phases", hint: "auto-picks an icon from words like order / production / test / shipping / install in the label", group: "🚚 Setup & Delivery" },
+          { key: "deliveryStagePhotos", label: "Delivery stage proof photos", kind: "stagePhotos", hint: "real photos of this machine crated, in a container, and installed on-site — each falls back to a technical icon until you upload one", group: "🚚 Setup & Delivery" },
+
+          { key: "reviews", label: "Buyer reviews", kind: "reviews", hint: "only real reviews you've collected — leave empty to show an honest 'be the first to review' state instead of fake ratings", group: "⭐ Reviews" },
+
+          { key: "customSections", label: "Custom sections", kind: "customSections", hint: "add extra sections to this product page — pick a template, fill in title/image/text. Appears automatically on the live page, in the order listed here, right after the delivery timeline.", group: "➕ Custom Sections" },
         ],
       },
       {

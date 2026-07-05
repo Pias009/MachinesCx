@@ -180,6 +180,39 @@ function ImagesField({ value, onChange }: { value: string[]; onChange: (v: strin
   );
 }
 
+// ── {title, detail, image}[] editor — shared by the top-level "steps"
+// field kind and the per-part install-guide editor nested inside "parts" ──
+type Step = { title: string; detail: string; image?: string };
+function StepsEditor({ value, onChange }: { value: Step[]; onChange: (v: Step[]) => void }) {
+  const rows = value ?? [];
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+      {rows.map((r, i) => (
+        <div key={i} style={{ borderRadius: 12, background: "rgba(255,255,255,0.04)", padding: "0.9rem", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <span style={{
+              width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
+              background: "var(--brand-teal)", color: "#04211e",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 700,
+            }}>{i + 1}</span>
+            <input style={{ ...inputStyle, flex: 1 }} value={r.title} placeholder="Step title"
+              onChange={e => { const n = rows.map(x => ({ ...x })); n[i].title = e.target.value; onChange(n); }} />
+            <button type="button" style={dangerBtn} onClick={() => onChange(rows.filter((_, j) => j !== i))}>Remove</button>
+          </div>
+          <textarea style={{ ...inputStyle, minHeight: 60, resize: "vertical" }} value={r.detail} placeholder="What happens in this step"
+            onChange={e => { const n = rows.map(x => ({ ...x })); n[i].detail = e.target.value; onChange(n); }} />
+          <div>
+            <span style={{ ...hintStyle, display: "block", marginBottom: "0.35rem" }}>Step photo or diagram (shown on the product page)</span>
+            <ImageField value={r.image ?? ""} onChange={v => { const n = rows.map(x => ({ ...x })); n[i].image = v; onChange(n); }} />
+          </div>
+        </div>
+      ))}
+      <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }} onClick={() => onChange([...rows, { title: "", detail: "", image: "" }])}>+ Add step</button>
+    </div>
+  );
+}
+
 // ── one field, dispatched by kind ──────────────────────────
 function FieldControl({ field, value, item, onChange, onItemChange }: {
   field: Field;
@@ -352,30 +385,8 @@ function FieldControl({ field, value, item, onChange, onItemChange }: {
       );
     }
     case "steps": {
-      // {title, detail}[] — numbered installation / setup steps
-      const rows = (value as { title: string; detail: string }[]) ?? [];
-      return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          {rows.map((r, i) => (
-            <div key={i} style={{ borderRadius: 12, background: "rgba(255,255,255,0.04)", padding: "0.9rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                <span style={{
-                  width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
-                  background: "var(--brand-teal)", color: "#04211e",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 700,
-                }}>{i + 1}</span>
-                <input style={{ ...inputStyle, flex: 1 }} value={r.title} placeholder="Step title"
-                  onChange={e => { const n = rows.map(x => ({ ...x })); n[i].title = e.target.value; onChange(n); }} />
-                <button type="button" style={dangerBtn} onClick={() => onChange(rows.filter((_, j) => j !== i))}>Remove</button>
-              </div>
-              <textarea style={{ ...inputStyle, minHeight: 60, resize: "vertical" }} value={r.detail} placeholder="What happens in this step"
-                onChange={e => { const n = rows.map(x => ({ ...x })); n[i].detail = e.target.value; onChange(n); }} />
-            </div>
-          ))}
-          <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }} onClick={() => onChange([...rows, { title: "", detail: "" }])}>+ Add step</button>
-        </div>
-      );
+      // {title, detail, image}[] — numbered installation / setup steps
+      return <StepsEditor value={(value as Step[]) ?? []} onChange={onChange} />;
     }
     case "phases": {
       // {label, duration, detail}[] — delivery/timeline phases
@@ -417,6 +428,214 @@ function FieldControl({ field, value, item, onChange, onItemChange }: {
             </div>
           ))}
           <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }} onClick={() => onChange([...rows, { src: "", caption: "" }])}>+ Add photo</button>
+        </div>
+      );
+    }
+    case "videos": {
+      // {url, title}[] — real product demo videos (YouTube link or ID)
+      const rows = (value as { url: string; title: string }[]) ?? [];
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          {rows.map((r, i) => (
+            <div key={i} style={{ borderRadius: 12, background: "rgba(255,255,255,0.04)", padding: "0.9rem", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
+                <input style={{ ...inputStyle, flex: 1 }} value={r.url} placeholder="YouTube URL or video ID"
+                  onChange={e => { const n = rows.map(x => ({ ...x })); n[i].url = e.target.value; onChange(n); }} />
+                <button type="button" style={dangerBtn} onClick={() => onChange(rows.filter((_, j) => j !== i))}>Remove</button>
+              </div>
+              <input style={inputStyle} value={r.title} placeholder="Video title (e.g. Live Production Run)"
+                onChange={e => { const n = rows.map(x => ({ ...x })); n[i].title = e.target.value; onChange(n); }} />
+            </div>
+          ))}
+          <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }} onClick={() => onChange([...rows, { url: "", title: "" }])}>+ Add video</button>
+        </div>
+      );
+    }
+    case "reviews": {
+      // {name, title, rating, text}[] — only real, collected buyer reviews
+      const rows = (value as { name: string; title: string; rating: number; text: string }[]) ?? [];
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          {rows.map((r, i) => (
+            <div key={i} style={{ borderRadius: 12, background: "rgba(255,255,255,0.04)", padding: "0.9rem", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                <input style={{ ...inputStyle, flex: 2, minWidth: 140 }} value={r.name} placeholder="Reviewer name"
+                  onChange={e => { const n = rows.map(x => ({ ...x })); n[i].name = e.target.value; onChange(n); }} />
+                <input style={{ ...inputStyle, flex: 2, minWidth: 160 }} value={r.title} placeholder="Company / role"
+                  onChange={e => { const n = rows.map(x => ({ ...x })); n[i].title = e.target.value; onChange(n); }} />
+                <select style={{ ...inputStyle, flex: "0 0 90px" }} value={r.rating || 5}
+                  onChange={e => { const n = rows.map(x => ({ ...x })); n[i].rating = Number(e.target.value); onChange(n); }}>
+                  {[5, 4, 3, 2, 1].map(v => <option key={v} value={v}>{v} star{v === 1 ? "" : "s"}</option>)}
+                </select>
+                <button type="button" style={dangerBtn} onClick={() => onChange(rows.filter((_, j) => j !== i))}>Remove</button>
+              </div>
+              <textarea style={{ ...inputStyle, minHeight: 70, resize: "vertical" }} value={r.text} placeholder="What the buyer said"
+                onChange={e => { const n = rows.map(x => ({ ...x })); n[i].text = e.target.value; onChange(n); }} />
+            </div>
+          ))}
+          <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }} onClick={() => onChange([...rows, { name: "", title: "", rating: 5, text: "" }])}>+ Add review</button>
+        </div>
+      );
+    }
+    case "stagePhotos": {
+      // {packing?, freight?, install?} — 3 fixed delivery-stage proof photos
+      const v = (value as { packing?: string; freight?: string; install?: string }) ?? {};
+      const STAGES: { key: "packing" | "freight" | "install"; label: string }[] = [
+        { key: "packing", label: "Export Packing — crated / palletized machine" },
+        { key: "freight", label: "Ocean / Air Freight — container loading" },
+        { key: "install", label: "On-Site Install — commissioning at buyer's site" },
+      ];
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
+          {STAGES.map(s => (
+            <div key={s.key} style={{ borderRadius: 12, background: "rgba(255,255,255,0.04)", padding: "0.9rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <span style={{ ...label, fontSize: "0.85rem" }}>{s.label}</span>
+              <ImageField value={v[s.key] ?? ""} onChange={val => onChange({ ...v, [s.key]: val })} />
+            </div>
+          ))}
+        </div>
+      );
+    }
+    case "customSections": {
+      // discriminated union — {kind, title, image?, text?, imageSide?, photos?}[].
+      // Admins pick a kind, then only the fields that template uses appear.
+      type Row = {
+        kind: "banner" | "text" | "split" | "gallery";
+        title: string;
+        image?: string;
+        text?: string;
+        imageSide?: "left" | "right";
+        photos?: { src: string; caption: string }[];
+      };
+      const rows = (value as Row[]) ?? [];
+      const KIND_LABEL: Record<Row["kind"], string> = {
+        banner: "Full-width image banner",
+        text: "Title + text only",
+        split: "Image + title + text (side by side)",
+        gallery: "Photo grid with captions",
+      };
+      const move = (i: number, dir: -1 | 1) => {
+        const j = i + dir;
+        if (j < 0 || j >= rows.length) return;
+        const n = rows.map(x => ({ ...x }));
+        [n[i], n[j]] = [n[j], n[i]];
+        onChange(n);
+      };
+      const patch = (i: number, p: Partial<Row>) => {
+        const n = rows.map(x => ({ ...x }));
+        n[i] = { ...n[i], ...p };
+        onChange(n);
+      };
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          {rows.map((r, i) => (
+            <div key={i} style={{ borderRadius: 12, background: "rgba(255,255,255,0.04)", padding: "1rem", display: "flex", flexDirection: "column", gap: "0.75rem", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
+                <select style={{ ...inputStyle, flex: "0 0 260px" }} value={r.kind}
+                  onChange={e => patch(i, { kind: e.target.value as Row["kind"] })}>
+                  {(Object.keys(KIND_LABEL) as Row["kind"][]).map(k => <option key={k} value={k}>{KIND_LABEL[k]}</option>)}
+                </select>
+                <div style={{ flex: 1 }} />
+                <button type="button" title="Move up" style={iconBtn} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
+                <button type="button" title="Move down" style={iconBtn} disabled={i === rows.length - 1} onClick={() => move(i, 1)}>↓</button>
+                <button type="button" style={dangerBtn} onClick={() => onChange(rows.filter((_, j) => j !== i))}>Remove section</button>
+              </div>
+
+              <input style={inputStyle} value={r.title} placeholder="Section title"
+                onChange={e => patch(i, { title: e.target.value })} />
+
+              {(r.kind === "banner" || r.kind === "split") && (
+                <div>
+                  <span style={{ ...hintStyle, display: "block", marginBottom: "0.35rem" }}>Image</span>
+                  <ImageField value={r.image ?? ""} onChange={v => patch(i, { image: v })} />
+                </div>
+              )}
+
+              {r.kind === "split" && (
+                <div style={{ display: "flex", gap: "1.25rem", alignItems: "center" }}>
+                  <span style={{ ...hintStyle }}>Image side:</span>
+                  <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", cursor: "pointer" }}>
+                    <input type="radio" checked={(r.imageSide ?? "left") === "left"} onChange={() => patch(i, { imageSide: "left" })} />
+                    <span style={{ ...hintStyle, color: "rgba(255,255,255,0.8)" }}>Left</span>
+                  </label>
+                  <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", cursor: "pointer" }}>
+                    <input type="radio" checked={r.imageSide === "right"} onChange={() => patch(i, { imageSide: "right" })} />
+                    <span style={{ ...hintStyle, color: "rgba(255,255,255,0.8)" }}>Right</span>
+                  </label>
+                </div>
+              )}
+
+              {(r.kind === "text" || r.kind === "split" || r.kind === "banner") && (
+                <textarea style={{ ...inputStyle, minHeight: 90, resize: "vertical" }}
+                  value={r.text ?? ""} placeholder={r.kind === "banner" ? "Caption text (optional)" : "Body text"}
+                  onChange={e => patch(i, { text: e.target.value })} />
+              )}
+
+              {r.kind === "gallery" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                  {(r.photos ?? []).map((p, pi) => (
+                    <div key={pi} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
+                      <div style={{ flex: 1 }}>
+                        <ImageField value={p.src} onChange={v => {
+                          const photos = (r.photos ?? []).map(x => ({ ...x }));
+                          photos[pi].src = v;
+                          patch(i, { photos });
+                        }} />
+                        <input style={{ ...inputStyle, marginTop: "0.5rem" }} value={p.caption} placeholder="Caption"
+                          onChange={e => {
+                            const photos = (r.photos ?? []).map(x => ({ ...x }));
+                            photos[pi].caption = e.target.value;
+                            patch(i, { photos });
+                          }} />
+                      </div>
+                      <button type="button" style={dangerBtn} onClick={() => patch(i, { photos: (r.photos ?? []).filter((_, j) => j !== pi) })}>Remove</button>
+                    </div>
+                  ))}
+                  <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }}
+                    onClick={() => patch(i, { photos: [...(r.photos ?? []), { src: "", caption: "" }] })}>+ Add photo</button>
+                </div>
+              )}
+            </div>
+          ))}
+          <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }}
+            onClick={() => onChange([...rows, { kind: "banner", title: "", image: "", text: "" }])}>+ Add section</button>
+        </div>
+      );
+    }
+    case "parts": {
+      // {name, detail, images?, installation?}[] — real machine parts/components.
+      // Each part can carry its own optional install-step sequence, only shown
+      // on the product page when that part actually has steps.
+      type Part = { name: string; detail: string; images?: string[]; installation?: Step[] };
+      const rows = (value as Part[]) ?? [];
+      const patch = (i: number, p: Partial<Part>) => {
+        const n = rows.map(x => ({ ...x }));
+        n[i] = { ...n[i], ...p };
+        onChange(n);
+      };
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          {rows.map((r, i) => (
+            <div key={i} style={{ borderRadius: 12, background: "rgba(255,255,255,0.04)", padding: "1rem", display: "flex", flexDirection: "column", gap: "0.75rem", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <input style={{ ...inputStyle, flex: 1 }} value={r.name} placeholder="Part name (e.g. Die Head Assembly)"
+                  onChange={e => patch(i, { name: e.target.value })} />
+                <button type="button" style={dangerBtn} onClick={() => onChange(rows.filter((_, j) => j !== i))}>Remove part</button>
+              </div>
+              <textarea style={{ ...inputStyle, minHeight: 70, resize: "vertical" }} value={r.detail} placeholder="What this part is / does"
+                onChange={e => patch(i, { detail: e.target.value })} />
+              <div>
+                <span style={{ ...hintStyle, display: "block", marginBottom: "0.35rem" }}>Part photos (upload as many as you like)</span>
+                <ImagesField value={r.images ?? []} onChange={v => patch(i, { images: v })} />
+              </div>
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "0.75rem" }}>
+                <span style={{ ...label, fontSize: "0.85rem", display: "block", marginBottom: "0.6rem" }}>Install steps for this part (optional — only add if this part needs its own sequence)</span>
+                <StepsEditor value={r.installation ?? []} onChange={v => patch(i, { installation: v })} />
+              </div>
+            </div>
+          ))}
+          <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }}
+            onClick={() => onChange([...rows, { name: "", detail: "", images: [], installation: [] }])}>+ Add part</button>
         </div>
       );
     }

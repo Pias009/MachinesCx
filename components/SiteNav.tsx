@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import TransitionLink from "@/components/TransitionLink";
 import ThemeToggle from "@/components/ThemeToggle";
 import { categories, familiesByCategory } from "@/lib/products";
@@ -18,6 +19,7 @@ function machineImg(slug: string) {
 }
 
 export default function SiteNav() {
+  const pathname = usePathname();
   const [scrolled,   setScrolled]   = useState(false);
   const [open,       setOpen]       = useState<string | null>(null);
   const [menuImg,    setMenuImg]    = useState<string>("");
@@ -46,6 +48,8 @@ export default function SiteNav() {
   const activeFamilies = open
     ? familiesByCategory(open as Parameters<typeof familiesByCategory>[0])
     : [];
+
+  if (pathname?.startsWith("/cx-ops-x7k9q2")) return null;
 
   return (
     <>

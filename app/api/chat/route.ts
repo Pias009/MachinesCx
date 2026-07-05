@@ -1,0 +1,67 @@
+import { NextRequest } from "next/server";
+import { connectDB } from "@/lib/mongodb";
+import ChatSession from "@/models/ChatSession";
+import { answerLocally } from "@/lib/localAgent";
+import { createInquiry } from "@/lib/inquiries";
+
+export const runtime = "nodejs";
+
+const AGENT_NAME = "ASHA";
+
+export async function GET(req: NextRequest) {
+  const sessionId = req.nextUrl.searchParams.get("sessionId");
+  if (!sessionId) return Response.json({ messages: [] });
+
+  await connectDB();
+  const session = await ChatSession.findOne({ sessionId }).lean();
+  return Response.json({ messages: session?.messages ?? [] });
+}
+
+export async function POST(req: NextRequest) {
+  const body = await req.json().catch(() => null);
+  const sessionId = body?.sessionId as string | undefined;
+  const message = body?.message as string | undefined;
+
+  if (!sessionId || !message?.trim()) {
+    return Response.json({ error: "sessionId and message are required" }, { status: 400 });
+  }
+
+  await connectDB();
+  let session = await ChatSession.findOne({ sessionId });
+  if (!session) session = new ChatSession({ sessionId, messages: [] });
+
+  session.messages.push({ role: "user", content: message.trim(), at: new Date() });
+
+  const answer = answerLocally(message.trim(), session.pendingInquiry ?? null);
+
+  session.messages.push({ role: "assistant", content: answer.text, at: new Date() });
+  session.pendingInquiry = answer.pendingInquiry ?? null;
+  await session.save();
+
+  if (answer.completedInquiry) {
+    const { name, email, qty, slug, machineName } = answer.completedInquiry;
+    try {
+      await createInquiry({
+        name,
+        email,
+        message: `Submitted by ${AGENT_NAME} (AI chat assistant) via the guided in-chat inquiry flow.`,
+        machines: [{ slug, name: machineName, series: "", model: "", qty, notes: "" }],
+      });
+    } catch (e) {
+      console.error("ASHA chat: failed to create inquiry from guided flow:", e);
+    }
+  }
+
+  // Same NDJSON framing the Grok-backed route used, so the widget's parser
+  // (ChatWidget.tsx) needs no changes: one delta frame with the full text
+  // (no real streaming needed — the engine answers synchronously), then the
+  // final frame carrying the structured actions.
+  const encoder = new TextEncoder();
+  const lines = [
+    JSON.stringify({ type: "delta", text: answer.text }),
+    JSON.stringify({ type: "final", text: answer.text, actions: answer.actions }),
+  ];
+  const body_ = encoder.encode(lines.join("\n") + "\n");
+
+  return new Response(body_, { headers: { "Content-Type": "application/x-ndjson; charset=utf-8" } });
+}

@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import ChatSession from "@/models/ChatSession";
-import { answerLocally } from "@/lib/localAgent";
+import { answerWithOpenRouter } from "@/lib/openrouter";
+import { answerLocally, isBasicQuery } from "@/lib/localAgent";
 import { createInquiry } from "@/lib/inquiries";
 
 export const runtime = "nodejs";
@@ -32,7 +33,26 @@ export async function POST(req: NextRequest) {
 
   session.messages.push({ role: "user", content: message.trim(), at: new Date() });
 
-  const answer = answerLocally(message.trim(), session.pendingInquiry ?? null);
+  let answer: Awaited<ReturnType<typeof answerWithOpenRouter>>;
+
+  // For basic queries (greetings, simple asks), skip OpenRouter entirely
+  if (isBasicQuery(message.trim(), session.pendingInquiry ?? null)) {
+    answer = answerLocally(message.trim(), session.pendingInquiry ?? null);
+  } else {
+    try {
+      // Race OpenRouter against a 10 s overall timeout so the user never
+      // waits longer than that before getting the local fallback.
+      answer = await Promise.race([
+        answerWithOpenRouter(session.messages, session.pendingInquiry ?? null),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("OpenRouter overall timeout")), 10_000),
+        ),
+      ]);
+    } catch (e) {
+      console.error("ASHA chat: OpenRouter unavailable, falling back to local engine:", e);
+      answer = answerLocally(message.trim(), session.pendingInquiry ?? null);
+    }
+  }
 
   session.messages.push({ role: "assistant", content: answer.text, at: new Date() });
   session.pendingInquiry = answer.pendingInquiry ?? null;

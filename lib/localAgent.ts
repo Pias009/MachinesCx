@@ -23,6 +23,7 @@ const CATEGORY_SYNONYMS: Record<CategorySlug, string[]> = {
 };
 
 const GREETING_WORDS = ["hi", "hello", "hey", "yo", "good morning", "good afternoon", "good evening"];
+const IDENTITY_WORDS = ["who are you", "who is asha", "tell me about yourself", "what are you", "introduce yourself", "your name", "about you", "who made you", "what can you do"];
 const COMPARE_WORDS = ["compare", " vs ", " vs.", "versus", "difference between"];
 const SPEC_WORDS = ["spec", "specs", "specification", "details", "tell me about"];
 const BUY_WORDS = ["buy", "order", "purchase", "quote", "price", "cost", "inquire", "inquiry", "interested in"];
@@ -162,6 +163,35 @@ function startInquiryFlow(machine: ProductFamily | undefined): LocalAnswer {
   };
 }
 
+/**
+ * Returns true when the query is simple enough to skip OpenRouter entirely.
+ * Covers greetings, quick-reply picks, inquiry flow steps, and short
+ * category / list requests — anything the local engine handles instantly.
+ */
+export function isBasicQuery(rawMessage: string, pendingInquiry: PendingInquiry | null | undefined): boolean {
+  // Guided inquiry flow is always local (no LLM needed for name/email/qty).
+  if (pendingInquiry && pendingInquiry.stage !== "done") return true;
+
+  const msg = normalize(rawMessage);
+
+  // Greetings
+  if (GREETING_WORDS.some(g => msg === g || msg.startsWith(g + " ") || msg.startsWith(g + ","))) return true;
+
+  // Identity questions ("who are you", "tell me about yourself")
+  if (IDENTITY_WORDS.some(w => msg.includes(w))) return true;
+
+  // Short messages (< 5 words) that don't reference specific machine details
+  // are very likely category picks, list requests, or vague questions the
+  // local engine handles well — and far faster than a round-trip to an LLM.
+  const wordCount = msg.split(/\s+/).filter(Boolean).length;
+  if (wordCount <= 4) return true;
+
+  // Category-only mentions (no machine slug or model number)
+  if (findCategory(rawMessage) && !findMachines(rawMessage).length) return true;
+
+  return false;
+}
+
 export function answerLocally(rawMessage: string, pendingInquiry: PendingInquiry | null | undefined): LocalAnswer {
   // A guided inquiry flow in progress takes priority over intent matching —
   // the visitor is answering a direct question, not asking a new one.
@@ -174,7 +204,15 @@ export function answerLocally(rawMessage: string, pendingInquiry: PendingInquiry
 
   if (GREETING_WORDS.some(g => msg === g || msg.startsWith(g + " ") || msg.startsWith(g + ","))) {
     return {
-      text: "Hi, I'm ASHA. What are you looking for today — a specific machine, or should I show you a category to start?",
+      text: "Hi, I'm ASHA, your AI assistant. I can help you explore our full range of machines — specs, comparisons, pricing, technical details, and more. Just ask me about any machine or category to get started!",
+      actions: [{ type: "quick_replies", options: categoryQuickReplies }],
+    };
+  }
+
+  const isIdentity = IDENTITY_WORDS.some(w => msg.includes(w));
+  if (isIdentity) {
+    return {
+      text: "I'm ASHA, your AI sales assistant here at ASHAL INNOMACH. I know our entire catalogue inside out — specs, models, series, and pricing. Ask me to compare machines, recommend the right model for your output, pull up technical details, or start an inquiry. I'm built to get you the right machine, fast.",
       actions: [{ type: "quick_replies", options: categoryQuickReplies }],
     };
   }

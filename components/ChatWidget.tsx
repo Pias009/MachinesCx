@@ -19,7 +19,8 @@ type ChatAction =
   | { type: "navigate"; slug: string }
   | { type: "show_machines"; slugs: string[] }
   | { type: "compare"; slugs: string[]; specLabels: string[] }
-  | { type: "quick_replies"; options: string[] };
+  | { type: "quick_replies"; options: string[] }
+  | { type: "machine_detail"; slug: string };
 
 interface Msg {
   role: "user" | "assistant";
@@ -56,8 +57,8 @@ function parseNumeric(v: string): number | null {
   return match ? parseFloat(match[0]) : null;
 }
 
-/** Compact machine list for a "show_machines" action — small thumbnail, name-led, professional row layout. */
-function MachineCards({ slugs, onInquire }: { slugs: string[]; onInquire: (slug: string, name: string) => void }) {
+/** Machine suggestion cards — larger image left, data right, polished card UI with Explore + Inquire buttons. */
+function MachineCards({ slugs, onInquire, onExplore }: { slugs: string[]; onInquire: (slug: string, name: string) => void; onExplore: (slug: string) => void }) {
   const [machines, setMachines] = useState<MachineSummary[] | null>(null);
 
   useEffect(() => {
@@ -76,15 +77,24 @@ function MachineCards({ slugs, onInquire }: { slugs: string[]; onInquire: (slug:
     <div className="asha-cards">
       {machines.map(m => (
         <div key={m.slug} className="asha-card">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={m.image} alt="" className="asha-card-thumb" />
-          <Link href={m.href} className="asha-card-info">
+          <div className="asha-card-img-col">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={m.image} alt={m.name} className="asha-card-img" />
+          </div>
+          <div className="asha-card-info-col">
             <div className="asha-card-name">{m.name}</div>
             <div className="asha-card-series">{m.series}</div>
-          </Link>
-          <button className="asha-card-inquire" onClick={() => onInquire(m.slug, m.name)} aria-label={`Inquire about ${m.name}`}>
-            Inquire
-          </button>
+            <div className="asha-card-cat">{m.categoryName}</div>
+            {m.tagline && <div className="asha-card-tagline">{m.tagline}</div>}
+            <div className="asha-card-actions">
+              <button className="asha-card-explore" onClick={() => onExplore(m.slug)}>
+                Explore
+              </button>
+              <button className="asha-card-inquire" onClick={() => onInquire(m.slug, m.name)}>
+                Inquire
+              </button>
+            </div>
+          </div>
         </div>
       ))}
     </div>
@@ -194,17 +204,94 @@ function NavigateAction({ slug }: { slug: string }) {
   return <div className="asha-nav-hint">Opening that machine's page…</div>;
 }
 
+/** Full machine detail view shown when "Explore" is clicked — hero image, spec bars, and inquiry CTA. */
+function MachineDetailView({ slug, onInquire }: { slug: string; onInquire: (slug: string, name: string) => void }) {
+  const [machine, setMachine] = useState<MachineSummary | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/chat/machines?slugs=${encodeURIComponent(slug)}`)
+      .then(res => res.json())
+      .then(data => { if (!cancelled) setMachine(data.machines?.[0] ?? null); })
+      .catch(() => { if (!cancelled) setMachine(null); });
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  if (!machine) return <div className="asha-cards-loading">Loading details…</div>;
+
+  const maxNum = (values: string[]) => Math.max(...values.map(v => parseNumeric(v) ?? 0), 1);
+
+  return (
+    <div className="asha-detail">
+      <div className="asha-detail-hero">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={machine.image} alt={machine.name} className="asha-detail-hero-img" />
+        <div className="asha-detail-hero-overlay">
+          <div className="asha-detail-cat-badge">{machine.categoryName}</div>
+          <div className="asha-detail-name">{machine.name}</div>
+          <div className="asha-detail-series">{machine.series}</div>
+        </div>
+      </div>
+
+      {machine.tagline && <p className="asha-detail-tagline">{machine.tagline}</p>}
+
+      <div className="asha-detail-models">
+        <span className="asha-detail-models-label">Models</span>
+        <div className="asha-detail-model-chips">
+          {machine.models.map(m => <span key={m} className="asha-detail-model-chip">{m}</span>)}
+        </div>
+      </div>
+
+      <div className="asha-detail-specs">
+        <div className="asha-detail-specs-title">Technical Specifications</div>
+        {machine.specs.map(spec => {
+          const barMax = maxNum(spec.values);
+          return (
+            <div key={spec.label} className="asha-detail-spec-row">
+              <div className="asha-detail-spec-label">{spec.label}</div>
+              <div className="asha-detail-spec-bars">
+                {spec.values.map((val, i) => {
+                  const num = parseNumeric(val);
+                  const model = machine.models[i] || "";
+                  const pct = num !== null ? Math.max(6, (num / barMax) * 100) : 0;
+                  return (
+                    <div key={model} className="asha-detail-spec-bar-row">
+                      <span className="asha-detail-spec-bar-model">{model}</span>
+                      <div className="asha-detail-spec-bar-track">
+                        <div className="asha-detail-spec-bar-fill" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="asha-detail-spec-bar-value">{val}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="asha-detail-cta">
+        <button className="asha-detail-inquire-btn" onClick={() => onInquire(machine.slug, machine.name)}>
+          Inquire About This Machine
+        </button>
+      </div>
+    </div>
+  );
+}
+
 interface ActionRendererProps {
   action: ChatAction;
   onInquire: (slug: string, name: string) => void;
   onQuickReply: (option: string) => void;
+  onExplore: (slug: string) => void;
 }
 
-function ActionRenderer({ action, onInquire, onQuickReply }: ActionRendererProps) {
+function ActionRenderer({ action, onInquire, onQuickReply, onExplore }: ActionRendererProps) {
   if (action.type === "navigate") return <NavigateAction slug={action.slug} />;
-  if (action.type === "show_machines") return <MachineCards slugs={action.slugs} onInquire={onInquire} />;
+  if (action.type === "show_machines") return <MachineCards slugs={action.slugs} onInquire={onInquire} onExplore={onExplore} />;
   if (action.type === "compare") return <CompareChart slugs={action.slugs} specLabels={action.specLabels} />;
   if (action.type === "quick_replies") return <QuickReplies options={action.options} onPick={onQuickReply} />;
+  if (action.type === "machine_detail") return <MachineDetailView slug={action.slug} onInquire={onInquire} />;
   return null;
 }
 
@@ -354,6 +441,10 @@ export default function ChatWidget() {
     send(option);
   };
 
+  const onExplore = (slug: string) => {
+    setMessages(prev => [...prev, { role: "assistant", content: "", actions: [{ type: "machine_detail", slug }] }]);
+  };
+
   return (
     <>
       <button
@@ -402,7 +493,7 @@ export default function ChatWidget() {
                 <div className={`asha-bubble ${m.role}`}>
                   {m.content || (sending && i === messages.length - 1 ? <span className="asha-typing"><span>·</span><span>·</span><span>·</span></span> : "")}
                 </div>
-                {m.actions?.map((action, ai) => <ActionRenderer key={ai} action={action} onInquire={onInquire} onQuickReply={onQuickReply} />)}
+                {m.actions?.map((action, ai) => <ActionRenderer key={ai} action={action} onInquire={onInquire} onQuickReply={onQuickReply} onExplore={onExplore} />)}
               </div>
             ))}
           </div>
@@ -423,7 +514,7 @@ export default function ChatWidget() {
         </div>
       )}
 
-      <style jsx>{`
+      <style jsx global>{`
         .asha-launcher {
           position: fixed; bottom: 24px; right: 24px; z-index: 9200;
           width: 58px; height: 58px; border-radius: 50%;
@@ -482,6 +573,7 @@ export default function ChatWidget() {
           box-shadow: 0 24px 64px rgba(0,0,0,0.5);
           display: flex; flex-direction: column; overflow: hidden;
           font-family: var(--ff-body), system-ui, sans-serif;
+          color-scheme: dark;
         }
         .asha-panel--expanded {
           width: min(720px, calc(100vw - 32px));
@@ -545,43 +637,209 @@ export default function ChatWidget() {
           border-bottom-right-radius: 4px;
         }
 
-        .asha-cards-loading { font-size: 0.78rem; color: var(--ink-35); padding: 0.2rem 0; }
+        .asha-cards-loading { font-size: 0.78rem; color: var(--ink-35); padding: 0.3rem 0; }
 
-        .asha-cards {
-          display: flex; flex-direction: column; gap: 0.4rem;
-        }
+        .asha-cards { display: flex; flex-direction: column; gap: 0.6rem; }
+
         .asha-card {
-          display: flex; align-items: center; gap: 0.6rem;
-          padding: 0.45rem 0.55rem;
+          display: flex; gap: 0;
           background: var(--bg-raise);
           border: 1px solid var(--bg-line);
-          border-radius: 8px;
-          transition: border-color 0.15s, background 0.15s;
+          border-radius: 12px;
+          overflow: hidden;
+          transition: border-color 0.18s, box-shadow 0.18s;
         }
-        .asha-card:hover { border-color: var(--brand-teal); }
-        .asha-card-thumb {
-          width: 34px; height: 34px; object-fit: contain; flex-shrink: 0;
-          background: var(--bg-surface); border-radius: 6px; padding: 0.2rem;
+        .asha-card:hover {
+          border-color: var(--brand-teal);
+          box-shadow: 0 0 0 1px rgba(43,191,179,0.12);
         }
-        .asha-card-info {
-          flex: 1; min-width: 0; text-decoration: none; color: var(--ink);
+
+        .asha-card-img-col {
+          width: 100px; min-height: 100px;
+          flex-shrink: 0;
+          background: var(--bg-surface);
+          display: flex; align-items: center; justify-content: center;
+          overflow: hidden;
         }
+        .asha-card-img {
+          width: 100%; height: 100%;
+          object-fit: contain; padding: 0.5rem;
+        }
+
+        .asha-card-info-col {
+          flex: 1; min-width: 0;
+          padding: 0.65rem 0.7rem 0.65rem 0.65rem;
+          display: flex; flex-direction: column; gap: 0.1rem;
+        }
+
         .asha-card-name {
-          font-size: 0.78rem; font-weight: 600; color: var(--ink); line-height: 1.3;
-          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+          font-size: 0.85rem; font-weight: 700;
+          color: var(--ink); line-height: 1.25;
         }
         .asha-card-series {
-          font-family: var(--ff-mono, inherit); font-size: 0.64rem;
-          letter-spacing: 0.03em; color: var(--ink-35); margin-top: 0.1rem;
+          font-family: var(--ff-mono, inherit);
+          font-size: 0.6rem; letter-spacing: 0.03em;
+          color: var(--ink-35);
         }
-        .asha-card-inquire {
-          flex-shrink: 0; padding: 0.32rem 0.6rem;
+        .asha-card-cat {
+          font-size: 0.62rem; font-weight: 600;
+          color: var(--brand-teal);
+          text-transform: uppercase; letter-spacing: 0.05em;
+          margin-top: 0.05rem;
+        }
+        .asha-card-tagline {
+          font-size: 0.68rem; color: var(--ink-60);
+          line-height: 1.35; margin-top: 0.1rem;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .asha-card-actions {
+          display: flex; gap: 0.35rem; margin-top: 0.45rem;
+        }
+        .asha-card-explore {
+          flex: 1; padding: 0.35rem 0.5rem;
           background: var(--brand-teal); color: #06110f;
-          border: none; border-radius: 6px; cursor: pointer;
+          border: none; border-radius: 7px; cursor: pointer;
           font-family: inherit; font-size: 0.68rem; font-weight: 600;
           transition: opacity 0.15s;
         }
-        .asha-card-inquire:hover { opacity: 0.8; }
+        .asha-card-explore:hover { opacity: 0.85; }
+        .asha-card-inquire {
+          flex-shrink: 0; padding: 0.35rem 0.6rem;
+          background: transparent; color: var(--ink-60);
+          border: 1px solid var(--bg-line); border-radius: 7px; cursor: pointer;
+          font-family: inherit; font-size: 0.68rem; font-weight: 500;
+          transition: border-color 0.15s, color 0.15s;
+        }
+        .asha-card-inquire:hover { border-color: var(--brand-teal); color: var(--brand-teal); }
+
+        .asha-detail {
+          background: var(--bg-raise);
+          border: 1px solid var(--bg-line);
+          border-radius: 12px;
+          overflow: hidden;
+        }
+
+        .asha-detail-hero {
+          position: relative; height: 150px;
+          background: var(--bg-surface);
+          display: flex; align-items: center; justify-content: center;
+          overflow: hidden;
+        }
+        .asha-detail-hero-img {
+          width: 100%; height: 100%;
+          object-fit: contain; padding: 1rem;
+        }
+        .asha-detail-hero-overlay {
+          position: absolute; inset: 0;
+          background: linear-gradient(180deg, transparent 50%, rgba(6,17,15,0.92) 100%);
+          display: flex; flex-direction: column; justify-content: flex-end;
+          padding: 0.8rem;
+        }
+        .asha-detail-cat-badge {
+          align-self: flex-start;
+          padding: 0.15rem 0.55rem;
+          border-radius: 4px;
+          background: rgba(43,191,179,0.15);
+          color: var(--brand-teal);
+          font-size: 0.6rem; font-weight: 600; letter-spacing: 0.04em;
+          text-transform: uppercase;
+          margin-bottom: 0.25rem;
+        }
+        .asha-detail-name {
+          font-size: 1rem; font-weight: 700;
+          color: #fff; line-height: 1.2;
+        }
+        .asha-detail-series {
+          font-family: var(--ff-mono, inherit);
+          font-size: 0.68rem; letter-spacing: 0.03em;
+          color: rgba(255,255,255,0.6); margin-top: 0.05rem;
+        }
+
+        .asha-detail-tagline {
+          font-size: 0.78rem; color: var(--ink-60);
+          line-height: 1.45; padding: 0.7rem 0.8rem 0;
+          margin: 0;
+        }
+
+        .asha-detail-models {
+          padding: 0.7rem 0.8rem;
+          display: flex; flex-direction: column; gap: 0.4rem;
+        }
+        .asha-detail-models-label {
+          font-size: 0.68rem; font-weight: 600; color: var(--ink-35);
+          text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .asha-detail-model-chips {
+          display: flex; flex-wrap: wrap; gap: 0.35rem;
+        }
+        .asha-detail-model-chip {
+          padding: 0.2rem 0.55rem;
+          background: rgba(43,191,179,0.08);
+          border: 1px solid rgba(43,191,179,0.2);
+          border-radius: 5px;
+          color: var(--brand-teal);
+          font-family: var(--ff-mono, inherit);
+          font-size: 0.64rem; font-weight: 500;
+        }
+
+        .asha-detail-specs {
+          padding: 0 0.8rem 0.6rem;
+        }
+        .asha-detail-specs-title {
+          font-size: 0.68rem; font-weight: 600; color: var(--ink-35);
+          text-transform: uppercase; letter-spacing: 0.05em;
+          margin-bottom: 0.5rem;
+        }
+        .asha-detail-spec-row {
+          margin-bottom: 0.55rem;
+        }
+        .asha-detail-spec-label {
+          font-size: 0.7rem; font-weight: 600; color: var(--ink-60);
+          margin-bottom: 0.25rem;
+        }
+        .asha-detail-spec-bars {
+          display: flex; flex-direction: column; gap: 0.2rem;
+        }
+        .asha-detail-spec-bar-row {
+          display: flex; align-items: center; gap: 0.4rem;
+        }
+        .asha-detail-spec-bar-model {
+          width: 5rem; flex-shrink: 0;
+          font-family: var(--ff-mono, inherit);
+          font-size: 0.6rem; color: var(--ink-35);
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .asha-detail-spec-bar-track {
+          flex: 1; height: 16px;
+          background: var(--bg-surface);
+          border-radius: 4px; overflow: hidden;
+        }
+        .asha-detail-spec-bar-fill {
+          height: 100%;
+          background: linear-gradient(90deg, var(--brand-teal), rgba(43,191,179,0.55));
+          border-radius: 4px;
+          transition: width 0.45s ease;
+        }
+        .asha-detail-spec-bar-value {
+          width: 4.5rem; flex-shrink: 0;
+          font-family: var(--ff-mono, inherit);
+          font-size: 0.62rem; font-weight: 600;
+          color: var(--ink); text-align: right;
+        }
+
+        .asha-detail-cta {
+          padding: 0.6rem 0.8rem 0.8rem;
+        }
+        .asha-detail-inquire-btn {
+          width: 100%; padding: 0.55rem;
+          background: var(--brand-teal); color: #06110f;
+          border: none; border-radius: 8px; cursor: pointer;
+          font-family: inherit; font-size: 0.8rem; font-weight: 700;
+          transition: opacity 0.15s;
+        }
+        .asha-detail-inquire-btn:hover { opacity: 0.85; }
 
         .asha-quick-replies { display: flex; flex-wrap: wrap; gap: 0.45rem; }
         .asha-quick-reply {
@@ -655,7 +913,9 @@ export default function ChatWidget() {
           flex: 1; resize: none; max-height: 90px;
           background: var(--bg-raise);
           border: 1px solid var(--bg-line);
-          border-radius: 10px; color: var(--ink); padding: 0.6rem 0.75rem;
+          border-radius: 10px;
+          color: var(--ink);
+          padding: 0.6rem 0.75rem;
           font-family: inherit; font-size: 0.9rem; outline: none;
         }
         .asha-input-row textarea::placeholder { color: var(--ink-35); }

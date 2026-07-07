@@ -269,6 +269,11 @@ function Step4({ machines, form }: { machines: SelectedMachine[]; form: FormData
 }
 
 /* ─── main page ──────────────────────────────────────────────────── */
+function detectSource(): string {
+  if (typeof window === "undefined") return "direct";
+  return sessionStorage.getItem("cx_source") ?? "direct";
+}
+
 function ContactPageInner() {
   const searchParams = useSearchParams();
   const [step, setStep] = useState(0);
@@ -278,6 +283,9 @@ function ContactPageInner() {
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
+  const [source, setSource] = useState("direct");
+
+  useEffect(() => { setSource(detectSource()); }, []);
 
   // Pre-fill from ?machine=slug query param (comes from product detail page)
   useEffect(() => {
@@ -336,6 +344,7 @@ function ContactPageInner() {
             qty: m.qty,
             notes: m.notes,
           })),
+          source,
         }),
       });
       if (!res.ok) {

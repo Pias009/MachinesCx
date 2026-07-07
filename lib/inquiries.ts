@@ -16,6 +16,7 @@ export interface CreateInquiryInput {
   country?: string;
   message?: string;
   machines: InquiryMachine[];
+  source?: string;
 }
 
 function escapeHtml(s: string) {
@@ -43,6 +44,7 @@ export async function createInquiry(body: CreateInquiryInput) {
     message: body.message?.trim() ?? "",
     machines: body.machines,
     status: "new",
+    source: body.source ?? "direct",
   });
 
   const notifyTo = process.env.INQUIRY_NOTIFY_EMAIL || process.env.ADMIN_EMAIL;
@@ -58,7 +60,8 @@ export async function createInquiry(body: CreateInquiryInput) {
         html: `
           <h2>New machine inquiry</h2>
           <p><strong>${escapeHtml(body.name)}</strong>${body.company ? ` — ${escapeHtml(body.company)}` : ""}<br/>
-          ${escapeHtml(body.email)}${body.phone ? ` · ${escapeHtml(body.phone)}` : ""}${body.country ? ` · ${escapeHtml(body.country)}` : ""}</p>
+          ${escapeHtml(body.email)}${body.phone ? ` · ${escapeHtml(body.phone)}` : ""}${body.country ? ` · ${escapeHtml(body.country)}` : ""}<br/>
+          <span style="color:#888;font-size:13px">Source: ${(body.source ?? "direct").toUpperCase()}</span></p>
           <table style="border-collapse:collapse">${machineRows}</table>
           ${body.message ? `<p><strong>Message:</strong><br/>${escapeHtml(body.message).replace(/\n/g, "<br/>")}</p>` : ""}
           <p style="color:#888;font-size:12px">View and reply from the admin panel.</p>

@@ -69,6 +69,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             window.addEventListener('load', function() {
               sessionStorage.removeItem('cr');
             });
+
+            // ── referrer source tracking ──
+            if (!sessionStorage.getItem('cx_source')) {
+              var ref = document.referrer || '';
+              var src = 'direct';
+              if (ref.indexOf('google.') !== -1) src = 'google';
+              else if (ref.indexOf('facebook.') !== -1 || ref.indexOf('fb.') !== -1) src = 'facebook';
+              else if (ref.indexOf('instagram.') !== -1) src = 'instagram';
+              else if (ref.indexOf('linkedin.') !== -1) src = 'linkedin';
+              else if (ref.indexOf('twitter.') !== -1 || ref.indexOf('x.com') !== -1) src = 'twitter';
+              else if (ref) src = 'other';
+              sessionStorage.setItem('cx_source', src);
+            }
           })();
         ` }} />
       </head>

@@ -26,6 +26,7 @@ export interface IInquiry {
   machines: InquiryMachine[];
   status: "new" | "read" | "replied";
   replies: InquiryReply[];
+  source: string;
   createdAt: Date;
 }
 
@@ -55,6 +56,7 @@ const InquirySchema = new Schema<IInquiry>({
   machines: { type: [InquiryMachineSchema], default: [] },
   status:   { type: String, enum: ["new", "read", "replied"], default: "new", index: true },
   replies:  { type: [InquiryReplySchema], default: [] },
+  source:   { type: String, default: "direct" },
   createdAt:{ type: Date, default: Date.now, index: true },
 });
 

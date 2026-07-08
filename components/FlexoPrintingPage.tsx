@@ -98,7 +98,7 @@ export default function FlexoPrintingPage() {
         .fp-gallery-thumb--active { border-color:var(--brand-red) !important; opacity:1 !important; }
 
         .fp-kv { display:flex; flex-direction:column; gap:.25rem; }
-        .fp-kv__label { font-family:var(--ff-mono); font-size:0.68rem; letter-spacing:.18em; text-transform:uppercase; color:var(--slate-30); }
+        .fp-kv__label { font-family:var(--ff-mono); font-size:0.68rem; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,0.65); }
         .fp-kv__value { font-family:var(--ff-display); font-size:1.45rem; color:var(--slate); line-height:1; }
       `}</style>
 

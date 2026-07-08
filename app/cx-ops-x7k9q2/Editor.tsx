@@ -73,7 +73,7 @@ function ImageField({ value, onChange }: { value: string; onChange: (v: string) 
   return (
     <div>
       <div style={{ display: "flex", gap: "0.6rem", alignItems: "center", flexWrap: "wrap" }}>
-        {value && value.startsWith("/") && (
+        {value && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={value} alt="" style={{
             width: 72, height: 72, objectFit: "contain", borderRadius: 10,

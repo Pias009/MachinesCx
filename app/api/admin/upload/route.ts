@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
+import { uploadImage } from "@/lib/cloudinary";
 
 export const runtime = "nodejs";
 
 const ALLOWED = new Set(["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"]);
-const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
+const MAX_BYTES = 8 * 1024 * 1024;
 
-// Auth is enforced by middleware for all /api/admin/* routes.
 export async function POST(req: NextRequest) {
   const form = await req.formData();
   const file = form.get("file");
@@ -21,13 +19,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "max 8 MB" }, { status: 413 });
   }
 
-  const ext = { "image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp", "image/gif": ".gif", "image/svg+xml": ".svg" }[file.type]!;
-  const base = (file.name || "image").replace(/\.[^.]*$/, "").replace(/[^a-zA-Z0-9_-]+/g, "-").slice(0, 48) || "image";
-  const name = `${base}-${Date.now().toString(36)}${ext}`;
+  const buf = Buffer.from(await file.arrayBuffer());
+  const base64 = `data:${file.type};base64,${buf.toString("base64")}`;
 
-  const dir = path.join(process.cwd(), "public", "uploads");
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(path.join(dir, name), Buffer.from(await file.arrayBuffer()));
-
-  return NextResponse.json({ path: `/uploads/${name}` });
+  const { url } = await uploadImage(base64, "cx-machinery");
+  return NextResponse.json({ path: url });
 }

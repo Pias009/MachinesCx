@@ -44,9 +44,8 @@ const FALLBACK_MACHINES = buildMachines(localFamilies as ProductFamily[]);
 const DURATION = 650;
 
 export default function PrintingShowcase() {
-  const cms = useCms<{ families?: ProductFamily[] }>("products", { families: localFamilies as ProductFamily[] });
-  const printingFamilies = (cms.families || []).filter(f => f.category === "printing");
-  const MACHINES = printingFamilies.length > 0 ? buildMachines(printingFamilies) : FALLBACK_MACHINES;
+  const cms = useCms<{ items?: PrintingMachine[] }>("printing-showcase", { items: FALLBACK_MACHINES });
+  const MACHINES = cms.items && cms.items.length ? cms.items : FALLBACK_MACHINES;
   const N = MACHINES.length;
 
   const [active,      setActive]      = useState(0);

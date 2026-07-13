@@ -17,6 +17,7 @@ if (!uri) {
 
 const sections = [
   "products",
+  "home-hero",
   "machine-catalog",
   "production-line",
   "flexo-strip",

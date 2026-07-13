@@ -1,7 +1,10 @@
 "use client";
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { families, familyImage } from "@/lib/products";
+import { useCms } from "@/lib/useCms";
+import type { ProductFamily } from "@/lib/products";
+import localProducts from "@/data/products.json";
+import localHero from "@/data/home-hero.json";
 
 const VS = `
 attribute vec2 position;
@@ -47,12 +50,24 @@ const ARCH = [
   { left: 92, top: 58, scale: 0.74 },
 ] as const;
 
-/* Pick 5 machines with real photo assets, apex first for visual weight */
-function pickNodes() {
-  const withImg = families.filter((f) => !!familyImage(f));
-  const chosen = withImg.slice(0, 5);
-  // reorder so the strongest shot lands on the apex (index 2)
-  return chosen;
+interface HeroCms {
+  eyebrow: string;
+  headline1: string;
+  headline2: string;
+  description: string;
+  primaryLabel: string;
+  primaryHref: string;
+  secondaryLabel: string;
+  secondaryHref: string;
+  featured: { slug: string }[];
+}
+
+const localFamilies = (localProducts as { families: ProductFamily[] }).families;
+
+function familyImage(f: Pick<ProductFamily, "slug" | "image" | "images">): string {
+  if (f.images && f.images.length > 0) return f.images[0];
+  if (f.image) return f.image;
+  return `/machines/${f.slug}.png`;
 }
 
 export default function HeroSplash() {
@@ -60,7 +75,21 @@ export default function HeroSplash() {
   const rafRef    = useRef<number>(0);
   const archRef   = useRef<HTMLDivElement>(null);
 
-  const nodes = pickNodes();
+  const hero = useCms<HeroCms>("home-hero", localHero as HeroCms);
+  const products = useCms<{ families: ProductFamily[] }>("products", localProducts as { families: ProductFamily[] });
+  const families = products.families ?? localFamilies;
+
+  /* Resolve admin-picked featured slugs → real machine data.
+     Falls back to the first machines with photos if none are configured. */
+  const nodes: ProductFamily[] = (() => {
+    const bySlug = new Map(families.map((f) => [f.slug, f]));
+    const picked = (hero.featured ?? [])
+      .map((x) => bySlug.get(x.slug))
+      .filter((f): f is ProductFamily => !!f)
+      .slice(0, 5);
+    if (picked.length) return picked;
+    return families.slice(0, 5);
+  })();
 
   /* GSAP: reveal media cards left → right, fading in one after another */
   useEffect(() => {
@@ -462,19 +491,11 @@ export default function HeroSplash() {
 
         {/* Hero copy — pinned to the top */}
         <div className="hs__main">
-          <span className="hs__eyebrow">Machinery in motion</span>
+          {hero.eyebrow && <span className="hs__eyebrow">{hero.eyebrow}</span>}
           <h1 className="hs__h1">
-            Built for the floor.
-            <em>Proven worldwide.</em>
+            {hero.headline1}
+            {hero.headline2 && <em>{hero.headline2}</em>}
           </h1>
-          <p className="hs__desc">
-            Industrial plastic-processing lines — engineered in Wenzhou,
-            running in 80+ countries. Watch them work.
-          </p>
-          <div className="hs__actions">
-            <Link href="/products" className="hs__btn-primary">Explore machines</Link>
-            <Link href="/contact" className="hs__btn-secondary">Request a quote</Link>
-          </div>
         </div>
 
         {/* ── ARCH of 5 video/media cards ── */}

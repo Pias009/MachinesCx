@@ -123,6 +123,33 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
     ],
   },
   {
+    slug: "home-hero",
+    title: "Home · Hero Section",
+    description: "The top hero — eyebrow, headline, description, buttons, and the featured machines shown along the curved arch.",
+    rootFields: [
+      { key: "eyebrow", label: "Eyebrow (small teal label)", kind: "text" },
+      { key: "headline1", label: "Headline line 1", kind: "text" },
+      { key: "headline2", label: "Headline line 2 (teal)", kind: "text" },
+      { key: "description", label: "Description", kind: "textarea" },
+      { key: "primaryLabel", label: "Primary button label", kind: "text" },
+      { key: "primaryHref", label: "Primary button link", kind: "text", hint: "e.g. /products" },
+      { key: "secondaryLabel", label: "Secondary button label", kind: "text" },
+      { key: "secondaryHref", label: "Secondary button link", kind: "text", hint: "e.g. /contact" },
+    ],
+    collections: [
+      {
+        key: "featured",
+        label: "Featured machines (arch cards)",
+        titleKeys: ["slug"],
+        canAdd: true,
+        template: { slug: "" },
+        fields: [
+          { key: "slug", label: "Product slug", kind: "text", hint: "must match a machine slug from the Products section — its photo, series and name are pulled in automatically. Up to 5 are shown along the arch." },
+        ],
+      },
+    ],
+  },
+  {
     slug: "machine-catalog",
     title: "Home · Machine Catalogue",
     description: "“Every machine. Find your perfect fit.” grid — headline and the stat shown on every machine card.",
@@ -152,6 +179,8 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
         key: "items",
         label: "Line steps (in setup order)",
         titleKeys: ["stage", "name"],
+        canAdd: true,
+        template: { stage: "Step N", name: "Machine", slug: "", cat: "film-blowing", img: "", role: "", quality: [] },
         fields: [
           { key: "stage", label: "Stage name", kind: "text" },
           { key: "name", label: "Machine name", kind: "text" },
@@ -167,19 +196,21 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
   {
     slug: "flexo-strip",
     title: "Home · Flexo Strip",
-    description: "“AI Series Flexo Press” selector — the four press models with speed, registration and Cloudinary image ids.",
+    description: "“AI Series Flexo Press” selector — the four press models with speed, registration and an uploaded product image each.",
     collections: [
       {
         key: "items",
         label: "Press models",
         titleKeys: ["label", "tag"],
+        canAdd: true,
+        template: { slug: "new-press", label: "AI-XX", colours: 2, speed: "120", reg: "±0.2mm", img: "", tag: "", hot: false, flagship: false },
         fields: [
-          { key: "slug", label: "Product slug", kind: "text" },
+          { key: "slug", label: "Product slug (link target)", kind: "text", hint: "links the card to /products/printing#<slug>" },
           { key: "label", label: "Model label", kind: "text" },
           { key: "colours", label: "Colours", kind: "number" },
           { key: "speed", label: "Speed (m/min)", kind: "text" },
           { key: "reg", label: "Registration", kind: "text" },
-          { key: "img", label: "Cloudinary image id", kind: "text", hint: "e.g. cx-machinery/printing/flexo-1" },
+          { key: "img", label: "Machine image", kind: "image", hint: "upload the press photo shown on the card" },
           { key: "tag", label: "Tag line", kind: "text" },
           { key: "hot", label: "Hot model badge", kind: "boolean" },
           { key: "flagship", label: "Flagship badge", kind: "boolean" },
@@ -196,6 +227,8 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
         key: "items",
         label: "Carousel machines",
         titleKeys: ["model", "series"],
+        canAdd: true,
+        template: { model: "AI-XX", series: "X-Colour Press", src: "", speed: "", reg: "", accent: "#e11d48" },
         fields: [
           { key: "model", label: "Model", kind: "text" },
           { key: "series", label: "Series", kind: "text" },

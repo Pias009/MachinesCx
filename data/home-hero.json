@@ -1,0 +1,17 @@
+{
+  "eyebrow": "Machinery in motion",
+  "headline1": "Built for the floor.",
+  "headline2": "Proven worldwide.",
+  "description": "Industrial plastic-processing lines — engineered in Wenzhou, running in 80+ countries. Watch them work.",
+  "primaryLabel": "Explore machines",
+  "primaryHref": "/products",
+  "secondaryLabel": "Request a quote",
+  "secondaryHref": "/contact",
+  "featured": [
+    { "slug": "abcde-2200" },
+    { "slug": "abc-multilayer-small" },
+    { "slug": "abc-multilayer-large" },
+    { "slug": "abc-cx-series" },
+    { "slug": "aba-1000-1500" }
+  ]
+}

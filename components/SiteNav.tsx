@@ -449,7 +449,6 @@ export default function SiteNav() {
             <TransitionLink href="/products" className="sn__link sn__link--hide">All Products</TransitionLink>
             <TransitionLink href="/news"     className="sn__link sn__link--hide">News</TransitionLink>
             <TransitionLink href="/about"    className="sn__link sn__link--hide">About</TransitionLink>
-            <TransitionLink href="/contact"  className="sn__link sn__link--hide">Contact</TransitionLink>
           </div>
 
           <div className="sn__actions">

@@ -6,6 +6,7 @@ import { ADMIN_PATH } from "@/lib/adminAuth";
 
 const SECTION_ICON: Record<string, string> = {
   "products": "🏭",
+  "home-hero": "✨",
   "machine-catalog": "🗂️",
   "production-line": "🔧",
   "flexo-strip": "🖨️",

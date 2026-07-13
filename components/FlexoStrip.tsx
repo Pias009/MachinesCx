@@ -37,33 +37,41 @@ const localFamilies: ProductFamily[] = [
   ], installation:[], deliveryGuide:[], gallery:[], videos:[], reviews:[], deliveryStagePhotos:{}, customSections:[], parts:[] },
 ];
 
+interface FlexoModel {
+  slug: string;
+  label: string;
+  colours: number;
+  speed: string;
+  reg: string;
+  img: string;
+  tag: string;
+  hot?: boolean;
+  flagship?: boolean;
+}
+
 function findSpec(family: ProductFamily, label: string): string {
   return family.specs?.find(s => s.label === label)?.values?.[0] ?? "";
 }
 
-function getModels(products: { families?: ProductFamily[] }) {
-  const printing = (products.families ?? []).filter(f => f.category === "printing");
-  if (!printing.length) return buildModels(localFamilies);
-  return buildModels(printing);
-}
-
-function buildModels(list: ProductFamily[]) {
+function buildModels(list: ProductFamily[]): FlexoModel[] {
   return list.map(f => ({
     slug: f.slug,
     label: f.series.split("·")[0].trim(),
     colours: parseInt(findSpec(f, "Printing Colours")) || 2,
     speed:   (findSpec(f, "Max Mechanical Speed").match(/\d+/) || ["120"])[0],
     reg:     findSpec(f, "Registration Accuracy") || "±0.2mm",
-    img:     f.images?.[0] ?? "/machines/flexo-1.png" as string,
+    img:     f.images?.[0] ?? "/machines/flexo-1.png",
     tag:     f.tagline ?? "",
     hot:      f.slug === "flexo-4c",
     flagship: f.slug === "flexo-8c",
   }));
 }
 
+const DEFAULT_MODELS: FlexoModel[] = buildModels(localFamilies);
+
 export default function FlexoStrip() {
-  const cms = useCms<{ families?: ProductFamily[] }>("products", { families: localFamilies });
-  const MODELS = getModels(cms);
+  const cms = useCms<{ items?: FlexoModel[] }>("flexo-strip", { items: DEFAULT_MODELS });
+  const MODELS = cms.items && cms.items.length ? cms.items : DEFAULT_MODELS;
 
   const sectionRef  = useRef<HTMLElement>(null);
   const gridRef     = useRef<HTMLDivElement>(null);

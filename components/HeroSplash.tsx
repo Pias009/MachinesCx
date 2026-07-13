@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { families, familyImage } from "@/lib/products";
 
 const VS = `
 attribute vec2 position;
@@ -34,9 +35,62 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }`;
 
+/* ── 5 media nodes distributed along the arch ──
+   left  → horizontal position (%) across the section
+   top   → vertical offset (%) — apex (center) is highest, edges dip down
+   scale → depth: apex biggest, edges smaller                        */
+const ARCH = [
+  { left: 8,  top: 58, scale: 0.74 },
+  { left: 29, top: 34, scale: 0.88 },
+  { left: 50, top: 22, scale: 1.0  },
+  { left: 71, top: 34, scale: 0.88 },
+  { left: 92, top: 58, scale: 0.74 },
+] as const;
+
+/* Pick 5 machines with real photo assets, apex first for visual weight */
+function pickNodes() {
+  const withImg = families.filter((f) => !!familyImage(f));
+  const chosen = withImg.slice(0, 5);
+  // reorder so the strongest shot lands on the apex (index 2)
+  return chosen;
+}
+
 export default function HeroSplash() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef    = useRef<number>(0);
+  const archRef   = useRef<HTMLDivElement>(null);
+
+  const nodes = pickNodes();
+
+  /* GSAP: reveal media cards left → right, fading in one after another */
+  useEffect(() => {
+    const root = archRef.current;
+    if (!root) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let ctx: { revert: () => void } | null = null;
+    let cancelled = false;
+
+    (async () => {
+      const { gsap } = await import("gsap");
+      if (cancelled || !root) return;
+      const cards = Array.from(root.querySelectorAll<HTMLElement>(".hs__node-inner"));
+      ctx = gsap.context(() => {
+        gsap.set(cards, { opacity: 0, x: -80, y: 24 });
+        gsap.to(cards, {
+          opacity: 1,
+          x: 0,
+          y: 0,
+          duration: 0.9,
+          ease: "power3.out",
+          stagger: 0.16,
+          delay: 0.4,
+        });
+      }, root);
+    })();
+
+    return () => { cancelled = true; ctx?.revert(); };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -100,6 +154,7 @@ export default function HeroSplash() {
           min-height: 100vh;
           display: flex;
           flex-direction: column;
+          overflow: hidden;
         }
 
         /* Colorful decorative circles */
@@ -177,6 +232,11 @@ export default function HeroSplash() {
           border-color: var(--brand-teal) !important;
           color: var(--brand-teal) !important;
         }
+        [data-theme="light"] .hs__node-card {
+          border-color: rgba(13,34,32,0.12);
+          box-shadow: 0 24px 60px -24px rgba(13,34,32,0.35);
+        }
+        [data-theme="light"] .hs__eyebrow { color: var(--brand-teal) !important; }
 
         /* Red top accent line — same as SiteNav */
         .hs::before {
@@ -188,27 +248,37 @@ export default function HeroSplash() {
           z-index: 10;
         }
 
-        /* hero content */
+        /* ── hero copy — pinned to the TOP ── */
         .hs__main {
           position: relative;
-          z-index: 5;
-          flex: 1;
+          z-index: 6;
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
           text-align: center;
-          padding: 6rem 1.5rem 8rem;
+          padding: clamp(6.5rem, 12vh, 9rem) 1.5rem 1.5rem;
+        }
+
+        .hs__eyebrow {
+          display: inline-flex; align-items: center; gap: .6rem;
+          font-family: var(--ff-mono); font-size: .7rem;
+          letter-spacing: .26em; text-transform: uppercase;
+          color: var(--brand-teal); margin-bottom: 1.4rem;
+          opacity: 0; animation: hs-rise .8s cubic-bezier(.2,.7,.2,1) .05s forwards;
+        }
+        .hs__eyebrow::before, .hs__eyebrow::after {
+          content: ""; width: 2rem; height: 1px; background: var(--brand-teal); opacity: .6;
         }
 
         .hs__h1 {
           font-family: var(--ff-display);
-          font-size: clamp(3.5rem, 8vw, 6rem);
-          line-height: .88;
-          letter-spacing: .01em;
+          font-size: clamp(3rem, 7.5vw, 6.5rem);
+          line-height: .9;
+          letter-spacing: -.01em;
           color: var(--ink);
-          margin: 0 0 1.75rem;
+          margin: 0 0 1.5rem;
           text-wrap: balance;
+          opacity: 0; animation: hs-rise .9s cubic-bezier(.2,.7,.2,1) .12s forwards;
         }
         .hs__h1 em {
           font-style: normal;
@@ -218,88 +288,166 @@ export default function HeroSplash() {
 
         .hs__desc {
           font-family: var(--ff-body);
-          font-size: clamp(.95rem, 1.1vw, 1rem);
+          font-size: clamp(.95rem, 1.1vw, 1.05rem);
           color: var(--ink-60);
           line-height: 1.7;
-          max-width: 38ch;
-          margin: 0 0 2.5rem;
+          max-width: 46ch;
+          margin: 0 0 2.25rem;
           letter-spacing: .01em;
+          opacity: 0; animation: hs-rise .9s cubic-bezier(.2,.7,.2,1) .2s forwards;
         }
 
         .hs__actions {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          flex-wrap: wrap;
-          justify-content: center;
+          display: flex; align-items: center; gap: 1rem;
+          flex-wrap: wrap; justify-content: center;
+          opacity: 0; animation: hs-rise .9s cubic-bezier(.2,.7,.2,1) .28s forwards;
         }
 
-        /* Primary — filled red, square (matches .btn--hot) */
+        @keyframes hs-rise {
+          from { opacity: 0; transform: translateY(26px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
         .hs__btn-primary {
-          display: inline-flex;
-          align-items: center;
-          gap: .5rem;
-          padding: .85rem 1.75rem;
-          background: var(--brand-red);
-          color: #fff;
-          font-family: var(--ff-mono);
-          font-size: .78rem;
-          letter-spacing: .1em;
-          text-transform: uppercase;
-          font-weight: 600;
-          text-decoration: none;
-          border: 1px solid var(--brand-red);
-          transition: background .18s, box-shadow .18s;
-          white-space: nowrap;
+          display: inline-flex; align-items: center; gap: .5rem;
+          padding: .9rem 1.9rem;
+          background: var(--brand-red); color: #fff;
+          font-family: var(--ff-mono); font-size: .78rem;
+          letter-spacing: .1em; text-transform: uppercase; font-weight: 600;
+          text-decoration: none; border: 1px solid var(--brand-red);
+          transition: background .18s, box-shadow .18s; white-space: nowrap;
         }
         .hs__btn-primary:hover {
           background: #1fa39a;
           box-shadow: 0 4px 20px rgba(43,191,179,0.45);
         }
-
-        /* Secondary — ghost, square (matches .btn--ghost) */
         .hs__btn-secondary {
-          display: inline-flex;
-          align-items: center;
-          gap: .5rem;
-          padding: .85rem 1.75rem;
-          background: transparent;
-          color: var(--ink-60);
+          display: inline-flex; align-items: center; gap: .5rem;
+          padding: .9rem 1.9rem;
+          background: transparent; color: var(--ink-60);
           border: 1px solid var(--ink-15);
-          font-family: var(--ff-mono);
-          font-size: .78rem;
-          letter-spacing: .1em;
-          text-transform: uppercase;
+          font-family: var(--ff-mono); font-size: .78rem;
+          letter-spacing: .1em; text-transform: uppercase;
           text-decoration: none;
-          transition: border-color .18s, color .18s;
-          white-space: nowrap;
+          transition: border-color .18s, color .18s; white-space: nowrap;
         }
         .hs__btn-secondary:hover {
-          border-color: var(--brand-red);
-          color: var(--brand-red);
+          border-color: var(--brand-red); color: var(--brand-red);
+        }
+
+        /* ── ARCH of media cards, bottom half ── */
+        .hs__arch {
+          position: relative;
+          z-index: 5;
+          flex: 1;
+          width: 100%;
+          max-width: 1500px;
+          margin: 0 auto;
+          min-height: clamp(340px, 42vw, 560px);
+        }
+
+        /* the curved guide line */
+        .hs__arch-line {
+          position: absolute;
+          inset: 0;
+          width: 100%; height: 100%;
+          pointer-events: none;
+          overflow: visible;
+        }
+
+        /* each media node, positioned along the curve.
+           x/y offset is applied to .hs__node-inner by GSAP so the
+           translate(-50%) centering on .hs__node stays intact */
+        .hs__node {
+          position: absolute;
+          transform: translateX(-50%);
+          width: clamp(118px, 14vw, 205px);
+        }
+
+        .hs__node-card {
+          position: relative;
+          display: block;
+          aspect-ratio: 4 / 5;
+          border-radius: 14px;
+          overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.1);
+          background: #0d1614;
+          box-shadow: 0 28px 60px -26px rgba(0,0,0,0.85);
+          transition: transform .3s cubic-bezier(.2,.7,.2,1), box-shadow .3s, border-color .3s;
+          text-decoration: none;
+        }
+        .hs__node-card:hover {
+          transform: translateY(-8px) scale(1.03);
+          border-color: rgba(43,191,179,0.6);
+          box-shadow: 0 34px 70px -22px rgba(0,0,0,0.9), 0 0 40px -6px rgba(43,191,179,0.35);
+        }
+        .hs__node-img {
+          position: absolute; inset: 0;
+          width: 100%; height: 100%;
+          object-fit: cover;
+          transition: transform .5s cubic-bezier(.2,.7,.2,1);
+        }
+        .hs__node-card:hover .hs__node-img { transform: scale(1.08); }
+        .hs__node-shade {
+          position: absolute; inset: 0;
+          background: linear-gradient(to top, rgba(5,10,9,0.9) 0%, rgba(5,10,9,0.15) 45%, transparent 75%);
+        }
+
+        .hs__node-meta {
+          position: absolute; left: 0; right: 0; bottom: 0;
+          padding: .7rem .8rem;
+          text-align: left;
+        }
+        .hs__node-series {
+          font-family: var(--ff-mono); font-size: .58rem;
+          letter-spacing: .14em; text-transform: uppercase;
+          color: var(--brand-teal); margin-bottom: .2rem;
+        }
+        .hs__node-name {
+          font-family: var(--ff-display); font-size: .8rem;
+          line-height: 1.15; color: #f8fafc;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+          overflow: hidden;
         }
 
         @media(prefers-reduced-motion:reduce){
           .hs__canvas { display: none; }
         }
 
+        /* ── responsive: collapse arch into a scrolling rail ── */
+        @media(max-width: 900px){
+          .hs { min-height: auto; }
+          .hs__arch {
+            display: flex;
+            gap: 1rem;
+            min-height: 0;
+            padding: 0 1.25rem 3rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+          }
+          .hs__arch-line { display: none; }
+          .hs__node {
+            position: relative !important;
+            left: auto !important; top: auto !important;
+            transform: none !important;
+            flex: 0 0 auto;
+            width: clamp(150px, 44vw, 220px);
+            scroll-snap-align: center;
+          }
+        }
         @media(max-width:640px){
-          .hs { min-height: 70vh; }
-          .hs__main { padding: 2.5rem 1.25rem 3rem; }
-          .hs__h1 { font-size: clamp(2rem, 9vw, 3rem); margin-bottom: 1rem; }
-          .hs__desc { font-size: 0.88rem; max-width: 100%; margin-bottom: 1.5rem; }
-          .hs__fade { height: 120px; }
+          .hs__main { padding: clamp(5.5rem, 14vh, 7rem) 1.25rem 1.25rem; }
+          .hs__h1 { font-size: clamp(2.2rem, 10vw, 3.2rem); }
+          .hs__desc { font-size: 0.9rem; }
         }
         @media(max-width:480px){
-          .hs { min-height: 60vh; }
-          .hs__main { padding: 2rem 1rem 2.5rem; }
-          .hs__actions { flex-direction: column; width: 100%; }
-          .hs__btn-primary, .hs__btn-secondary { width: 100%; justify-content: center; padding: .75rem 1rem; }
-          .hs__h1 { font-size: clamp(1.8rem, 9vw, 2.4rem); }
+          .hs__actions { flex-direction: column; width: 100%; max-width: 320px; }
+          .hs__btn-primary, .hs__btn-secondary { width: 100%; justify-content: center; }
         }
       `}</style>
 
-      <section className="hs" aria-label="Wenzhou Asal Innomach — Hero">
+      <section className="hs" aria-label="Wenzhou Ashal Innomach — Hero">
 
         {/* Decorative floating shapes */}
         <div className="hs__shape hs__shape--1" aria-hidden="true" />
@@ -312,27 +460,85 @@ export default function HeroSplash() {
         {/* bottom fade */}
         <div className="hs__fade" aria-hidden="true" />
 
-        {/* Hero copy — nav is handled by SiteNav (fixed, always on top) */}
-        <main className="hs__main">
+        {/* Hero copy — pinned to the top */}
+        <div className="hs__main">
+          <span className="hs__eyebrow">Machinery in motion</span>
           <h1 className="hs__h1">
             Built for the floor.
             <em>Proven worldwide.</em>
           </h1>
-
           <p className="hs__desc">
-            Industrial plastic-processing lines — built in Wenzhou,
-            running in 80+ countries.
+            Industrial plastic-processing lines — engineered in Wenzhou,
+            running in 80+ countries. Watch them work.
           </p>
-
           <div className="hs__actions">
-            <Link href="/products" className="hs__btn-primary">
-              Explore machines
-            </Link>
-            <Link href="/contact" className="hs__btn-secondary">
-              Request a quote
-            </Link>
+            <Link href="/products" className="hs__btn-primary">Explore machines</Link>
+            <Link href="/contact" className="hs__btn-secondary">Request a quote</Link>
           </div>
-        </main>
+        </div>
+
+        {/* ── ARCH of 5 video/media cards ── */}
+        <div className="hs__arch" ref={archRef} aria-label="Featured machines">
+          {/* curved guide line */}
+          <svg
+            className="hs__arch-line"
+            viewBox="0 0 1000 400"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="hs-arch-grad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0"   stopColor="rgba(43,191,179,0)" />
+                <stop offset="0.5" stopColor="rgba(43,191,179,0.55)" />
+                <stop offset="1"   stopColor="rgba(43,191,179,0)" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M0,330 C 250,70 750,70 1000,330"
+              fill="none"
+              stroke="url(#hs-arch-grad)"
+              strokeWidth="1.5"
+              strokeDasharray="2 8"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
+
+          {nodes.map((f, i) => {
+            const pos = ARCH[i];
+            return (
+              <div
+                key={f.slug}
+                className="hs__node"
+                style={{
+                  left: `${pos.left}%`,
+                  top: `${pos.top}%`,
+                  width: `calc(clamp(118px, 14vw, 205px) * ${pos.scale})`,
+                }}
+              >
+                <div className="hs__node-inner">
+                  <Link
+                    href={`/products/${f.category}/${f.slug}`}
+                    className="hs__node-card"
+                    aria-label={f.name}
+                  >
+                    <img
+                      src={familyImage(f)}
+                      alt={f.name}
+                      className="hs__node-img"
+                      loading="lazy"
+                    />
+                    <span className="hs__node-shade" aria-hidden="true" />
+                    <span className="hs__node-meta">
+                      <span className="hs__node-series">{f.series}</span>
+                      <span className="hs__node-name">{f.name}</span>
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
       </section>
     </>

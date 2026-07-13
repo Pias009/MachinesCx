@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bebas_Neue, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import SiteNav from "@/components/SiteNav";
+import PageNav from "@/components/PageNav";
 import SiteFooter from "@/components/SiteFooter";
 import PageTransitionOverlay from "@/components/PageTransitionOverlay";
 import PageMountTrigger from "@/components/PageMountTrigger";
@@ -91,6 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PageTransitionOverlay />
         <PageMountTrigger />
         <SiteNav />
+        <PageNav />
         <main>{children}</main>
         <SiteFooter />
         <ChatWidget />

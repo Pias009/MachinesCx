@@ -87,15 +87,24 @@ export default function SiteNav() {
           font-family: var(--ff-display);
           font-size: 1.55rem; letter-spacing: 0.05em;
           color: #fff; text-decoration: none;
-          display: flex; align-items: center;
+          display: flex; align-items: center; gap: .65rem;
           flex: 0 0 auto;
-          height: 32px; overflow: hidden;
+          height: 44px;
           position: relative;
           min-width: max-content;
           perspective: 400px;
         }
+        .sn__logo-img {
+          height: 40px; width: auto; display: block;
+          border-radius: 6px; object-fit: contain;
+          flex-shrink: 0;
+        }
+        .sn__logo-text {
+          position: relative;
+          height: 32px; overflow: hidden;
+          display: flex; align-items: center;
+        }
         .sn__logo-word {
-          position: absolute; left: 0; top: 0;
           display: inline-flex; white-space: nowrap;
           transform-origin: 50% 0%;
           will-change: transform, opacity, filter;
@@ -103,6 +112,10 @@ export default function SiteNav() {
         .sn__logo-word em { color: var(--brand-red); font-style: normal; margin-right: 0.28em; }
 
         .sn__logo-word--hold { transform: translateY(0); opacity: 1; }
+
+        @media(max-width:480px){
+          .sn__logo-text { display: none; }
+        }
 
         /* ── Nav links — centered with equal space on both sides ── */
         .sn__links {
@@ -404,9 +417,12 @@ export default function SiteNav() {
       <nav className={`sn${scrolled ? " sn--on" : ""}`}>
         <div className="sn__inner">
 
-          <TransitionLink href="/" className="sn__logo">
-            <span className="sn__logo-word sn__logo-word--hold">
-              <em>ASHAL</em>{" INNOMACH"}
+          <TransitionLink href="/" className="sn__logo" aria-label="Ashal Innomach — home">
+            <img src="/logo.jpeg" alt="Ashal Innomach" className="sn__logo-img" />
+            <span className="sn__logo-text">
+              <span className="sn__logo-word sn__logo-word--hold">
+                <em>ASHAL</em>{" INNOMACH"}
+              </span>
             </span>
           </TransitionLink>
 

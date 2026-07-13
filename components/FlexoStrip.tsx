@@ -3,16 +3,9 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import AetherBtn from "@/components/AetherBtn";
-import { CldImage } from "next-cloudinary";
 import TransitionLink from "@/components/TransitionLink";
 import { useCms } from "@/lib/useCms";
-
-const DEFAULT_MODELS = [
-  { slug:"flexo-2c", label:"AI-2C",  colours:2, speed:"120", reg:"±0.2mm",  img:"cx-machinery/printing/flexo-1", tag:"Entry CI Press" },
-  { slug:"flexo-4c", label:"AI-4C",  colours:4, speed:"200", reg:"±0.15mm", img:"cx-machinery/printing/flexo-2", tag:"Mid-range · Hot Model", hot:true },
-  { slug:"flexo-6c", label:"AI-6C",  colours:6, speed:"260", reg:"±0.1mm",  img:"cx-machinery/printing/flexo-4", tag:"High-speed CI Press" },
-  { slug:"flexo-8c", label:"AI-8C",  colours:8, speed:"350", reg:"±0.1mm",  img:"cx-machinery/printing/flexo-3", tag:"Flagship · Max Output", flagship:true },
-];
+import type { ProductFamily } from "@/lib/products";
 
 const SPECS = [
   { label:"Substrates",  value:"PE · PP · PET · BOPP · Paper · Non-woven" },
@@ -21,10 +14,56 @@ const SPECS = [
   { label:"Power",       value:"380V 3PH 50/60Hz" },
 ];
 
+const localFamilies: ProductFamily[] = [
+  { slug:"flexo-2c", category:"printing", series:"AI-2C · 2-colour", name:"AI-2C", tagline:"Entry CI Press", models:["AI-2C-500"], materials:"PE, PP, PET, BOPP, Paper", images:["/machines/flexo-1.png"], specs:[
+    { label:"Printing Colours",      values:["2"] },
+    { label:"Max Mechanical Speed",  values:["120m/min"] },
+    { label:"Registration Accuracy", values:["±0.2mm"] },
+  ], installation:[], deliveryGuide:[], gallery:[], videos:[], reviews:[], deliveryStagePhotos:{}, customSections:[], parts:[] },
+  { slug:"flexo-4c", category:"printing", series:"AI-4C · 4-colour", name:"AI-4C", tagline:"Mid-range · Hot Model", models:["AI-4C-800"], materials:"PE, PP, PET, BOPP, Paper", images:["/machines/flexo-2.png"], specs:[
+    { label:"Printing Colours",      values:["4"] },
+    { label:"Max Mechanical Speed",  values:["200m/min"] },
+    { label:"Registration Accuracy", values:["±0.15mm"] },
+  ], installation:[], deliveryGuide:[], gallery:[], videos:[], reviews:[], deliveryStagePhotos:{}, customSections:[], parts:[] },
+  { slug:"flexo-6c", category:"printing", series:"AI-6C · 6-colour", name:"AI-6C", tagline:"High-speed CI Press", models:["AI-6C-1200"], materials:"PE, PP, PET, BOPP, Paper", images:["/machines/flexo-6c-nobg.png"], specs:[
+    { label:"Printing Colours",      values:["6"] },
+    { label:"Max Mechanical Speed",  values:["260m/min"] },
+    { label:"Registration Accuracy", values:["±0.1mm"] },
+  ], installation:[], deliveryGuide:[], gallery:[], videos:[], reviews:[], deliveryStagePhotos:{}, customSections:[], parts:[] },
+  { slug:"flexo-8c", category:"printing", series:"AI-8C · 8-colour", name:"AI-8C", tagline:"Flagship · Max Output", models:["AI-8C-1600"], materials:"PE, PP, PET, BOPP, Paper", images:["/machines/flexo-4.png"], specs:[
+    { label:"Printing Colours",      values:["8"] },
+    { label:"Max Mechanical Speed",  values:["350m/min"] },
+    { label:"Registration Accuracy", values:["±0.1mm"] },
+  ], installation:[], deliveryGuide:[], gallery:[], videos:[], reviews:[], deliveryStagePhotos:{}, customSections:[], parts:[] },
+];
+
+function findSpec(family: ProductFamily, label: string): string {
+  return family.specs?.find(s => s.label === label)?.values?.[0] ?? "";
+}
+
+function getModels(products: { families?: ProductFamily[] }) {
+  const printing = (products.families ?? []).filter(f => f.category === "printing");
+  if (!printing.length) return buildModels(localFamilies);
+  return buildModels(printing);
+}
+
+function buildModels(list: ProductFamily[]) {
+  return list.map(f => ({
+    slug: f.slug,
+    label: f.series.split("·")[0].trim(),
+    colours: parseInt(findSpec(f, "Printing Colours")) || 2,
+    speed:   (findSpec(f, "Max Mechanical Speed").match(/\d+/) || ["120"])[0],
+    reg:     findSpec(f, "Registration Accuracy") || "±0.2mm",
+    img:     f.images?.[0] ?? "/machines/flexo-1.png" as string,
+    tag:     f.tagline ?? "",
+    hot:      f.slug === "flexo-4c",
+    flagship: f.slug === "flexo-8c",
+  }));
+}
+
 export default function FlexoStrip() {
-  // live CMS content (admin panel) with hardcoded fallback
-  const cms = useCms<{ items: typeof DEFAULT_MODELS }>("flexo-strip", { items: DEFAULT_MODELS });
-  const MODELS = cms.items && cms.items.length ? cms.items : DEFAULT_MODELS;
+  const cms = useCms<{ families?: ProductFamily[] }>("products", { families: localFamilies });
+  const MODELS = getModels(cms);
 
   const sectionRef  = useRef<HTMLElement>(null);
   const gridRef     = useRef<HTMLDivElement>(null);
@@ -164,6 +203,22 @@ export default function FlexoStrip() {
           text-transform: uppercase; color: var(--brand-red);
         }
 
+        /* ── Light mode: keep cards dark with white text ── */
+        [data-theme="light"] .fls-card { background: #0d1018 !important; border-color: rgba(255,255,255,0.08) !important; }
+        [data-theme="light"] .fls-card:hover { border-color: rgba(225,29,72,0.4) !important; }
+        [data-theme="light"] .fls-card__media { background: #0d1614 !important; }
+        [data-theme="light"] .fls-card [style*="color: #fff"],
+        [data-theme="light"] .fls-card [style*="color:#fff"],
+        [data-theme="light"] .fls-card [style*="color: white"],
+        [data-theme="light"] .fls-card [style*="color:white"] { color: #fff !important; }
+        [data-theme="light"] .fls-card [style*="color: rgba(255"] { color: rgba(255,255,255,0.7) !important; }
+        [data-theme="light"] .fls-card [style*="color: rgba(255,255,255,0.85"],
+        [data-theme="light"] .fls-card [style*="color: rgba(255,255,255,.85"] { color: rgba(255,255,255,0.85) !important; }
+        [data-theme="light"] .fls-card [style*="color: rgba(255,255,255,0.6"],
+        [data-theme="light"] .fls-card [style*="color: rgba(255,255,255,.6"] { color: rgba(255,255,255,0.6) !important; }
+        [data-theme="light"] .fls-card [style*="color: rgba(255,255,255,0.5"],
+        [data-theme="light"] .fls-card [style*="color: rgba(255,255,255,.5"] { color: rgba(255,255,255,0.5) !important; }
+
         @media (max-width: 640px) {
           .fls-title-clip h2 { font-size: clamp(2rem, 9vw, 3.2rem) !important; }
         }
@@ -217,7 +272,7 @@ export default function FlexoStrip() {
               <div className="fls-card__media">
                 {model.hot      && <span className="fls-badge fls-badge--hot">Hot</span>}
                 {model.flagship && <span className="fls-badge fls-badge--flagship">Flagship</span>}
-                <CldImage src={model.img} alt={model.label} width={480} height={360} sizes="(max-width: 640px) 90vw, 25vw" />
+                <img src={model.img} alt={model.label} />
               </div>
               <div className="fls-card__body">
                 <span className="fls-card__series">AI · {model.colours}-colour</span>

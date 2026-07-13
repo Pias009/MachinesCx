@@ -100,10 +100,24 @@ export default function FlexoPrintingPage() {
         .fp-kv { display:flex; flex-direction:column; gap:.25rem; }
         .fp-kv__label { font-family:var(--ff-mono); font-size:0.68rem; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,0.65); }
         .fp-kv__value { font-family:var(--ff-display); font-size:1.45rem; color:var(--slate); line-height:1; }
+
+        /* ── Light mode: keep dark sections dark with white text ── */
+        [data-theme="light"] .fp-dark { background: #0d1614 !important; }
+        [data-theme="light"] .fp-dark [style*="color: rgba(255"] { color: rgba(255,255,255,0.7) !important; }
+        [data-theme="light"] .fp-dark [style*="color: rgba(255,255,255,0.65"],
+        [data-theme="light"] .fp-dark [style*="color: rgba(255,255,255,.65"] { color: rgba(255,255,255,0.65) !important; }
+        [data-theme="light"] .fp-dark [style*="color: rgba(255,255,255,0.75"],
+        [data-theme="light"] .fp-dark [style*="color: rgba(255,255,255,.75"] { color: rgba(255,255,255,0.75) !important; }
+        [data-theme="light"] .fp-dark [style*="color: rgba(255,255,255,0.78"],
+        [data-theme="light"] .fp-dark [style*="color: rgba(255,255,255,.78"] { color: rgba(255,255,255,0.78) !important; }
+        [data-theme="light"] .fp-dark [style*="color: #fff"],
+        [data-theme="light"] .fp-dark [style*="color:#fff"],
+        [data-theme="light"] .fp-dark [style*="color: white"],
+        [data-theme="light"] .fp-dark [style*="color:white"] { color: #fff !important; }
       `}</style>
 
       {/* ── HERO GALLERY ── */}
-      <section style={{
+      <section className="fp-dark" style={{
         background: "#0d1614",
         padding: "5rem 0 0",
         overflow: "hidden",
@@ -298,7 +312,7 @@ export default function FlexoPrintingPage() {
       </section>
 
       {/* ── SUBSTRATE SECTION ── */}
-      <section style={{ background:"#0d1614", padding:"4rem 0" }}>
+      <section className="fp-dark" style={{ background:"#0d1614", padding:"4rem 0" }}>
         <div className="wrap">
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4rem", alignItems:"center" }}>
             <div>

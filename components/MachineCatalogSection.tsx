@@ -1,14 +1,30 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { families, categories, familyImage } from "@/lib/products";
 import { useCms } from "@/lib/useCms";
+import type { ProductFamily } from "@/lib/products";
+import localData from "@/data/products.json";
+const localFamilies = (localData as { families: ProductFamily[] }).families;
+
+/* helpers that work with both local and live CMS product data */
+function familyImage(f: Pick<ProductFamily, "slug" | "image" | "images">): string {
+  if (f.images && f.images.length > 0) return f.images[0];
+  if (f.image) return f.image;
+  return `/machines/${f.slug}.png`;
+}
 
 const CAT_LABELS: Record<string, string> = {
   "film-blowing": "Film Blowing",
   "bag-making":   "Bag Making",
   "recycling":    "Recycling",
   "printing":     "Flexo Printing",
+};
+
+const CAT_COLORS: Record<string, { accent: string; bg: string }> = {
+  "film-blowing": { accent: "#2bbfb3", bg: "rgba(43,191,179,0.08)" },
+  "bag-making":   { accent: "#f59e0b", bg: "rgba(245,158,11,0.08)"  },
+  "recycling":    { accent: "#22c55e", bg: "rgba(34,197,94,0.08)"   },
+  "printing":     { accent: "#e11d48", bg: "rgba(225,29,72,0.08)"   },
 };
 
 const CAT_ICONS: Record<string, string> = {
@@ -59,27 +75,33 @@ interface CatalogCms {
 }
 
 export default function MachineCatalogSection() {
-  // live CMS content (admin panel) with hardcoded fallback
   const cms = useCms<CatalogCms>("machine-catalog", {
     headline1: "Every machine.",
     headline2: "Find your perfect fit.",
     items: [],
   });
+  const productsCms = useCms<{ families?: ProductFamily[] }>("products", {});
+
+  const allFamilies = (productsCms.families && productsCms.families.length > 0)
+    ? productsCms.families
+    : localFamilies;
+
   const KEY_SPECS: Record<string, { stat: string; label: string }> =
     cms.items && cms.items.length
       ? Object.fromEntries(cms.items.map(i => [i.slug, { stat: i.stat, label: i.label }]))
       : DEFAULT_KEY_SPECS;
   const [activeTab, setActiveTab] = useState<string>("all");
 
-  const totalFamilies = families.length;
-  const totalModels   = families.reduce((n, f) => n + f.models.length, 0);
+  const totalFamilies = allFamilies.length;
+  const totalModels   = allFamilies.reduce((n, f) => n + f.models.length, 0);
 
   const filtered = activeTab === "all"
-    ? families
-    : families.filter(f => f.category === activeTab);
+    ? allFamilies
+    : allFamilies.filter(f => f.category === activeTab);
 
-  const tabCounts: Record<string, number> = { all: families.length };
-  categories.forEach(c => { tabCounts[c.slug] = families.filter(f => f.category === c.slug).length; });
+  const tabSlugs = [...new Set(allFamilies.map(f => f.category))];
+  const tabCounts: Record<string, number> = { all: allFamilies.length };
+  tabSlugs.forEach(s => { tabCounts[s] = allFamilies.filter(f => f.category === s).length; });
 
   return (
     <>
@@ -88,10 +110,28 @@ export default function MachineCatalogSection() {
           background: var(--bg-base);
           border-top: 1px solid rgba(255,255,255,0.06);
           padding: clamp(4rem,8vw,8rem) 0;
+          position: relative;
+          overflow: hidden;
         }
         .mcs__wrap {
           max-width: 1600px; margin: 0 auto;
           padding-inline: clamp(1rem,3vw,2.5rem);
+          position: relative; z-index: 2;
+        }
+
+        /* ── Decorative color blobs ── */
+        .mcs__blob {
+          position: absolute; border-radius: 50%; pointer-events: none; z-index: 0;
+        }
+        .mcs__blob--t {
+          width: min(40vw, 500px); height: min(40vw, 500px);
+          top: -10%; right: -5%;
+          background: radial-gradient(circle, rgba(43,191,179,0.06) 0%, transparent 70%);
+        }
+        .mcs__blob--b {
+          width: min(50vw, 600px); height: min(50vw, 600px);
+          bottom: -15%; left: -10%;
+          background: radial-gradient(circle, rgba(245,158,11,0.05) 0%, transparent 70%);
         }
 
         /* ── Header ── */
@@ -164,11 +204,15 @@ export default function MachineCatalogSection() {
           white-space: nowrap;
         }
         .mcs__tab:hover { color: var(--ink); }
-        .mcs__tab--active {
-          color: var(--brand-teal);
-          border-bottom-color: var(--brand-teal);
-        }
-        .mcs__tab-icon { font-size: .75rem; opacity: .7; }
+        .mcs__tab--active { color: var(--ink); border-bottom-color: var(--brand-teal); }
+
+        /* per-category active tab color */
+        .mcs__tab--film-blowing { color: var(--ink); border-bottom-color: #2bbfb3; }
+        .mcs__tab--bag-making { color: var(--ink); border-bottom-color: #f59e0b; }
+        .mcs__tab--recycling { color: var(--ink); border-bottom-color: #22c55e; }
+        .mcs__tab--printing { color: var(--ink); border-bottom-color: #e11d48; }
+
+        .mcs__tab-icon { font-size: 1rem; }
         .mcs__tab-count {
           font-size: 0.66rem;
           background: rgba(255,255,255,0.08);
@@ -205,8 +249,9 @@ export default function MachineCatalogSection() {
           text-decoration: none;
           position: relative;
           overflow: hidden;
-          transition: background .18s;
+          transition: background .18s, transform .25s cubic-bezier(0.16,1,0.3,1);
         }
+        .mcs-card:hover { transform: translateY(-4px); }
 
         /* machine image — bottom-right, partially visible */
         .mcs-card__bg {
@@ -252,6 +297,7 @@ export default function MachineCatalogSection() {
           );
         }
 
+        /* color-coded top accent line */
         .mcs-card::after {
           content: "";
           position: absolute; top: 0; left: 0; right: 0;
@@ -262,14 +308,20 @@ export default function MachineCatalogSection() {
           transition: transform .22s cubic-bezier(0.16,1,0.3,1);
         }
         .mcs-card:hover::after { transform: scaleX(1); }
+        .mcs-card--film-blowing::after { background: #2bbfb3; }
+        .mcs-card--bag-making::after { background: #f59e0b; }
+        .mcs-card--recycling::after { background: #22c55e; }
+        .mcs-card--printing::after { background: #e11d48; }
         [data-theme="light"] .mcs-card { background: #fff; }
 
-        .mcs-card__top {}
         .mcs-card__cat {
-          font-family: var(--ff-mono); font-size: 0.66rem;
+          font-family: var(--ff-mono); font-size: 0.68rem;
           letter-spacing: .14em; text-transform: uppercase;
-          color: var(--brand-teal); opacity: .7;
           margin-bottom: .4rem;
+          display: inline-flex; align-items: center; gap: .45rem;
+        }
+        .mcs-card__cat-dot {
+          width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
         }
         .mcs-card__series {
           font-family: var(--ff-mono); font-size: 0.7rem;
@@ -381,6 +433,8 @@ export default function MachineCatalogSection() {
       `}</style>
 
       <section className="mcs" aria-label="Machine catalogue">
+        <div className="mcs__blob mcs__blob--t" aria-hidden="true" />
+        <div className="mcs__blob mcs__blob--b" aria-hidden="true" />
         <div className="mcs__wrap">
 
           {/* ── Header ── */}
@@ -414,30 +468,35 @@ export default function MachineCatalogSection() {
               All machines
               <span className="mcs__tab-count">{tabCounts.all}</span>
             </button>
-            {categories.map(c => (
-              <button
-                key={c.slug}
-                role="tab"
-                aria-selected={activeTab === c.slug}
-                className={`mcs__tab${activeTab === c.slug ? " mcs__tab--active" : ""}`}
-                onClick={() => setActiveTab(c.slug)}
-              >
-                <span className="mcs__tab-icon">{CAT_ICONS[c.slug]}</span>
-                {CAT_LABELS[c.slug]}
-                <span className="mcs__tab-count">{tabCounts[c.slug]}</span>
-              </button>
-            ))}
+            {tabSlugs.map(slug => {
+              const col = CAT_COLORS[slug];
+              return (
+                <button
+                  key={slug}
+                  role="tab"
+                  aria-selected={activeTab === slug}
+                  className={`mcs__tab${activeTab === slug ? ` mcs__tab--active mcs__tab--${slug}` : ""}`}
+                  onClick={() => setActiveTab(slug)}
+                  style={activeTab === slug ? { borderBottomColor: col?.accent } : undefined}
+                >
+                  <span className="mcs__tab-icon">{CAT_ICONS[slug] ?? ""}</span>
+                  {CAT_LABELS[slug] ?? slug}
+                  <span className="mcs__tab-count">{tabCounts[slug]}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* ── Machine grid ── */}
           <div className="mcs__grid" role="tabpanel">
             {filtered.map((fam, i) => {
               const spec = KEY_SPECS[fam.slug];
+              const col = CAT_COLORS[fam.category];
               return (
                 <Link
                   key={fam.slug}
                   href={`/products/${fam.category}/${fam.slug}`}
-                  className="mcs-card"
+                  className={`mcs-card mcs-card--${fam.category}`}
                   style={{ animationDelay: `${Math.min(i, 15) * 28}ms` }}
                 >
                   <div className="mcs-card__bg" aria-hidden="true">
@@ -445,8 +504,11 @@ export default function MachineCatalogSection() {
                   </div>
                   <div className="mcs-card__scrim" aria-hidden="true" />
                   <div className="mcs-card__top" style={{ position: "relative", zIndex: 1 }}>
-                    <div className="mcs-card__cat">{CAT_LABELS[fam.category]}</div>
-                    <div className="mcs-card__series">{fam.series}</div>
+                    <div className="mcs-card__cat">
+                      <span className="mcs-card__cat-dot" style={{ background: col?.accent }} />
+                      {CAT_LABELS[fam.category]}
+                    </div>
+                    <div className="mcs-card__series" style={{ color: col?.accent }}>{fam.series}</div>
                     <div className="mcs-card__name">{fam.name.split("—")[0].trim()}</div>
                   </div>
                   <div className="mcs-card__bottom" style={{ position: "relative", zIndex: 1 }}>
@@ -458,7 +520,9 @@ export default function MachineCatalogSection() {
                     ) : (
                       <div />
                     )}
-                    <div className="mcs-card__arrow" aria-hidden="true">
+                    <div className="mcs-card__arrow" aria-hidden="true"
+                      style={{ borderColor: col ? `${col.accent}44` : undefined }}
+                    >
                       <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
                         <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>

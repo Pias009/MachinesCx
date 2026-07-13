@@ -57,7 +57,7 @@ export default function SiteNav() {
         /* ── Base bar ── */
         .sn {
           position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-          height: 72px;
+          height: 72px; width: 100%; overflow-x: hidden;
           background: rgba(15,23,42,0.72);
           backdrop-filter: blur(20px) saturate(1.6);
           border-bottom: 1px solid rgba(255,255,255,0.07);
@@ -77,9 +77,9 @@ export default function SiteNav() {
         }
 
         .sn__inner {
-          height: 72px; max-width: 1320px; margin: 0 auto;
-          padding: 0 clamp(1.25rem, 4vw, 3rem);
-          display: flex; align-items: center; gap: 0;
+          height: 72px; width: 100%; max-width: 1280px; margin-inline: auto;
+          padding: 0 clamp(1rem, 4vw, 2.5rem);
+          display: flex; align-items: center; justify-content: space-between; gap: 1rem;
         }
 
         /* ── Logo ── */
@@ -88,10 +88,10 @@ export default function SiteNav() {
           font-size: 1.55rem; letter-spacing: 0.05em;
           color: #fff; text-decoration: none;
           display: flex; align-items: center;
-          flex-shrink: 0;
+          flex: 0 0 auto;
           height: 32px; overflow: hidden;
           position: relative;
-          min-width: clamp(160px, 17vw, 250px);
+          min-width: max-content;
           perspective: 400px;
         }
         .sn__logo-word {
@@ -104,10 +104,15 @@ export default function SiteNav() {
 
         .sn__logo-word--hold { transform: translateY(0); opacity: 1; }
 
-        /* ── Nav links — pushed to right via margin-left: auto ── */
+        /* ── Nav links — centered with equal space on both sides ── */
         .sn__links {
           display: flex; align-items: center;
-          margin-left: auto; gap: 0;
+          flex: 0 1 auto; min-width: 0; margin: 0 auto; gap: 0;
+        }
+        /* ── Right actions ── */
+        .sn__actions {
+          display: flex; align-items: center; gap: 0.9rem;
+          flex: 0 0 auto; justify-content: flex-end;
         }
 
         /* category dropdown trigger */
@@ -431,17 +436,19 @@ export default function SiteNav() {
             <TransitionLink href="/contact"  className="sn__link sn__link--hide">Contact</TransitionLink>
           </div>
 
-          <ThemeToggle />
-          <TransitionLink href="/contact" className="sn__cta">Get a Quote</TransitionLink>
+          <div className="sn__actions">
+            <ThemeToggle />
+            <TransitionLink href="/contact" className="sn__cta">Get a Quote</TransitionLink>
 
-          {/* Hamburger — mobile only */}
-          <button
-            className={`sn__burger${mobileOpen ? " sn__burger--open" : ""}`}
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            onClick={() => setMobileOpen(v => !v)}
-          >
-            <span /><span /><span />
-          </button>
+            {/* Hamburger — mobile only */}
+            <button
+              className={`sn__burger${mobileOpen ? " sn__burger--open" : ""}`}
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              onClick={() => setMobileOpen(v => !v)}
+            >
+              <span /><span /><span />
+            </button>
+          </div>
         </div>
 
         {/* Mobile backdrop */}

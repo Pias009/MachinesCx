@@ -100,19 +100,43 @@ export default function HeroSplash() {
           min-height: 100vh;
           display: flex;
           flex-direction: column;
-          /* NO overflow:hidden — it blocks mobile touch scroll */
         }
 
-        /* Engineering grid overlay */
-        .hs__grid {
+        /* Colorful decorative circles */
+        .hs__shape {
           position: absolute;
-          inset: 0;
-          background-image:
-            linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-          background-size: 80px 80px;
-          z-index: 0;
+          border-radius: 50%;
           pointer-events: none;
+          z-index: 0;
+        }
+        .hs__shape--1 {
+          width: min(50vw, 600px);
+          height: min(50vw, 600px);
+          top: -10%;
+          right: -5%;
+          background: radial-gradient(circle, rgba(43,191,179,0.15) 0%, transparent 70%);
+          animation: hs-float 8s ease-in-out infinite;
+        }
+        .hs__shape--2 {
+          width: min(30vw, 400px);
+          height: min(30vw, 400px);
+          bottom: 5%;
+          left: -8%;
+          background: radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%);
+          animation: hs-float 11s ease-in-out infinite reverse;
+        }
+        .hs__shape--3 {
+          width: min(20vw, 260px);
+          height: min(20vw, 260px);
+          top: 40%;
+          left: 45%;
+          background: radial-gradient(circle, rgba(225,29,72,0.08) 0%, transparent 70%);
+          animation: hs-float 14s ease-in-out infinite 2s;
+        }
+        @keyframes hs-float {
+          0%,100% { transform: translate(0, 0) scale(1); }
+          33%      { transform: translate(10px, -20px) scale(1.03); }
+          66%      { transform: translate(-8px, 15px) scale(0.97); }
         }
 
         /* WebGL canvas — pointer-events none so scroll passes through */
@@ -122,7 +146,7 @@ export default function HeroSplash() {
           width: 100%;
           height: 100%;
           z-index: 1;
-          opacity: .55;
+          opacity: .45;
           mix-blend-mode: screen;
           pointer-events: none;
         }
@@ -138,14 +162,9 @@ export default function HeroSplash() {
         }
 
         /* ── Light mode overrides ── */
-        [data-theme="light"] .hs__grid {
-          background-image:
-            linear-gradient(rgba(43,191,179,0.07) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(43,191,179,0.07) 1px, transparent 1px);
-        }
         [data-theme="light"] .hs__canvas {
           mix-blend-mode: darken;
-          opacity: 0.65;
+          opacity: 0.45;
         }
         [data-theme="light"] .hs__h1  { color: var(--slate) !important; }
         [data-theme="light"] .hs__h1 em { color: var(--brand-teal) !important; }
@@ -282,8 +301,10 @@ export default function HeroSplash() {
 
       <section className="hs" aria-label="Wenzhou Asal Innomach — Hero">
 
-        {/* Engineering grid */}
-        <div className="hs__grid" aria-hidden="true" />
+        {/* Decorative floating shapes */}
+        <div className="hs__shape hs__shape--1" aria-hidden="true" />
+        <div className="hs__shape hs__shape--2" aria-hidden="true" />
+        <div className="hs__shape hs__shape--3" aria-hidden="true" />
 
         {/* WebGL wisp background */}
         <canvas ref={canvasRef} className="hs__canvas" aria-hidden="true" />

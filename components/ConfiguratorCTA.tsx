@@ -61,7 +61,7 @@ export default function ConfiguratorCTA() {
         .cc {
           position: relative;
           background: #0d1614;
-          min-height: 480px;
+          min-height: 820px;
           display: flex; align-items: center; justify-content: center;
           overflow: hidden;
         }
@@ -83,82 +83,146 @@ export default function ConfiguratorCTA() {
         }
         .cc__content {
           position: relative; z-index: 3;
-          display: flex; flex-direction: column;
-          align-items: center; text-align: center;
+          display: flex; flex-direction: row;
+          align-items: center; justify-content: space-between;
+          gap: clamp(2rem, 12vw, 12rem);
           padding: clamp(4rem,8vw,7rem) clamp(1.5rem,5vw,4rem);
-          max-width: 680px;
+          width: 100%; margin: 0 auto;
         }
+        .cc__left { flex: 0 0 38%; max-width: 38%; text-align: left; }
+        .cc__index {
+          font-family: var(--ff-mono); font-size: .7rem; letter-spacing: .2em;
+          text-transform: uppercase; color: rgba(248,250,252,.4);
+          display: flex; align-items: center; gap: .7rem; margin-bottom: 2rem;
+        }
+        .cc__index b { color: var(--brand-teal); font-weight: 600; }
+        .cc__index::after { content:""; flex:1; height:1px; background: linear-gradient(90deg, rgba(43,191,179,.4), transparent); }
+        .cc__right {
+          flex: 0 0 30%; max-width: 30%;
+          display: flex; flex-direction: column; align-items: stretch;
+          text-align: left;
+          padding: clamp(1.75rem, 2.5vw, 2.5rem);
+          background: transparent;
+          border: 1px solid rgba(43,191,179,.18);
+          border-radius: 2px;
+          box-shadow: 0 30px 80px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.04);
+          position: relative;
+        }
+        .cc__right::before, .cc__right::after {
+          content:""; position:absolute; width:14px; height:14px; pointer-events:none;
+          border-color: var(--brand-teal);
+        }
+        .cc__right::before { top:-1px; left:-1px; border-top:2px solid; border-left:2px solid; }
+        .cc__right::after { bottom:-1px; right:-1px; border-bottom:2px solid; border-right:2px solid; }
+        .cc__badge {
+          display:inline-flex; align-items:center; gap:.5rem; align-self:flex-start;
+          font-family: var(--ff-mono); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase;
+          color: var(--brand-teal); margin-bottom:1.25rem;
+          padding:.35rem .7rem; border:1px solid rgba(43,191,179,.25);
+          border-radius:999px; background: rgba(43,191,179,.06);
+        }
+        .cc__badge .dot { width:6px; height:6px; border-radius:50%; background:var(--brand-teal); box-shadow:0 0 8px var(--brand-teal); animation: ccpulse 2s infinite; }
+        @keyframes ccpulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
         .cc__eyebrow {
           display: inline-flex; align-items: center; gap: .6rem;
           font-family: var(--ff-mono); font-size: .65rem;
           letter-spacing: .26em; text-transform: uppercase;
           color: var(--brand-teal); margin-bottom: 1.4rem;
         }
-        .cc__eyebrow::before,
         .cc__eyebrow::after { content:""; width:2rem; height:1px; background:var(--brand-teal); }
         .cc__title {
           font-family: var(--ff-display);
-          font-size: clamp(3rem,7vw,6rem);
-          line-height: .9; letter-spacing: -.015em;
-          color: #f8fafc; margin: 0 0 1.25rem;
+          font-size: clamp(3rem,6.5vw,6.5rem);
+          line-height: .9; letter-spacing: -.02em;
+          color: #f8fafc; margin: 0 0 1.75rem;
         }
-        .cc__title em { font-style:normal; color:var(--brand-teal); }
+        .cc__title em {
+          font-style:normal;
+          background: linear-gradient(120deg, var(--brand-teal), #7fe9df);
+          -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .cc__metrics {
+          display:flex; gap:2rem; margin-top:.5rem;
+        }
+        .cc__metric { display:flex; flex-direction:column; gap:.25rem; }
+        .cc__metric b { font-family: var(--ff-display); font-size:1.6rem; color:#f8fafc; line-height:1; }
+        .cc__metric span { font-family: var(--ff-mono); font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(248,250,252,.45); }
         .cc__desc {
-          font-size: clamp(.9rem,1.1vw,1rem);
+          font-size: clamp(.78rem,0.9vw,.85rem);
           color: rgba(248,250,252,0.7);
-          line-height: 1.75; max-width: 42ch; margin: 0 0 2.75rem;
+          line-height: 1.7; max-width: 46ch; margin: 0 0 2rem;
+          text-align: left;
         }
         .cc__cta {
-          display: inline-flex; align-items: center; gap: .9rem;
-          padding: .9rem 2rem;
+          display: flex; align-items: center; justify-content: space-between; gap: .9rem;
+          align-self: stretch;
+          padding: 1.05rem 1.5rem;
           border: 1px solid var(--brand-red);
-          border-radius: 0;
+          border-radius: 2px;
           background: var(--brand-red);
-          font-family: var(--ff-mono); font-size: .78rem;
+          font-family: var(--ff-mono); font-size: .8rem;
           letter-spacing: .1em; text-transform: uppercase;
           font-weight: 600;
           color: #fff; text-decoration: none;
           position: relative; overflow: hidden;
-          transition: background .18s, box-shadow .18s;
+          transition: background .25s, box-shadow .25s, transform .25s;
+        }
+        .cc__cta::after {
+          content:""; position:absolute; top:0; left:-120%; width:60%; height:100%;
+          background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent);
+          transform: skewX(-20deg); transition: left .6s ease;
         }
         .cc__cta:hover {
           background: var(--brand-teal-dk);
-          box-shadow: 0 4px 32px rgba(43,191,179,0.45);
+          box-shadow: 0 12px 40px rgba(43,191,179,0.4);
+          transform: translateY(-2px);
         }
+        .cc__cta:hover::after { left: 130%; }
         .cc__cta-arr {
           display:flex; align-items:center; justify-content:center;
-          width:28px; height:28px; border-radius:0;
+          width:30px; height:30px; border-radius:2px;
           background: rgba(255,255,255,.18);
-          flex-shrink:0;
+          flex-shrink:0; transition: transform .25s;
         }
+        .cc__cta:hover .cc__cta-arr { transform: translateX(4px); }
         .cc__hint {
-          display: flex; align-items: center; gap: .6rem;
-          margin-top: 2rem; flex-wrap: wrap; justify-content: center;
+          display: flex; flex-direction: column; gap: 0;
+          margin-top: 1.75rem;
+          width: 100%;
+          border-top: 1px solid rgba(255,255,255,.08);
         }
+        .cc__hint-row {
+          display: flex; align-items: center; gap: .8rem;
+          padding: .85rem .25rem;
+          border-bottom: 1px solid rgba(255,255,255,.06);
+          transition: padding-left .2s, background .2s;
+        }
+        .cc__hint-row:last-child { border-bottom: none; }
+        .cc__hint-row:hover { padding-left: .8rem; background: rgba(43,191,179,.04); }
         .cc__hint-step {
-          display: flex; align-items: center; gap: .45rem;
-          font-family: var(--ff-mono); font-size: 0.7rem;
-          letter-spacing: .1em; text-transform: uppercase;
-          color: rgba(248,250,252,0.6);
+          display: flex; align-items: center; gap: .7rem;
+          font-family: var(--ff-mono); font-size: 0.72rem;
+          letter-spacing: .08em; text-transform: uppercase;
+          color: rgba(248,250,252,0.7);
         }
         .cc__hint-num {
-          width: 18px; height: 18px; border-radius: 0;
-          border: 1px solid rgba(255,255,255,.12);
+          width: 26px; height: 26px; border-radius: 50%;
+          border: 1px solid rgba(43,191,179,.35);
+          background: rgba(43,191,179,.08);
           display:flex; align-items:center; justify-content:center;
-          font-size: 0.64rem; color: rgba(248,250,252,0.65); flex-shrink:0;
+          font-size: 0.68rem; color: var(--brand-teal); flex-shrink:0; font-weight:600;
         }
-        .cc__hint-sep { width:20px; height:1px; background:rgba(255,255,255,.1); }
         .cc__wave {
           position: absolute; bottom: 0; left: 0; right: 0; z-index: 4; line-height:0;
         }
         @media(max-width:640px){
-          .cc { min-height: 360px; }
-          .cc__content { padding: clamp(2.5rem,6vw,4rem) 1.25rem; }
+          .cc { min-height: auto; }
+          .cc__content { padding: clamp(2.5rem,6vw,4rem) 1.25rem; flex-direction: column; gap: 2rem; align-items: stretch; }
+          .cc__left, .cc__right { flex: 1 1 100%; max-width: 100%; }
           .cc__title { font-size: clamp(2rem,8vw,3.5rem); }
-          .cc__desc { font-size: 0.88rem; margin-bottom: 1.75rem; }
-          .cc__cta { padding: .75rem 1.5rem; font-size: .72rem; }
-          .cc__hint { flex-direction: column; gap: .4rem; align-items: flex-start; }
-          .cc__hint-sep { display: none; }
+          .cc__desc { font-size: 0.88rem; margin-bottom: 1.5rem; }
+          .cc__cta { font-size: .72rem; }
+          .cc__metrics { gap: 1.5rem; }
         }
         @media(max-width:480px){
           .cc__title { font-size: clamp(1.7rem,9vw,2.6rem); }
@@ -179,33 +243,41 @@ export default function ConfiguratorCTA() {
         <div className="cc__vignette" aria-hidden="true" />
 
         <div className="cc__content">
-          <div className="cc__eyebrow">Custom configuration</div>
-          <h2 className="cc__title">
-            Build your<br /><em>machine order.</em>
-          </h2>
-          <p className="cc__desc">
-            Browse every model, pick the spec that fits your production, then send us an inquiry — our engineers reply within 24 hours.
-          </p>
+          <div className="cc__left">
+            <div className="cc__index"><b>01</b> / Configurator</div>
+            <div className="cc__eyebrow">Custom configuration</div>
+            <h2 className="cc__title">
+              Build your<br /><em>machine order.</em>
+            </h2>
+            <div className="cc__metrics">
+              <div className="cc__metric"><b>120+</b><span>Models</span></div>
+              <div className="cc__metric"><b>24h</b><span>Reply time</span></div>
+              <div className="cc__metric"><b>∞</b><span>Configs</span></div>
+            </div>
+          </div>
 
-          <TransitionLink href="/products" className="cc__cta">
-            Choose a machine
-            <span className="cc__cta-arr" aria-hidden="true">
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                <path d="M2.5 6.5h8M8 3l3 3.5-3 3" stroke="#f8fafc" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
-          </TransitionLink>
+          <div className="cc__right">
+            <div className="cc__badge"><span className="dot" />Engineers online</div>
 
-          <div className="cc__hint" aria-label="Steps">
-            {["Browse machines","Select & configure","Send inquiry"].map((s, i) => (
-              <div key={i} style={{ display:"flex", alignItems:"center", gap:".6rem" }}>
-                <div className="cc__hint-step">
-                  <span className="cc__hint-num">{i + 1}</span>
-                  {s}
+            <TransitionLink href="/products" className="cc__cta">
+              Choose a machine
+              <span className="cc__cta-arr" aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <path d="M2.5 6.5h8M8 3l3 3.5-3 3" stroke="#f8fafc" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+            </TransitionLink>
+
+            <div className="cc__hint" aria-label="Steps">
+              {["Browse machines","Select & configure","Send inquiry"].map((s, i) => (
+                <div key={i} className="cc__hint-row">
+                  <div className="cc__hint-step">
+                    <span className="cc__hint-num">{i + 1}</span>
+                    {s}
+                  </div>
                 </div>
-                {i < 2 && <div className="cc__hint-sep" />}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 

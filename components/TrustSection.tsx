@@ -27,6 +27,8 @@ const PALETTE = [
   new THREE.Color("#0d3530"), new THREE.Color("#165e58"),
   new THREE.Color("#1fa39a"), new THREE.Color("#2bbfb3"),
   new THREE.Color("#5dd6cc"), new THREE.Color("#a8ede9"),
+  new THREE.Color("#fcd34d"), new THREE.Color("#f59e0b"),
+  new THREE.Color("#fb7185"), new THREE.Color("#e11d48"),
 ];
 function pickColor(t: number) {
   const s = Math.max(0,Math.min(0.9999,t))*(PALETTE.length-1);
@@ -232,6 +234,25 @@ export default function TrustSection() {
           padding-top: clamp(5rem, 10vw, 9rem);
           padding-bottom: clamp(4rem, 8vw, 7rem);
         }
+        .ts__blob {
+          position: absolute; border-radius: 50%; pointer-events: none;
+        }
+        .ts__blob--1 {
+          width: min(45vw, 500px); height: min(45vw, 500px);
+          bottom: -15%; right: -10%;
+          background: radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 70%);
+          animation: ts-float 18s ease-in-out infinite;
+        }
+        .ts__blob--2 {
+          width: min(25vw, 280px); height: min(25vw, 280px);
+          top: 10%; left: 5%;
+          background: radial-gradient(circle, rgba(225,29,72,0.05) 0%, transparent 70%);
+          animation: ts-float 14s ease-in-out infinite reverse;
+        }
+        @keyframes ts-float {
+          0%,100% { transform: translate(0, 0) scale(1); }
+          50%      { transform: translate(15px, -25px) scale(1.05); }
+        }
         .ts-bg {
           position: absolute; inset: 0; z-index: 0;
           -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
@@ -257,16 +278,22 @@ export default function TrustSection() {
           display: inline-flex; align-items: center; gap: .75rem;
           font-family: var(--ff-mono); font-size: .67rem;
           letter-spacing: .22em; text-transform: uppercase;
-          color: var(--brand-teal); margin-bottom: 1.1rem;
+          color: var(--brand-amber); margin-bottom: 1.1rem;
         }
-        .ts-kicker::before{content:"";width:2rem;height:1px;background:var(--brand-teal);}
+        .ts-kicker::before{content:"";width:2rem;height:1px;background:var(--brand-amber);}
         .ts-headline {
           font-family: var(--ff-display);
           font-size: clamp(2.6rem, 5.2vw, 5rem);
           line-height: .95; letter-spacing: -.01em;
           color: #f8fafc; text-wrap: balance; margin: 0;
         }
-        .ts-headline em{font-style:normal;color:var(--brand-teal);}
+        .ts-headline em{
+          font-style:normal;
+          background: linear-gradient(135deg, var(--brand-amber), var(--brand-rose));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
         .ts-desc {
           color: rgba(248,250,252,0.75);
           font-size: clamp(.88rem, 1.15vw, 1rem);
@@ -289,7 +316,10 @@ export default function TrustSection() {
           font-family: var(--ff-display);
           font-size: clamp(1.3rem, 2.4vw, 1.9rem);
           letter-spacing: .01em;
-          color: var(--brand-teal);
+          background: linear-gradient(135deg, var(--brand-amber), var(--brand-rose));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
           white-space: nowrap;
         }
 
@@ -310,7 +340,8 @@ export default function TrustSection() {
         .ts-stat:last-child{border-right:none;}
         .ts-stat::after {
           content:""; position:absolute; bottom:0; left:0; right:0;
-          height:2px; background:var(--brand-teal);
+          height:2px;
+          background: linear-gradient(90deg, var(--brand-teal), var(--brand-amber), var(--brand-rose));
           transform:scaleX(0); transform-origin:left;
           transition:transform .4s cubic-bezier(.16,1,.3,1);
         }
@@ -349,10 +380,10 @@ export default function TrustSection() {
 
         /* ── Light mode ── */
         [data-theme="light"] .trust-section { background: #eaf5f4; }
-        [data-theme="light"] .ts-kicker     { color: var(--brand-teal); }
-        [data-theme="light"] .ts-kicker::before { background: var(--brand-teal); }
+        [data-theme="light"] .ts-kicker     { color: var(--brand-amber); }
+        [data-theme="light"] .ts-kicker::before { background: var(--brand-amber); }
         [data-theme="light"] .ts-headline   { color: #0d2220; }
-        [data-theme="light"] .ts-headline em { color: var(--brand-teal); }
+        [data-theme="light"] .ts-headline em { background: none; -webkit-text-fill-color: initial; color: var(--brand-amber); }
         [data-theme="light"] .ts-desc       { color: rgba(13,34,32,0.72); }
         [data-theme="light"] .ts-stat__val   { color: #0d2220; }
         [data-theme="light"] .ts-stat__label { color: rgba(13,34,32,0.72); }
@@ -360,9 +391,13 @@ export default function TrustSection() {
         [data-theme="light"] .ts-stats       { border-color: rgba(43,191,179,0.2); }
         [data-theme="light"] .ts-stat        { border-right-color: rgba(43,191,179,0.15); }
         [data-theme="light"] .ts-header      { border-bottom-color: rgba(43,191,179,0.18); }
+        [data-theme="light"] .ts-roll__word { background: none; -webkit-text-fill-color: initial; color: var(--brand-amber); }
       `}</style>
 
       <section className="trust-section" aria-label="Why trust CX Machinery">
+
+        <div className="ts__blob ts__blob--1" aria-hidden="true" />
+        <div className="ts__blob ts__blob--2" aria-hidden="true" />
 
         <div className="ts-bg" aria-hidden="true">
           <NebulaBackground/>

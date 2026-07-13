@@ -4,48 +4,49 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import TransitionLink from "@/components/TransitionLink";
 import { useCms } from "@/lib/useCms";
+import { families as localFamilies } from "@/lib/products";
+import type { ProductFamily } from "@/lib/products";
 
-const DEFAULT_MACHINES = [
-  {
-    src:    "/machines/flexo-2-nobg.png",
-    model:  "AI-4C",
-    series: "4-Colour Press",
-    speed:  "200 m/min",
-    reg:    "±0.15 mm",
-    accent: "#e11d48",
-  },
-  {
-    src:    "/machines/flexo-1-nobg.png",
-    model:  "AI-2C",
-    series: "2-Colour Press",
-    speed:  "120 m/min",
-    reg:    "±0.20 mm",
-    accent: "#e11d48",
-  },
-  {
-    src:    "/machines/flexo-6c-nobg.png",
-    model:  "AI-6C",
-    series: "6-Colour Press",
-    speed:  "260 m/min",
-    reg:    "±0.10 mm",
-    accent: "#e11d48",
-  },
-  {
-    src:    "/machines/flexo-5-nobg.png",
-    model:  "AI-8C",
-    series: "8-Colour Press",
-    speed:  "350 m/min",
-    reg:    "±0.10 mm",
-    accent: "#e11d48",
-  },
-];
+const ACCENTS = ["#e11d48", "#f59e0b", "#2bbfb3", "#e11d48"];
+
+interface PrintingMachine {
+  src: string;
+  model: string;
+  series: string;
+  speed: string;
+  reg: string;
+  accent: string;
+}
+
+function familyToMachine(f: ProductFamily, idx: number): PrintingMachine {
+  const speedSpec = f.specs?.find(s => /speed/i.test(s.label));
+  const regSpec = f.specs?.find(s => /regist(?:ration|er)/i.test(s.label));
+  const colourSpec = f.specs?.find(s => /colours?/i.test(s.label));
+  const images = (f.images?.length ? f.images : f.image ? [f.image] : [`/machines/${f.slug}.png`]);
+  const model = f.series?.split("·")[0]?.trim() || f.series;
+  const numColours = colourSpec ? colourSpec.values[0] : "";
+  return {
+    src: images[0],
+    model,
+    series: numColours ? `${numColours}-Colour Press` : f.name,
+    speed: speedSpec ? speedSpec.values[0] : "",
+    reg: regSpec ? regSpec.values[0] : "",
+    accent: ACCENTS[idx % ACCENTS.length],
+  };
+}
+
+function buildMachines(families: ProductFamily[]): PrintingMachine[] {
+  return families.filter(f => f.category === "printing").map((f, i) => familyToMachine(f, i));
+}
+
+const FALLBACK_MACHINES = buildMachines(localFamilies as ProductFamily[]);
 
 const DURATION = 650;
 
 export default function PrintingShowcase() {
-  // live CMS content (admin panel) with hardcoded fallback
-  const cms = useCms<{ items: typeof DEFAULT_MACHINES }>("printing-showcase", { items: DEFAULT_MACHINES });
-  const MACHINES = cms.items && cms.items.length ? cms.items : DEFAULT_MACHINES;
+  const cms = useCms<{ families?: ProductFamily[] }>("products", { families: localFamilies as ProductFamily[] });
+  const printingFamilies = (cms.families || []).filter(f => f.category === "printing");
+  const MACHINES = printingFamilies.length > 0 ? buildMachines(printingFamilies) : FALLBACK_MACHINES;
   const N = MACHINES.length;
 
   const [active,      setActive]      = useState(0);

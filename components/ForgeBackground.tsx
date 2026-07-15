@@ -193,10 +193,10 @@ export default function ForgeBackground({ scrollProgress = 0 }: { scrollProgress
   }, [isLight]);
 
   return (
-    <div
-      ref={mountRef}
-      aria-hidden
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-    />
+      <div
+        ref={mountRef}
+        aria-hidden
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+      />
   );
 }

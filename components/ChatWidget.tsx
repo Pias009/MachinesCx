@@ -521,10 +521,8 @@ export default function ChatWidget() {
           background: var(--brand-teal); color: #06110f;
           border: none; cursor: pointer;
           display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 8px 32px rgba(43,191,179,0.45);
-          transition: transform 0.18s, box-shadow 0.18s;
         }
-        .asha-launcher:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(43,191,179,0.55); }
+        .asha-launcher:hover { background: #3dd6ca; }
         .asha-engineer-icon {
           animation: asha-idle-float 3s ease-in-out infinite;
         }

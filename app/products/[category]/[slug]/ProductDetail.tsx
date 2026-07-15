@@ -8,6 +8,7 @@ import ProcessIcon, { resolveIcon, type IconName } from "@/components/ProcessIco
 import DeliveryStageIcon, { resolveDeliveryStage } from "@/components/DeliveryStageIcon";
 import CustomSections from "@/components/CustomSections";
 import MachineParts from "@/components/MachineParts";
+import MachineDiagram from "@/components/MachineDiagram";
 import type { ProductFamily, Category } from "@/lib/products";
 import { familyImage, familyImages, parseYouTubeId } from "@/lib/products";
 
@@ -503,6 +504,17 @@ export default function ProductDetail({ family, category, related }: Props) {
           {/* ── Product Details ── */}
           {activeTab === "details" && (
             <div className="pdv2-tabpane">
+
+              {/* circular diagram — key specs around machine image */}
+              <MachineDiagram
+                image={heroImg}
+                name={family.name}
+                specs={family.specs}
+                specKeys={calloutKeys}
+                modelIndex={activeModel}
+                models={family.models}
+                family={family}
+              />
 
               {/* machine breakdown — callout pins on the photo */}
               {callouts.length > 0 && (

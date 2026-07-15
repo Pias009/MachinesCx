@@ -5,14 +5,18 @@ export default function ThemeToggle() {
   const [light, setLight] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Read saved preference on mount
+  // Read saved preference on mount (default theme is light)
   useEffect(() => {
     setMounted(true);
     const saved = localStorage.getItem("theme");
-    if (saved === "light") {
+    if (saved === "dark") {
+      setLight(false);
+      document.documentElement.removeAttribute("data-theme");
+    } else if (saved === "light") {
       setLight(true);
       document.documentElement.setAttribute("data-theme", "light");
     }
+    // no saved value → keep the light default already set on <html>
   }, []);
 
   const toggle = () => {

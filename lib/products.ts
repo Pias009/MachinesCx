@@ -122,6 +122,8 @@ export interface ProductFamily {
   deliveryStagePhotos?: DeliveryStagePhotos; // real packing/freight/install proof photos
   customSections?: CustomSection[];   // admin-authored extra sections, rendered in order
   parts?: MachinePart[];              // real machine parts/components, admin-added
+  radarImage?: string;                // dedicated center image for the radar chart spider web
+  radarSpecs?: string[];              // spec labels to display on the radar chart
 }
 
 /** Extracts a YouTube video ID from a full URL or a bare 11-char ID. */

@@ -164,20 +164,10 @@ export default function ConfiguratorCTA() {
           letter-spacing: .1em; text-transform: uppercase;
           font-weight: 600;
           color: #fff; text-decoration: none;
-          position: relative; overflow: hidden;
-          transition: background .25s, box-shadow .25s, transform .25s;
-        }
-        .cc__cta::after {
-          content:""; position:absolute; top:0; left:-120%; width:60%; height:100%;
-          background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent);
-          transform: skewX(-20deg); transition: left .6s ease;
         }
         .cc__cta:hover {
           background: var(--brand-teal-dk);
-          box-shadow: 0 12px 40px rgba(43,191,179,0.4);
-          transform: translateY(-2px);
         }
-        .cc__cta:hover::after { left: 130%; }
         .cc__cta-arr {
           display:flex; align-items:center; justify-content:center;
           width:30px; height:30px; border-radius:2px;

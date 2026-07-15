@@ -379,7 +379,7 @@ export default function TrustSection() {
         }
 
         /* ── Light mode ── */
-        [data-theme="light"] .trust-section { background: #eaf5f4; }
+        [data-theme="light"] .trust-section { background: #ffffff; }
         [data-theme="light"] .ts-kicker     { color: var(--brand-amber); }
         [data-theme="light"] .ts-kicker::before { background: var(--brand-amber); }
         [data-theme="light"] .ts-headline   { color: #0d2220; }

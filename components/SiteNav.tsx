@@ -175,7 +175,6 @@ export default function SiteNav() {
         /* ── CTA button ── */
         .sn__cta {
           margin-left: auto; flex-shrink: 0;
-          position: relative; overflow: hidden;
           font-family: var(--ff-display); font-size: 0.95rem;
           letter-spacing: 0.06em; text-transform: uppercase;
           color: #080e0d; text-decoration: none;
@@ -183,21 +182,10 @@ export default function SiteNav() {
           padding: 0.65rem 1.6rem;
           border: 1px solid var(--brand-teal);
           font-weight: 700;
-          transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
           white-space: nowrap;
         }
-        .sn__cta::after {
-          content: '';
-          position: absolute; inset: 0;
-          background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.28) 50%, transparent 60%);
-          transform: translateX(-100%);
-          transition: transform 0.4s ease;
-        }
-        .sn__cta:hover::after { transform: translateX(100%); }
         .sn__cta:hover {
           background: #3dd6ca;
-          box-shadow: 0 4px 24px rgba(43,191,179,0.5);
-          transform: translateY(-1px);
         }
 
         /* ── Dropdown ── */
@@ -466,79 +454,81 @@ export default function SiteNav() {
           </div>
         </div>
 
-        {/* Mobile backdrop */}
-        <div
-          className={`sn__mob-bd${mobileOpen ? " sn__mob-bd--open" : ""}`}
-          onClick={() => setMobileOpen(false)}
-        />
+      </nav>
 
-        {/* Mobile drawer — full height, slides from left */}
-        <div className={`sn__mobile${mobileOpen ? " sn__mobile--open" : ""}`}>
+      {/* Mobile backdrop + drawer live OUTSIDE .sn so overflow/backdrop-filter
+          on the bar can't clip the full-height fixed drawer */}
+      <div
+        className={`sn__mob-bd${mobileOpen ? " sn__mob-bd--open" : ""}`}
+        onClick={() => setMobileOpen(false)}
+      />
 
-          {/* Header: logo + close */}
-          <div className="sn__mob-header">
-            <TransitionLink href="/" className="sn__mob-logo" onClick={() => setMobileOpen(false)}>
-              <em>ASHAL</em>{" INNOMACH"}
-            </TransitionLink>
-            <button className="sn__mob-close" aria-label="Close menu" onClick={() => setMobileOpen(false)}>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <path d="M2 2l12 12M14 2L2 14"/>
-              </svg>
-            </button>
-          </div>
+      {/* Mobile drawer — full height, slides from left */}
+      <div className={`sn__mobile${mobileOpen ? " sn__mobile--open" : ""}`}>
 
-          {/* Nav links */}
-          <div className="sn__mob-links">
-            {categories.map(cat => (
-              <TransitionLink key={cat.slug} href={`/products/${cat.slug}`} className="sn__mobile-link" onClick={() => setMobileOpen(false)}>
-                {cat.name}
-              </TransitionLink>
-            ))}
-            <TransitionLink href="/products" className="sn__mobile-link" onClick={() => setMobileOpen(false)}>All Products</TransitionLink>
-            <TransitionLink href="/news"     className="sn__mobile-link" onClick={() => setMobileOpen(false)}>News</TransitionLink>
-            <TransitionLink href="/about"    className="sn__mobile-link" onClick={() => setMobileOpen(false)}>About</TransitionLink>
-            <TransitionLink href="/contact"  className="sn__mobile-link" onClick={() => setMobileOpen(false)}>Contact</TransitionLink>
-          </div>
-
-          {/* CTA pinned to bottom */}
-          <div style={{ padding:"1.25rem", borderTop:"1px solid rgba(43,191,179,0.12)", flexShrink:0 }}>
-            <TransitionLink href="/contact" className="sn__mobile-cta" onClick={() => setMobileOpen(false)}>
-              Get a Quote
-            </TransitionLink>
-          </div>
+        {/* Header: logo + close */}
+        <div className="sn__mob-header">
+          <TransitionLink href="/" className="sn__mob-logo" onClick={() => setMobileOpen(false)}>
+            <em>ASHAL</em>{" INNOMACH"}
+          </TransitionLink>
+          <button className="sn__mob-close" aria-label="Close menu" onClick={() => setMobileOpen(false)}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M2 2l12 12M14 2L2 14"/>
+            </svg>
+          </button>
         </div>
 
-        {/* backdrop */}
-        {open && <div className="sn__backdrop" onMouseEnter={closeMenu} />}
+        {/* Nav links */}
+        <div className="sn__mob-links">
+          {categories.map(cat => (
+            <TransitionLink key={cat.slug} href={`/products/${cat.slug}`} className="sn__mobile-link" onClick={() => setMobileOpen(false)}>
+              {cat.name}
+            </TransitionLink>
+          ))}
+          <TransitionLink href="/products" className="sn__mobile-link" onClick={() => setMobileOpen(false)}>All Products</TransitionLink>
+          <TransitionLink href="/news"     className="sn__mobile-link" onClick={() => setMobileOpen(false)}>News</TransitionLink>
+          <TransitionLink href="/about"    className="sn__mobile-link" onClick={() => setMobileOpen(false)}>About</TransitionLink>
+          <TransitionLink href="/contact"  className="sn__mobile-link" onClick={() => setMobileOpen(false)}>Contact</TransitionLink>
+        </div>
 
-        {/* dropdown */}
-        {open && (
-          <div className="sn__dd" onMouseEnter={keepMenu} onMouseLeave={closeMenu}>
-            <div className="sn__dd-list">
-              {activeFamilies.map((fam) => (
-                <TransitionLink
-                  key={fam.slug}
-                  href={`/products/${open}/${fam.slug}`}
-                  className={`sn__dd-item${menuImg === fam.slug ? " sn__dd-item--on" : ""}`}
-                  onMouseEnter={() => setMenuImg(fam.slug)}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={machineImg(fam.slug)} alt="" className="sn__dd-thumb" />
-                  <div>
-                    <span className="sn__dd-series">{fam.series}</span>
-                    <span className="sn__dd-tag">{fam.tagline}</span>
-                  </div>
-                </TransitionLink>
-              ))}
-            </div>
-            <div className="sn__dd-preview">
-              <div className="sn__dd-glow" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img key={menuImg} src={machineImg(menuImg)} alt="" className="sn__dd-preview-img" />
-            </div>
+        {/* CTA pinned to bottom */}
+        <div style={{ padding:"1.25rem", borderTop:"1px solid rgba(43,191,179,0.12)", flexShrink:0 }}>
+          <TransitionLink href="/contact" className="sn__mobile-cta" onClick={() => setMobileOpen(false)}>
+            Get a Quote
+          </TransitionLink>
+        </div>
+      </div>
+
+      {/* backdrop + dropdown live OUTSIDE .sn so the nav's overflow:hidden /
+          backdrop-filter can't clip the fixed layer below the 72px bar */}
+      {open && <div className="sn__backdrop" onMouseEnter={closeMenu} />}
+
+      {open && (
+        <div className="sn__dd" onMouseEnter={keepMenu} onMouseLeave={closeMenu}>
+          <div className="sn__dd-list">
+            {activeFamilies.map((fam) => (
+              <TransitionLink
+                key={fam.slug}
+                href={`/products/${open}/${fam.slug}`}
+                className={`sn__dd-item${menuImg === fam.slug ? " sn__dd-item--on" : ""}`}
+                onMouseEnter={() => setMenuImg(fam.slug)}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={machineImg(fam.slug)} alt="" className="sn__dd-thumb" />
+                <div>
+                  <span className="sn__dd-series">{fam.series}</span>
+                  <span className="sn__dd-tag">{fam.tagline}</span>
+                </div>
+              </TransitionLink>
+            ))}
           </div>
-        )}
-      </nav>
+          <div className="sn__dd-preview">
+            <div className="sn__dd-glow" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img key={menuImg} src={machineImg(menuImg)} alt="" className="sn__dd-preview-img" />
+          </div>
+        </div>
+      )}
     </>
   );
 }

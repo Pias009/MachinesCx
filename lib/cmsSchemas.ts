@@ -69,7 +69,7 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
         label: "Product families",
         titleKeys: ["series", "name"],
         canAdd: true,
-        groups: ["📝 Basic Info", "📸 Photos", "🎬 Videos", "📊 Specifications", "🔩 Parts", "🚚 Setup & Delivery", "⭐ Reviews", "➕ Custom Sections"],
+        groups: ["📝 Basic Info", "📸 Photos", "🎬 Videos", "📊 Specifications", "🕸 Radar Chart", "🔩 Parts", "🚚 Setup & Delivery", "⭐ Reviews", "➕ Custom Sections"],
         template: {
           slug: "new-machine", category: "film-blowing", series: "NEW",
           name: "New machine", tagline: "", models: ["Model-1"],
@@ -82,6 +82,8 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
           deliveryStagePhotos: { packing: "", freight: "", install: "" },
           customSections: [],
           parts: [],
+          radarImage: "",
+          radarSpecs: ["Screw Diameter", "Max Extrusion Output", "Total Power", "Film Width", "Roller Width", "Main Motor", "Max Bag Width", "Max Web Width", "Max Mechanical Speed"],
         },
         fields: [
           { key: "name", label: "Name", kind: "text", group: "📝 Basic Info" },
@@ -97,6 +99,9 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
           { key: "videos", label: "Product demo videos", kind: "videos", hint: "paste a real YouTube link or video ID — leave empty to show a 'video coming soon' placeholder instead of a broken/fake video", group: "🎬 Videos" },
 
           { key: "specs", label: "Spec table", kind: "specs", hint: "model columns are added/renamed/removed directly in this table", group: "📊 Specifications" },
+
+          { key: "radarImage", label: "Radar center image", kind: "image", hint: "the photo that appears at the center of the spider-web chart on the product page — leave empty to use the first product photo", group: "🕸 Radar Chart" },
+          { key: "radarSpecs", label: "Radar spec labels (one per line)", kind: "stringlist", hint: "which specs appear on the spider-web chart — type the exact spec labels, one per line, matching the spec table above. Defaults to common specs if left empty.", group: "🕸 Radar Chart" },
 
           { key: "parts", label: "Machine parts / components", kind: "parts", hint: "add one or more real parts of this machine — name, detail text, real photos. Give a part its own install steps only if it needs a separate installation sequence.", group: "🔩 Parts" },
 

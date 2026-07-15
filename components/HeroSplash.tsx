@@ -1,10 +1,17 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCms } from "@/lib/useCms";
 import type { ProductFamily } from "@/lib/products";
 import localProducts from "@/data/products.json";
 import localHero from "@/data/home-hero.json";
+import WispBackground from "@/components/WispBackground";
+
+// react-three-fiber Canvas must be client-only (SSR breaks the hero subtree)
+const WaveBackground = dynamic(() => import("@/components/WaveBackground"), {
+  ssr: false,
+});
 
 const VS = `
 attribute vec2 position;
@@ -71,9 +78,17 @@ function familyImage(f: Pick<ProductFamily, "slug" | "image" | "images">): strin
 }
 
 export default function HeroSplash() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rafRef    = useRef<number>(0);
   const archRef   = useRef<HTMLDivElement>(null);
+  const [isLight, setIsLight] = useState(false);
+
+  useEffect(() => {
+    const check = () =>
+      setIsLight(document.documentElement.getAttribute("data-theme") === "light");
+    check();
+    const obs = new MutationObserver(check);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => obs.disconnect();
+  }, []);
 
   const hero = useCms<HeroCms>("home-hero", localHero as HeroCms);
   const products = useCms<{ families: ProductFamily[] }>("products", localProducts as { families: ProductFamily[] });
@@ -119,59 +134,6 @@ export default function HeroSplash() {
     })();
 
     return () => { cancelled = true; ctx?.revert(); };
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const gl = canvas.getContext("webgl");
-    if (!gl) return;
-
-    function resize() {
-      if (!canvas) return;
-      canvas.width  = canvas.offsetWidth  * Math.min(window.devicePixelRatio, 2);
-      canvas.height = canvas.offsetHeight * Math.min(window.devicePixelRatio, 2);
-      gl!.viewport(0, 0, canvas.width, canvas.height);
-    }
-    resize();
-    window.addEventListener("resize", resize, { passive: true });
-
-    function shader(type: number, src: string) {
-      const s = gl!.createShader(type)!;
-      gl!.shaderSource(s, src);
-      gl!.compileShader(s);
-      return s;
-    }
-    const prog = gl.createProgram()!;
-    gl.attachShader(prog, shader(gl.VERTEX_SHADER,   VS));
-    gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, FS));
-    gl.linkProgram(prog);
-    gl.useProgram(prog);
-
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-    const loc = gl.getAttribLocation(prog, "position");
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-
-    const uTime = gl.getUniformLocation(prog, "u_time");
-    const uRes  = gl.getUniformLocation(prog, "u_resolution");
-
-    function frame(t: number) {
-      gl!.uniform1f(uTime, t * 0.001);
-      gl!.uniform2f(uRes, canvas!.width, canvas!.height);
-      gl!.clearColor(0, 0, 0, 0);
-      gl!.clear(gl!.COLOR_BUFFER_BIT);
-      gl!.drawArrays(gl!.TRIANGLE_STRIP, 0, 4);
-      rafRef.current = requestAnimationFrame(frame);
-    }
-    rafRef.current = requestAnimationFrame(frame);
-
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      window.removeEventListener("resize", resize);
-    };
   }, []);
 
   return (
@@ -246,26 +208,61 @@ export default function HeroSplash() {
         }
 
         /* ── Light mode overrides ── */
-        [data-theme="light"] .hs__canvas {
-          mix-blend-mode: darken;
-          opacity: 0.45;
+        /* Fully white hero with a subtle light 3D wave texture → text must be dark */
+        [data-theme="light"] .hs__shape--1 {
+          background: radial-gradient(circle, rgba(43,191,179,0.10) 0%, transparent 70%);
         }
-        [data-theme="light"] .hs__h1  { color: var(--slate) !important; }
+        [data-theme="light"] .hs__shape--2 {
+          background: radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 70%);
+        }
+        [data-theme="light"] .hs__shape--3 {
+          background: radial-gradient(circle, rgba(225,29,72,0.06) 0%, transparent 70%);
+        }
+        [data-theme="light"] section.hs h1.hs__h1 { color: #0d2220 !important; }
         [data-theme="light"] .hs__h1 em { color: var(--brand-teal) !important; }
-        [data-theme="light"] .hs__desc { color: var(--slate-60) !important; }
+        [data-theme="light"] .hs__desc { color: rgba(13,34,32,0.72) !important; }
         [data-theme="light"] .hs__btn-secondary {
-          color: var(--slate-60) !important;
-          border-color: rgba(13,34,32,0.2) !important;
+          color: rgba(13,34,32,0.72) !important;
+          border-color: rgba(13,34,32,0.18) !important;
         }
         [data-theme="light"] .hs__btn-secondary:hover {
           border-color: var(--brand-teal) !important;
-          color: var(--brand-teal) !important;
+          color: #0d2220 !important;
         }
         [data-theme="light"] .hs__node-card {
-          border-color: rgba(13,34,32,0.12);
-          box-shadow: 0 24px 60px -24px rgba(13,34,32,0.35);
+          background: #ffffff;
+          border-color: rgba(13,34,32,0.10);
+          box-shadow: 0 24px 60px -28px rgba(13,34,32,0.25);
         }
+        [data-theme="light"] .hs__node-shade {
+          background: linear-gradient(to top, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.82) 28%, transparent 58%);
+        }
+        [data-theme="light"] .hs__node-series { color: var(--brand-teal); }
+        [data-theme="light"] .hs__node-name { color: #0d2220; }
         [data-theme="light"] .hs__eyebrow { color: var(--brand-teal) !important; }
+
+        /* JS-driven light state — guarantees dark hero text even if the
+           [data-theme] attribute isn't matched at first paint (same isLight
+           that swaps the background, so it can never disagree) */
+        .hs--light { background: #ffffff; }
+        .hs--light .hs__h1  { color: #0d2220 !important; }
+        .hs--light .hs__h1 em { color: var(--brand-teal) !important; }
+        .hs--light .hs__desc { color: rgba(13,34,32,0.72) !important; }
+        .hs--light .hs__eyebrow { color: var(--brand-teal) !important; }
+        .hs--light .hs__btn-secondary {
+          color: rgba(13,34,32,0.72) !important;
+          border-color: rgba(13,34,32,0.18) !important;
+        }
+        .hs--light .hs__node-card {
+          background: #ffffff;
+          border-color: rgba(13,34,32,0.10);
+          box-shadow: 0 24px 60px -28px rgba(13,34,32,0.25);
+        }
+        .hs--light .hs__node-shade {
+          background: linear-gradient(to top, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.82) 28%, transparent 58%);
+        }
+        .hs--light .hs__node-series { color: var(--brand-teal); }
+        .hs--light .hs__node-name { color: #0d2220; }
 
         /* Red top accent line — same as SiteNav */
         .hs::before {
@@ -293,7 +290,7 @@ export default function HeroSplash() {
           font-family: var(--ff-mono); font-size: .7rem;
           letter-spacing: .26em; text-transform: uppercase;
           color: var(--brand-teal); margin-bottom: 1.4rem;
-          opacity: 0; animation: hs-rise .8s cubic-bezier(.2,.7,.2,1) .05s forwards;
+          opacity: 1; animation: hs-rise .8s cubic-bezier(.2,.7,.2,1) .05s both;
         }
         .hs__eyebrow::before, .hs__eyebrow::after {
           content: ""; width: 2rem; height: 1px; background: var(--brand-teal); opacity: .6;
@@ -307,7 +304,7 @@ export default function HeroSplash() {
           color: var(--ink);
           margin: 0 0 1.5rem;
           text-wrap: balance;
-          opacity: 0; animation: hs-rise .9s cubic-bezier(.2,.7,.2,1) .12s forwards;
+          opacity: 1; animation: hs-rise .9s cubic-bezier(.2,.7,.2,1) .12s both;
         }
         .hs__h1 em {
           font-style: normal;
@@ -323,13 +320,13 @@ export default function HeroSplash() {
           max-width: 46ch;
           margin: 0 0 2.25rem;
           letter-spacing: .01em;
-          opacity: 0; animation: hs-rise .9s cubic-bezier(.2,.7,.2,1) .2s forwards;
+          opacity: 1; animation: hs-rise .9s cubic-bezier(.2,.7,.2,1) .2s both;
         }
 
         .hs__actions {
           display: flex; align-items: center; gap: 1rem;
           flex-wrap: wrap; justify-content: center;
-          opacity: 0; animation: hs-rise .9s cubic-bezier(.2,.7,.2,1) .28s forwards;
+          opacity: 1; animation: hs-rise .9s cubic-bezier(.2,.7,.2,1) .28s both;
         }
 
         @keyframes hs-rise {
@@ -476,15 +473,15 @@ export default function HeroSplash() {
         }
       `}</style>
 
-      <section className="hs" aria-label="Wenzhou Ashal Innomach — Hero">
+      <section className={`hs${isLight ? " hs--light" : ""}`} aria-label="Wenzhou Ashal Innomach — Hero">
 
         {/* Decorative floating shapes */}
         <div className="hs__shape hs__shape--1" aria-hidden="true" />
         <div className="hs__shape hs__shape--2" aria-hidden="true" />
         <div className="hs__shape hs__shape--3" aria-hidden="true" />
 
-        {/* WebGL wisp background */}
-        <canvas ref={canvasRef} className="hs__canvas" aria-hidden="true" />
+        {/* 3D background — dark wave scene in light mode, original teal wisp in dark mode */}
+        {isLight ? <WaveBackground /> : <WispBackground />}
 
         {/* bottom fade */}
         <div className="hs__fade" aria-hidden="true" />
@@ -493,9 +490,20 @@ export default function HeroSplash() {
         <div className="hs__main">
           {hero.eyebrow && <span className="hs__eyebrow">{hero.eyebrow}</span>}
           <h1 className="hs__h1">
-            {hero.headline1}
+            <span>{hero.headline1}</span>
             {hero.headline2 && <em>{hero.headline2}</em>}
           </h1>
+          {hero.description && (
+            <p className="hs__desc">{hero.description}</p>
+          )}
+          <div className="hs__actions">
+            <Link href={hero.primaryHref} className="hs__btn-primary">
+              {hero.primaryLabel}
+            </Link>
+            <Link href={hero.secondaryHref} className="hs__btn-secondary">
+              {hero.secondaryLabel}
+            </Link>
+          </div>
         </div>
 
         {/* ── ARCH of 5 video/media cards ── */}

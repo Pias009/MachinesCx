@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { connectDB }   from "@/lib/mongodb";
 import { uploadImage, deleteImage } from "@/lib/cloudinary";
+import { verifySessionToken } from "@/lib/adminAuth";
 import MachineImage    from "@/models/MachineImage";
+
+async function requireAdmin(request: NextRequest): Promise<boolean> {
+  const sessionCookie = request.cookies.get("admin_session")?.value ?? cookies().get("admin_session")?.value;
+  return !!sessionCookie && await verifySessionToken(sessionCookie);
+}
 
 // GET /api/images?slug=flexo-2c
 // GET /api/images?category=printing
@@ -22,14 +29,16 @@ export async function GET(req: NextRequest) {
 // Body: { machineSlug, category, url, alt?, order? }
 // url can be a Cloudinary URL, public URL, or base64 data URI
 export async function POST(req: NextRequest) {
+  if (!await requireAdmin(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   await connectDB();
-  const body = await req.json() as {
-    machineSlug: string;
-    category:    string;
-    url:         string;
-    alt?:        string;
-    order?:      number;
-  };
+  let body: { machineSlug?: string; category?: string; url?: string; alt?: string; order?: number };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
 
   const { machineSlug, category, url, alt = "", order = 0 } = body;
 
@@ -54,6 +63,9 @@ export async function POST(req: NextRequest) {
 
 // DELETE /api/images?publicId=cx-machinery/printing/flexo-2c/img1
 export async function DELETE(req: NextRequest) {
+  if (!await requireAdmin(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   await connectDB();
   const publicId = req.nextUrl.searchParams.get("publicId");
   if (!publicId) {

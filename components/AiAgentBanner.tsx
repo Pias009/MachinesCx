@@ -84,18 +84,15 @@ export default function AiAgentBanner() {
         .aib__cta {
           display: inline-flex; align-items: center; gap: .8rem;
           padding: 1rem 1.9rem;
-          background: linear-gradient(135deg, var(--brand-amber), #f97316);
+          background: var(--brand-amber);
           color: #080e0d;
           border: none; cursor: pointer;
           border-radius: 999px;
           font-family: var(--ff-body); font-size: .98rem;
           font-weight: 600;
-          box-shadow: 0 8px 28px rgba(245,158,11,0.35);
-          transition: transform 0.2s, box-shadow 0.2s;
         }
         .aib__cta:hover {
-          transform: translateY(-3px) scale(1.02);
-          box-shadow: 0 14px 40px rgba(245,158,11,0.5);
+          background: #e08b0a;
         }
         .aib__cta-icon {
           display: flex; align-items: center; justify-content: center;

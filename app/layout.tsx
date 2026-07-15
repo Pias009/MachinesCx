@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { Bebas_Neue, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import SiteNav from "@/components/SiteNav";
@@ -8,8 +9,9 @@ import PageTransitionOverlay from "@/components/PageTransitionOverlay";
 import PageMountTrigger from "@/components/PageMountTrigger";
 import LoadingScreen from "@/components/LoadingScreen";
 import SectionAnimator from "@/components/SectionAnimator";
-import ChatWidget from "@/components/ChatWidget";
 import { BRAND } from "@/lib/products";
+
+const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
 const bebas = Bebas_Neue({
   subsets: ["latin"],
@@ -36,7 +38,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${bebas.variable} ${inter.variable} ${jetbrains.variable}`}>
+    <html
+      lang="en"
+      data-theme="light"
+      suppressHydrationWarning
+      className={`${bebas.variable} ${inter.variable} ${jetbrains.variable}`}
+    >
       <head>
         {/* Prevent browser caching of chunks */}
         <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />

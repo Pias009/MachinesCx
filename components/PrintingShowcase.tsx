@@ -267,7 +267,7 @@ export default function PrintingShowcase() {
 
           /* ── Light mode overrides ── */
           [data-theme="light"] section[data-ps] {
-            background-color: #f4fafa !important;
+            background-color: #ffffff !important;
           }
           [data-theme="light"] .ps-ghost-text {
             color: rgba(13,34,32,0.04) !important;

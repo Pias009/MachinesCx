@@ -42,8 +42,8 @@ export async function readSection(section: CmsSection): Promise<unknown> {
     await connectDB();
     const doc = await CmsSection.findOne({ section }).lean();
     if (doc) return doc.data;
-  } catch {
-    /* DB unavailable — fall through to bundled default */
+  } catch (e) {
+    console.error(`CMS: DB unavailable for "${section}", using bundled fallback:`, e);
   }
   const fallback = BUNDLED_DEFAULTS[section];
   if (fallback !== undefined) return fallback;
@@ -52,10 +52,15 @@ export async function readSection(section: CmsSection): Promise<unknown> {
 
 export async function writeSection(section: CmsSection, data: unknown): Promise<void> {
   if (typeof data !== "object" || data === null) throw new Error("payload must be an object");
-  await connectDB();
-  await CmsSection.updateOne(
-    { section },
-    { $set: { data, updatedAt: new Date() } },
-    { upsert: true },
-  );
+  try {
+    await connectDB();
+    await CmsSection.updateOne(
+      { section },
+      { $set: { data, updatedAt: new Date() } },
+      { upsert: true },
+    );
+  } catch (e) {
+    console.error(`CMS: failed to write section "${section}":`, e);
+    throw new Error("Database write failed. Check server logs.");
+  }
 }

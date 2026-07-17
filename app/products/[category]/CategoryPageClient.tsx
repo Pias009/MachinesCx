@@ -298,7 +298,7 @@ export default function CategoryPageClient({ category, families, allCategories }
             <p className="ccp-cta__p">Talk to our engineers — we match every line to your output targets, floor space, and film spec.</p>
           </div>
           <AetherBtn>
-            <TransitionLink href="/contact">Talk to an engineer →</TransitionLink>
+            <TransitionLink href="/inquiries">Talk to an engineer →</TransitionLink>
           </AetherBtn>
         </div>
       </section>

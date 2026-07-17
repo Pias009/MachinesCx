@@ -441,7 +441,7 @@ export default function SiteNav() {
 
           <div className="sn__actions">
             <ThemeToggle />
-            <TransitionLink href="/contact" className="sn__cta">Get a Quote</TransitionLink>
+            <TransitionLink href="/inquiries" className="sn__cta">Get a Quote</TransitionLink>
 
             {/* Hamburger — mobile only */}
             <button
@@ -488,12 +488,12 @@ export default function SiteNav() {
           <TransitionLink href="/products" className="sn__mobile-link" onClick={() => setMobileOpen(false)}>All Products</TransitionLink>
           <TransitionLink href="/news"     className="sn__mobile-link" onClick={() => setMobileOpen(false)}>News</TransitionLink>
           <TransitionLink href="/about"    className="sn__mobile-link" onClick={() => setMobileOpen(false)}>About</TransitionLink>
-          <TransitionLink href="/contact"  className="sn__mobile-link" onClick={() => setMobileOpen(false)}>Contact</TransitionLink>
+          <TransitionLink href="/inquiries"  className="sn__mobile-link" onClick={() => setMobileOpen(false)}>Contact</TransitionLink>
         </div>
 
         {/* CTA pinned to bottom */}
         <div style={{ padding:"1.25rem", borderTop:"1px solid rgba(43,191,179,0.12)", flexShrink:0 }}>
-          <TransitionLink href="/contact" className="sn__mobile-cta" onClick={() => setMobileOpen(false)}>
+          <TransitionLink href="/inquiries" className="sn__mobile-cta" onClick={() => setMobileOpen(false)}>
             Get a Quote
           </TransitionLink>
         </div>

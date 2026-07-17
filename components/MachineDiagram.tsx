@@ -96,8 +96,8 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
     if (!chartsReady) return;
 
     const initCharts = async () => {
-      const { Chart, RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } = await import("chart.js");
-      Chart.register(RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
+      const { Chart, RadarController, BarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } = await import("chart.js");
+      Chart.register(RadarController, BarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
       const isLight = document.documentElement.getAttribute("data-theme") === "light";
       const ink = isLight ? "#0d2220" : "#ffffff";

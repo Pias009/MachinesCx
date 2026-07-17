@@ -315,7 +315,7 @@ export default function FlexoStrip() {
               </div>
             ))}
           </div>
-          <AetherBtn><Link href="/contact">Request spec sheet →</Link></AetherBtn>
+          <AetherBtn><Link href="/inquiries">Request spec sheet →</Link></AetherBtn>
         </div>
       </div>
     </section>

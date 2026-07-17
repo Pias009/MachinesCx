@@ -180,7 +180,7 @@ export default function FlexoPrintingPage() {
                 </div>
               </div>
 
-              <AetherBtn style={{ alignSelf:"flex-start", marginTop:".5rem" }}><Link href="/contact">Request a quote →</Link></AetherBtn>
+              <AetherBtn style={{ alignSelf:"flex-start", marginTop:".5rem" }}><Link href="/inquiries">Request a quote →</Link></AetherBtn>
             </div>
           </div>
         </div>
@@ -325,7 +325,7 @@ export default function FlexoPrintingPage() {
               <p style={{ fontFamily:"var(--ff-body)", fontSize:".95rem", lineHeight:1.7, color:"rgba(255,255,255,0.75)", marginBottom:"2rem", maxWidth:"42ch" }}>
                 Ceramic anilox rollers at 200–600 LPI deliver consistent ink transfer across thin film, paper and woven materials. Independent IR drying per colour station prevents back-bleed.
               </p>
-              <AetherBtn><Link href="/contact">Talk to a print specialist →</Link></AetherBtn>
+              <AetherBtn><Link href="/inquiries">Talk to a print specialist →</Link></AetherBtn>
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"1px", background:"rgba(255,255,255,.08)" }}>
               {["PE Film","PP Film","PET Film","NY (Nylon)","BOPP Film","CPP Film","Kraft Paper","Non-woven Fabric","Corrugated Paper","Metalised Film"].map(sub => (
@@ -354,7 +354,7 @@ export default function FlexoPrintingPage() {
         <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.75rem,4vw,2.8rem)", color:"var(--slate)", lineHeight:.98 }}>
           Need help choosing a model?
         </h2>
-        <AetherBtn><Link href="/contact">Talk to an engineer →</Link></AetherBtn>
+        <AetherBtn><Link href="/inquiries">Talk to an engineer →</Link></AetherBtn>
       </section>
     </>
   );

@@ -13,8 +13,8 @@ const SHORTCUTS = [
   { label: "Bag Making",    href: "/products/bag-making",     icon: "M4 4h16v11H8l-4 4V4z" },
   { label: "Recycling",     href: "/products/recycling",      icon: "M12 2l4 8h-8l-4-8h8zm0 0l4 8M4 22h16M12 22v-6" },
   { label: "Printing",      href: "/products/printing",       icon: "M4 7V4h16v3M4 7l16 10M4 17l16-10M4 17v3h16v-3" },
-  { label: "Get a Quote",   href: "/contact",                 icon: "M12 2l3 6h6l-5 4 2 6-6-4-6 4 2-6-5-4h6z" },
-  { label: "Contact",       href: "/contact",                 icon: "M4 4h16v11H8l-4 4V4z" },
+  { label: "Get a Quote",   href: "/inquiries",                 icon: "M12 2l3 6h6l-5 4 2 6-6-4-6 4 2-6-5-4h6z" },
+  { label: "Contact",       href: "/inquiries",                 icon: "M4 4h16v11H8l-4 4V4z" },
 ];
 
 export default function SiteFooter() {
@@ -58,7 +58,7 @@ export default function SiteFooter() {
           <div className="footer-links">
             <Link href="/about">About</Link>
             <Link href="/news">News</Link>
-            <Link href="/contact">Contact</Link>
+            <Link href="/inquiries">Contact</Link>
             <Link href="/products">Catalogue</Link>
           </div>
 

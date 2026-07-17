@@ -303,8 +303,12 @@ export default function ChatWidget() {
   const [sending, setSending] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [replyCount, setReplyCount] = useState(0);
+  const [latestReply, setLatestReply] = useState<{ inquiryId: string; inquiryType: string; message: string; machineNames: string[]; partNames: string[]; sentAt: string } | null>(null);
+  const [showReplyPopup, setShowReplyPopup] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const sessionIdRef = useRef<string>("");
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     sessionIdRef.current = getSessionId();
@@ -321,6 +325,29 @@ export default function ChatWidget() {
       }, 10000);
       return () => { clearTimeout(timer); clearTimeout(autoDismiss); };
     }
+  }, []);
+
+  // Poll for reply notifications
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const email = localStorage.getItem("cx_inquiry_email");
+    if (!email) return;
+
+    async function checkReplies() {
+      try {
+        const lastSeen = localStorage.getItem("cx_inquiry_lastSeen") || "";
+        const res = await fetch(`/api/inquiry-replies?email=${encodeURIComponent(email!)}&lastSeen=${encodeURIComponent(lastSeen)}`);
+        const data = await res.json();
+        if (data.hasNewReplies && data.replies.length > 0) {
+          setReplyCount(data.count);
+          setLatestReply(data.replies[0]);
+        }
+      } catch { /* silent */ }
+    }
+
+    checkReplies();
+    pollRef.current = setInterval(checkReplies, 30000);
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, []);
 
   useEffect(() => {
@@ -449,13 +476,26 @@ export default function ChatWidget() {
     <>
       <button
         aria-label={open ? `Close ${AGENT_NAME} chat` : `Open ${AGENT_NAME} chat`}
-        onClick={() => (open ? setOpen(false) : handleOpen())}
-        className={`asha-launcher ${sending ? "asha-launcher--thinking" : ""}`}
+        onClick={() => {
+          if (open) {
+            setOpen(false);
+          } else if (replyCount > 0 && !showReplyPopup) {
+            setShowReplyPopup(true);
+            setShowTooltip(false);
+          } else {
+            setShowReplyPopup(false);
+            handleOpen();
+          }
+        }}
+        className={`asha-launcher ${sending ? "asha-launcher--thinking" : ""} ${replyCount > 0 && !open ? "asha-launcher--has-reply" : ""}`}
       >
         {open ? (
           <X size={24} />
         ) : (
           <HardHat size={26} className={`asha-engineer-icon ${sending ? "asha-engineer-icon--thinking" : ""}`} />
+        )}
+        {replyCount > 0 && !open && (
+          <span className="asha-reply-badge">{replyCount}</span>
         )}
       </button>
 
@@ -463,6 +503,52 @@ export default function ChatWidget() {
         <div className="asha-tooltip" onClick={() => { setShowTooltip(false); localStorage.setItem("asha_tooltip_dismissed", "1"); handleOpen(); }}>
           <div className="asha-tooltip-text">Ask <strong>ASHA</strong> — specs, comparisons &amp; pricing</div>
           <div className="asha-tooltip-arrow" />
+        </div>
+      )}
+
+      {showReplyPopup && latestReply && (
+        <div className="asha-reply-popup">
+          <div className="asha-reply-popup__header">
+            <div className="asha-reply-popup__icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M17 10c0 3.866-3.134 7-7 7a6.97 6.97 0 01-3.5-.938L3 17l.938-3.5A6.97 6.97 0 013 10c0-3.866 3.134-7 7-7s7 3.134 7 7z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="7.5" cy="10" r="0.8" fill="currentColor"/>
+                <circle cx="10" cy="10" r="0.8" fill="currentColor"/>
+                <circle cx="12.5" cy="10" r="0.8" fill="currentColor"/>
+              </svg>
+            </div>
+            <div className="asha-reply-popup__header-text">
+              <div className="asha-reply-popup__title">New Reply from Engineer</div>
+              <div className="asha-reply-popup__type">
+                {latestReply.inquiryType === "talk-to-engineer" ? "Talk to Engineer" :
+                 latestReply.inquiryType === "parts" ? "Part Inquiry" : "Direct Inquiry"}
+                {latestReply.machineNames.length > 0 && ` — ${latestReply.machineNames.join(", ")}`}
+                {latestReply.partNames.length > 0 && ` — ${latestReply.partNames.join(", ")}`}
+              </div>
+            </div>
+            <button className="asha-reply-popup__close" onClick={() => setShowReplyPopup(false)}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8m0-8l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+            </button>
+          </div>
+          <div className="asha-reply-popup__body">
+            <p>{latestReply.message}</p>
+          </div>
+          <div className="asha-reply-popup__actions">
+            <button className="asha-reply-popup__btn asha-reply-popup__btn--primary" onClick={() => {
+              setShowReplyPopup(false);
+              setReplyCount(0);
+              localStorage.setItem("cx_inquiry_lastSeen", new Date().toISOString());
+              window.location.href = `/inquiries#${latestReply.inquiryId}`;
+            }}>
+              View Full Reply
+            </button>
+            <button className="asha-reply-popup__btn" onClick={() => {
+              setShowReplyPopup(false);
+              handleOpen();
+            }}>
+              Chat with ASHA
+            </button>
+          </div>
         </div>
       )}
 
@@ -951,12 +1037,111 @@ export default function ChatWidget() {
           100% { transform: scale(1.5); opacity: 0; }
         }
 
+        /* reply notification badge */
+        .asha-reply-badge {
+          position: absolute; top: -4px; right: -4px;
+          min-width: 20px; height: 20px; padding: 0 5px;
+          border-radius: 10px; background: #ef4444; color: #fff;
+          font-family: var(--ff-body), system-ui, sans-serif;
+          font-size: 0.7rem; font-weight: 700;
+          display: flex; align-items: center; justify-content: center;
+          border: 2px solid var(--brand-teal);
+          animation: asha-badge-blink 1.2s ease-in-out infinite;
+        }
+        @keyframes asha-badge-blink {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.15); }
+        }
+        .asha-launcher--has-reply {
+          animation: asha-reply-glow 1.5s ease-in-out infinite !important;
+        }
+        @keyframes asha-reply-glow {
+          0%, 100% { box-shadow: 0 4px 20px rgba(239,68,68,0.4); }
+          50% { box-shadow: 0 4px 32px rgba(239,68,68,0.7), 0 0 0 6px rgba(239,68,68,0.15); }
+        }
+
+        /* reply popup */
+        .asha-reply-popup {
+          position: fixed; bottom: 96px; right: 24px; z-index: 9201;
+          width: min(380px, calc(100vw - 32px));
+          background: var(--bg-surface);
+          border: 1px solid var(--bg-line);
+          border-radius: 16px;
+          box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+          overflow: hidden;
+          animation: asha-popup-in 0.3s var(--ease-out) both;
+          font-family: var(--ff-body), system-ui, sans-serif;
+          color-scheme: dark;
+        }
+        @keyframes asha-popup-in {
+          0% { opacity: 0; transform: translateY(12px) scale(0.95); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .asha-reply-popup__header {
+          display: flex; align-items: center; gap: 0.6rem;
+          padding: 0.9rem 1rem;
+          border-bottom: 1px solid var(--bg-line);
+          background: var(--bg-raise);
+        }
+        .asha-reply-popup__icon {
+          width: 34px; height: 34px; border-radius: 50%;
+          background: rgba(43,191,179,0.15); color: var(--brand-teal);
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+          animation: asha-popup-icon-pulse 2s ease-in-out infinite;
+        }
+        @keyframes asha-popup-icon-pulse {
+          0%, 100% { background: rgba(43,191,179,0.15); }
+          50% { background: rgba(43,191,179,0.25); }
+        }
+        .asha-reply-popup__header-text { flex: 1; min-width: 0; }
+        .asha-reply-popup__title {
+          color: var(--ink); font-weight: 700; font-size: 0.88rem;
+          line-height: 1.2;
+        }
+        .asha-reply-popup__type {
+          color: var(--ink-35); font-size: 0.72rem; margin-top: 0.15rem;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .asha-reply-popup__close {
+          width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
+          background: transparent; border: none; cursor: pointer;
+          color: var(--ink-35); display: flex; align-items: center; justify-content: center;
+          transition: background 0.15s, color 0.15s;
+        }
+        .asha-reply-popup__close:hover { background: rgba(255,255,255,0.08); color: var(--ink); }
+        .asha-reply-popup__body {
+          padding: 1rem;
+          max-height: 160px; overflow-y: auto;
+        }
+        .asha-reply-popup__body p {
+          margin: 0; font-size: 0.88rem; line-height: 1.6;
+          color: var(--ink-60);
+        }
+        .asha-reply-popup__actions {
+          display: flex; gap: 0.5rem; padding: 0.75rem 1rem;
+          border-top: 1px solid var(--bg-line);
+        }
+        .asha-reply-popup__btn {
+          flex: 1; padding: 0.6rem 0.75rem; border-radius: 8px;
+          border: 1px solid var(--bg-line); background: var(--bg-raise);
+          font-family: var(--ff-body), system-ui, sans-serif;
+          font-size: 0.8rem; font-weight: 600; cursor: pointer;
+          color: var(--ink-60); transition: all 0.15s;
+        }
+        .asha-reply-popup__btn:hover { border-color: var(--brand-teal); color: var(--brand-teal); }
+        .asha-reply-popup__btn--primary {
+          background: var(--brand-teal); color: #06110f; border-color: var(--brand-teal);
+        }
+        .asha-reply-popup__btn--primary:hover { background: #3dd6ca; }
+
         @media (max-width: 480px) {
           .asha-panel, .asha-panel--expanded {
             right: 16px; bottom: 88px;
             width: calc(100vw - 32px); height: calc(100vh - 160px);
           }
           .asha-launcher { right: 16px; bottom: 16px; }
+          .asha-reply-popup { right: 16px; bottom: 88px; width: calc(100vw - 32px); }
         }
       `}</style>
     </>

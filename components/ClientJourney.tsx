@@ -731,7 +731,7 @@ export default function ClientJourney() {
               <strong>engineers available 24/7</strong>
             </p>
             <Link
-              href="/contact"
+              href="/inquiries"
               className="cj__cta"
               style={{ "--accent": curAccent.hex } as React.CSSProperties}
             >

@@ -99,7 +99,7 @@ function StarRating({ n }: { n: number }) {
 }
 
 function InquiryButton({ slug, name }: { slug: string; name: string }) {
-  const href = `/contact?machine=${encodeURIComponent(slug)}&name=${encodeURIComponent(name)}`;
+  const href = `/inquiries/talk-to-engineer?machine=${encodeURIComponent(slug)}&name=${encodeURIComponent(name)}`;
   return (
     <AetherBtn>
       <TransitionLink href={href}>Request a Quote →</TransitionLink>
@@ -877,7 +877,7 @@ export default function ProductDetail({ family, category, related }: Props) {
           </p>
           <div className="pdv2-cta-band__actions">
             <InquiryButton slug={family.slug} name={family.name} />
-            <Link href="/contact" className="pdv2-ghost-btn">See all contact options</Link>
+            <Link href="/inquiries" className="pdv2-ghost-btn">See all contact options</Link>
           </div>
         </div>
       </section>

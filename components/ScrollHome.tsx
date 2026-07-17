@@ -532,7 +532,7 @@ export default function ScrollHome() {
             <AetherBtn><TransitionLink href="/products/bag-making">
               Bag making lines →
             </TransitionLink></AetherBtn>
-            <TransitionLink href="/contact" style={{
+            <TransitionLink href="/inquiries" style={{
               display: "inline-flex", alignItems: "center", gap: "0.5rem",
               fontFamily: "var(--ff-mono)", fontSize: "0.78rem", letterSpacing: "0.08em",
               textTransform: "uppercase", padding: "0.85rem 1.5rem",

@@ -2,19 +2,39 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BRAND, categories } from "@/lib/products";
+import { BRAND } from "@/lib/products";
 
 const PHONE_DISPLAY = "+86 577 8888 8888";
 const PHONE_TEL = "+8657788888888";
 const WHATSAPP_NUMBER = "8657788888888";
+const EMAIL = "info@cxmachinery.com";
 
-const SHORTCUTS = [
-  { label: "Film Blowing",  href: "/products/film-blowing",   icon: "M7 21l7-9-7-9M17 3v18" },
-  { label: "Bag Making",    href: "/products/bag-making",     icon: "M4 4h16v11H8l-4 4V4z" },
-  { label: "Recycling",     href: "/products/recycling",      icon: "M12 2l4 8h-8l-4-8h8zm0 0l4 8M4 22h16M12 22v-6" },
-  { label: "Printing",      href: "/products/printing",       icon: "M4 7V4h16v3M4 7l16 10M4 17l16-10M4 17v3h16v-3" },
-  { label: "Get a Quote",   href: "/inquiries",                 icon: "M12 2l3 6h6l-5 4 2 6-6-4-6 4 2-6-5-4h6z" },
-  { label: "Contact",       href: "/inquiries",                 icon: "M4 4h16v11H8l-4 4V4z" },
+const PRODUCT_LINKS = [
+  { label: "Film Blowing Machines", href: "/products/film-blowing" },
+  { label: "Bag Making Machines", href: "/products/bag-making" },
+  { label: "Recycling Lines", href: "/products/recycling" },
+  { label: "Printing Machines", href: "/products/printing" },
+  { label: "Complete Catalogue", href: "/products" },
+];
+
+const COMPANY_LINKS = [
+  { label: "About Us", href: "/about" },
+  { label: "Our Factory", href: "/about" },
+  { label: "News & Updates", href: "/news" },
+  { label: "Careers", href: "/about" },
+];
+
+const SUPPORT_LINKS = [
+  { label: "Request a Quote", href: "/inquiries" },
+  { label: "Spare Parts", href: "/inquiries" },
+  { label: "Technical Support", href: "/inquiries" },
+  { label: "Contact Us", href: "/inquiries" },
+  { label: "Talk to an Engineer", href: "/inquiries" },
+];
+
+const LEGAL_LINKS = [
+  { label: "Privacy Policy", href: "#" },
+  { label: "Terms of Service", href: "#" },
 ];
 
 export default function SiteFooter() {
@@ -25,63 +45,134 @@ export default function SiteFooter() {
     <footer className="footer">
       <div className="wrap">
 
-        {/* ── Shortcut icon grid ── */}
-        <div className="footer-shortcuts">
-          {SHORTCUTS.map((s) => (
-            <Link key={s.label} href={s.href} className="footer-shortcut">
-              <span className="footer-shortcut__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d={s.icon} />
-                </svg>
-              </span>
-              <span className="footer-shortcut__label">{s.label}</span>
-            </Link>
-          ))}
-        </div>
+        {/* ── Main footer grid ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr auto", gap: "clamp(2rem,4vw,3.5rem)", paddingBottom: "2.5rem", borderBottom: "1px solid rgba(255,255,255,0.06)" }} className="footer-main-grid">
 
-        {/* ── Bottom row: brand + contact + company links ── */}
-        <div className="footer-bottom">
-          <div className="footer-brand-col">
-            <div className="footer-logo-row">
+          {/* Brand + QR codes */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
               <span className="footer-logo">
-                <Image src="/logo.jpeg" alt={`${BRAND} logo`} width={56} height={56} />
+                <Image src="/logo.jpeg" alt={`${BRAND} logo`} width={48} height={48} />
               </span>
-              <div className="footer-brand">Ashal<span>·</span>Innomach</div>
+              <div>
+                <div className="footer-brand">Ashal<span style={{ color: "var(--brand-red)" }}>·</span>Innomach</div>
+                <div style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.45)", marginTop: "0.25rem" }}>SINCE 2008 · WENZHOU, CHINA</div>
+              </div>
             </div>
-            <div className="footer-founded">
-              <span>Founded 2008</span>
-              <span className="footer-founded__dot" aria-hidden="true" />
-              <span>Wenzhou, China</span>
+
+            <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.82rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.7, maxWidth: "30ch" }}>
+              Designing and manufacturing blown-film lines, bag-making converters, and recycling systems shipped to 60+ countries.
+            </p>
+
+            {/* QR Codes */}
+            <div style={{ display: "flex", gap: "1rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem" }}>
+                <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "0.4rem", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <img src="/qr-whatsapp.png" alt="WhatsApp QR" width={80} height={80} style={{ display: "block" }} />
+                </div>
+                <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.55rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>WhatsApp</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem" }}>
+                <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "0.4rem", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <img src="/qr-website.png" alt="Website QR" width={80} height={80} style={{ display: "block" }} />
+                </div>
+                <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.55rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Website</span>
+              </div>
             </div>
           </div>
 
-          <div className="footer-links">
-            <Link href="/about">About</Link>
-            <Link href="/news">News</Link>
-            <Link href="/inquiries">Contact</Link>
-            <Link href="/products">Catalogue</Link>
+          {/* Products */}
+          <div>
+            <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "0.85rem", letterSpacing: "0.06em", color: "#fff", textTransform: "uppercase", marginBottom: "1.25rem" }}>Products</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+              {PRODUCT_LINKS.map((l) => (
+                <Link key={l.label} href={l.href} className="footer-col-link">{l.label}</Link>
+              ))}
+            </div>
           </div>
 
-          <div className="footer-contact-col">
+          {/* Company */}
+          <div>
+            <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "0.85rem", letterSpacing: "0.06em", color: "#fff", textTransform: "uppercase", marginBottom: "1.25rem" }}>Company</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+              {COMPANY_LINKS.map((l) => (
+                <Link key={l.label} href={l.href} className="footer-col-link">{l.label}</Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Support */}
+          <div>
+            <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "0.85rem", letterSpacing: "0.06em", color: "#fff", textTransform: "uppercase", marginBottom: "1.25rem" }}>Support</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+              {SUPPORT_LINKS.map((l) => (
+                <Link key={l.label} href={l.href} className="footer-col-link">{l.label}</Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Contact + Social */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem", minWidth: "180px" }}>
+            <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "0.85rem", letterSpacing: "0.06em", color: "#fff", textTransform: "uppercase", marginBottom: "0.25rem" }}>Contact</h4>
+
             <a href={`tel:${PHONE_TEL}`} className="footer-contact-link">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               {PHONE_DISPLAY}
             </a>
+
             <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="footer-contact-link">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm5.8 14.06c-.24.68-1.4 1.3-1.93 1.35-.5.05-1.03.24-3.43-.72-2.9-1.16-4.76-4.13-4.9-4.32-.14-.19-1.17-1.56-1.17-2.98 0-1.42.75-2.11 1.02-2.4.27-.29.58-.36.78-.36.2 0 .39.002.56.01.18.008.42-.07.66.5.24.58.82 2 .89 2.14.07.14.12.31.02.5-.1.19-.15.31-.3.47-.15.17-.31.37-.44.5-.15.14-.3.3-.13.59.17.3.76 1.25 1.63 2.02 1.12.99 2.06 1.3 2.36 1.45.3.14.47.12.65-.07.18-.19.75-.88.95-1.18.2-.3.4-.25.66-.15.27.1 1.71.81 2 .96.29.14.48.21.55.33.07.12.07.68-.17 1.36Z"/></svg>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm5.8 14.06c-.24.68-1.4 1.3-1.93 1.35-.5.05-1.03.24-3.43-.72-2.9-1.16-4.76-4.13-4.9-4.32-.14-.19-1.17-1.56-1.17-2.98 0-1.42.75-2.11 1.02-2.4.27-.29.58-.36.78-.36.2 0 .39.002.56.01.18.008.42-.07.66.5.24.58.82 2 .89 2.14.07.14.12.31.02.5-.1.19-.15.31-.3.47-.15.17-.31.37-.44.5-.15.14-.3.3-.13.59.17.3.76 1.25 1.63 2.02 1.12.99 2.06 1.3 2.36 1.45.3.14.47.12.65-.07.18-.19.75-.88.95-1.18.2-.3.4-.25.66-.15.27.1 1.71.81 2 .96.29.14.48.21.55.33.07.12.07.68-.17 1.36Z"/></svg>
               WhatsApp
             </a>
+
+            <a href={`mailto:${EMAIL}`} className="footer-contact-link">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+              {EMAIL}
+            </a>
+
             <span className="footer-contact-static">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              Wenzhou, China
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Wenzhou, Zhejiang, China
             </span>
+
+            {/* Social icons */}
+            <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
+              <a href="https://www.facebook.com/cxmachinery" target="_blank" rel="noopener noreferrer" className="footer-social-icon" aria-label="Facebook">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              </a>
+              <a href="https://www.instagram.com/cxmachinery" target="_blank" rel="noopener noreferrer" className="footer-social-icon" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+              </a>
+              <a href="https://www.linkedin.com/company/cxmachinery" target="_blank" rel="noopener noreferrer" className="footer-social-icon" aria-label="LinkedIn">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              </a>
+              <a href="https://www.youtube.com/@cxmachinery" target="_blank" rel="noopener noreferrer" className="footer-social-icon" aria-label="YouTube">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              </a>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="wrap footer-bar">
-        <p>© {new Date().getFullYear()} {BRAND}. All specifications subject to change without notice.</p>
-        <p>Wenzhou Ashal Innomach Technology Co., Ltd.</p>
+        {/* ── Certifications bar ── */}
+        <div style={{ display: "flex", alignItems: "center", gap: "2rem", paddingBlock: "1.25rem", borderBottom: "1px solid rgba(255,255,255,0.06)", flexWrap: "wrap" }}>
+          <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Certifications</span>
+          {["CE Certified", "ISO 9001", "SGS Verified"].map((cert) => (
+            <span key={cert} style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.5)", padding: "0.25rem 0.6rem", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "2px" }}>{cert}</span>
+          ))}
+          <span style={{ flex: 1 }} />
+          <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.6rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.35)" }}>60+ Countries · 6 Continents · 18+ Machine Families</span>
+        </div>
+
+        {/* ── Bottom bar ── */}
+        <div className="footer-bar">
+          <p style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem", color: "rgba(255,255,255,0.45)" }}>© {new Date().getFullYear()} {BRAND}. All specifications subject to change without notice.</p>
+          <div style={{ display: "flex", gap: "1.5rem" }}>
+            {LEGAL_LINKS.map((l) => (
+              <Link key={l.label} href={l.href} style={{ fontFamily: "var(--ff-mono)", fontSize: "0.68rem", color: "rgba(255,255,255,0.35)", textDecoration: "none", letterSpacing: "0.04em" }}>{l.label}</Link>
+            ))}
+          </div>
+          <p style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem", color: "rgba(255,255,255,0.45)" }}>Wenzhou Ashal Innomach Technology Co., Ltd.</p>
+        </div>
       </div>
     </footer>
   );

@@ -10,3 +10,6 @@ tsconfig.tsbuildinfo
 .env*.local
 *.log
 .DS_Store
+
+# About page video frames (served from Cloudinary)
+public/about-frames/

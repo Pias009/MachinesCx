@@ -142,7 +142,8 @@ function getPositionStyle(pos: TextOverlay["position"]): React.CSSProperties {
 }
 
 function getFrameSrc(frame: number): string {
-  return "/about-frames/frame_" + String(frame).padStart(3, "0") + ".jpg";
+  const id = "about-frames/frame_" + String(frame).padStart(3, "0");
+  return "https://res.cloudinary.com/dpyhwgsqk/image/upload/f_auto,q_80,w_1280/" + id + ".jpg";
 }
 
 const imageCache = new Map<number, HTMLImageElement>();

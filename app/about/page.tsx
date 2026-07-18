@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 
-const TOTAL_FRAMES = 155;
+const TOTAL_FRAMES = 97;
 
 interface TextOverlay {
   from: number;
@@ -12,113 +12,102 @@ interface TextOverlay {
   lines: { text: string; size?: string; weight?: number; color?: string; spacing?: string }[];
 }
 
-function resolveColor(color: string | undefined, isDark: boolean): string {
-  if (!color) return isDark ? "#fff" : "#111827";
-  if (!isDark) {
-    return color
-      .replace(/rgba\(255,255,255,([0-9.]+)\)/g, "rgba(0,0,0,$1)")
-      .replace("#fff", "#111827")
-      .replace("#ffffff", "#111827");
-  }
-  return color;
-}
-
 const OVERLAYS: TextOverlay[] = [
-  { from: 1, to: 15, position: "center", lines: [
+  { from: 1, to: 10, position: "center", lines: [
     { text: "WENZHOU ASHAL", size: "clamp(2.5rem,7vw,5.5rem)", weight: 700, spacing: "0.04em" },
     { text: "INNOMACH TECHNOLOGY", size: "clamp(2.5rem,7vw,5.5rem)", weight: 700, spacing: "0.04em" },
   ]},
-  { from: 16, to: 30, position: "top-left", lines: [
+  { from: 10, to: 19, position: "top-left", lines: [
     { text: "COMPANY", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "EST. 2008", size: "clamp(1.5rem,3vw,2.5rem)", weight: 700, spacing: "0.04em" },
     { text: "Wenzhou, Zhejiang, China", size: "clamp(0.65rem,1vw,0.85rem)", weight: 300, color: "rgba(255,255,255,0.6)", spacing: "0.06em" },
   ]},
-  { from: 16, to: 30, position: "bottom-right", lines: [
+  { from: 10, to: 19, position: "bottom-right", lines: [
     { text: "BUILT IN WENZHOU", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "SHIPPED WORLDWIDE", size: "clamp(1.2rem,2.5vw,2rem)", weight: 700, spacing: "0.06em" },
   ]},
-  { from: 31, to: 48, position: "top-left", lines: [
+  { from: 19, to: 30, position: "top-left", lines: [
     { text: "REACH", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "60+", size: "clamp(2.5rem,6vw,5rem)", weight: 700, spacing: "0.02em" },
     { text: "COUNTRIES SERVED", size: "clamp(0.6rem,1vw,0.8rem)", weight: 500, color: "rgba(255,255,255,0.7)", spacing: "0.2em" },
     { text: "6 CONTINENTS", size: "clamp(0.6rem,1vw,0.8rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.15em" },
   ]},
-  { from: 31, to: 48, position: "bottom-right", lines: [
+  { from: 19, to: 30, position: "bottom-right", lines: [
     { text: "OUTPUT", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "400 KG/H", size: "clamp(2rem,5vw,4rem)", weight: 700, spacing: "0.02em" },
     { text: "MAX PRODUCTION RATE", size: "clamp(0.6rem,1vw,0.8rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.15em" },
   ]},
-  { from: 49, to: 65, position: "top-left", lines: [
+  { from: 30, to: 41, position: "top-left", lines: [
     { text: "PORTFOLIO", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "18+", size: "clamp(2.5rem,6vw,5rem)", weight: 700, spacing: "0.02em" },
     { text: "MACHINE FAMILIES", size: "clamp(0.6rem,1vw,0.8rem)", weight: 500, color: "rgba(255,255,255,0.7)", spacing: "0.2em" },
   ]},
-  { from: 49, to: 65, position: "bottom-right", lines: [
+  { from: 30, to: 41, position: "bottom-right", lines: [
     { text: "FACILITY", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "12,000 M\u00B2", size: "clamp(1.8rem,4vw,3.5rem)", weight: 700, spacing: "0.02em" },
     { text: "MANUFACTURING FLOOR", size: "clamp(0.6rem,1vw,0.8rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.15em" },
   ]},
-  { from: 66, to: 82, position: "top-left", lines: [
+  { from: 41, to: 51, position: "top-left", lines: [
     { text: "MILESTONE", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "2011", size: "clamp(1.5rem,3vw,2.5rem)", weight: 700, spacing: "0.06em" },
     { text: "ABA 3-LAYER CO-EXTRUSION", size: "clamp(0.6rem,1vw,0.8rem)", weight: 400, color: "rgba(255,255,255,0.6)", spacing: "0.1em" },
     { text: "First export to Southeast Asia", size: "clamp(0.6rem,1vw,0.8rem)", weight: 300, color: "rgba(255,255,255,0.45)", spacing: "0.06em" },
   ]},
-  { from: 66, to: 82, position: "bottom-right", lines: [
+  { from: 41, to: 51, position: "bottom-right", lines: [
     { text: "MATERIALS", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "LDPE \u00B7 LLDPE \u00B7 HDPE", size: "clamp(0.7rem,1.2vw,1rem)", weight: 500, spacing: "0.08em" },
     { text: "PP \u00B7 PA \u00B7 EVOH", size: "clamp(0.7rem,1.2vw,1rem)", weight: 500, spacing: "0.08em" },
     { text: "PBAT+PLA BIODEGRADABLE", size: "clamp(0.6rem,1vw,0.8rem)", weight: 400, color: "rgba(255,255,255,0.6)", spacing: "0.1em" },
   ]},
-  { from: 83, to: 100, position: "top-left", lines: [
+  { from: 51, to: 63, position: "top-left", lines: [
     { text: "MILESTONE", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "2017", size: "clamp(1.5rem,3vw,2.5rem)", weight: 700, spacing: "0.06em" },
     { text: "CE CERTIFICATION", size: "clamp(0.6rem,1vw,0.8rem)", weight: 400, color: "rgba(255,255,255,0.6)", spacing: "0.1em" },
     { text: "European conformity achieved", size: "clamp(0.6rem,1vw,0.8rem)", weight: 300, color: "rgba(255,255,255,0.45)", spacing: "0.06em" },
   ]},
-  { from: 83, to: 100, position: "bottom-right", lines: [
+  { from: 51, to: 63, position: "bottom-right", lines: [
     { text: "TECHNOLOGY", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "1 \u2013 5 LAYERS", size: "clamp(1.2rem,2.5vw,2rem)", weight: 700, spacing: "0.06em" },
     { text: "CO-EXTRUSION BLOWN FILM", size: "clamp(0.6rem,1vw,0.8rem)", weight: 400, color: "rgba(255,255,255,0.6)", spacing: "0.1em" },
     { text: "UP TO 2,200MM WIDTH", size: "clamp(0.6rem,1vw,0.8rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.12em" },
   ]},
-  { from: 101, to: 118, position: "center", lines: [
+  { from: 63, to: 74, position: "center", lines: [
     { text: "ENGINEERED. PROVEN. SUPPORTED.", size: "clamp(1rem,2.5vw,2rem)", weight: 500, color: "rgba(255,255,255,0.95)", spacing: "0.12em" },
   ]},
-  { from: 101, to: 118, position: "top-left", lines: [
+  { from: 63, to: 74, position: "top-left", lines: [
     { text: "VALUE", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "ENGINEERING FIRST", size: "clamp(0.75rem,1.3vw,1.1rem)", weight: 600, spacing: "0.08em" },
     { text: "Over-engineer where it matters", size: "clamp(0.6rem,1vw,0.8rem)", weight: 300, color: "rgba(255,255,255,0.5)", spacing: "0.04em" },
   ]},
-  { from: 101, to: 118, position: "bottom-right", lines: [
+  { from: 63, to: 74, position: "bottom-right", lines: [
     { text: "OFFICES", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "GERMANY \u00B7 VIETNAM", size: "clamp(0.8rem,1.5vw,1.2rem)", weight: 600, spacing: "0.1em" },
     { text: "European & SEA operations", size: "clamp(0.6rem,1vw,0.8rem)", weight: 300, color: "rgba(255,255,255,0.5)", spacing: "0.04em" },
   ]},
-  { from: 119, to: 135, position: "top-left", lines: [
+  { from: 74, to: 84, position: "top-left", lines: [
     { text: "CATEGORIES", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "BLOWN FILM", size: "clamp(0.8rem,1.4vw,1.2rem)", weight: 600, spacing: "0.1em" },
     { text: "BAG MAKING", size: "clamp(0.8rem,1.4vw,1.2rem)", weight: 600, spacing: "0.1em" },
     { text: "RECYCLING", size: "clamp(0.8rem,1.4vw,1.2rem)", weight: 600, spacing: "0.1em" },
     { text: "PRINTING", size: "clamp(0.8rem,1.4vw,1.2rem)", weight: 600, spacing: "0.1em" },
   ]},
-  { from: 119, to: 135, position: "bottom-right", lines: [
+  { from: 74, to: 84, position: "bottom-right", lines: [
     { text: "SUPPORT", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "LIFETIME", size: "clamp(1.5rem,3vw,2.5rem)", weight: 700, spacing: "0.06em" },
     { text: "SPARE PARTS & REMOTE SUPPORT", size: "clamp(0.6rem,1vw,0.8rem)", weight: 400, color: "rgba(255,255,255,0.6)", spacing: "0.1em" },
     { text: "FOR EVERY MACHINE WE BUILD", size: "clamp(0.55rem,0.9vw,0.75rem)", weight: 300, color: "rgba(255,255,255,0.45)", spacing: "0.1em" },
   ]},
-  { from: 136, to: 150, position: "top-left", lines: [
+  { from: 84, to: 94, position: "top-left", lines: [
     { text: "CERTIFICATION", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "CE", size: "clamp(2rem,4vw,3.5rem)", weight: 700, spacing: "0.08em" },
     { text: "EUROPEAN CONFORMITY", size: "clamp(0.6rem,1vw,0.8rem)", weight: 400, color: "rgba(255,255,255,0.6)", spacing: "0.15em" },
   ]},
-  { from: 136, to: 150, position: "bottom-right", lines: [
+  { from: 84, to: 94, position: "bottom-right", lines: [
     { text: "DELIVERY", size: "clamp(0.5rem,0.8vw,0.7rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.3em" },
     { text: "25\u201345 DAYS", size: "clamp(1.5rem,3vw,2.5rem)", weight: 700, spacing: "0.04em" },
     { text: "PRODUCTION TO COMMISSIONING", size: "clamp(0.6rem,1vw,0.8rem)", weight: 400, color: "rgba(255,255,255,0.5)", spacing: "0.1em" },
   ]},
-  { from: 151, to: 155, position: "center", lines: [
+  { from: 94, to: 97, position: "center", lines: [
     { text: "CX MACHINERY.COM", size: "clamp(1.2rem,3vw,2.5rem)", weight: 700, spacing: "0.08em" },
   ]},
 ];
@@ -143,7 +132,7 @@ function getPositionStyle(pos: TextOverlay["position"]): React.CSSProperties {
 
 function getFrameSrc(frame: number): string {
   const id = "about-frames/frame_" + String(frame).padStart(3, "0");
-  return "https://res.cloudinary.com/dpyhwgsqk/image/upload/f_auto,q_80,w_1280/" + id + ".jpg";
+  return "https://res.cloudinary.com/dpyhwgsqk/image/upload/f_auto,q_80,w_1280/" + id + ".jpg?v=4";
 }
 
 const imageCache = new Map<number, HTMLImageElement>();

@@ -13,3 +13,7 @@ tsconfig.tsbuildinfo
 
 # About page video frames (served from Cloudinary)
 public/about-frames/
+
+# About page hero video — served from Cloudinary, not committed (large binary)
+public/about-hero.mp4
+/l.mp4

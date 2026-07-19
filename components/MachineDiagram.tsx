@@ -10,6 +10,7 @@ interface Props {
   modelIndex: number;
   models: string[];
   family: ProductFamily;
+  category?: string;
 }
 
 function extractNum(v: string): number {
@@ -54,7 +55,14 @@ function SpecCounter({ value, suffix, label, decimals = 0 }: { value: number; su
   );
 }
 
-export default function MachineDiagram({ image, name, specs, specKeys, modelIndex, models, family }: Props) {
+const RADAR_DEFAULTS: Record<string, string[]> = {
+  "film-blowing": ["Screw Diameter", "Max Extrusion Output", "Total Power", "Film Width", "Roller Width", "Main Motor", "Max Bag Width", "Max Web Width", "Max Mechanical Speed"],
+  "bag-making": ["Max Bag Width", "Total Power", "Mechanical Speed", "Bag Making Speed", "Line Speed", "Film Thickness", "Produce Length", "Max Unwind Roll Dia."],
+  "recycling": ["Screw Diameter", "Max Extrusion Output", "Main Motor", "Total Power", "Output Capacity", "Film Width", "Pelletizer Speed"],
+  "printing": ["Max Web Width", "Max Mechanical Speed", "Printing Colours", "Max Printing Width", "Repeat Length Range", "Machine Weight", "Max Unwind/Rewind Dia."],
+};
+
+export default function MachineDiagram({ image, name, specs, specKeys, modelIndex, models, family, category }: Props) {
   const radarRef = useRef<HTMLCanvasElement>(null);
   const radarChart = useRef<{ destroy: () => void } | null>(null);
   const [chartsReady, setChartsReady] = useState(false);
@@ -76,9 +84,10 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
   }, [specs, modelIndex]);
 
   const radarSpecs = useMemo(() => {
+    const defaults = RADAR_DEFAULTS[category ?? ""] ?? RADAR_DEFAULTS["film-blowing"];
     const keys = family.radarSpecs?.length
       ? family.radarSpecs
-      : ["Screw Diameter", "Max Extrusion Output", "Total Power", "Film Width", "Roller Width", "Main Motor", "Max Bag Width", "Max Web Width", "Max Mechanical Speed"];
+      : defaults;
     return keys
       .map((key) => {
         const row = specs.find((s) => s.label === key);
@@ -88,7 +97,7 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
       })
       .filter((x): x is { label: string; value: number; unit: string } => x !== null && x.value > 0)
       .slice(0, 8);
-  }, [specs, modelIndex, family.radarSpecs]);
+  }, [specs, modelIndex, family.radarSpecs, category]);
 
   useEffect(() => { setChartsReady(true); }, []);
 
@@ -141,7 +150,7 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
         radarChart.current = new Chart(ctx, {
           type: "radar",
           data: {
-            labels: [],
+            labels: radarSpecs.map((s) => s.label),
             datasets: [{
               label: name,
               data: radarSpecs.map((s) => s.value),
@@ -213,7 +222,7 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
   if (radarSpecs.length < 3) return null;
 
   return (
-    <div className="md-section" data-reveal>
+    <div className="md-section">
       <style suppressHydrationWarning>{`
         .md-section {
           padding: 2.5rem 0 3rem;

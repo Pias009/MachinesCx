@@ -507,7 +507,7 @@ html {
 }
 body {
   background: var(--bg-base);
-  color: var(--slate);
+  color: var(--ink);
   font-family: var(--ff-body);
   font-size: 1rem;
   line-height: 1.7;
@@ -3309,69 +3309,75 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   padding: clamp(3rem, 6vw, 5rem) 0;
   border-bottom: 1px solid var(--bg-line);
 }
-.pdv2-delivery-timeline {
-  display: flex; flex-direction: column; gap: 0;
-  border: 1px solid var(--bg-line);
-  background: var(--bg-surface);
-  position: relative;
-}
-/* continuous rail running through every icon's center — a real
-   connected sequence instead of floating badges with a short tick
-   between rows. Anchored to the icon column: 1.4rem padding + half of
-   the 76px icon slot. */
-.pdv2-delivery-rail {
-  position: absolute;
-  top: 2.75rem; bottom: 2.75rem;
-  left: calc(1.4rem + 38px);
-  width: 2px;
-  background: linear-gradient(to bottom, transparent, var(--bg-line) 4%, var(--bg-line) 96%, transparent);
-  z-index: 0;
-}
-.pdv2-delivery-phase {
+/* card grid — each delivery phase is a self-contained column instead of
+   a full-width row. A connector chevron bridges cards that sit next to
+   each other in the same row; it's hidden once the grid wraps (2- and
+   1-column breakpoints) since a left-to-right arrow stops making sense
+   once the sequence continues on the next line. */
+.pdv2-delivery-grid {
   display: grid;
-  grid-template-columns: 76px minmax(0, 1fr) auto;
-  gap: 1rem 1.25rem;
-  align-items: center;
-  padding: 1.5rem 1.4rem;
-  border-bottom: 1px solid var(--bg-line);
-  position: relative;
-  overflow: hidden;
-  transition: background 0.2s;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
 }
-.pdv2-delivery-phase:last-child { border-bottom: none; }
-.pdv2-delivery-phase:hover { background: var(--bg-raise); }
-.pdv2-delivery-phase__dot {
+.pdv2-delivery-card {
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-line);
+  border-radius: 1rem;
+  padding: 1.75rem 1.5rem;
+  display: flex; flex-direction: column;
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), border-color 0.2s, box-shadow 0.25s;
+}
+.pdv2-delivery-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(43,191,179,0.35);
+  box-shadow: 0 16px 40px -20px rgba(43,191,179,0.3);
+}
+.pdv2-delivery-card__step {
+  position: absolute; top: 1.1rem; right: 1.25rem;
+  font-family: var(--ff-display); font-size: 2.4rem;
+  color: var(--ink); opacity: 0.06; line-height: 1;
+  pointer-events: none;
+}
+.pdv2-delivery-card__icon {
   position: relative; z-index: 1;
-  width: 76px; height: 76px;
+  width: 64px; height: 64px; margin-bottom: 1.25rem;
+  border-radius: 0.875rem;
+  background: rgba(43,191,179,0.08);
+  border: 1px solid rgba(43,191,179,0.18);
   display: flex; align-items: center; justify-content: center;
+  color: var(--brand-teal);
   transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
 }
-.pdv2-delivery-phase__dot::before {
-  content: "";
-  position: absolute; inset: -6px;
-  background: var(--bg-surface);
-  border-radius: 50%;
-  z-index: -1;
+.pdv2-delivery-card:hover .pdv2-delivery-card__icon { transform: scale(1.06); }
+.pdv2-delivery-card__label {
+  font-family: var(--ff-display); font-size: 1.1rem;
+  color: var(--ink); line-height: 1.15;
+  margin: 0 0 0.6rem; overflow-wrap: anywhere;
 }
-.pdv2-delivery-phase:hover .pdv2-delivery-phase__dot {
-  transform: scale(1.08);
+.pdv2-delivery-card__detail {
+  font-family: var(--ff-body); font-size: 0.83rem;
+  color: var(--ink-60); line-height: 1.65;
+  margin: 0 0 1.1rem; overflow-wrap: anywhere; flex: 1;
 }
-.pdv2-delivery-phase__body { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
-.pdv2-delivery-phase__label {
-  font-family: var(--ff-display); font-size: 1.15rem;
-  color: var(--ink); line-height: 1.1;
-  overflow-wrap: anywhere;
-}
-.pdv2-delivery-phase__detail {
-  font-family: var(--ff-body); font-size: 0.84rem;
-  color: var(--ink-60); line-height: 1.6; max-width: 62ch;
-  overflow-wrap: anywhere;
-}
-.pdv2-delivery-phase__duration {
-  font-family: var(--ff-mono); font-size: 0.68rem;
+.pdv2-delivery-card__duration {
+  align-self: flex-start;
+  font-family: var(--ff-mono); font-size: 0.66rem;
   letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--brand-teal); white-space: nowrap;
-  padding: 0.3rem 0.65rem; border: 1px solid rgba(43,191,179,0.3);
+  padding: 0.3rem 0.65rem; border-radius: 999px;
+  border: 1px solid rgba(43,191,179,0.3);
+  background: rgba(43,191,179,0.06);
+}
+.pdv2-delivery-card__connector {
+  display: none;
+  position: absolute; top: 50%; right: -1.9rem;
+  width: 20px; height: 20px; transform: translateY(-50%);
+  color: var(--ink-35); z-index: 2;
+}
+@media (min-width: 860px) {
+  .pdv2-delivery-grid { grid-template-columns: repeat(3, 1fr); }
+  .pdv2-delivery-card:not(:nth-child(3n)) .pdv2-delivery-card__connector { display: block; }
 }
 
 /* ── proof sections: packing / freight / install, each its own full-width
@@ -3423,6 +3429,34 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-dv-box__icon::after  { bottom: 0; right: 0; border-bottom: 2px solid; border-right: 2px solid; }
 .pdv2-dv-box:hover .pdv2-dv-box__icon::before,
 .pdv2-dv-box:hover .pdv2-dv-box__icon::after { opacity: 1; }
+
+/* multi-photo nav — overlaid bottom-right, same banner/crop never resizes
+   as the visitor steps through a stage's photos */
+.pdv2-dv-box__nav {
+  position: absolute; z-index: 2;
+  right: clamp(1rem, 3vw, 2rem); bottom: clamp(1rem, 3vw, 2rem);
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.pdv2-dv-box__nav-btn {
+  width: 2.25rem; height: 2.25rem;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(8,14,13,0.55);
+  backdrop-filter: blur(6px);
+  color: #fff; font-size: 1.1rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, transform 0.18s cubic-bezier(0.16,1,0.3,1);
+}
+.pdv2-dv-box__nav-btn:hover { border-color: var(--brand-teal); background: rgba(43,191,179,0.25); transform: translateY(-2px); }
+.pdv2-dv-box__nav-btn:active { transform: scale(0.94); }
+.pdv2-dv-box__nav-count {
+  font-family: var(--ff-mono); font-size: 0.7rem; letter-spacing: 0.06em;
+  padding: 0.35rem 0.7rem;
+  background: rgba(8,14,13,0.55);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+}
 @media (max-width: 640px) {
   .pdv2-dv-box__media { aspect-ratio: 4 / 3; }
 }
@@ -3875,13 +3909,12 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 [data-theme=light] .pdv2-mp-step__detail { color: rgba(13,34,32,0.7); }
 [data-theme=light] .pdv2-mp-step__img   { border-color: rgba(13,34,32,0.12); }
 [data-theme=light] .pdv2-delivery       { background: #ffffff; border-color: rgba(13,34,32,0.12); }
-[data-theme=light] .pdv2-delivery-timeline { background: #fff; border-color: rgba(13,34,32,0.12); }
-[data-theme=light] .pdv2-delivery-phase { border-color: rgba(13,34,32,0.12); }
-[data-theme=light] .pdv2-delivery-phase__dot::before { background: #fff; }
-[data-theme=light] .pdv2-delivery-rail { background: linear-gradient(to bottom, transparent, rgba(13,34,32,0.12) 4%, rgba(13,34,32,0.12) 96%, transparent); }
-[data-theme=light] .pdv2-delivery-phase:hover { background: #ffffff; }
-[data-theme=light] .pdv2-delivery-phase__label { color: #0d2220; }
-[data-theme=light] .pdv2-delivery-phase__detail { color: rgba(13,34,32,0.65); }
+[data-theme=light] .pdv2-delivery-card  { background: #fff; border-color: rgba(13,34,32,0.12); }
+[data-theme=light] .pdv2-delivery-card:hover { border-color: rgba(43,191,179,0.4); }
+[data-theme=light] .pdv2-delivery-card__step { color: #0d2220; }
+[data-theme=light] .pdv2-delivery-card__label { color: #0d2220; }
+[data-theme=light] .pdv2-delivery-card__detail { color: rgba(13,34,32,0.65); }
+[data-theme=light] .pdv2-delivery-card__connector { color: rgba(13,34,32,0.25); }
 [data-theme=light] .pdv2-dv-box         { border-color: rgba(13,34,32,0.12); }
 [data-theme=light] .pdv2-dv-box__media  { background: #ffffff; border-color: rgba(13,34,32,0.12); }
 [data-theme=light] .pdv2-dv-box__label  { color: #0d2220; }
@@ -3939,11 +3972,6 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   .pdv2-rating-bar__fill { background: var(--brand-teal); }
   .pdv2-cta-band { grid-template-columns: 1fr; }
   .pdv2-cta-band__img-side { min-height: 200px; }
-  .pdv2-delivery-phase { grid-template-columns: 52px 1fr; }
-  .pdv2-delivery-phase__dot { width: 52px; height: 52px; }
-  .pdv2-delivery-phase__dot .dsi-svg { width: 44px; height: 44px; }
-  .pdv2-delivery-rail { left: calc(1.4rem + 26px); }
-  .pdv2-delivery-phase__duration { grid-column: 2; justify-self: start; margin-top: 0.15rem; }
 }
 @media (max-width: 600px) {
   .pdv2-related-grid { grid-template-columns: 1fr 1fr; }

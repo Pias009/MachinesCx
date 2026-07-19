@@ -1,9 +1,14 @@
 import Link from "next/link";
-import { categories, familiesByCategory, familyImage } from "@/lib/products";
+import { familyImage } from "@/lib/products";
+import { getLiveCatalogue } from "@/lib/liveCatalogue";
 
 export const metadata = { title: "Full Catalogue — Ashal Innomach" };
+export const dynamic = "force-dynamic";
 
-export default function ProductsIndex() {
+export default async function ProductsIndex() {
+  const { categories, families } = await getLiveCatalogue();
+  const familiesByCategory = (slug: string) => families.filter((f) => f.category === slug);
+
   return (
     <>
       <header className="cat-hero">

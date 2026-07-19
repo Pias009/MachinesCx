@@ -16,6 +16,7 @@ export interface CreateInquiryInput {
   phone?: string;
   country?: string;
   message?: string;
+  images?: string[];
   machines?: InquiryMachine[];
   parts?: InquiryPart[];
   source?: string;
@@ -41,8 +42,11 @@ export async function createInquiry(body: CreateInquiryInput) {
 
   const inquiryType = body.inquiryType ?? "direct";
 
-  // Validate based on type
-  if (inquiryType === "talk-to-engineer" || inquiryType === "direct") {
+  // Validate based on type. "talk-to-engineer" can go out with no machine
+  // attached — the visitor may just want to describe a general request —
+  // so it isn't required there the way it is for "direct" (a machine is
+  // the whole point of that flow).
+  if (inquiryType === "direct") {
     if (!Array.isArray(body.machines) || body.machines.length === 0) {
       throw new Error("Select at least one machine");
     }
@@ -62,6 +66,7 @@ export async function createInquiry(body: CreateInquiryInput) {
     phone: body.phone?.trim() ?? "",
     country: body.country?.trim() ?? "",
     message: body.message?.trim() ?? "",
+    images: body.images ?? [],
     machines: body.machines ?? [],
     parts: body.parts ?? [],
     status: "new",
@@ -99,6 +104,7 @@ export async function createInquiry(body: CreateInquiryInput) {
           ${machineRows ? `<h3>Machines</h3><table style="border-collapse:collapse">${machineRows}</table>` : ""}
           ${partRows ? `<h3>Parts</h3><table style="border-collapse:collapse">${partRows}</table>` : ""}
           ${body.message ? `<p><strong>Message:</strong><br/>${escapeHtml(body.message).replace(/\n/g, "<br/>")}</p>` : ""}
+          ${body.images && body.images.length > 0 ? `<p><strong>${body.images.length} attached photo${body.images.length > 1 ? "s" : ""}</strong> — view in the admin panel.</p>` : ""}
           <p style="color:#888;font-size:12px">View and reply from the admin panel.</p>
         `,
       });

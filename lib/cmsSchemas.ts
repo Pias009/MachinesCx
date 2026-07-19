@@ -22,7 +22,7 @@ export type FieldKind =
   | "gallery"     // {src, caption}[] rows — image + local upload + caption
   | "videos"      // {url, title}[] rows — YouTube URL/ID + title
   | "reviews"     // {name, title, rating, text}[] rows — real buyer reviews
-  | "stagePhotos" // {packing?, freight?, install?} — 3 fixed delivery-stage proof photos
+  | "stagePhotos" // {packing?, freight?, install?: string[]} — 3 fixed delivery-stage proof photo galleries, each with unlimited photos
   | "customSections" // {kind, title, image?, text?, imageSide?, photos?}[] — admin-authored extra sections, fixed safe templates
   | "parts";      // {name, detail, images?, installation?}[] rows — real machine parts, each with its own optional install steps
 
@@ -79,7 +79,7 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
           gallery: [{ src: "", caption: "" }],
           videos: [],
           reviews: [],
-          deliveryStagePhotos: { packing: "", freight: "", install: "" },
+          deliveryStagePhotos: { packing: [], freight: [], install: [] },
           customSections: [],
           parts: [],
           radarImage: "",
@@ -107,7 +107,7 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
 
           { key: "installation", label: "Installation / setup steps", kind: "steps", hint: "add a photo or diagram per step — auto-picks an icon from words like foundation / power / assembly / calibration / training in the title", group: "🚚 Setup & Delivery" },
           { key: "deliveryGuide", label: "Delivery guide (timeline)", kind: "phases", hint: "auto-picks an icon from words like order / production / test / shipping / install in the label", group: "🚚 Setup & Delivery" },
-          { key: "deliveryStagePhotos", label: "Delivery stage proof photos", kind: "stagePhotos", hint: "real photos of this machine crated, in a container, and installed on-site — each falls back to a technical icon until you upload one", group: "🚚 Setup & Delivery" },
+          { key: "deliveryStagePhotos", label: "Delivery stage proof photos", kind: "stagePhotos", hint: "real photos of this machine crated, in a container, and installed on-site — upload as many as you like per stage, each falls back to a technical icon until at least one is uploaded", group: "🚚 Setup & Delivery" },
 
           { key: "reviews", label: "Buyer reviews", kind: "reviews", hint: "only real reviews you've collected — leave empty to show an honest 'be the first to review' state instead of fake ratings", group: "⭐ Reviews" },
 

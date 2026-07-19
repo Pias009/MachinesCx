@@ -27,12 +27,17 @@ const TYPE_CONFIG: Record<InquiryType, { label: string; icon: string; color: str
   parts:              { label: "Part Inquiry",     icon: "🔧", color: "#f59e0b" },
 };
 
+// Some legacy inquiries predate the inquiryType field — fall back to
+// "direct" (the same default lib/inquiries.ts uses when creating one)
+// instead of crashing the whole page on an undefined lookup.
+const typeConfig = (t: InquiryType | undefined) => TYPE_CONFIG[t ?? "direct"] ?? TYPE_CONFIG.direct;
+
 const SOURCE_CONFIG: Record<string, { label: string; color: string }> = {
   google:    { label: "Google",    color: "#4285F4" },
   facebook:  { label: "Facebook",  color: "#1877F2" },
   instagram: { label: "Instagram", color: "#E4405F" },
   linkedin:  { label: "LinkedIn",  color: "#0A66C2" },
-  twitter:   { label: "X",         color: "#000" },
+  twitter:   { label: "X",         color: "#ffffff" },
   direct:    { label: "Direct",    color: "rgba(255,255,255,0.4)" },
   other:     { label: "Other",     color: "rgba(255,255,255,0.4)" },
 };
@@ -40,7 +45,7 @@ const SOURCE_CONFIG: Record<string, { label: string; color: string }> = {
 const STATUS_COLOR: Record<string, string> = {
   new: "#e11d48",
   read: "#f5c451",
-  replied: "var(--brand-teal)",
+  replied: "#2bbfb3",
 };
 const STATUS_LABEL: Record<string, string> = {
   new: "New",
@@ -103,17 +108,23 @@ export default function InquiriesPage() {
     }
   }
 
+  // Legacy inquiries predate the inquiryType field — treat a missing type
+  // as "direct" everywhere (filtering, counts, badges), matching the
+  // create-time default in lib/inquiries.ts, so they're findable instead
+  // of silently excluded from every type tab except "All".
+  const effectiveType = (i: InquiryRow) => i.inquiryType ?? "direct";
+
   const filtered = inquiries?.filter(i => {
     if (filter !== "all" && i.status !== filter) return false;
-    if (typeFilter !== "all" && i.inquiryType !== typeFilter) return false;
+    if (typeFilter !== "all" && effectiveType(i) !== typeFilter) return false;
     return true;
   }) ?? [];
 
   const typeCounts = {
     all: inquiries?.length ?? 0,
-    "talk-to-engineer": inquiries?.filter(i => i.inquiryType === "talk-to-engineer").length ?? 0,
-    direct: inquiries?.filter(i => i.inquiryType === "direct").length ?? 0,
-    parts: inquiries?.filter(i => i.inquiryType === "parts").length ?? 0,
+    "talk-to-engineer": inquiries?.filter(i => effectiveType(i) === "talk-to-engineer").length ?? 0,
+    direct: inquiries?.filter(i => effectiveType(i) === "direct").length ?? 0,
+    parts: inquiries?.filter(i => effectiveType(i) === "parts").length ?? 0,
   };
 
   const typeTabs: { key: "all" | InquiryType; label: string }[] = [
@@ -135,7 +146,7 @@ export default function InquiriesPage() {
       {!inquiries ? (
         <p style={{ fontFamily: "var(--ff-body)", color: "rgba(255,255,255,0.6)" }}>Loading…</p>
       ) : inquiries.length === 0 ? (
-        <div style={{ borderRadius: 16, background: "#0d1a18", padding: "2.5rem", textAlign: "center" }}>
+        <div style={{ borderRadius: 16, background: "#111", padding: "2.5rem", textAlign: "center" }}>
           <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>📭</div>
           <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: "rgba(255,255,255,0.6)" }}>
             No inquiries yet — they&apos;ll show up here as soon as a customer submits the contact form.
@@ -144,7 +155,7 @@ export default function InquiriesPage() {
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: "1.25rem", alignItems: "start" }}>
           {/* ── list ── */}
-          <div style={{ borderRadius: 16, background: "#0d1a18", overflow: "hidden" }}>
+          <div style={{ borderRadius: 16, background: "#111", overflow: "hidden" }}>
             {/* type filter tabs */}
             <div style={{ display: "flex", gap: "0.35rem", padding: "0.9rem 0.9rem 0.5rem", flexWrap: "wrap" }}>
               {typeTabs.map(tab => {
@@ -155,12 +166,12 @@ export default function InquiriesPage() {
                     padding: "0.4rem 0.7rem", borderRadius: 8, border: "none", cursor: "pointer",
                     fontFamily: "var(--ff-body)", fontSize: "0.78rem", fontWeight: 600,
                     background: active
-                      ? (tab.key === "all" ? "var(--brand-teal)" : TYPE_CONFIG[tab.key as InquiryType].color)
+                      ? (tab.key === "all" ? "var(--brand-teal)" : typeConfig(tab.key as InquiryType).color)
                       : "rgba(255,255,255,0.06)",
                     color: active ? "#04211e" : "rgba(255,255,255,0.65)",
                     display: "flex", alignItems: "center", gap: "0.3rem",
                   }}>
-                    {tab.key !== "all" && <span>{TYPE_CONFIG[tab.key as InquiryType].icon}</span>}
+                    {tab.key !== "all" && <span>{typeConfig(tab.key as InquiryType).icon}</span>}
                     {tab.label}
                     <span style={{
                       display: "inline-flex", alignItems: "center", justifyContent: "center",
@@ -189,12 +200,12 @@ export default function InquiriesPage() {
 
             <div style={{ maxHeight: "68vh", overflowY: "auto" }}>
               {filtered.map(inq => {
-                const type = TYPE_CONFIG[inq.inquiryType];
+                const inqType = typeConfig(inq.inquiryType);
                 return (
                   <button key={inq._id} onClick={() => selectInquiry(inq)} style={{
                     display: "block", width: "100%", textAlign: "left", padding: "0.9rem 1.1rem",
                     border: "none", borderBottom: "1px solid rgba(255,255,255,0.05)", cursor: "pointer",
-                    background: selectedId === inq._id ? "#122320" : "transparent",
+                    background: selectedId === inq._id ? "#1a1a1a" : "transparent",
                   }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.25rem" }}>
                       <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.95rem", fontWeight: 700, color: "#fff" }}>{inq.name}</span>
@@ -206,10 +217,10 @@ export default function InquiriesPage() {
                       <span style={{
                         display: "inline-flex", alignItems: "center", gap: "0.25rem",
                         padding: "0.15rem 0.5rem", borderRadius: 5,
-                        background: type.color + "22", color: type.color,
+                        background: `${inqType.color}22`, color: inqType.color,
                         fontFamily: "var(--ff-body)", fontSize: "0.7rem", fontWeight: 700,
                       }}>
-                        <span>{type.icon}</span> {type.label}
+                        <span>{inqType.icon}</span> {inqType.label}
                       </span>
                     </div>
 
@@ -249,7 +260,7 @@ export default function InquiriesPage() {
           {selected ? (
             <InquiryDetail key={selected._id} inquiry={selected} onReplied={load} />
           ) : (
-            <div style={{ borderRadius: 16, background: "#0d1a18", padding: "3rem", textAlign: "center" }}>
+            <div style={{ borderRadius: 16, background: "#111", padding: "3rem", textAlign: "center" }}>
               <p style={{ fontFamily: "var(--ff-body)", color: "rgba(255,255,255,0.45)" }}>Select an inquiry to view details.</p>
             </div>
           )}
@@ -266,7 +277,7 @@ function InquiryDetail({ inquiry, onReplied }: { inquiry: InquiryRow; onReplied:
   const [error, setError] = useState("");
   const [sentOk, setSentOk] = useState(false);
 
-  const type = TYPE_CONFIG[inquiry.inquiryType];
+  const inqTypeInfo = typeConfig(inquiry.inquiryType);
 
   const availableImages = Array.from(new Set(
     inquiry.machines.flatMap(m => {
@@ -306,22 +317,22 @@ function InquiryDetail({ inquiry, onReplied }: { inquiry: InquiryRow; onReplied:
   const valStyle: React.CSSProperties = { fontFamily: "var(--ff-body)", fontSize: "0.9rem", color: "#fff", fontWeight: 600, textAlign: "right" };
 
   return (
-    <div style={{ borderRadius: 16, background: "#0d1a18", padding: "1.75rem", display: "flex", flexDirection: "column", gap: "1.75rem" }}>
+    <div style={{ borderRadius: 16, background: "#111", padding: "1.75rem", display: "flex", flexDirection: "column", gap: "1.75rem" }}>
       {/* header with type badge */}
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.6rem" }}>
           <span style={{
             display: "inline-flex", alignItems: "center", gap: "0.3rem",
             padding: "0.25rem 0.7rem", borderRadius: 6,
-            background: type.color + "22", color: type.color,
+            background: `${inqTypeInfo.color}22`, color: inqTypeInfo.color,
             fontFamily: "var(--ff-body)", fontSize: "0.82rem", fontWeight: 700,
           }}>
-            <span>{type.icon}</span> {type.label}
+            <span>{inqTypeInfo.icon}</span> {inqTypeInfo.label}
           </span>
           <span style={{
             display: "inline-flex", alignItems: "center", gap: "0.25rem",
             padding: "0.2rem 0.55rem", borderRadius: 5,
-            background: STATUS_COLOR[inquiry.status] + "22",
+            background: `${STATUS_COLOR[inquiry.status]}22`,
             color: STATUS_COLOR[inquiry.status],
             fontFamily: "var(--ff-body)", fontSize: "0.75rem", fontWeight: 700,
           }}>
@@ -350,8 +361,8 @@ function InquiryDetail({ inquiry, onReplied }: { inquiry: InquiryRow; onReplied:
         ))}
       </div>
 
-      {/* machines requested (talk-to-engineer & direct) */}
-      {(inquiry.inquiryType === "talk-to-engineer" || inquiry.inquiryType === "direct") && inquiry.machines.length > 0 && (
+      {/* machines requested (talk-to-engineer & direct — and legacy rows with no inquiryType, which default to "direct") */}
+      {inquiry.inquiryType !== "parts" && inquiry.machines.length > 0 && (
         <div>
           <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 700, color: "var(--brand-teal)", marginBottom: "0.6rem" }}>Machines requested</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
@@ -362,6 +373,14 @@ function InquiryDetail({ inquiry, onReplied }: { inquiry: InquiryRow; onReplied:
                   Model: {m.model} · Qty: {m.qty}
                 </div>
                 {m.notes && <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.82rem", color: "rgba(255,255,255,0.45)", marginTop: "0.3rem", fontStyle: "italic" }}>&quot;{m.notes}&quot;</div>}
+                {(m.images ?? []).length > 0 && (
+                  <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                    {(m.images ?? []).map((src, j) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img key={j} src={src} alt="" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)" }} />
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -233,13 +233,13 @@ function FieldControl({ field, value, item, onChange, onItemChange }: {
       return (
         <label style={{ display: "inline-flex", alignItems: "center", gap: "0.6rem", cursor: "pointer" }}>
           <input type="checkbox" checked={Boolean(value)} onChange={e => onChange(e.target.checked)} style={{ width: 20, height: 20 }} />
-          <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.95rem", color: "rgba(255,255,255,0.8)" }}>{Boolean(value) ? "On" : "Off"}</span>
+          <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.95rem", color: "#fff" }}>{Boolean(value) ? "On" : "Off"}</span>
         </label>
       );
     case "select":
       return (
         <select style={{ ...inputStyle, appearance: "auto" }} value={(value as string) ?? ""} onChange={e => onChange(e.target.value)}>
-          {(field.options ?? []).map(o => <option key={o} value={o} style={{ color: "#000" }}>{o}</option>)}
+          {(field.options ?? []).map(o => <option key={o} value={o} style={{ color: "#e0e0e0", background: "#111" }}>{o}</option>)}
         </select>
       );
     case "image":
@@ -465,7 +465,7 @@ function FieldControl({ field, value, item, onChange, onItemChange }: {
                   onChange={e => { const n = rows.map(x => ({ ...x })); n[i].title = e.target.value; onChange(n); }} />
                 <select style={{ ...inputStyle, flex: "0 0 90px" }} value={r.rating || 5}
                   onChange={e => { const n = rows.map(x => ({ ...x })); n[i].rating = Number(e.target.value); onChange(n); }}>
-                  {[5, 4, 3, 2, 1].map(v => <option key={v} value={v}>{v} star{v === 1 ? "" : "s"}</option>)}
+                  {[5, 4, 3, 2, 1].map(v => <option key={v} value={v} style={{ color: "#e0e0e0", background: "#111" }}>{v} star{v === 1 ? "" : "s"}</option>)}
                 </select>
                 <button type="button" style={dangerBtn} onClick={() => onChange(rows.filter((_, j) => j !== i))}>Remove</button>
               </div>
@@ -478,8 +478,11 @@ function FieldControl({ field, value, item, onChange, onItemChange }: {
       );
     }
     case "stagePhotos": {
-      // {packing?, freight?, install?} — 3 fixed delivery-stage proof photos
-      const v = (value as { packing?: string; freight?: string; install?: string }) ?? {};
+      // {packing?, freight?, install?: string[]} — 3 fixed delivery-stage
+      // proof photo galleries. Older data may still hold a single string per
+      // stage — normalize to an array so existing saves keep working.
+      const v = (value as Record<"packing" | "freight" | "install", string | string[] | undefined>) ?? {};
+      const toArray = (x: string | string[] | undefined): string[] => (Array.isArray(x) ? x : x ? [x] : []);
       const STAGES: { key: "packing" | "freight" | "install"; label: string }[] = [
         { key: "packing", label: "Export Packing — crated / palletized machine" },
         { key: "freight", label: "Ocean / Air Freight — container loading" },
@@ -490,7 +493,7 @@ function FieldControl({ field, value, item, onChange, onItemChange }: {
           {STAGES.map(s => (
             <div key={s.key} style={{ borderRadius: 12, background: "rgba(255,255,255,0.04)", padding: "0.9rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               <span style={{ ...label, fontSize: "0.85rem" }}>{s.label}</span>
-              <ImageField value={v[s.key] ?? ""} onChange={val => onChange({ ...v, [s.key]: val })} />
+              <ImagesField value={toArray(v[s.key])} onChange={val => onChange({ ...v, [s.key]: val })} />
             </div>
           ))}
         </div>
@@ -533,7 +536,7 @@ function FieldControl({ field, value, item, onChange, onItemChange }: {
               <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
                 <select style={{ ...inputStyle, flex: "0 0 260px" }} value={r.kind}
                   onChange={e => patch(i, { kind: e.target.value as Row["kind"] })}>
-                  {(Object.keys(KIND_LABEL) as Row["kind"][]).map(k => <option key={k} value={k}>{KIND_LABEL[k]}</option>)}
+                  {(Object.keys(KIND_LABEL) as Row["kind"][]).map(k => <option key={k} value={k} style={{ color: "#e0e0e0", background: "#111" }}>{KIND_LABEL[k]}</option>)}
                 </select>
                 <div style={{ flex: 1 }} />
                 <button type="button" title="Move up" style={iconBtn} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
@@ -769,7 +772,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
 
       {/* root fields */}
       {schema.rootFields && schema.rootFields.length > 0 && (
-        <div style={{ borderRadius: 16, background: "#0d1a18", padding: "1.5rem", marginBottom: "2rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem" }}>
+        <div style={{ borderRadius: 16, background: "#111", padding: "1.5rem", marginBottom: "2rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem" }}>
           {schema.rootFields.map(f => (
             <label key={f.key}>
               <FieldLabel>{f.label}</FieldLabel>
@@ -806,7 +809,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
                 const title = col.titleKeys.map(k => String(item[k] ?? "")).filter(Boolean).join(" — ") || `#${i + 1}`;
                 const isOpen = open === i;
                 return (
-                  <div key={i} style={{ borderRadius: 14, background: isOpen ? "#122320" : "#0d1a18", overflow: "hidden" }}>
+                  <div key={i} style={{ borderRadius: 14, background: isOpen ? "#111" : "#0a0a0a", overflow: "hidden" }}>
                     {/* row header */}
                     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.9rem 1.1rem" }}>
                       <button type="button"

@@ -44,11 +44,11 @@ export default function AdminLogin() {
   return (
     <div style={{
       minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-      background: "#0b1615", padding: "1.5rem",
+      background: "#000", padding: "1.5rem",
     }}>
       <form onSubmit={submit} style={{
         width: "100%", maxWidth: 400,
-        background: "#0d1a18", borderRadius: 20,
+        background: "#000", borderRadius: 20,
         border: "1px solid rgba(255,255,255,0.08)",
         padding: "2.5rem 2.25rem",
       }}>

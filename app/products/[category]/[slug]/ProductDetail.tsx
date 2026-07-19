@@ -10,7 +10,7 @@ import CustomSections from "@/components/CustomSections";
 import MachineParts from "@/components/MachineParts";
 import MachineDiagram from "@/components/MachineDiagram";
 import type { ProductFamily, Category } from "@/lib/products";
-import { familyImage, familyImages, parseYouTubeId } from "@/lib/products";
+import { familyImage, familyImages, parseYouTubeId, stagePhotos } from "@/lib/products";
 
 interface Props {
   family: ProductFamily;
@@ -117,6 +117,7 @@ export default function ProductDetail({ family, category, related }: Props) {
   const [reviewIdx,    setReviewIdx]    = useState(0);
   const [activeTab,    setActiveTab]    = useState<TabKey>("details");
   const [activePhoto,  setActivePhoto]  = useState(0);
+  const [dvIdx, setDvIdx] = useState<Record<string, number>>({});
 
   /* real videos only — an unset/invalid URL never falls back to a fake
      placeholder video, it just means the section shows "coming soon" */
@@ -258,7 +259,7 @@ export default function ProductDetail({ family, category, related }: Props) {
   }, []);
 
   return (
-    <div className="pdv2" ref={rootRef}>
+    <div className="pdv2" ref={rootRef} data-no-anim>
 
       {/* ══════════════════════════════════════════════════
           HERO — breadcrumb + two-col (gallery | panel)
@@ -514,6 +515,7 @@ export default function ProductDetail({ family, category, related }: Props) {
                 modelIndex={activeModel}
                 models={family.models}
                 family={family}
+                category={category.slug}
               />
 
               {/* machine breakdown — callout pins on the photo */}
@@ -689,19 +691,33 @@ export default function ProductDetail({ family, category, related }: Props) {
 
           {/* proof sections — packing / freight / install, each its own
               full-width banner: title on top, full-bleed photo below.
-              Falls back to the technical icon until a real photo is
-              uploaded per stage from the admin panel. */}
+              Falls back to the technical icon until at least one real photo
+              is uploaded per stage from the admin panel. Each stage can hold
+              multiple photos — arrows + counter step through them, same
+              banner never changes size or crop between photos. */}
           {DELIVERY_STAGES.map(stage => {
-            const photo = deliveryStagePhotos[stage.key];
+            const photos = stagePhotos(deliveryStagePhotos[stage.key]);
+            const idx = Math.min(dvIdx[stage.key] ?? 0, Math.max(photos.length - 1, 0));
+            const setIdx = (next: number) =>
+              setDvIdx(prev => ({ ...prev, [stage.key]: (next + photos.length) % photos.length }));
             return (
               <div key={stage.key} className="pdv2-dv-box" data-reveal="scale">
                 <div className="pdv2-wrap">
                   <span className="pdv2-dv-box__label">{stage.label}</span>
                 </div>
                 <div className="pdv2-dv-box__media">
-                  {photo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={photo} alt={stage.label} loading="lazy" />
+                  {photos.length > 0 ? (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={photos[idx]} alt={`${stage.label} — photo ${idx + 1} of ${photos.length}`} loading="lazy" key={idx} />
+                      {photos.length > 1 && (
+                        <div className="pdv2-dv-box__nav">
+                          <button type="button" className="pdv2-dv-box__nav-btn" onClick={() => setIdx(idx - 1)} aria-label="Previous photo">‹</button>
+                          <span className="pdv2-dv-box__nav-count">{idx + 1} / {photos.length}</span>
+                          <button type="button" className="pdv2-dv-box__nav-btn" onClick={() => setIdx(idx + 1)} aria-label="Next photo">›</button>
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <span className="pdv2-dv-box__icon">
                       <ProcessIcon name={stage.icon} size={44} />
@@ -713,20 +729,21 @@ export default function ProductDetail({ family, category, related }: Props) {
           })}
 
           <div className="pdv2-wrap">
-            <div className="pdv2-delivery-timeline" data-reveal>
-              {/* continuous rail running through every icon — a real
-                  connected sequence, not a list of floating badges */}
-              <span className="pdv2-delivery-rail" aria-hidden="true" />
-              {family.deliveryGuide.map((phase, i) => (
-                <div key={i} className="pdv2-delivery-phase">
-                  <span className="pdv2-delivery-phase__dot">
-                    <DeliveryStageIcon name={resolveDeliveryStage(phase.label)} size={56} />
+            <div className="pdv2-delivery-grid" data-reveal="scale">
+              {family.deliveryGuide.map((phase, i, arr) => (
+                <div key={i} className="pdv2-delivery-card">
+                  <span className="pdv2-delivery-card__step">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="pdv2-delivery-card__icon">
+                    <DeliveryStageIcon name={resolveDeliveryStage(phase.label)} size={44} />
                   </span>
-                  <div className="pdv2-delivery-phase__body">
-                    <h3 className="pdv2-delivery-phase__label">{phase.label}</h3>
-                    <p className="pdv2-delivery-phase__detail">{phase.detail}</p>
-                  </div>
-                  <span className="pdv2-delivery-phase__duration">{phase.duration}</span>
+                  <h3 className="pdv2-delivery-card__label">{phase.label}</h3>
+                  <p className="pdv2-delivery-card__detail">{phase.detail}</p>
+                  <span className="pdv2-delivery-card__duration">{phase.duration}</span>
+                  {i < arr.length - 1 && (
+                    <svg className="pdv2-delivery-card__connector" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M4 12h13m0 0l-5-5m5 5l-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
                 </div>
               ))}
             </div>

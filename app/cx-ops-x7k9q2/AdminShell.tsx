@@ -29,7 +29,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#0b1615" }}>
+    <div style={{ display: "flex", minHeight: "100vh", background: "#000" }}>
       <style suppressHydrationWarning>{`
         .adm-nav__link {
           display: flex; align-items: center; gap: 0.6rem;
@@ -54,7 +54,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       {/* ── sidebar ── */}
       <aside className="adm-side" style={{
         position: "fixed", top: 0, left: 0, bottom: 0, width: 268,
-        background: "#0d1a18",
+        background: "#000",
         borderRight: "1px solid rgba(255,255,255,0.06)",
         display: "flex", flexDirection: "column", zIndex: 50,
       }}>

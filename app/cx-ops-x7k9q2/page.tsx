@@ -29,7 +29,7 @@ export default function AdminHome() {
         {SECTION_SCHEMAS.map(s => (
           <Link key={s.slug} href={`/${ADMIN_PATH}/s/${s.slug}`} style={{
             display: "block", padding: "1.75rem", textDecoration: "none",
-            background: "#0d1a18", borderRadius: 16,
+            background: "#111", borderRadius: 16,
             border: "1px solid rgba(255,255,255,0.07)",
             transition: "transform 0.15s, border-color 0.15s, background 0.15s",
           }}

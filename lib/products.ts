@@ -49,9 +49,9 @@ export interface ProductReview {
 }
 
 export interface DeliveryStagePhotos {
-  packing?: string;   // export packing photo — crated / palletized machine
-  freight?: string;   // ocean/air freight photo — container loading, etc.
-  install?: string;   // on-site install photo — commissioning at the buyer's site
+  packing?: string | string[];   // export packing photos — crated / palletized machine
+  freight?: string | string[];   // ocean/air freight photos — container loading, etc.
+  install?: string | string[];   // on-site install photos — commissioning at the buyer's site
 }
 
 /* ── admin-authored custom sections — a fixed set of pre-styled,
@@ -136,15 +136,26 @@ export const parseYouTubeId = (input: string): string | null => {
 
 
 // ---------------------------------------------------------------------------
-// Catalogue data now lives in data/products.json — editable from the admin
-// panel. This module keeps the same exports so nothing downstream changes.
-// NOTE: JSON is bundled at build time; static product pages need a rebuild
-// after edits (dev server picks changes up automatically).
+// Catalogue data is bundled from data/products.json at build time. These
+// exports back most of the site (nav, homepage sections, AI chat, contact
+// forms) and generateStaticParams, where a build-time snapshot is fine.
+//
+// The product catalogue pages themselves (app/products/**) instead call
+// getLiveCatalogue() from lib/liveCatalogue.ts, which reads the CMS store
+// (MongoDB) directly so admin edits — including delivery-stage photos —
+// appear without a rebuild. That helper lives in its own module (not here)
+// so this file — imported by client components for its types/helpers —
+// never pulls the server-only mongoose/mongodb chain into the browser bundle.
 // ---------------------------------------------------------------------------
 import productsData from "@/data/products.json";
 
 export const categories = productsData.categories as Category[];
 export const families = productsData.families as ProductFamily[];
+
+export interface Catalogue {
+  categories: Category[];
+  families: ProductFamily[];
+}
 
 export const familiesByCategory = (slug: CategorySlug) =>
   families.filter((f) => f.category === slug);
@@ -164,6 +175,13 @@ export const familyImages = (f: Pick<ProductFamily, "slug" | "image" | "images">
   if (f.images && f.images.length > 0) return f.images;
   if (f.image && f.image.trim()) return [f.image];
   return [`/machines/${f.slug}.png`];
+};
+
+// Normalizes a delivery-stage photo field to an array — old data saved a
+// single string per stage, newer data saves string[]. Filters out empties.
+export const stagePhotos = (v: string | string[] | undefined): string[] => {
+  const arr = Array.isArray(v) ? v : v ? [v] : [];
+  return arr.filter((s) => s && s.trim());
 };
 
 // First/primary product photo — for card thumbnails, related-machine tiles

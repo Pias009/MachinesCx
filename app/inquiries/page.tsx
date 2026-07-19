@@ -1,58 +1,13 @@
 "use client";
 import TransitionLink from "@/components/TransitionLink";
 
-const CARDS = [
-  {
-    type: "talk-to-engineer",
-    href: "/inquiries/talk-to-engineer",
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-        <path d="M16 4a8 8 0 018 8v2a8 8 0 01-16 0v-2a8 8 0 018-8z" stroke="currentColor" strokeWidth="1.5"/>
-        <path d="M12 28h8M16 24v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-        <circle cx="16" cy="12" r="3" stroke="currentColor" strokeWidth="1.3"/>
-        <path d="M10 16h12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeDasharray="2 2"/>
-      </svg>
-    ),
-    title: "Talk to Our Engineer",
-    desc: "Select machines, customize specs, add parts — we build a detailed sheet and our engineers review it personally.",
-    badge: "Recommended",
-  },
-  {
-    type: "direct",
-    href: "/inquiries/direct",
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-        <rect x="4" y="6" width="24" height="20" rx="3" stroke="currentColor" strokeWidth="1.5"/>
-        <path d="M4 12h24M10 18h8M10 22h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      </svg>
-    ),
-    title: "Send Direct Inquiry",
-    desc: "Already know what you need? Send a quick inquiry about any machine with optional customization notes.",
-    badge: "Quick",
-  },
-  {
-    type: "parts",
-    href: "/inquiries/parts",
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-        <circle cx="16" cy="16" r="10" stroke="currentColor" strokeWidth="1.5"/>
-        <path d="M16 6v4M16 22v4M6 16h4M22 16h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-        <circle cx="16" cy="16" r="3" stroke="currentColor" strokeWidth="1.3"/>
-      </svg>
-    ),
-    title: "Inquire About Parts",
-    desc: "Need spare parts, replacements, or custom components? Tell us what you need and we'll get back to you.",
-    badge: "Parts",
-  },
-];
-
 export default function InquiriesPage() {
   return (
     <>
       <style suppressHydrationWarning>{`
         .inq-page {
           min-height: 100vh; padding-top: 100px;
-          background: var(--bg); position: relative;
+          background: var(--bg-base); position: relative;
         }
         .inq-page::before {
           content: ""; position: absolute; inset: 0; z-index: 0;
@@ -67,7 +22,7 @@ export default function InquiriesPage() {
           max-width: 1100px; margin: 0 auto;
           padding: 0 clamp(1.5rem, 4vw, 3rem) clamp(4rem, 7vw, 7rem);
         }
-        .inq-header { text-align: center; margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+        .inq-header { text-align: center; margin-bottom: clamp(2.75rem, 6vw, 4.5rem); }
         .inq-eyebrow {
           display: inline-flex; align-items: center; gap: .6rem;
           font-family: var(--ff-mono); font-size: .65rem;
@@ -78,73 +33,133 @@ export default function InquiriesPage() {
         .inq-h1 {
           font-family: var(--ff-display);
           font-size: clamp(2.8rem, 6vw, 5rem);
-          line-height: .93; color: var(--text);
+          line-height: .93; color: var(--ink);
           letter-spacing: -.01em; margin: 0 0 .9rem;
         }
         .inq-h1 em { font-style: normal; color: var(--brand-teal); }
         .inq-sub {
           font-size: clamp(.875rem, 1.1vw, 1rem);
-          color: var(--text-muted); line-height: 1.7; max-width: 52ch;
+          color: var(--ink-60); line-height: 1.7; max-width: 52ch;
           margin: 0 auto;
         }
-        .inq-grid {
+
+        /* ── lead option — full-width, unmistakably the default pick ── */
+        .inq-lead {
+          position: relative;
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 1.5rem;
+          grid-template-columns: auto 1fr auto;
+          align-items: center;
+          gap: clamp(1.25rem, 3vw, 2.5rem);
+          background: var(--bg-surface);
+          border: 1px solid var(--brand-teal);
+          border-radius: 1.5rem;
+          padding: clamp(1.75rem, 4vw, 3rem);
+          text-decoration: none;
+          margin-bottom: 1.25rem;
+          transition: transform .2s cubic-bezier(0.16,1,0.3,1), box-shadow .2s;
+          overflow: hidden;
+        }
+        .inq-lead::before {
+          content: ""; position: absolute; inset: 0; z-index: 0;
+          background: radial-gradient(ellipse 480px 260px at 15% 30%, rgba(43,191,179,.14), transparent 70%);
+          pointer-events: none;
+        }
+        .inq-lead:hover { transform: translateY(-3px); box-shadow: 0 20px 60px -20px rgba(43,191,179,.35); }
+        .inq-lead:active { transform: translateY(-1px); }
+        .inq-lead__icon {
+          position: relative; z-index: 1;
+          width: clamp(72px, 9vw, 96px); height: clamp(72px, 9vw, 96px);
+          border-radius: 1.25rem; flex-shrink: 0;
+          background: rgba(43,191,179,.1);
+          border: 1px solid rgba(43,191,179,.25);
+          display: flex; align-items: center; justify-content: center;
+          color: var(--brand-teal);
+        }
+        .inq-lead__body { position: relative; z-index: 1; min-width: 0; }
+        .inq-lead__badge {
+          display: inline-flex; align-items: center; gap: .4rem;
+          font-family: var(--ff-mono); font-size: .62rem;
+          letter-spacing: .16em; text-transform: uppercase;
+          color: var(--brand-teal); margin-bottom: .6rem;
+        }
+        .inq-lead__badge::before { content: "●"; font-size: .5rem; }
+        .inq-lead__title {
+          font-family: var(--ff-display);
+          font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+          color: var(--ink); line-height: 1.05; margin: 0 0 .5rem;
+        }
+        .inq-lead__desc {
+          font-size: clamp(.85rem, 1vw, .95rem); color: var(--ink-60);
+          line-height: 1.6; margin: 0; max-width: 56ch;
+        }
+        .inq-lead__cta {
+          position: relative; z-index: 1;
+          display: flex; align-items: center; justify-content: center;
+          width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+          background: var(--brand-teal); color: #04211e;
+          transition: transform .2s cubic-bezier(0.16,1,0.3,1);
+        }
+        .inq-lead:hover .inq-lead__cta { transform: translateX(4px) scale(1.06); }
+        @media (max-width: 700px) {
+          .inq-lead { grid-template-columns: auto 1fr; }
+          .inq-lead__cta { display: none; }
+        }
+
+        /* ── two quick picks — smaller, side by side ── */
+        .inq-quick-label {
+          font-family: var(--ff-mono); font-size: .62rem;
+          letter-spacing: .18em; text-transform: uppercase;
+          color: var(--ink-35); margin: 2rem 0 .9rem;
+        }
+        .inq-quick-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
         }
         .inq-card {
           position: relative;
-          background: var(--card-bg);
-          border: 1px solid var(--border);
-          border-radius: 1.25rem;
-          padding: clamp(1.75rem, 3vw, 2.5rem);
+          background: var(--bg-surface);
+          border: 1px solid var(--bg-line);
+          border-radius: 1.125rem;
+          padding: clamp(1.5rem, 2.6vw, 2rem);
           text-decoration: none;
-          display: flex; flex-direction: column; gap: 1.25rem;
+          display: flex; align-items: center; gap: 1.1rem;
           transition: border-color .2s, transform .2s, box-shadow .2s;
-          cursor: pointer;
         }
         .inq-card:hover {
           border-color: var(--brand-teal);
-          transform: translateY(-4px);
-          box-shadow: 0 12px 40px rgba(43,191,179,.12);
-        }
-        .inq-card__badge {
-          position: absolute; top: 1.25rem; right: 1.25rem;
-          font-family: var(--ff-mono); font-size: .6rem;
-          letter-spacing: .12em; text-transform: uppercase;
-          padding: .3rem .7rem; border-radius: 999px;
-          background: rgba(43,191,179,.12);
-          color: var(--brand-teal);
-          border: 1px solid rgba(43,191,179,.25);
+          transform: translateY(-3px);
+          box-shadow: 0 12px 32px -14px rgba(43,191,179,.3);
         }
         .inq-card__icon {
-          width: 56px; height: 56px;
+          width: 52px; height: 52px; flex-shrink: 0;
           border-radius: .875rem;
           background: rgba(43,191,179,.08);
           border: 1px solid rgba(43,191,179,.15);
           display: flex; align-items: center; justify-content: center;
           color: var(--brand-teal);
         }
+        .inq-card__body { min-width: 0; }
         .inq-card__title {
           font-family: var(--ff-display);
-          font-size: clamp(1.3rem, 2vw, 1.6rem);
-          color: var(--text); line-height: 1.1;
-          margin: 0;
+          font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+          color: var(--ink); line-height: 1.15;
+          margin: 0 0 .3rem;
         }
         .inq-card__desc {
-          font-size: .9rem; color: var(--text-muted);
-          line-height: 1.65; margin: 0; flex: 1;
+          font-size: .82rem; color: var(--ink-60);
+          line-height: 1.5; margin: 0;
         }
-        .inq-card__cta {
-          display: inline-flex; align-items: center; gap: .5rem;
-          font-family: var(--ff-mono); font-size: .7rem;
-          letter-spacing: .1em; text-transform: uppercase;
-          color: var(--brand-teal); margin-top: .5rem;
+        .inq-card__arrow {
+          margin-left: auto; flex-shrink: 0;
+          color: var(--ink-35); transition: transform .2s, color .2s;
         }
-        .inq-card__cta svg { transition: transform .2s; }
-        .inq-card:hover .inq-card__cta svg { transform: translateX(4px); }
+        .inq-card:hover .inq-card__arrow { transform: translateX(3px); color: var(--brand-teal); }
         @media (max-width: 680px) {
-          .inq-grid { grid-template-columns: 1fr; }
+          .inq-quick-grid { grid-template-columns: 1fr; }
+          /* clears the fixed chat bubble (bottom: 24-96px, see ChatWidget.tsx)
+             so the last card is never hidden behind it on short screens */
+          .inq-wrap { padding-bottom: clamp(6rem, 24vw, 8rem); }
         }
       `}</style>
 
@@ -156,27 +171,75 @@ export default function InquiriesPage() {
               How can we <em>help?</em>
             </h1>
             <p className="inq-sub">
-              Choose the inquiry type that best fits your needs. Every inquiry is reviewed by our engineering team and answered within 24 hours.
+              Pick the option that matches what you need. Every inquiry is reviewed by our engineering team and answered within 24 hours.
             </p>
           </div>
 
-          <div className="inq-grid">
-            {CARDS.map(c => (
-              <TransitionLink key={c.type} href={c.href}>
-                <div className="inq-card">
-                  <span className="inq-card__badge">{c.badge}</span>
-                  <div className="inq-card__icon">{c.icon}</div>
-                  <h2 className="inq-card__title">{c.title}</h2>
-                  <p className="inq-card__desc">{c.desc}</p>
-                  <span className="inq-card__cta">
-                    Get started
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M3 7h8m0 0L8 4m3 3L8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </span>
+          {/* lead option — full width, the obvious default pick */}
+          <TransitionLink href="/inquiries/talk-to-engineer">
+            <div className="inq-lead">
+              <div className="inq-lead__icon">
+                <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
+                  <path d="M16 4a8 8 0 018 8v2a8 8 0 01-16 0v-2a8 8 0 018-8z" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M12 28h8M16 24v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="16" cy="12" r="3" stroke="currentColor" strokeWidth="1.3"/>
+                  <path d="M10 16h12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeDasharray="2 2"/>
+                </svg>
+              </div>
+              <div className="inq-lead__body">
+                <div className="inq-lead__badge">Recommended</div>
+                <h2 className="inq-lead__title">Talk to Our Engineer</h2>
+                <p className="inq-lead__desc">
+                  Select machines, customize specs, add parts — we build a detailed configuration sheet and our engineers review it personally.
+                </p>
+              </div>
+              <div className="inq-lead__cta">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M3 9h12m0 0L9 3m6 6l-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
+          </TransitionLink>
+
+          <div className="inq-quick-label">Or, if you already know exactly what you need</div>
+
+          <div className="inq-quick-grid">
+            <TransitionLink href="/inquiries/direct">
+              <div className="inq-card">
+                <div className="inq-card__icon">
+                  <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+                    <rect x="4" y="6" width="24" height="20" rx="3" stroke="currentColor" strokeWidth="1.5"/>
+                    <path d="M4 12h24M10 18h8M10 22h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
                 </div>
-              </TransitionLink>
-            ))}
+                <div className="inq-card__body">
+                  <h2 className="inq-card__title">Direct Inquiry</h2>
+                  <p className="inq-card__desc">Quick inquiry about any machine, with optional notes.</p>
+                </div>
+                <span className="inq-card__arrow">
+                  <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M3 7h8m0 0L8 4m3 3L8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </span>
+              </div>
+            </TransitionLink>
+
+            <TransitionLink href="/inquiries/parts">
+              <div className="inq-card">
+                <div className="inq-card__icon">
+                  <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="10" stroke="currentColor" strokeWidth="1.5"/>
+                    <path d="M16 6v4M16 22v4M6 16h4M22 16h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="16" cy="16" r="3" stroke="currentColor" strokeWidth="1.3"/>
+                  </svg>
+                </div>
+                <div className="inq-card__body">
+                  <h2 className="inq-card__title">Part Inquiry</h2>
+                  <p className="inq-card__desc">Spare parts or replacement components, with photos.</p>
+                </div>
+                <span className="inq-card__arrow">
+                  <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M3 7h8m0 0L8 4m3 3L8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </span>
+              </div>
+            </TransitionLink>
           </div>
         </div>
       </div>

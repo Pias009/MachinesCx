@@ -7,6 +7,7 @@ export interface InquiryMachine {
   model: string;
   qty: number;
   notes: string;
+  images?: string[];     // user-uploaded reference photos
 }
 
 export interface InquiryPart {
@@ -35,6 +36,7 @@ export interface IInquiry {
   phone: string;
   country: string;
   message: string;
+  images: string[];        // general reference photos, not tied to a specific machine/part
   machines: InquiryMachine[];
   parts: InquiryPart[];
   status: "new" | "read" | "replied";
@@ -50,6 +52,7 @@ const InquiryMachineSchema = new Schema<InquiryMachine>({
   model:  { type: String, default: "" },
   qty:    { type: Number, default: 1 },
   notes:  { type: String, default: "" },
+  images: { type: [String], default: [] },
 }, { _id: false });
 
 const InquiryPartSchema = new Schema<InquiryPart>({
@@ -76,6 +79,7 @@ const InquirySchema = new Schema<IInquiry>({
   phone:      { type: String, default: "" },
   country:    { type: String, default: "" },
   message:    { type: String, default: "" },
+  images:     { type: [String], default: [] },
   machines:   { type: [InquiryMachineSchema], default: [] },
   parts:      { type: [InquiryPartSchema], default: [] },
   status:     { type: String, enum: ["new", "read", "replied"], default: "new", index: true },

@@ -17,12 +17,12 @@ export default async function ProductsIndex() {
           <img src="/machines/abcde-2200.png" alt="" />
         </div>
         <div className="wrap">
-          <p style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--ash)" }}>
-            <Link href="/" style={{ color: "var(--ash)" }}>Home</Link> /&nbsp;
-            <span style={{ color: "var(--bone)" }}>Catalogue</span>
+          <p style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--ink-35)" }}>
+            <Link href="/" style={{ color: "var(--ink-35)" }}>Home</Link> /&nbsp;
+            <span style={{ color: "var(--ink)" }}>Catalogue</span>
           </p>
           <h1>Full catalogue.</h1>
-          <p style={{ color: "var(--ash)", maxWidth: "52ch", marginTop: "1rem" }}>
+          <p style={{ color: "var(--ink-35)", maxWidth: "52ch", marginTop: "1rem" }}>
             Every machine family, with full bilingual specification tables. Jump
             to a category or browse everything below.
           </p>
@@ -35,13 +35,13 @@ export default async function ProductsIndex() {
       </header>
 
       {categories.map((c) => (
-        <section key={c.slug} style={{ background: "var(--void)", padding: "clamp(3.5rem,7vw,6rem) 0", borderTop: "1px solid var(--border)" }}>
+        <section key={c.slug} style={{ background: "var(--bg-base)", padding: "clamp(3.5rem,7vw,6rem) 0", borderTop: "1px solid var(--bg-line)" }}>
           <div className="wrap">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "1.5rem", flexWrap: "wrap", marginBottom: "2.5rem" }}>
               <div>
                 <span className="eyebrow">{c.tagline}</span>
-                <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,5vw,3.8rem)", color: "var(--slate)", lineHeight: 0.96, marginTop: "0.75rem" }}>{c.name}</h2>
-                <p style={{ color: "var(--ash)", marginTop: "0.75rem", maxWidth: "54ch" }}>{c.blurb}</p>
+                <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,5vw,3.8rem)", color: "var(--ink)", lineHeight: 0.96, marginTop: "0.75rem" }}>{c.name}</h2>
+                <p style={{ color: "var(--ink-35)", marginTop: "0.75rem", maxWidth: "54ch" }}>{c.blurb}</p>
               </div>
               <Link href={`/products/${c.slug}`} className="btn btn--ghost">Full spec tables →</Link>
             </div>

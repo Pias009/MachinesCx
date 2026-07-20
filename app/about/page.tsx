@@ -1,23 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import AutoPlayVideo from "@/components/AutoPlayVideo";
+
+const HQ_BUILDING_PHOTO = "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784543576/cx-machinery/about-hq-building.jpg";
 
 export default function AboutPage() {
   const [isDark, setIsDark] = useState(true);
-  const [videoDone, setVideoDone] = useState(false);
-  const [showIntro, setShowIntro] = useState(false);
-  const onVideoComplete = useCallback(() => setVideoDone(true), []);
-
-  // Video plays start to finish, holds on its last frame, then — 3s later —
-  // the section below auto-reveals. No scroll-driven scrubbing or scroll
-  // hijacking: the visitor can scroll freely at any point.
-  useEffect(() => {
-    if (!videoDone) return;
-    const t = setTimeout(() => setShowIntro(true), 3000);
-    return () => clearTimeout(t);
-  }, [videoDone]);
 
   useEffect(() => {
     document.title = "About \u2014 Wenzhou Ashal Innomach Technology";
@@ -42,7 +31,7 @@ export default function AboutPage() {
   const border = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)";
   const gridBg = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)";
   const cardBg = isDark ? "#0f1420" : "#fff";
-  const responsiveCSS = "@keyframes aboutFadeIn { from { opacity: 0; transform: translateY(2rem); } to { opacity: 1; transform: translateY(0); } } @keyframes aboutArrowBounce { 0%, 100% { transform: translateY(0); opacity: 0.6; } 50% { transform: translateY(10px); opacity: 1; } } @media (max-width: 768px) { .about-grid-2 { grid-template-columns: 1fr !important; gap: 2rem !important; } .about-grid-4 { grid-template-columns: repeat(2, 1fr) !important; } .about-grid-3 { grid-template-columns: 1fr !important; } .about-stats { grid-template-columns: repeat(2, 1fr) !important; } .about-specs { grid-template-columns: 1fr !important; } .about-materials { grid-template-columns: 1fr !important; } .about-contact { grid-template-columns: 1fr !important; } .about-categories { grid-template-columns: repeat(2, 1fr) !important; } } @media (max-width: 480px) { .about-grid-4 { grid-template-columns: 1fr !important; } .about-categories { grid-template-columns: 1fr !important; } .about-stats { grid-template-columns: 1fr !important; } }";
+  const responsiveCSS = "@keyframes aboutArrowBounce { 0%, 100% { transform: translateY(0); opacity: 0.6; } 50% { transform: translateY(10px); opacity: 1; } } @media (max-width: 768px) { .about-hero { height: 62vh !important; min-height: 420px !important; } .about-hero__sticky { position: relative !important; top: auto !important; height: 100% !important; } .about-hero__img { object-fit: contain !important; } .about-hero__eyebrow { margin-bottom: 0.5rem !important; } .about-hero__title { font-size: clamp(1.6rem,6.5vw,2.2rem) !important; } .about-section { padding-top: 1.75rem !important; padding-bottom: 1.75rem !important; padding-left: 1.25rem !important; padding-right: 1.25rem !important; } .about-section h3 { font-size: 1.5rem !important; margin-bottom: 1.25rem !important; } .about-stats { grid-template-columns: repeat(2, 1fr) !important; } .about-stats > div { padding: 0.5rem !important; } .about-story { grid-template-columns: 1fr !important; gap: 2rem !important; } .about-values { grid-template-columns: repeat(2, 1fr) !important; } .about-values > div { padding: 1.1rem 0.9rem !important; } .about-values h4 { font-size: 0.95rem !important; margin-bottom: 0.4rem !important; } .about-values p { font-size: 0.72rem !important; line-height: 1.45 !important; } .about-specs { grid-template-columns: 1fr !important; gap: 1.75rem !important; } .about-materials { grid-template-columns: repeat(2, 1fr) !important; } .about-materials > div { padding: 0.75rem 0.85rem !important; flex-direction: column !important; align-items: flex-start !important; gap: 0.15rem !important; } .about-categories { grid-template-columns: repeat(2, 1fr) !important; } .about-categories > div { padding: 1.25rem 0.9rem !important; } .about-categories img { height: 80px !important; margin-bottom: 0.75rem !important; } .about-categories h4 { font-size: 0.95rem !important; } .about-global { grid-template-columns: 1fr !important; gap: 1.5rem !important; } .about-support { grid-template-columns: 1fr !important; gap: 2rem !important; } .about-contact { grid-template-columns: 1fr !important; gap: 2rem !important; } }";
 
   return (
     <div>
@@ -51,44 +40,44 @@ export default function AboutPage() {
       {/* CONTENT SECTION */}
       <div style={{ background: bg, position: "relative", zIndex: 20, overflow: "hidden" }}>
 
-        {/* Hero — full-screen video, plays once start to finish and holds
-            on its last frame. The section below auto-reveals 3s later. */}
-        <section className="about-hero" style={{ position: "relative", height: "100vh", overflow: "hidden" }}>
-          <AutoPlayVideo src="https://res.cloudinary.com/dpyhwgsqk/video/upload/v1784500140/cx-machinery/about-hero.mp4" onComplete={onVideoComplete} />
-        </section>
+        {/* Hero — generated headquarters building photo, logo composited
+            onto the building facade itself (not a CSS overlay). The photo
+            is sticky: it stays pinned to the viewport while the section
+            below scrolls up over it, then releases once this section's
+            own height is exhausted. */}
+        <section
+          className="about-hero"
+          style={{ position: "relative", height: "120vh" }}
+        >
+          <div className="about-hero__sticky" style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden", background: "#000" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className="about-hero__img"
+              src={HQ_BUILDING_PHOTO}
+              alt="Ashal Innomech Technology headquarters building"
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", display: "block" }}
+            />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 30%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.25) 100%)" }} />
 
-        {/* Hero text — auto-reveals 3s after the video finishes playing */}
-        {showIntro && (
-          <section
-            style={{
-              padding: "clamp(4rem,8vw,8rem) clamp(1.5rem,4vw,3rem)",
-              borderBottom: "1px solid " + border,
-              animation: "aboutFadeIn 0.8s ease forwards",
-            }}
-          >
-            <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%" }}>
-              <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1.5rem" }}>Company Profile</span>
-              <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2.5rem,6vw,5rem)", color: textPrimary, lineHeight: 0.92, marginBottom: "2rem", maxWidth: "20ch" }}>Wenzhou Ashal<br /><span style={{ color: "var(--brand-red)" }}>Innomach Technology</span></h2>
-              <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: textBody, lineHeight: 1.8, maxWidth: "60ch", marginBottom: "1.5rem" }}>Designs and manufactures blown-film lines, bag-making converters, and recycling systems for polymer film processors across six continents. Founded in 2008, we have grown from a single machine type to a full portfolio of 18+ machine families — every product designed in-house, fabricated in our 12,000 m² Wenzhou facility, and tested before it ships.</p>
-              <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: textBodyAlt, lineHeight: 1.8, maxWidth: "60ch", marginBottom: "clamp(3rem,6vw,5rem)" }}>Our customers range from single-line converters running one shift a day to multi-site groups running 24/7 on four continents. The machine has to work the same way for both.</p>
-              {/* Animated scroll-down arrow */}
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <svg
-                  width="24"
-                  height="48"
-                  viewBox="0 0 24 48"
-                  fill="none"
-                  style={{ animation: "aboutArrowBounce 1.8s ease-in-out infinite" }}
-                >
-                  <rect x="1" y="1" width="22" height="46" rx="11" stroke={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"} strokeWidth="2" />
-                  <circle cx="12" cy="14" r="3" fill="var(--brand-red)">
-                    <animate attributeName="cy" values="14;28;14" dur="1.8s" repeatCount="indefinite" />
-                  </circle>
-                </svg>
+            <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", alignItems: "flex-end", justifyContent: "flex-start", padding: "clamp(1.5rem,4vw,3rem)" }}>
+              <div style={{ textAlign: "left", maxWidth: "42ch", marginBottom: "clamp(1.5rem,5vw,3rem)" }}>
+                <span className="about-hero__eyebrow" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "#fff", display: "block", marginBottom: "1.25rem", textShadow: "0 2px 10px rgba(0,0,0,0.6)" }}>Company Profile</span>
+                <h1 className="about-hero__title" style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2.3rem,5.5vw,4.5rem)", color: "#fff", lineHeight: 0.95, textShadow: "0 4px 24px rgba(0,0,0,0.65)" }}>
+                  Wenzhou Ashal<br /><span style={{ color: "var(--brand-red)" }}>Innomach Technology</span>
+                </h1>
               </div>
             </div>
-          </section>
-        )}
+          </div>
+        </section>
+
+        {/* Company profile copy */}
+        <section className="about-section" style={{ padding: "clamp(4rem,8vw,8rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+          <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%" }}>
+            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1.5rem" }}>Who We Are</span>
+            <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: textBody, lineHeight: 1.8, maxWidth: "60ch", marginBottom: "1.5rem" }}>Designs and manufactures blown-film lines, bag-making converters, and recycling systems for polymer film processors across six continents. Founded in 2008, we have grown from a single machine type to a full portfolio of 18+ machine families — every product designed in-house, fabricated in our 12,000 m² Wenzhou facility, and tested before it ships.</p>
+            <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: textBodyAlt, lineHeight: 1.8, maxWidth: "60ch" }}>Our customers range from single-line converters running one shift a day to multi-site groups running 24/7 on four continents. The machine has to work the same way for both.</p>
+          </div>
+        </section>
 
         {/* Stats */}
         <section style={{ background: "var(--brand-red)", padding: "clamp(2rem,4vw,3rem) clamp(1.5rem,4vw,3rem)", position: "relative", zIndex: 5 }}>
@@ -103,8 +92,8 @@ export default function AboutPage() {
         </section>
 
         {/* Timeline + Story */}
-        <section style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,6rem)" }} className="about-grid-2">
+        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+          <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,6rem)" }} className="about-story">
             <div>
               <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>Our Story</span>
               <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(1.8rem,3.5vw,2.8rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "1.5rem" }}>From one line to a full machinery portfolio</h3>
@@ -135,7 +124,7 @@ export default function AboutPage() {
         </section>
 
         {/* Machine Categories */}
-        <section style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
             <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>Product Portfolio</span>
             <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2rem,4vw,3rem)" }}>Machine Families</h3>
@@ -157,11 +146,11 @@ export default function AboutPage() {
         </section>
 
         {/* Values */}
-        <section style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
             <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>How We Work</span>
             <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2rem,4vw,3rem)" }}>Four things we never compromise on</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: gridBg }} className="about-grid-2">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: gridBg }} className="about-values">
               {[
                 { h: "Engineering First", b: "Every machine starts on the drawing board, not the sales brochure. We over-engineer where it matters \u2014 drive trains, die heads, frame rigidity \u2014 and simplify everything else." },
                 { h: "Long-Term Support", b: "We supply spare parts and provide remote process support for every machine we have ever built. A ten-year-old line deserves the same attention as a new one." },
@@ -179,7 +168,7 @@ export default function AboutPage() {
         </section>
 
         {/* Materials */}
-        <section style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
             <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>Material Compatibility</span>
             <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2rem,4vw,3rem)" }}>Resins & Materials We Process</h3>
@@ -199,7 +188,7 @@ export default function AboutPage() {
         </section>
 
         {/* Specs */}
-        <section style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,6rem)" }} className="about-specs">
             {[
               { label: "Blown Film", specs: [["Layers", "1 to 5"], ["Film Width", "150\u20132,200 mm"], ["Output", "Up to 400 kg/h"], ["Die Diameters", "50\u2013600 mm"], ["Extruders", "20\u201390 mm L/D 30:1"]] },
@@ -220,11 +209,11 @@ export default function AboutPage() {
         </section>
 
         {/* Global */}
-        <section style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
             <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>Global Reach</span>
             <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "2rem" }}>60+ Countries Across Six Continents</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: gridBg }} className="about-grid-2">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: gridBg }} className="about-global">
               <div style={{ background: cardBg, padding: "2rem" }}>
                 <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.2rem", color: textPrimary, marginBottom: "1rem" }}>Key Markets</h4>
                 <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: textMuted, lineHeight: 1.7, margin: 0 }}>Vietnam, Indonesia, Thailand, Philippines, India, Bangladesh, Pakistan, Turkey, Egypt, Nigeria, Kenya, Colombia, Peru, Germany, and 45+ more countries.</p>
@@ -238,8 +227,8 @@ export default function AboutPage() {
         </section>
 
         {/* Support */}
-        <section style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,6rem)" }} className="about-grid-2">
+        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+          <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,6rem)" }} className="about-support">
             <div>
               <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>After-Sales</span>
               <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "1.5rem" }}>Lifetime Support</h3>
@@ -259,7 +248,7 @@ export default function AboutPage() {
         </section>
 
         {/* Contact */}
-        <section style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)" }}>
+        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)" }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,6rem)" }} className="about-contact">
             <div>
               <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>Contact</span>

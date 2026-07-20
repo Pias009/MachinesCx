@@ -22,12 +22,12 @@ export default function NewsIndexPage() {
     <>
       {/* ── Header ── */}
       <div style={{
-        background: "var(--canvas-bg)",
-        borderBottom: "1px solid var(--line)",
+        background: "var(--bg-base)",
+        borderBottom: "1px solid var(--bg-line)",
         paddingTop: "clamp(6rem,12vw,10rem)",
         paddingBottom: "clamp(3rem,6vw,5rem)",
         backgroundImage:
-          "linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px)",
+          "linear-gradient(var(--bg-line) 1px,transparent 1px),linear-gradient(90deg,var(--bg-line) 1px,transparent 1px)",
         backgroundSize: "80px 80px",
       }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(1.25rem,4vw,3rem)" }}>
@@ -35,7 +35,7 @@ export default function NewsIndexPage() {
           <h1 style={{
             fontFamily: "var(--ff-display)",
             fontSize: "clamp(3rem,8vw,7rem)",
-            lineHeight: 0.92, color: "var(--slate)",
+            lineHeight: 0.92, color: "var(--ink)",
           }}>
             From the factory floor.
           </h1>
@@ -60,18 +60,18 @@ export default function NewsIndexPage() {
               }}>{featured.category}</span>
               <span style={{
                 fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
-                letterSpacing: "0.1em", color: "var(--slate-30)",
+                letterSpacing: "0.1em", color: "var(--ink-35)",
               }}>{fmt(featured.date)}</span>
             </div>
             <h2 style={{
               fontFamily: "var(--ff-display)",
               fontSize: "clamp(1.8rem,3.5vw,3rem)",
-              color: "var(--slate)", lineHeight: 0.95,
+              color: "var(--ink)", lineHeight: 0.95,
               letterSpacing: "0.01em", marginBottom: "1rem",
             }}>{featured.title}</h2>
             <p style={{
               fontFamily: "var(--ff-body)", fontSize: "1rem", fontWeight: 400,
-              color: "var(--slate-60)", lineHeight: 1.72, maxWidth: "52ch",
+              color: "var(--ink-35)", lineHeight: 1.72, maxWidth: "52ch",
               marginBottom: "1.5rem",
             }}>{featured.excerpt}</p>
             <span style={{
@@ -86,8 +86,8 @@ export default function NewsIndexPage() {
         <div style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill,minmax(clamp(240px,24vw,300px),1fr))",
-          gap: "1px", background: "var(--line)",
-          border: "1px solid var(--line)",
+          gap: "1px", background: "var(--bg-line)",
+          border: "1px solid var(--bg-line)",
           marginTop: "1px",
         }}>
           {rest.map((a) => (
@@ -116,18 +116,18 @@ export default function NewsIndexPage() {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 0;
-          background: var(--surface);
-          border: 1px solid var(--line);
+          background: var(--bg-surface);
+          border: 1px solid var(--bg-line);
           text-decoration: none;
           transition: background 0.18s;
           overflow: hidden;
         }
-        .news-featured:hover { background: #fef2f4; }
+        .news-featured:hover { background: var(--bg-raise); }
         .news-featured__img-wrap {
-          background: var(--canvas-bg);
+          background: var(--bg-base);
           display: flex; align-items: center; justify-content: center;
           min-height: 320px;
-          border-right: 1px solid var(--line);
+          border-right: 1px solid var(--bg-line);
           overflow: hidden;
         }
         .news-featured__img {
@@ -142,21 +142,21 @@ export default function NewsIndexPage() {
         }
         @media (max-width: 680px) {
           .news-featured { grid-template-columns: 1fr; }
-          .news-featured__img-wrap { border-right: none; border-bottom: 1px solid var(--line); min-height: 220px; }
+          .news-featured__img-wrap { border-right: none; border-bottom: 1px solid var(--bg-line); min-height: 220px; }
         }
 
         /* reuse ns-card styles from NewsStrip */
         .ns-card {
           display: flex; flex-direction: column;
-          background: var(--surface); text-decoration: none;
+          background: var(--bg-surface); text-decoration: none;
           transition: background 0.18s;
         }
-        .ns-card:hover { background: #fef2f4; }
+        .ns-card:hover { background: var(--bg-raise); }
         .ns-card__img-wrap {
           width: 100%; aspect-ratio: 16/9;
-          background: var(--canvas-bg); overflow: hidden;
+          background: var(--bg-base); overflow: hidden;
           display: flex; align-items: center; justify-content: center;
-          border-bottom: 1px solid var(--line);
+          border-bottom: 1px solid var(--bg-line);
         }
         .ns-card__img {
           width: 60%; height: 75%; object-fit: contain;
@@ -167,9 +167,9 @@ export default function NewsIndexPage() {
         .ns-card__body { padding: 1.1rem 1.1rem 1.4rem; display: flex; flex-direction: column; flex: 1; }
         .ns-card__meta { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem; }
         .ns-card__cat { font-family: var(--ff-mono); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand-red); }
-        .ns-card__date { font-family: var(--ff-mono); font-size: 0.66rem; letter-spacing: 0.1em; color: var(--slate-30); }
-        .ns-card__title { font-family: var(--ff-display); font-size: clamp(1rem,1.8vw,1.2rem); color: var(--slate); line-height: 1.15; letter-spacing: 0.01em; margin-bottom: 0.6rem; }
-        .ns-card__excerpt { font-family: var(--ff-body); font-size: 0.82rem; font-weight: 400; color: var(--slate-60); line-height: 1.6; flex: 1; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .ns-card__date { font-family: var(--ff-mono); font-size: 0.66rem; letter-spacing: 0.1em; color: var(--ink-35); }
+        .ns-card__title { font-family: var(--ff-display); font-size: clamp(1rem,1.8vw,1.2rem); color: var(--ink); line-height: 1.15; letter-spacing: 0.01em; margin-bottom: 0.6rem; }
+        .ns-card__excerpt { font-family: var(--ff-body); font-size: 0.82rem; font-weight: 400; color: var(--ink-35); line-height: 1.6; flex: 1; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .ns-card__cta { font-family: var(--ff-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand-red); }
       `}</style>
     </>

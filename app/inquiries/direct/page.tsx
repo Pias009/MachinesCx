@@ -1,9 +1,12 @@
 "use client";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { families, categories, familyImage, familiesByCategory, type ProductFamily, type CategorySlug } from "@/lib/products";
+import { families, familiesByCategory, type ProductFamily, type CategorySlug } from "@/lib/products";
 import TransitionLink from "@/components/TransitionLink";
-import { ChatThread, ChoiceRow, ChoiceChip, Composer, InsightPanel, ReviewCard, ImageGallery, chatStyles, type Turn, type ReviewRow } from "@/components/ChatInquiry";
+import {
+  Field, Section, MachinePicker,
+  InsightPanel, ReviewCard, ImageGallery, chatStyles, type ReviewRow,
+} from "@/components/ChatInquiry";
 
 interface FormData {
   name: string;
@@ -16,10 +19,9 @@ interface FormData {
 
 const EMPTY_FORM: FormData = { name: "", company: "", email: "", phone: "", country: "", message: "" };
 
-type Stage = "machine" | "model" | "qty" | "notes" | "contact" | "message" | "photos" | "review" | "sent";
-
 function DirectInquiryInner() {
   const searchParams = useSearchParams();
+  const [category, setCategory] = useState<CategorySlug>("film-blowing");
   const [family, setFamily] = useState<ProductFamily | null>(null);
   const [modelIdx, setModelIdx] = useState(0);
   const [qty, setQty] = useState(1);
@@ -28,60 +30,19 @@ function DirectInquiryInner() {
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const [activeCat, setActiveCat] = useState<CategorySlug>("film-blowing");
-  const [stage, setStage] = useState<Stage>("machine");
-  const [typing, setTyping] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
-
-  // draft values for the composer, committed into a bubble on send
-  const [nameDraft, setNameDraft] = useState("");
-  const [emailDraft, setEmailDraft] = useState("");
-  const [companyDraft, setCompanyDraft] = useState("");
-  const [messageDraft, setMessageDraft] = useState("");
+  const [sent, setSent] = useState(false);
 
   useEffect(() => {
     const slug = searchParams?.get("machine");
     if (!slug) return;
     const fam = families.find(f => f.slug === slug);
     if (!fam) return;
+    setCategory(fam.category);
     setFamily(fam);
-    setStage(fam.models.length > 1 ? "model" : "qty");
   }, [searchParams]);
-
-  function say(next: () => void, delay = 550) {
-    setTyping(true);
-    setTimeout(() => { setTyping(false); next(); }, delay);
-  }
-
-  function pickMachine(fam: ProductFamily) {
-    setFamily(fam);
-    say(() => setStage(fam.models.length > 1 ? "model" : "qty"));
-  }
-
-  function pickModel(i: number) {
-    setModelIdx(i);
-    say(() => setStage("qty"));
-  }
-
-  function submitQty() {
-    say(() => setStage("notes"));
-  }
-
-  function submitNotes() {
-    say(() => setStage("contact"));
-  }
-
-  function submitContact() {
-    if (!nameDraft.trim() || !emailDraft.trim()) return;
-    setForm(f => ({ ...f, name: nameDraft.trim(), email: emailDraft.trim(), company: companyDraft.trim() }));
-    say(() => setStage("message"));
-  }
-
-  function submitMessage() {
-    setForm(f => ({ ...f, message: messageDraft.trim() }));
-    say(() => setStage("photos"));
-  }
 
   async function uploadImage(file: File) {
     setUploading(true);
@@ -97,10 +58,6 @@ function DirectInquiryInner() {
     } finally {
       setUploading(false);
     }
-  }
-
-  function submitPhotos() {
-    say(() => setStage("review"), 650);
   }
 
   async function send() {
@@ -133,7 +90,7 @@ function DirectInquiryInner() {
         localStorage.setItem("cx_inquiry_email", form.email.trim().toLowerCase());
         localStorage.setItem("cx_inquiry_lastSeen", new Date().toISOString());
       }
-      say(() => setStage("sent"), 500);
+      setSent(true);
     } catch (e) {
       setSendError((e as Error).message || "Something went wrong — please try again.");
     } finally {
@@ -155,100 +112,24 @@ function DirectInquiryInner() {
     { key: "message", label: "Message", value: form.message, kind: "textarea", placeholder: "Optional", onChange: v => setForm(f => ({ ...f, message: v })) },
   ], [qty, notes, form]);
 
-  const turns = useMemo<Turn[]>(() => {
-    const t: Turn[] = [
-      { id: "b0", from: "bot", content: (
-        <>
-          Hey! I&apos;m here to send your inquiry straight to our team. Which machine are you interested in?
-          <ChoiceRow>
-            {categories.map(c => (
-              <ChoiceChip key={c.slug} active={activeCat === c.slug} onClick={() => setActiveCat(c.slug as CategorySlug)}>
-                {c.name}
-              </ChoiceChip>
-            ))}
-          </ChoiceRow>
-          {stage === "machine" && (
-            <ChoiceRow>
-              {familiesByCategory(activeCat).map(f => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <ChoiceChip key={f.slug} onClick={() => pickMachine(f)}>
-                  <img src={familyImage(f)} alt="" /> {f.name}
-                </ChoiceChip>
-              ))}
-            </ChoiceRow>
-          )}
-        </>
-      ) },
-    ];
-
-    if (family) {
-      t.push({ id: "u0", from: "user", content: family.name });
-
-      if (family.models.length > 1) {
-        t.push({ id: "b1", from: "bot", content: (
-          <>
-            Nice pick. Which model of the {family.name}?
-            {stage === "model" && (
-              <ChoiceRow>
-                {family.models.map((m, i) => <ChoiceChip key={m} onClick={() => pickModel(i)}>{m}</ChoiceChip>)}
-              </ChoiceRow>
-            )}
-          </>
-        ) });
-      }
-      if (stage !== "machine" && stage !== "model") {
-        t.push({ id: "u1", from: "user", content: family.models[modelIdx] });
-      }
-    }
-
-    if (stage === "qty" || (family && !["machine", "model"].includes(stage))) {
-      t.push({ id: "b2", from: "bot", content: "How many units do you need?" });
-    }
-    if (!["machine", "model", "qty"].includes(stage)) {
-      t.push({ id: "u2", from: "user", content: `${qty} unit${qty > 1 ? "s" : ""}` });
-    }
-
-    if (stage === "notes" || !["machine", "model", "qty", "notes"].includes(stage)) {
-      t.push({ id: "b3", from: "bot", content: "Anything to customize — voltage, automation level, certification? Leave blank if not." });
-    }
-    if (!["machine", "model", "qty", "notes"].includes(stage)) {
-      t.push({ id: "u3", from: "user", content: notes.trim() || "No special requirements" });
-    }
-
-    if (stage === "contact" || !["machine", "model", "qty", "notes", "contact"].includes(stage)) {
-      t.push({ id: "b4", from: "bot", content: "Almost done — what's your name and email so we can reach you?" });
-    }
-    if (!["machine", "model", "qty", "notes", "contact"].includes(stage)) {
-      t.push({ id: "u4", from: "user", content: `${form.name} · ${form.email}` });
-    }
-
-    if (["message", "photos", "review", "sent"].includes(stage)) {
-      t.push({ id: "b5", from: "bot", content: "Anything else you'd like us to know? (optional)" });
-    }
-    if (["photos", "review", "sent"].includes(stage)) {
-      t.push({ id: "u5", from: "user", content: form.message || "Nothing else" });
-    }
-
-    if (["photos", "review", "sent"].includes(stage)) {
-      t.push({ id: "b6", from: "bot", content: "Want to attach any reference photos? Totally optional." });
-    }
-    if (["review", "sent"].includes(stage)) {
-      t.push({ id: "u6", from: "user", content: images.length ? `${images.length} photo${images.length > 1 ? "s" : ""} attached` : "No photos" });
-    }
-
-    if (stage === "review") {
-      t.push({ id: "b7", from: "bot", content: "Here's everything — click any answer below to edit it, then send whenever you're ready." });
-    }
-
-    if (stage === "sent") {
-      t.push({ id: "b8", from: "bot", content: (
-        <>Thanks, {form.name}! Our team will review this and reply to {form.email} within 24 hours.</>
-      ) });
-    }
-
-    return t;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [family, modelIdx, qty, notes, form, stage, activeCat, images]);
+  if (sent) {
+    return (
+      <>
+        <style suppressHydrationWarning>{chatStyles}</style>
+        <div className="ci-page">
+          <div className="ci-shell" style={{ gridTemplateColumns: "1fr" }}>
+            <div className="ci-success">
+              <div className="ci-success__icon">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M6 14l5 5 11-11" stroke="var(--brand-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
+              <h1 className="ci-success__title">Thanks, {form.name}!</h1>
+              <p className="ci-success__sub">Our team will review this and reply to {form.email} within 24 hours.</p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -268,51 +149,75 @@ function DirectInquiryInner() {
             </div>
 
             <div className="ci-convo">
-              <ChatThread turns={turns} typing={typing} />
+              <Section title="Machine">
+                <MachinePicker
+                  category={category}
+                  onCategory={setCategory}
+                  family={family}
+                  onFamily={setFamily}
+                  modelIdx={modelIdx}
+                  onModel={setModelIdx}
+                />
+                <div className="ci-row">
+                  <Field label="Quantity">
+                    <div className="ci-qty">
+                      <button type="button" className="ci-qty__btn" onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
+                      <span className="ci-qty__val">{qty}</span>
+                      <button type="button" className="ci-qty__btn" onClick={() => setQty(q => q + 1)}>+</button>
+                    </div>
+                  </Field>
+                  <Field label="Customization notes" hint="Voltage, automation, certification…">
+                    <input type="text" placeholder="Optional" value={notes} onChange={e => setNotes(e.target.value)} />
+                  </Field>
+                </div>
+              </Section>
 
-              {stage === "qty" && (
-                <Composer onSend={submitQty} sendLabel="Continue">
-                  <div className="ci-qty">
-                    <button type="button" className="ci-qty__btn" onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
-                    <span className="ci-qty__val">{qty}</span>
-                    <button type="button" className="ci-qty__btn" onClick={() => setQty(q => q + 1)}>+</button>
-                  </div>
-                </Composer>
-              )}
-
-              {stage === "notes" && (
-                <Composer onSend={submitNotes} sendLabel="Continue">
-                  <textarea rows={2} placeholder="e.g. corona treatment, special voltage, CE certification…" value={notes} onChange={e => setNotes(e.target.value)} />
-                </Composer>
-              )}
-
-              {stage === "contact" && (
-                <Composer onSend={submitContact} sendLabel="Continue" disabled={!nameDraft.trim() || !emailDraft.trim()}>
-                  <div className="ci-composer__grid">
-                    <input type="text" placeholder="Your name *" value={nameDraft} onChange={e => setNameDraft(e.target.value)} />
-                    <input type="email" placeholder="Email *" value={emailDraft} onChange={e => setEmailDraft(e.target.value)} />
-                  </div>
-                </Composer>
-              )}
-
-              {stage === "message" && (
-                <Composer onSend={submitMessage} sendLabel="Continue">
-                  <textarea rows={2} placeholder="Optional — anything else to add" value={messageDraft} onChange={e => setMessageDraft(e.target.value)} />
-                </Composer>
-              )}
-
-              {stage === "photos" && (
-                <Composer onSend={submitPhotos} sendLabel="Continue" disabled={uploading}>
+              <Section title="Your details">
+                <div className="ci-row">
+                  <Field label="Name" required>
+                    <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+                  </Field>
+                  <Field label="Email" required>
+                    <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+                  </Field>
+                </div>
+                <div className="ci-row">
+                  <Field label="Company">
+                    <input type="text" placeholder="Optional" value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))} />
+                  </Field>
+                  <Field label="Phone">
+                    <input type="tel" placeholder="Optional" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
+                  </Field>
+                </div>
+                <Field label="Message" hint="Anything else you'd like us to know?">
+                  <textarea rows={3} placeholder="Optional" value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
+                </Field>
+                <Field label="Reference photos">
                   <ImageGallery
                     images={images}
                     uploading={uploading}
                     onAdd={() => fileRef.current?.click()}
                     onRemove={i => setImages(prev => prev.filter((_, j) => j !== i))}
                   />
-                </Composer>
-              )}
+                </Field>
+                <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" style={{ display: "none" }}
+                  onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f); e.target.value = ""; }} />
+              </Section>
 
-              {stage === "review" && (
+              {sendError && <div className="ci-error" role="alert">{sendError}</div>}
+
+              {!reviewing ? (
+                <div className="ci-submit-bar">
+                  <button
+                    type="button"
+                    className="ci-submit-bar__btn"
+                    disabled={!family || !form.name.trim() || !form.email.trim()}
+                    onClick={() => setReviewing(true)}
+                  >
+                    Review inquiry →
+                  </button>
+                </div>
+              ) : (
                 <ReviewCard
                   title={<>Review your inquiry for <strong>{family?.name}</strong> ({family?.models[modelIdx]}).</>}
                   rows={reviewRows}
@@ -324,10 +229,7 @@ function DirectInquiryInner() {
                   sending={sending}
                 />
               )}
-              <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" style={{ display: "none" }}
-                onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f); e.target.value = ""; }} />
             </div>
-            {sendError && <div className="ci-error" role="alert">{sendError}</div>}
           </div>
 
           <InsightPanel
@@ -335,13 +237,8 @@ function DirectInquiryInner() {
             modelIdx={modelIdx}
             related={related}
             tip={
-              stage === "machine" ? { text: <>Not sure which line fits? <strong>Pick a category</strong> above to browse — you can switch anytime before sending.</> } :
-              stage === "model" ? { text: <>Each model trades off <strong>speed vs. footprint</strong> — check the spec panel on the left as you pick.</> } :
-              stage === "qty" ? { text: <>Ordering more than one line? We can quote <strong>volume pricing</strong> — just say so in the notes step.</> } :
-              stage === "notes" ? { text: <>Mention your <strong>target output (kg/h)</strong> and film type — it helps us size the right model fast.</> } :
-              stage === "contact" ? { text: <>We reply from a <strong>real engineer</strong>, not a bot — expect a detailed answer within 24 hours.</> } :
-              stage === "review" ? { text: <>Click any row in the review card to <strong>edit it</strong> before sending — nothing sends until you press the button.</> } :
-              { text: <>Double-check the <strong>quantity and model</strong> above — you can still go back and change your answers.</> }
+              !family ? { text: <>Not sure which line fits? <strong>Pick a category</strong> above to browse machines.</> } :
+              { text: <>Mention your <strong>target output (kg/h)</strong> and film type in notes — it helps us size the right model fast.</> }
             }
           />
         </div>

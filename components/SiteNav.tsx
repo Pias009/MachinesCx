@@ -305,6 +305,7 @@ export default function SiteNav() {
           gap: 0;
           overflow-y: auto;
           overflow-x: hidden;
+          scrollbar-width: none;
           transform: translateX(-100%);
           visibility: hidden;
           pointer-events: none;
@@ -312,6 +313,7 @@ export default function SiteNav() {
                       visibility 0s linear 0.32s;
           box-shadow: 8px 0 40px rgba(0,0,0,0.8);
         }
+        .sn__mobile::-webkit-scrollbar { display: none; }
         .sn__mobile--open {
           transform: translateX(0);
           visibility: visible;

@@ -518,7 +518,10 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;  /* body clips horizontal, html scrolls vertically */
   max-width: 100vw;
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* old Edge/IE */
 }
+body::-webkit-scrollbar { display: none; } /* Chrome/Safari/Brave */
 a { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
 button { cursor: pointer; border: none; background: none; font: inherit; }

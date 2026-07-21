@@ -1,8 +1,11 @@
 "use client";
 import { Suspense, useMemo, useRef, useState } from "react";
-import { families, familyImage, familiesByCategory, type ProductFamily } from "@/lib/products";
+import { familiesByCategory, type ProductFamily, type CategorySlug } from "@/lib/products";
 import TransitionLink from "@/components/TransitionLink";
-import { ChatThread, ChoiceRow, ChoiceChip, Composer, InsightPanel, ReviewCard, chatStyles, type Turn, type ReviewRow } from "@/components/ChatInquiry";
+import {
+  Field, Section, MachinePicker, EntryRow, AddAnotherButton,
+  InsightPanel, ReviewCard, chatStyles, type ReviewRow,
+} from "@/components/ChatInquiry";
 
 interface PartEntry {
   name: string;
@@ -24,12 +27,12 @@ interface FormData {
 
 const EMPTY_FORM: FormData = { name: "", company: "", email: "", phone: "", country: "", message: "" };
 
-type Stage = "part-name" | "part-machine" | "part-qty" | "part-notes" | "part-images" | "more" | "contact" | "message" | "review" | "sent";
-
 function PartsInquiryInner() {
   const [parts, setParts] = useState<PartEntry[]>([]);
   const [draftName, setDraftName] = useState("");
+  const [draftCat, setDraftCat] = useState<CategorySlug>("film-blowing");
   const [draftMachine, setDraftMachine] = useState<ProductFamily | null>(null);
+  const [draftModelIdx, setDraftModelIdx] = useState(0);
   const [draftQty, setDraftQty] = useState(1);
   const [draftNotes, setDraftNotes] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -37,38 +40,10 @@ function PartsInquiryInner() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<FormData>(EMPTY_FORM);
-  const [nameDraft, setNameDraft] = useState("");
-  const [emailDraft, setEmailDraft] = useState("");
-  const [companyDraft, setCompanyDraft] = useState("");
-  const [messageDraft, setMessageDraft] = useState("");
-
-  const [stage, setStage] = useState<Stage>("part-name");
-  const [typing, setTyping] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
-
-  function say(next: () => void, delay = 550) {
-    setTyping(true);
-    setTimeout(() => { setTyping(false); next(); }, delay);
-  }
-
-  function submitPartName() {
-    if (!draftName.trim()) return;
-    say(() => setStage("part-machine"));
-  }
-
-  function pickMachine(fam: ProductFamily | null) {
-    setDraftMachine(fam);
-    say(() => setStage("part-qty"));
-  }
-
-  function submitQty() {
-    say(() => setStage("part-notes"));
-  }
-
-  function submitNotes() {
-    say(() => setStage("part-images"));
-  }
+  const [sent, setSent] = useState(false);
 
   async function uploadImage(file: File) {
     setUploading(true);
@@ -86,32 +61,16 @@ function PartsInquiryInner() {
     }
   }
 
-  function finishPart() {
+  function addPart() {
+    if (!draftName.trim()) return;
     setParts(prev => [...prev, {
       name: draftName.trim(), machine: draftMachine?.name ?? "", machineSlug: draftMachine?.slug ?? "",
       quantity: draftQty, notes: draftNotes.trim(), images: draftImages,
     }]);
-    say(() => setStage("more"));
+    setDraftName(""); setDraftMachine(null); setDraftModelIdx(0); setDraftQty(1); setDraftNotes(""); setDraftImages([]);
   }
-
-  function addAnotherPart() {
-    setDraftName(""); setDraftMachine(null); setDraftQty(1); setDraftNotes(""); setDraftImages([]);
-    say(() => setStage("part-name"));
-  }
-
-  function doneAddingParts() {
-    say(() => setStage("contact"));
-  }
-
-  function submitContact() {
-    if (!nameDraft.trim() || !emailDraft.trim()) return;
-    setForm(f => ({ ...f, name: nameDraft.trim(), email: emailDraft.trim(), company: companyDraft.trim() }));
-    say(() => setStage("message"));
-  }
-
-  function submitMessage() {
-    setForm(f => ({ ...f, message: messageDraft.trim() }));
-    say(() => setStage("review"), 650);
+  function removePart(i: number) {
+    setParts(prev => prev.filter((_, j) => j !== i));
   }
 
   async function send() {
@@ -143,7 +102,7 @@ function PartsInquiryInner() {
         localStorage.setItem("cx_inquiry_email", form.email.trim().toLowerCase());
         localStorage.setItem("cx_inquiry_lastSeen", new Date().toISOString());
       }
-      say(() => setStage("sent"), 500);
+      setSent(true);
     } catch (e) {
       setSendError((e as Error).message || "Something went wrong — please try again.");
     } finally {
@@ -156,117 +115,31 @@ function PartsInquiryInner() {
     return familiesByCategory(draftMachine.category).filter(f => f.slug !== draftMachine.slug);
   }, [draftMachine]);
 
-  function patchPart(i: number, patch: Partial<PartEntry>) {
-    setParts(prev => prev.map((p, j) => j === i ? { ...p, ...patch } : p));
-  }
+  const reviewRows = useMemo<ReviewRow[]>(() => [
+    { key: "name", label: "Name", value: form.name, onChange: v => setForm(f => ({ ...f, name: v })) },
+    { key: "email", label: "Email", value: form.email, onChange: v => setForm(f => ({ ...f, email: v })) },
+    { key: "company", label: "Company", value: form.company, placeholder: "Optional", onChange: v => setForm(f => ({ ...f, company: v })) },
+    { key: "message", label: "Message", value: form.message, kind: "textarea", placeholder: "Optional", onChange: v => setForm(f => ({ ...f, message: v })) },
+  ], [form]);
 
-  const reviewRows = useMemo<ReviewRow[]>(() => {
-    const rows: ReviewRow[] = [];
-    parts.forEach((p, i) => {
-      rows.push({ key: `part-name-${i}`, label: `Part ${i + 1}`, value: p.name, onChange: v => patchPart(i, { name: v }) });
-      rows.push({ key: `part-qty-${i}`, label: `Qty`, value: String(p.quantity), onChange: v => patchPart(i, { quantity: Math.max(1, parseInt(v, 10) || 1) }) });
-      rows.push({ key: `part-notes-${i}`, label: `Notes`, value: p.notes, kind: "textarea", placeholder: "Specs, dimensions…", onChange: v => patchPart(i, { notes: v }) });
-    });
-    rows.push(
-      { key: "name", label: "Name", value: form.name, onChange: v => setForm(f => ({ ...f, name: v })) },
-      { key: "email", label: "Email", value: form.email, onChange: v => setForm(f => ({ ...f, email: v })) },
-      { key: "company", label: "Company", value: form.company, placeholder: "Optional", onChange: v => setForm(f => ({ ...f, company: v })) },
-      { key: "message", label: "Message", value: form.message, kind: "textarea", placeholder: "Optional", onChange: v => setForm(f => ({ ...f, message: v })) },
+  if (sent) {
+    return (
+      <>
+        <style suppressHydrationWarning>{chatStyles}</style>
+        <div className="ci-page">
+          <div className="ci-shell" style={{ gridTemplateColumns: "1fr" }}>
+            <div className="ci-success">
+              <div className="ci-success__icon">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M6 14l5 5 11-11" stroke="var(--brand-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
+              <h1 className="ci-success__title">Thanks, {form.name}!</h1>
+              <p className="ci-success__sub">Our team will review your parts list and reply to {form.email} within 24 hours.</p>
+            </div>
+          </div>
+        </div>
+      </>
     );
-    return rows;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parts, form]);
-
-  const turns = useMemo<Turn[]>(() => {
-    const t: Turn[] = [
-      { id: "b0", from: "bot", content: "Hi! Tell me about the part you need — name it, and I'll help you attach the right machine, quantity, and photos." },
-    ];
-
-    parts.forEach((p, i) => {
-      t.push({ id: `pu${i}`, from: "user", content: (
-        <>{p.name} — {p.machine || "no machine specified"} · qty {p.quantity}{p.notes ? ` · "${p.notes}"` : ""}{p.images.length ? ` · ${p.images.length} photo${p.images.length > 1 ? "s" : ""}` : ""}</>
-      ) });
-      t.push({ id: `pb${i}`, from: "bot", content: `Got it — part ${i + 1} added.` });
-    });
-
-    if (stage === "part-name") {
-      t.push({ id: "b1", from: "bot", content: "What's the part called? (e.g. Die Head, Screw, Barrel, Heating Element)" });
-    }
-    if (!["part-name"].includes(stage)) {
-      const currentPartIdx = parts.length;
-      t.push({ id: `u-name-${currentPartIdx}`, from: "user", content: draftName });
-    }
-
-    if (stage === "part-machine") {
-      t.push({ id: "b2", from: "bot", content: (
-        <>
-          Which machine is this part for? (optional — pick one or skip)
-          <ChoiceRow>
-            <ChoiceChip onClick={() => pickMachine(null)}>Not sure / skip</ChoiceChip>
-            {families.slice(0, 8).map(f => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <ChoiceChip key={f.slug} onClick={() => pickMachine(f)}><img src={familyImage(f)} alt="" /> {f.name}</ChoiceChip>
-            ))}
-          </ChoiceRow>
-        </>
-      ) });
-    }
-    if (!["part-name", "part-machine"].includes(stage)) {
-      t.push({ id: "u-machine", from: "user", content: draftMachine?.name ?? "Not sure / skip" });
-    }
-
-    if (stage === "part-qty") {
-      t.push({ id: "b3", from: "bot", content: "How many do you need?" });
-    }
-    if (!["part-name", "part-machine", "part-qty"].includes(stage)) {
-      t.push({ id: "u-qty", from: "user", content: `${draftQty} unit${draftQty > 1 ? "s" : ""}` });
-    }
-
-    if (stage === "part-notes") {
-      t.push({ id: "b4", from: "bot", content: "Any specs, dimensions, or reference numbers? Leave blank if not sure." });
-    }
-    if (!["part-name", "part-machine", "part-qty", "part-notes"].includes(stage)) {
-      t.push({ id: "u-notes", from: "user", content: draftNotes.trim() || "No extra notes" });
-    }
-
-    if (stage === "part-images") {
-      t.push({ id: "b5", from: "bot", content: "Got a photo of the part or where it fits? Attach it — totally optional." });
-    }
-    if (stage === "more" || stage === "contact" || stage === "message" || stage === "review" || stage === "sent") {
-      t.push({ id: "u-images", from: "user", content: draftImages.length ? `${draftImages.length} photo${draftImages.length > 1 ? "s" : ""} attached` : "No photos" });
-    }
-
-    if (stage === "more") {
-      t.push({ id: "b6", from: "bot", content: "Need anything else, or ready to send this?" });
-    }
-
-    if (stage === "contact" || stage === "message" || stage === "review" || stage === "sent") {
-      t.push({ id: "b7", from: "bot", content: "What's your name and email so we can reach you?" });
-    }
-    if (stage === "message" || stage === "review" || stage === "sent") {
-      t.push({ id: "u7", from: "user", content: `${form.name} · ${form.email}` });
-    }
-
-    if (stage === "message" || stage === "review" || stage === "sent") {
-      t.push({ id: "b8", from: "bot", content: "Anything else you'd like us to know? (optional)" });
-    }
-    if (stage === "review" || stage === "sent") {
-      t.push({ id: "u8", from: "user", content: form.message || "Nothing else" });
-    }
-
-    if (stage === "review") {
-      t.push({ id: "b9", from: "bot", content: (
-        <>Here&apos;s your parts inquiry — <strong>{parts.length} part{parts.length > 1 ? "s" : ""}</strong>. Click any answer below to edit it, then send whenever you&apos;re ready.</>
-      ) });
-    }
-
-    if (stage === "sent") {
-      t.push({ id: "b10", from: "bot", content: <>Thanks, {form.name}! Our team will review your parts list and reply to {form.email} within 24 hours.</> });
-    }
-
-    return t;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parts, draftName, draftMachine, draftQty, draftNotes, draftImages, form, stage]);
+  }
 
   return (
     <>
@@ -286,33 +159,47 @@ function PartsInquiryInner() {
             </div>
 
             <div className="ci-convo">
-              <ChatThread turns={turns} typing={typing} />
+              <Section title="Parts" subtitle="Add as many parts as you need.">
+                {parts.map((p, i) => (
+                  <EntryRow
+                    key={i}
+                    title={`${p.name} — ${p.machine || "no machine specified"} · qty ${p.quantity}`}
+                    meta={[p.notes, p.images.length ? `${p.images.length} photo${p.images.length > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ") || undefined}
+                    onRemove={() => removePart(i)}
+                  />
+                ))}
 
-              {stage === "part-name" && (
-                <Composer onSend={submitPartName} sendLabel="Continue" disabled={!draftName.trim()}>
-                  <input type="text" placeholder="e.g. Die Head, Screw, Barrel…" value={draftName} onChange={e => setDraftName(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter") submitPartName(); }} />
-                </Composer>
-              )}
+                <Field label="Part name" hint="e.g. Die Head, Screw, Barrel, Heating Element">
+                  <input type="text" value={draftName} onChange={e => setDraftName(e.target.value)} />
+                </Field>
 
-              {stage === "part-qty" && (
-                <Composer onSend={submitQty} sendLabel="Continue">
-                  <div className="ci-qty">
-                    <button type="button" className="ci-qty__btn" onClick={() => setDraftQty(q => Math.max(1, q - 1))}>−</button>
-                    <span className="ci-qty__val">{draftQty}</span>
-                    <button type="button" className="ci-qty__btn" onClick={() => setDraftQty(q => q + 1)}>+</button>
-                  </div>
-                </Composer>
-              )}
+                <Field label="Machine" hint="Optional — pick one if you know it, or leave blank">
+                  <MachinePicker
+                    category={draftCat}
+                    onCategory={setDraftCat}
+                    family={draftMachine}
+                    onFamily={setDraftMachine}
+                    modelIdx={draftModelIdx}
+                    onModel={setDraftModelIdx}
+                    allowNone
+                    noneLabel="Not sure / skip"
+                  />
+                </Field>
 
-              {stage === "part-notes" && (
-                <Composer onSend={submitNotes} sendLabel="Continue">
-                  <textarea rows={2} placeholder="Material, dimensions, reference numbers…" value={draftNotes} onChange={e => setDraftNotes(e.target.value)} />
-                </Composer>
-              )}
+                <div className="ci-row">
+                  <Field label="Quantity">
+                    <div className="ci-qty">
+                      <button type="button" className="ci-qty__btn" onClick={() => setDraftQty(q => Math.max(1, q - 1))}>−</button>
+                      <span className="ci-qty__val">{draftQty}</span>
+                      <button type="button" className="ci-qty__btn" onClick={() => setDraftQty(q => q + 1)}>+</button>
+                    </div>
+                  </Field>
+                  <Field label="Specs / reference numbers">
+                    <input type="text" placeholder="Optional" value={draftNotes} onChange={e => setDraftNotes(e.target.value)} />
+                  </Field>
+                </div>
 
-              {stage === "part-images" && (
-                <Composer onSend={finishPart} sendLabel="Continue" disabled={uploading}>
+                <Field label="Reference photo" hint="Shows the part or where it fits — optional">
                   <div style={{ display: "flex", gap: ".5rem", alignItems: "center", flexWrap: "wrap" }}>
                     {draftImages.map((src, i) => (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -325,54 +212,64 @@ function PartsInquiryInner() {
                     <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" style={{ display: "none" }}
                       onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f); e.target.value = ""; }} />
                   </div>
-                </Composer>
-              )}
+                </Field>
 
-              {stage === "more" && (
-                <Composer onSend={doneAddingParts} sendLabel="I'm done, review my order">
-                  <button type="button" onClick={addAnotherPart}
-                    style={{ padding: ".7rem 1rem", borderRadius: ".7rem", border: "1px dashed var(--brand-teal)", background: "rgba(43,191,179,.06)", color: "var(--brand-teal)", fontSize: ".85rem", cursor: "pointer", width: "100%" }}>
-                    + Add another part
+                <AddAnotherButton onClick={addPart}>Add this part</AddAnotherButton>
+              </Section>
+
+              <Section title="Your details">
+                <div className="ci-row">
+                  <Field label="Name" required>
+                    <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+                  </Field>
+                  <Field label="Email" required>
+                    <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+                  </Field>
+                </div>
+                <div className="ci-row">
+                  <Field label="Company">
+                    <input type="text" placeholder="Optional" value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))} />
+                  </Field>
+                  <Field label="Phone">
+                    <input type="tel" placeholder="Optional" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
+                  </Field>
+                </div>
+                <Field label="Message" hint="Anything else you'd like us to know?">
+                  <textarea rows={3} placeholder="Optional" value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
+                </Field>
+              </Section>
+
+              {sendError && <div className="ci-error" role="alert">{sendError}</div>}
+
+              {!reviewing ? (
+                <div className="ci-submit-bar">
+                  <button
+                    type="button"
+                    className="ci-submit-bar__btn"
+                    disabled={parts.length === 0 || !form.name.trim() || !form.email.trim()}
+                    onClick={() => setReviewing(true)}
+                  >
+                    Review inquiry →
                   </button>
-                </Composer>
-              )}
-
-              {stage === "contact" && (
-                <Composer onSend={submitContact} sendLabel="Continue" disabled={!nameDraft.trim() || !emailDraft.trim()}>
-                  <div className="ci-composer__grid">
-                    <input type="text" placeholder="Your name *" value={nameDraft} onChange={e => setNameDraft(e.target.value)} />
-                    <input type="email" placeholder="Email *" value={emailDraft} onChange={e => setEmailDraft(e.target.value)} />
-                  </div>
-                </Composer>
-              )}
-
-              {stage === "message" && (
-                <Composer onSend={submitMessage} sendLabel="Continue">
-                  <textarea rows={2} placeholder="Optional — anything else to add" value={messageDraft} onChange={e => setMessageDraft(e.target.value)} />
-                </Composer>
-              )}
-
-              {stage === "review" && (
+                </div>
+              ) : (
                 <ReviewCard
-                  title={<>Review your parts inquiry — click any answer to edit it.</>}
+                  title={<>Review your parts inquiry — <strong>{parts.length} part{parts.length > 1 ? "s" : ""}</strong>. Click any answer to edit it.</>}
                   rows={reviewRows}
                   onSend={send}
                   sending={sending}
                 />
               )}
             </div>
-            {sendError && <div className="ci-error" role="alert">{sendError}</div>}
           </div>
 
           <InsightPanel
             family={draftMachine}
+            modelIdx={draftModelIdx}
             related={related}
             tip={
-              stage === "part-name" ? { text: <>Use the name printed on the part itself if you have it — <strong>exact terms</strong> help our engineers match it faster.</> } :
-              stage === "part-machine" ? { text: <>Not sure which machine? <strong>Skip is fine</strong> — a reference photo usually tells us everything we need.</> } :
-              stage === "part-images" ? { text: <>A photo showing the part <strong>in place</strong> (not just the part alone) helps us confirm fit.</> } :
-              stage === "review" ? { text: <>Click any row in the review card to <strong>edit it</strong> — nothing sends until you press the button.</> } :
-              { text: <>You can add as many parts as you need before sending — nothing sends until you press <strong>send inquiry</strong>.</> }
+              parts.length === 0 ? { text: <>Use the name printed on the part itself if you have it — <strong>exact terms</strong> help our engineers match it faster.</> } :
+              { text: <>Add as many parts as you need before sending — nothing sends until you press <strong>send inquiry</strong>.</> }
             }
           />
         </div>

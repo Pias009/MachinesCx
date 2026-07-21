@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
-import type { ProductFamily } from "@/lib/products";
-import { familyImage } from "@/lib/products";
+import type { ProductFamily, CategorySlug } from "@/lib/products";
+import { categories, familiesByCategory, familyImage } from "@/lib/products";
 
 /** Extracts a numeric magnitude from a spec value string (e.g. "2,100 mm"
  *  -> 2100) so it can be drawn as a bar. Non-numeric values (e.g. bag
@@ -13,88 +13,138 @@ function specMagnitude(v: string): number {
   return m ? parseFloat(m[0]) : 0;
 }
 
-/* ─── shared building blocks for the 3 "feels like messaging" inquiry
-   flows (talk-to-engineer, direct, parts). A bot bubble asks one thing
-   at a time; the visitor's choice/input renders back as their own
-   bubble before the next question appears. ─────────────────────── */
+/* ─── shared building blocks for the 3 inquiry forms (talk-to-engineer,
+   direct, parts). All fields are visible on one scrollable page — like
+   writing a document, not answering one prompt at a time — grouped into
+   labelled sections with a review step before the final send. ──────── */
 
-export interface Turn {
-  id: string;
-  from: "bot" | "user";
-  content: ReactNode;
+/** A labelled field wrapper — section building block for the single-page form. */
+export function Field({ label, hint, required, children }: {
+  label: string;
+  hint?: string;
+  required?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <label className="ci-field">
+      <span className="ci-field__label">{label}{required && <em>*</em>}</span>
+      {children}
+      {hint && <span className="ci-field__hint">{hint}</span>}
+    </label>
+  );
 }
 
-export function ChatThread({ turns, typing }: { turns: Turn[]; typing?: boolean }) {
-  const endRef = useRef<HTMLDivElement>(null);
+/** A titled card grouping related fields — the form's visual sections
+ *  (e.g. "Machine", "Your details"). */
+export function Section({ title, subtitle, children, actions }: {
+  title: ReactNode;
+  subtitle?: ReactNode;
+  children: ReactNode;
+  actions?: ReactNode;
+}) {
+  return (
+    <section className="ci-section">
+      <div className="ci-section__head">
+        <div>
+          <h2 className="ci-section__title">{title}</h2>
+          {subtitle && <p className="ci-section__subtitle">{subtitle}</p>}
+        </div>
+        {actions}
+      </div>
+      <div className="ci-section__body">{children}</div>
+    </section>
+  );
+}
 
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [turns.length, typing]);
+/** Category + machine + model picker — three plain selects, the standard
+ *  form pattern for choosing from a bounded catalogue. */
+export function MachinePicker({
+  category, onCategory, family, onFamily, modelIdx, onModel, allowNone, noneLabel = "Not sure / skip",
+}: {
+  category: CategorySlug;
+  onCategory: (c: CategorySlug) => void;
+  family: ProductFamily | null;
+  onFamily: (f: ProductFamily | null) => void;
+  modelIdx: number;
+  onModel: (i: number) => void;
+  allowNone?: boolean;
+  noneLabel?: string;
+}) {
+  const options = familiesByCategory(category);
 
   return (
-    <div className="ci-thread">
-      {turns.map(t => (
-        <div key={t.id} className={`ci-turn ci-turn--${t.from}`}>
-          {t.from === "bot" && <span className="ci-avatar">AI</span>}
-          <div className="ci-bubble">{t.content}</div>
-        </div>
-      ))}
-      {typing && (
-        <div className="ci-turn ci-turn--bot">
-          <span className="ci-avatar">AI</span>
-          <div className="ci-bubble ci-bubble--typing">
-            <span /><span /><span />
-          </div>
-        </div>
+    <div className="ci-picker">
+      <div className="ci-picker__row">
+        <Field label="Machine category">
+          <select
+            value={category}
+            onChange={e => { onCategory(e.target.value as CategorySlug); onFamily(null); }}
+          >
+            {categories.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
+          </select>
+        </Field>
+        <Field label="Machine">
+          <select
+            value={family?.slug ?? ""}
+            onChange={e => {
+              const fam = options.find(f => f.slug === e.target.value) ?? null;
+              onFamily(fam);
+              onModel(0);
+            }}
+          >
+            <option value="">{allowNone ? noneLabel : "Select a machine…"}</option>
+            {options.map(f => <option key={f.slug} value={f.slug}>{f.name}</option>)}
+          </select>
+        </Field>
+      </div>
+
+      {family && family.models.length > 1 && (
+        <Field label="Model">
+          <select value={modelIdx} onChange={e => onModel(parseInt(e.target.value, 10))}>
+            {family.models.map((m, i) => <option key={m} value={i}>{m}</option>)}
+          </select>
+        </Field>
       )}
-      <div ref={endRef} />
     </div>
   );
 }
 
-/** Row of pickable chips/cards rendered inside a bot bubble as the answer widget. */
-export function ChoiceRow({ children }: { children: ReactNode }) {
-  return <div className="ci-choices">{children}</div>;
-}
-
-export function ChoiceChip({ active, onClick, children }: { active?: boolean; onClick: () => void; children: ReactNode }) {
+/** A single machine/part line already added to the order — shown as a
+ *  compact summary row with a remove control, above the picker for the
+ *  next one. */
+export function EntryRow({ title, meta, onRemove }: { title: ReactNode; meta?: ReactNode; onRemove: () => void }) {
   return (
-    <button type="button" className={`ci-chip${active ? " ci-chip--on" : ""}`} onClick={onClick}>
-      {children}
-    </button>
-  );
-}
-
-/** The composer bar pinned at the bottom — holds whatever input widget
- *  answers the current question, plus the advance button. */
-export function Composer({ children, onSend, sendLabel = "Send", disabled }: {
-  children: ReactNode;
-  onSend: () => void;
-  sendLabel?: string;
-  disabled?: boolean;
-}) {
-  return (
-    <div className="ci-composer">
-      <div className="ci-composer__field">{children}</div>
-      <button type="button" className="ci-composer__send" disabled={disabled} onClick={onSend} aria-label={sendLabel}>
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M2 9h13m0 0l-5-5m5 5l-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+    <div className="ci-entry">
+      <div className="ci-entry__body">
+        <div className="ci-entry__title">{title}</div>
+        {meta && <div className="ci-entry__meta">{meta}</div>}
+      </div>
+      <button type="button" className="ci-entry__remove" onClick={onRemove} aria-label="Remove">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8m0-8l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
       </button>
     </div>
   );
 }
 
-/** Tip shown in the side panel, keyed to the current question so it always
- *  reads as relevant to what the visitor is doing right now. */
+/** Secondary "+ Add another" button used to append a repeatable entry
+ *  (another machine, another part) to the form. */
+export function AddAnotherButton({ onClick, children }: { onClick: () => void; children: ReactNode }) {
+  return (
+    <button type="button" className="ci-add-another" onClick={onClick}>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+      {children}
+    </button>
+  );
+}
+
+/** Tip shown in the side panel, contextual to whichever section is in focus. */
 export interface Tip {
   text: ReactNode;
 }
 
-/* ─── editable review card ──────────────────────────────────────────
-   The final step before send: every answer the visitor gave renders as
-   a row they can click to edit right there, instead of a plain summary
-   they'd have to scroll back up to change. ──────────────────────── */
+/* ─── editable review section — the final step before send. Every value
+   the visitor entered renders as a row they can click to edit right
+   there, instead of scrolling back up through the form. ────────────── */
 
 export interface ReviewRow {
   key: string;
@@ -158,7 +208,7 @@ function ReviewField({ row }: { row: ReviewRow }) {
 }
 
 /** A row of attached photos with per-image remove and an "add more" tile.
- *  Used for the general "attach photos" step available on all 3 forms. */
+ *  Used for the general "attach photos" field available on all 3 forms. */
 export function ImageGallery({
   images, onRemove, onAdd, uploading,
 }: {
@@ -240,7 +290,7 @@ export function InsightPanel({
             <circle cx="18" cy="18" r="14" stroke="currentColor" strokeWidth="1.4" />
             <path d="M18 12v7l5 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <p>Pick a machine in the chat and its live spec readout will appear here.</p>
+          <p>Pick a machine in the form and its spec sheet will appear here.</p>
         </div>
       </aside>
     );
@@ -257,7 +307,7 @@ export function InsightPanel({
       <div className="ci-insight__img-wrap">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={familyImage(family)} alt={family.name} className="ci-insight__img" />
-        <span className="ci-insight__live"><span className="ci-insight__live-dot" />Live spec readout</span>
+        <span className="ci-insight__live"><span className="ci-insight__live-dot" />Spec sheet</span>
       </div>
       <div className="ci-insight__series">{family.series}</div>
       <div className="ci-insight__name">{family.name}</div>
@@ -360,110 +410,98 @@ export const chatStyles = `
   }
   .ci-back:hover { color: var(--ink); }
 
-  /* conversation panel */
+  /* the form itself — one scrollable document, not a step-reveal panel */
   .ci-convo {
     background: var(--bg-surface);
     border: 1px solid var(--bg-line);
     border-radius: 1.25rem;
-    display: flex; flex-direction: column;
-    height: min(72vh, 780px);
-    overflow: hidden;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    display: flex; flex-direction: column; gap: 1.75rem;
   }
-  .ci-thread {
-    flex: 1; overflow-y: auto;
-    padding: clamp(1.25rem, 2.5vw, 2rem);
-    display: flex; flex-direction: column; gap: 1rem;
-  }
-  .ci-turn { display: flex; gap: .65rem; align-items: flex-start; max-width: 100%; }
-  .ci-turn--user { flex-direction: row-reverse; }
-  .ci-avatar {
-    flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
-    background: rgba(43,191,179,.14); border: 1px solid rgba(43,191,179,.3);
-    color: var(--brand-teal);
-    font-family: var(--ff-mono); font-size: .6rem; font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .ci-bubble {
-    background: var(--bg-raise);
-    border: 1px solid var(--bg-line);
-    border-radius: 1rem 1rem 1rem .25rem;
-    padding: .85rem 1.1rem;
-    font-size: .92rem; color: var(--ink); line-height: 1.55;
-    max-width: min(100%, 560px);
-  }
-  .ci-turn--user .ci-bubble {
-    background: var(--brand-teal); color: #04211e; border-color: var(--brand-teal);
-    border-radius: 1rem 1rem .25rem 1rem;
-  }
-  .ci-bubble--typing { display: flex; gap: .3rem; padding: 1rem 1.1rem; }
-  .ci-bubble--typing span {
-    width: 6px; height: 6px; border-radius: 50%; background: var(--ink-35);
-    animation: ci-bounce 1.1s ease-in-out infinite;
-  }
-  .ci-bubble--typing span:nth-child(2) { animation-delay: .15s; }
-  .ci-bubble--typing span:nth-child(3) { animation-delay: .3s; }
-  @keyframes ci-bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-4px); opacity: 1; } }
 
-  /* answer widgets, shown inline in the latest bot bubble */
-  .ci-choices { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
-  .ci-chip {
-    display: flex; align-items: center; gap: .55rem;
-    padding: .55rem .9rem; border-radius: .7rem;
-    border: 1px solid var(--bg-line); background: var(--bg-surface);
-    font-family: var(--ff-body); font-size: .85rem; color: var(--ink);
-    cursor: pointer; transition: border-color .15s, background .15s;
+  /* section = one labelled group of fields */
+  .ci-section { display: flex; flex-direction: column; gap: 1rem; }
+  .ci-section + .ci-section { padding-top: 1.75rem; border-top: 1px solid var(--bg-line); }
+  .ci-section__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+  .ci-section__title {
+    font-family: var(--ff-display); font-size: 1.15rem; color: var(--ink);
+    line-height: 1.3; margin: 0;
   }
-  .ci-chip:hover { border-color: var(--brand-teal); }
-  .ci-chip--on { border-color: var(--brand-teal); background: rgba(43,191,179,.12); color: var(--brand-teal); font-weight: 600; }
-  .ci-chip img { width: 32px; height: 32px; object-fit: contain; border-radius: .4rem; flex-shrink: 0; }
+  .ci-section__subtitle { font-size: .82rem; color: var(--ink-60); line-height: 1.5; margin: .3rem 0 0; }
+  .ci-section__body { display: flex; flex-direction: column; gap: 1rem; }
 
-  .ci-machine-search {
-    display: flex; align-items: center; gap: .5rem;
-    margin-top: .85rem; padding: .55rem .8rem;
-    background: var(--bg-raise); border: 1px solid var(--bg-line);
-    border-radius: .7rem; color: var(--ink-35);
+  /* field = one labelled input */
+  .ci-field { display: flex; flex-direction: column; gap: .4rem; }
+  .ci-field__label {
+    font-family: var(--ff-mono); font-size: .68rem; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-35);
   }
-  .ci-machine-search input {
-    flex: 1; border: none; background: none; outline: none;
-    color: var(--ink); font-family: var(--ff-body); font-size: .85rem; padding: 0;
-  }
-  .ci-machine-search input::placeholder { color: var(--ink-35); }
-
-  /* composer */
-  .ci-composer {
-    display: flex; align-items: flex-end; gap: .6rem;
-    padding: 1rem clamp(1.25rem, 2.5vw, 2rem);
-    border-top: 1px solid var(--bg-line);
-    background: var(--bg-surface);
-  }
-  .ci-composer__field { flex: 1; min-width: 0; }
-  .ci-composer input, .ci-composer textarea, .ci-composer select {
+  .ci-field__label em { color: var(--brand-teal); font-style: normal; margin-left: .2rem; }
+  .ci-field__hint { font-size: .76rem; color: var(--ink-35); line-height: 1.5; }
+  .ci-field input, .ci-field textarea, .ci-field select {
     width: 100%; background: var(--bg-raise); border: 1px solid var(--bg-line);
-    border-radius: .7rem; color: var(--ink); padding: .7rem .9rem;
+    border-radius: .6rem; color: var(--ink); padding: .7rem .9rem;
     font-family: var(--ff-body); font-size: .9rem; outline: none;
   }
-  .ci-composer input:focus, .ci-composer textarea:focus, .ci-composer select:focus { border-color: var(--brand-teal); }
-  .ci-composer textarea { resize: none; }
-  .ci-composer__grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
-  @media (max-width: 520px) { .ci-composer__grid { grid-template-columns: 1fr; } }
-  .ci-composer__send {
-    flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%;
-    background: var(--brand-teal); color: #04211e; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: transform .15s, background .15s;
-  }
-  .ci-composer__send:hover:not(:disabled) { background: var(--brand-teal-dk); transform: scale(1.05); }
-  .ci-composer__send:disabled { opacity: .35; cursor: default; }
+  .ci-field input:focus, .ci-field textarea:focus, .ci-field select:focus { border-color: var(--brand-teal); }
+  .ci-field textarea { resize: vertical; min-height: 5.5rem; }
+  .ci-field select { cursor: pointer; }
 
-  .ci-qty { display: inline-flex; align-items: center; border: 1px solid var(--bg-line); border-radius: .7rem; overflow: hidden; background: var(--bg-raise); }
+  .ci-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 560px) { .ci-row { grid-template-columns: 1fr; } }
+
+  /* machine/model picker */
+  .ci-picker { display: flex; flex-direction: column; gap: 1rem; }
+  .ci-picker__row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 560px) { .ci-picker__row { grid-template-columns: 1fr; } }
+
+  /* qty stepper */
+  .ci-qty { display: inline-flex; align-items: center; border: 1px solid var(--bg-line); border-radius: .6rem; overflow: hidden; background: var(--bg-raise); width: fit-content; }
   .ci-qty__btn { width: 40px; height: 40px; background: none; border: none; color: var(--ink-60); font-size: 1.1rem; cursor: pointer; }
   .ci-qty__btn:hover { background: rgba(43,191,179,.12); color: var(--brand-teal); }
-  .ci-qty__val { min-width: 44px; text-align: center; font-family: var(--ff-mono); font-size: .9rem; color: var(--ink); }
+  .ci-qty__val { min-width: 48px; text-align: center; font-family: var(--ff-mono); font-size: .9rem; color: var(--ink); }
 
-  /* insight side panel — a live "diagnostics readout" feel: corner
-     brackets, a scanning sweep, animated spec bars instead of plain
-     rows, all built from the site's existing teal/industrial palette
-     rather than a generic sci-fi neon look. */
+  /* an already-added machine/part entry */
+  .ci-entry {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+    background: var(--bg-raise); border: 1px solid var(--bg-line);
+    border-radius: .7rem; padding: .8rem .9rem;
+  }
+  .ci-entry__title { font-size: .88rem; color: var(--ink); font-weight: 600; line-height: 1.4; }
+  .ci-entry__meta { font-size: .78rem; color: var(--ink-60); line-height: 1.5; margin-top: .2rem; }
+  .ci-entry__remove {
+    flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+    background: none; border: 1px solid var(--bg-line); color: var(--ink-35);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .ci-entry__remove:hover { border-color: #ef4444; color: #ef4444; }
+
+  .ci-add-another {
+    display: inline-flex; align-items: center; gap: .45rem; width: fit-content;
+    padding: .6rem 1rem; border-radius: .6rem;
+    border: 1px dashed var(--brand-teal); background: rgba(43,191,179,.06);
+    color: var(--brand-teal); font-size: .85rem; cursor: pointer;
+    transition: background .15s;
+  }
+  .ci-add-another:hover { background: rgba(43,191,179,.12); }
+
+  /* submit bar pinned at the bottom of the form */
+  .ci-submit-bar {
+    display: flex; justify-content: flex-end; padding-top: .5rem;
+  }
+  .ci-submit-bar__btn {
+    padding: .8rem 1.75rem; border-radius: .7rem; border: none;
+    background: var(--brand-teal); color: #04211e; cursor: pointer;
+    font-family: var(--ff-display); font-size: .95rem; letter-spacing: .02em;
+    transition: background .15s;
+  }
+  .ci-submit-bar__btn:hover:not(:disabled) { background: var(--brand-teal-dk); }
+  .ci-submit-bar__btn:disabled { opacity: .4; cursor: default; }
+
+  /* insight side panel — a live spec-sheet readout: corner brackets and
+     animated spec bars, built from the site's existing teal/industrial
+     palette rather than a generic sci-fi neon look. */
   .ci-insight {
     position: sticky; top: 116px;
     background: var(--bg-surface); border: 1px solid var(--bg-line);
@@ -574,14 +612,13 @@ export const chatStyles = `
   .ci-success__title { font-family: var(--ff-display); font-size: clamp(1.8rem,3.6vw,2.6rem); color: var(--ink); margin: 0 0 .85rem; line-height: .98; }
   .ci-success__sub { color: var(--ink-60); font-size: .92rem; line-height: 1.7; max-width: 40ch; margin: 0 auto; }
   .ci-error {
-    margin: 0 clamp(1.25rem, 2.5vw, 2rem) 1rem; padding: .75rem 1rem;
+    padding: .75rem 1rem;
     background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3);
     border-radius: .6rem; color: #fca5a5; font-size: .85rem;
   }
 
-  /* editable review card */
+  /* editable review section */
   .ci-review-card {
-    margin: 0 clamp(1.25rem, 2.5vw, 2rem) 1.25rem;
     background: var(--bg-raise); border: 1px solid var(--bg-line);
     border-radius: 1rem; padding: 1.25rem;
   }
@@ -625,7 +662,7 @@ export const chatStyles = `
   .ci-review-card__send:hover:not(:disabled) { background: var(--brand-teal-dk); }
   .ci-review-card__send:disabled { opacity: .5; cursor: default; }
 
-  /* photo gallery — used both inline in the composer and in the review card */
+  /* photo gallery — used both inline in a field and in the review section */
   .ci-gallery { display: flex; flex-wrap: wrap; gap: .5rem; }
   .ci-gallery__item {
     position: relative; width: 56px; height: 56px; border-radius: .5rem;

@@ -1,7 +1,71 @@
 "use client";
+import { useEffect, useRef } from "react";
 import { openAshaChat } from "@/components/ChatWidget";
 
 export default function AiAgentBanner() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const eyebrowRef = useRef<HTMLDivElement>(null);
+  const titleRef   = useRef<HTMLHeadingElement>(null);
+  const descRef    = useRef<HTMLParagraphElement>(null);
+  const ctaRef     = useRef<HTMLButtonElement>(null);
+  const hintRef    = useRef<HTMLDivElement>(null);
+
+  // ── "Signal Handshake" scroll-in — GSAP + ScrollTrigger ──────────────
+  useEffect(() => {
+    let ctx: { revert?: () => void } = {};
+
+    (async () => {
+      const { gsap }          = await import("gsap");
+      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+      const { SplitText }     = await import("gsap/SplitText");
+      gsap.registerPlugin(ScrollTrigger, SplitText);
+
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      ctx = gsap.context(() => {
+        const st = () => ({ trigger: sectionRef.current, start: "top 82%", toggleActions: "play none none none" });
+
+        if (reduced) {
+          gsap.set([eyebrowRef.current, titleRef.current, descRef.current, ctaRef.current, hintRef.current], { opacity: 1, clearProps: "all" });
+          return;
+        }
+
+        // Eyebrow — clip-path wipe, dot included as one unit
+        gsap.fromTo(eyebrowRef.current,
+          { clipPath: "inset(0 100% 0 0)", opacity: 0 },
+          { clipPath: "inset(0 0% 0 0)", opacity: 1, duration: 0.5, ease: "power2.out", scrollTrigger: st() }
+        );
+
+        // Title — word-by-word rise, staggered response after the eyebrow
+        if (titleRef.current) {
+          const split = new SplitText(titleRef.current, { type: "words" });
+          gsap.fromTo(split.words,
+            { y: "60%", opacity: 0 },
+            { y: "0%", opacity: 1, duration: 0.6, ease: "power3.out", stagger: 0.05, delay: 0.15, scrollTrigger: st() }
+          );
+        }
+
+        // Description
+        gsap.fromTo(descRef.current,
+          { y: 16, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", delay: 0.35, scrollTrigger: st() }
+        );
+
+        // CTA + hint
+        gsap.fromTo(ctaRef.current,
+          { scale: 0.92, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(1.4)", delay: 0.45, scrollTrigger: st() }
+        );
+        gsap.fromTo(hintRef.current,
+          { opacity: 0 },
+          { opacity: 1, duration: 0.4, ease: "power1.out", delay: 0.6, scrollTrigger: st() }
+        );
+      }, sectionRef);
+    })();
+
+    return () => { ctx.revert?.(); };
+  }, []);
+
   return (
     <>
       <style suppressHydrationWarning>{`
@@ -64,6 +128,7 @@ export default function AiAgentBanner() {
           font-size: clamp(1.8rem,3.6vw,2.7rem);
           line-height: 1.1; letter-spacing: -.02em;
           color: #f8fafc; margin: 0 0 0.9rem;
+          overflow: hidden; /* clips SplitText word-rise cleanly */
         }
         .aib__title em {
           font-style: normal;
@@ -113,30 +178,30 @@ export default function AiAgentBanner() {
         }
       `}</style>
 
-      <section className="aib" aria-label="Meet ASHA, our AI machine assistant">
+      <section ref={sectionRef} className="aib" data-no-anim aria-label="Meet ASHA, our AI machine assistant">
         <div className="aib__blob aib__blob--1" aria-hidden="true" />
         <div className="aib__blob aib__blob--2" aria-hidden="true" />
         <div className="aib__blob aib__blob--3" aria-hidden="true" />
 
         <div className="aib__content">
           <div className="aib__text">
-            <div className="aib__eyebrow">AI Machine Assistant</div>
-            <h2 className="aib__title">
+            <div ref={eyebrowRef} className="aib__eyebrow">AI Machine Assistant</div>
+            <h2 ref={titleRef} className="aib__title">
               Ask <em>ASHA</em> — get the right machine, instantly.
             </h2>
-            <p className="aib__desc">
+            <p ref={descRef} className="aib__desc">
               Our AI agent knows every machine in this catalogue. Ask a spec question, compare models side by side, or get routed straight to the page you need — available around the clock.
             </p>
           </div>
 
           <div className="aib__actions">
-            <button className="aib__cta" onClick={() => openAshaChat()}>
+            <button ref={ctaRef} className="aib__cta" onClick={() => openAshaChat()}>
               Talk to ASHA
               <span className="aib__cta-icon" aria-hidden="true">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v11H8l-4 4V4z" stroke="#080e0d" strokeWidth="2" strokeLinejoin="round" /></svg>
               </span>
             </button>
-            <div className="aib__hint">&#10094; No forms. Just ask. <span>&#10095;</span></div>
+            <div ref={hintRef} className="aib__hint">&#10094; No forms. Just ask. <span>&#10095;</span></div>
           </div>
         </div>
       </section>

@@ -607,7 +607,7 @@ export default function ClientJourney() {
         <div className="cj__blob cj__blob--3" aria-hidden />
 
         <div className="cj__wrap">
-          <div className="cj__head" ref={headRef}>
+          <div className="cj__head" ref={headRef} data-no-anim>
             <div>
               <div className="cj__label">End-to-end process</div>
               <h2 className="cj__title">
@@ -674,6 +674,7 @@ export default function ClientJourney() {
           <div
             className="cj__detail"
             ref={detailRef}
+            data-no-anim
             style={{ "--accent": curAccent.hex } as React.CSSProperties}
           >
             <div className="cj__col-icon">

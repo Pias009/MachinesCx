@@ -57,7 +57,7 @@ export default function SiteNav() {
         /* ── Base bar ── */
         .sn {
           position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-          height: 72px; width: 100%; overflow-x: hidden;
+          height: 72px; width: 100%; overflow: hidden;
           background: rgba(15,23,42,0.72);
           backdrop-filter: blur(20px) saturate(1.6);
           border-bottom: 1px solid rgba(255,255,255,0.07);
@@ -219,8 +219,9 @@ export default function SiteNav() {
         .sn__dd-list {
           flex: 1; padding: 0.6rem 0;
           max-height: 65vh; overflow-y: auto; scrollbar-width: none;
+          -ms-overflow-style: none;
         }
-        .sn__dd-list::-webkit-scrollbar { display: none; }
+        .sn__dd-list::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
         .sn__dd-item {
           display: flex; align-items: center; gap: 1rem;
@@ -306,6 +307,7 @@ export default function SiteNav() {
           overflow-y: auto;
           overflow-x: hidden;
           scrollbar-width: none;
+          -ms-overflow-style: none;
           transform: translateX(-100%);
           visibility: hidden;
           pointer-events: none;
@@ -313,7 +315,7 @@ export default function SiteNav() {
                       visibility 0s linear 0.32s;
           box-shadow: 8px 0 40px rgba(0,0,0,0.8);
         }
-        .sn__mobile::-webkit-scrollbar { display: none; }
+        .sn__mobile::-webkit-scrollbar { display: none; width: 0; height: 0; }
         .sn__mobile--open {
           transform: translateX(0);
           visibility: visible;

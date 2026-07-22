@@ -338,7 +338,7 @@ export default function NewsStrip() {
           gap: "1.5rem", flexWrap: "wrap",
           marginBottom: "clamp(2rem,4vw,3rem)",
         }}>
-          <div>
+          <div data-no-anim>
             <span ref={eyebrowRef} className="eyebrow" style={{
               marginBottom: "0.9rem", color: "var(--brand-red)",
               display: "inline-flex", alignItems: "center", gap: "0.75rem",
@@ -397,6 +397,7 @@ export default function NewsStrip() {
 
         <div
           ref={trackRef}
+          data-no-anim
           style={{
             display: "flex",
             gap: "clamp(0.75rem,1.5vw,1.25rem)",

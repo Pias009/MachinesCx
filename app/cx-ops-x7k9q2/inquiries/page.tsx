@@ -15,6 +15,7 @@ interface InquiryRow {
   message: string;
   machines: InquiryMachine[];
   parts: InquiryPart[];
+  images: string[];
   status: "new" | "read" | "replied";
   replies: InquiryReply[];
   source: string;
@@ -360,6 +361,21 @@ function InquiryDetail({ inquiry, onReplied }: { inquiry: InquiryRow; onReplied:
           <div key={k} style={rowStyle}><span style={keyStyle}>{k}</span><span style={valStyle}>{v}</span></div>
         ))}
       </div>
+
+      {/* customer-attached reference photos (talk-to-engineer, not tied to a machine/part) */}
+      {(inquiry.images ?? []).length > 0 && (
+        <div>
+          <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 700, color: "var(--brand-teal)", marginBottom: "0.6rem" }}>Attached photos</div>
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            {inquiry.images.map((src, j) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <a key={j} href={src} target="_blank" rel="noopener noreferrer">
+                <img src={src} alt="" style={{ width: 72, height: 72, objectFit: "cover", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)" }} />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* machines requested (talk-to-engineer & direct — and legacy rows with no inquiryType, which default to "direct") */}
       {inquiry.inquiryType !== "parts" && inquiry.machines.length > 0 && (

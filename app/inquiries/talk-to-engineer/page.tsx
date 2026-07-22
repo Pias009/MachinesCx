@@ -4,9 +4,10 @@ import { useSearchParams } from "next/navigation";
 import { families, familiesByCategory, type ProductFamily, type CategorySlug } from "@/lib/products";
 import TransitionLink from "@/components/TransitionLink";
 import {
-  Field, Section, MachinePicker, EntryRow, AddAnotherButton,
+  Field, Section, MachineGrid, EntryRow, AddAnotherButton,
   InsightPanel, ReviewCard, ImageGallery, chatStyles, type ReviewRow,
 } from "@/components/ChatInquiry";
+import AiReviewChat from "@/components/AiReviewChat";
 
 interface MachineEntry {
   family: ProductFamily;
@@ -56,6 +57,7 @@ function TalkToEngineerInner() {
   const generalFileRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<FormData>(EMPTY_FORM);
+  const [step, setStep] = useState<"build" | "ai-review" | "details">("build");
   const [reviewing, setReviewing] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
@@ -101,6 +103,23 @@ function TalkToEngineerInner() {
   }
   function removePart(i: number) {
     setParts(prev => prev.filter((_, j) => j !== i));
+  }
+
+  // ── AI review chat callbacks — the chat suggests changes, these apply them
+  //    to the same machines/parts state the manual form above edits. ──────
+  function aiAddMachine(slug: string) {
+    const fam = families.find(f => f.slug === slug);
+    if (!fam) return;
+    setMachines(prev => [...prev, { family: fam, modelIdx: 0, qty: 1, notes: "" }]);
+  }
+  function aiEditMachineQty(index: number, qty: number) {
+    setMachines(prev => prev.map((m, i) => (i === index ? { ...m, qty: Math.max(1, qty) } : m)));
+  }
+  function aiEditMachineNotes(index: number, notes: string) {
+    setMachines(prev => prev.map((m, i) => (i === index ? { ...m, notes } : m)));
+  }
+  function aiAddPart(name: string) {
+    setParts(prev => [...prev, { name, machine: "", machineSlug: "", quantity: 1, notes: "", images: [] }]);
   }
 
   async function uploadImage(file: File) {
@@ -202,18 +221,26 @@ function TalkToEngineerInner() {
       <div className="ci-page">
         <div className="ci-shell">
           <div>
-            <TransitionLink href="/inquiries">
-              <span className="ci-back">
+            {step === "build" ? (
+              <TransitionLink href="/inquiries">
+                <span className="ci-back">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  All inquiry types
+                </span>
+              </TransitionLink>
+            ) : (
+              <button type="button" className="ci-back" onClick={() => setStep(step === "details" ? "ai-review" : "build")}>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                All inquiry types
-              </span>
-            </TransitionLink>
+                {step === "details" ? "Back to AI review" : "Back to machines & parts"}
+              </button>
+            )}
             <div className="ci-heading">
               <div className="ci-eyebrow">Talk to an Engineer</div>
               <h1 className="ci-h1">Build your <em>custom order.</em></h1>
             </div>
 
             <div className="ci-convo">
+              {step === "build" && (
               <Section
                 title="Machines"
                 subtitle="Add as many as you need. Not sure yet? Skip this and mention it in your message below."
@@ -227,7 +254,7 @@ function TalkToEngineerInner() {
                   />
                 ))}
 
-                <MachinePicker
+                <MachineGrid
                   category={draftCat}
                   onCategory={setDraftCat}
                   family={draftFamily}
@@ -254,7 +281,9 @@ function TalkToEngineerInner() {
                   </>
                 )}
               </Section>
+              )}
 
+              {step === "build" && (
               <Section
                 title="Parts"
                 subtitle="Add specific parts to this order — optional."
@@ -304,7 +333,39 @@ function TalkToEngineerInner() {
                   </>
                 )}
               </Section>
+              )}
 
+              {step === "build" && (
+                <div className="ci-submit-bar">
+                  <button
+                    type="button"
+                    className="ci-submit-bar__btn"
+                    disabled={!!draftFamily || !!partName.trim()}
+                    onClick={() => setStep("ai-review")}
+                  >
+                    Continue →
+                  </button>
+                </div>
+              )}
+
+              {step === "ai-review" && (
+                <Section
+                  title="AI review"
+                  subtitle="Optional — our AI looks over what you've picked, asks a couple of questions, and can suggest additions."
+                >
+                  <AiReviewChat
+                    machines={machines.map(m => ({ slug: m.family.slug, name: m.family.name, series: m.family.series, model: m.family.models[m.modelIdx], qty: m.qty, notes: m.notes }))}
+                    parts={parts.map(p => ({ name: p.name, machine: p.machine, quantity: p.quantity, notes: p.notes }))}
+                    onAddMachine={aiAddMachine}
+                    onEditMachineQty={aiEditMachineQty}
+                    onEditMachineNotes={aiEditMachineNotes}
+                    onAddPart={aiAddPart}
+                    onContinue={() => setStep("details")}
+                  />
+                </Section>
+              )}
+
+              {step === "details" && (
               <Section title="Your details">
                 <div className="ci-row">
                   <Field label="Name" required>
@@ -336,10 +397,11 @@ function TalkToEngineerInner() {
                 <input ref={generalFileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" style={{ display: "none" }}
                   onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f); e.target.value = ""; }} />
               </Section>
+              )}
 
-              {sendError && <div className="ci-error" role="alert">{sendError}</div>}
+              {step === "details" && sendError && <div className="ci-error" role="alert">{sendError}</div>}
 
-              {!reviewing ? (
+              {step === "details" && (!reviewing ? (
                 <div className="ci-submit-bar">
                   <button
                     type="button"
@@ -361,7 +423,7 @@ function TalkToEngineerInner() {
                   onSend={send}
                   sending={sending}
                 />
-              )}
+              ))}
             </div>
           </div>
 

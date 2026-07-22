@@ -504,10 +504,18 @@
 html {
   scroll-behavior: auto;
   /* no overflow-x:hidden on html — kills iOS scroll */
-  scrollbar-width: none;      /* Firefox */
-  -ms-overflow-style: none;   /* old Edge/IE */
+  scrollbar-width: thin;              /* Firefox */
+  scrollbar-color: rgba(43,191,179,0.45) transparent;
 }
-html::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+html::-webkit-scrollbar { width: 10px; height: 10px; }
+html::-webkit-scrollbar-track { background: transparent; }
+html::-webkit-scrollbar-thumb {
+  background: rgba(43,191,179,0.45);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+html::-webkit-scrollbar-thumb:hover { background: rgba(43,191,179,0.7); background-clip: padding-box; }
 body {
   background: var(--bg-base);
   color: var(--ink);
@@ -518,10 +526,7 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;  /* body clips horizontal, html scrolls vertically */
   max-width: 100vw;
-  scrollbar-width: none;      /* Firefox */
-  -ms-overflow-style: none;   /* old Edge/IE */
 }
-body::-webkit-scrollbar { display: none; } /* Chrome/Safari/Brave */
 a { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
 button { cursor: pointer; border: none; background: none; font: inherit; }

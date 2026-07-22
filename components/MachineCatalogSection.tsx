@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useCms } from "@/lib/useCms";
 import type { ProductFamily } from "@/lib/products";
@@ -91,6 +91,83 @@ export default function MachineCatalogSection() {
       ? Object.fromEntries(cms.items.map(i => [i.slug, { stat: i.stat, label: i.label }]))
       : DEFAULT_KEY_SPECS;
   const [activeTab, setActiveTab] = useState<string>("all");
+  // true only while showing the tab state active on first paint — used to
+  // opt those cards out of the CSS mount-fade in favor of the GSAP entrance.
+  // Any tab click sets this false permanently, restoring normal CSS-driven
+  // re-renders for every later filter change.
+  const isFirstTabRef = useRef(true);
+
+  const sectionRef = useRef<HTMLElement>(null);
+  const badgeRef   = useRef<HTMLDivElement>(null);
+  const titleRef   = useRef<HTMLHeadingElement>(null);
+  const subRef     = useRef<HTMLParagraphElement>(null);
+  const tabsRef    = useRef<HTMLDivElement>(null);
+  const gridRef    = useRef<HTMLDivElement>(null);
+
+  // ── "Batch Load" scroll-in — GSAP + ScrollTrigger, fires once ever ──
+  // Deliberately NOT dependent on activeTab: individual .mcs-card nodes
+  // are unmounted/remounted on every tab-filter click (different
+  // `filtered` array), so this entrance binds only to the stable grid
+  // container and plays exactly once. Subsequent tab-driven re-renders
+  // are handled entirely by the existing CSS `mcs-fade-in` keyframe.
+  useEffect(() => {
+    let ctx: { revert?: () => void } = {};
+
+    (async () => {
+      const { gsap }          = await import("gsap");
+      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+      gsap.registerPlugin(ScrollTrigger);
+
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      ctx = gsap.context(() => {
+        if (gridRef.current?.hasAttribute("data-mcs-batch-done")) return;
+
+        const els = [badgeRef.current, titleRef.current, subRef.current, tabsRef.current];
+        if (reduced) {
+          gsap.set(els, { opacity: 1, clearProps: "all" });
+          if (gridRef.current) gsap.set(gridRef.current.querySelectorAll(".mcs-card"), { opacity: 1, clearProps: "all" });
+          gridRef.current?.setAttribute("data-mcs-batch-done", "");
+          return;
+        }
+
+        const trigger = { trigger: gridRef.current, start: "top 88%", toggleActions: "play none none none" };
+
+        gsap.fromTo(badgeRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out", scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
+        gsap.fromTo(titleRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power3.out", delay: 0.08, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
+        gsap.fromTo(subRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out", delay: 0.18, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
+
+        // Tabs — border draws in, then each tab lifts with a fast stagger
+        if (tabsRef.current) {
+          gsap.fromTo(tabsRef.current, { scaleX: 0 }, { scaleX: 1, transformOrigin: "left center", duration: 0.5, ease: "power2.out", delay: 0.25, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
+          const tabs = Array.from(tabsRef.current.querySelectorAll<HTMLElement>(".mcs__tab"));
+          gsap.fromTo(tabs, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power2.out", stagger: 0.04, delay: 0.35, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
+        }
+
+        // Grid — column-major "batch load" stagger, auto-detects columns from layout.
+        // Mark the grid done immediately (not just on tween start) so the CSS
+        // mount-fade is suppressed for the same frame GSAP takes over — otherwise
+        // the still-running CSS animation's computed opacity can briefly outrank
+        // GSAP's inline opacity:0 before the tween begins.
+        if (gridRef.current) {
+          gridRef.current.setAttribute("data-mcs-batch-done", "");
+          const cards = Array.from(gridRef.current.querySelectorAll<HTMLElement>(".mcs-card"));
+          gsap.fromTo(cards,
+            { opacity: 0, y: 18, scale: 0.97 },
+            {
+              opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power2.out",
+              stagger: { each: 0.05, grid: "auto", from: "start", axis: "x" },
+              scrollTrigger: trigger,
+            }
+          );
+        }
+
+        ScrollTrigger.refresh();
+      }, sectionRef);
+    })();
+
+    return () => { ctx.revert?.(); };
+  }, []);
 
   const totalFamilies = allFamilies.length;
   const totalModels   = allFamilies.reduce((n, f) => n + f.models.length, 0);
@@ -399,6 +476,15 @@ export default function MachineCatalogSection() {
         .mcs-card {
           animation: mcs-fade-in .32s cubic-bezier(0.16,1,0.3,1) both;
         }
+        /* The very first paint's cards are owned entirely by the one-time
+           GSAP "Batch Load" entrance (see the effect above) — this class
+           opts them out of the CSS mount-fade so the two never fight over
+           opacity. Every later tab-filter re-render mounts fresh card
+           elements without this class, so they keep using the CSS fade
+           exactly as before. */
+        .mcs-card--gsap-entrance {
+          animation: none;
+        }
         @media (prefers-reduced-motion: reduce) {
           .mcs-card { animation: none; }
         }
@@ -432,7 +518,7 @@ export default function MachineCatalogSection() {
         [data-theme="light"] .mcs-card__stat-label { color: rgba(13,34,32,0.7); }
       `}</style>
 
-      <section className="mcs" aria-label="Machine catalogue">
+      <section ref={sectionRef} className="mcs" data-no-anim aria-label="Machine catalogue">
         <div className="mcs__blob mcs__blob--t" aria-hidden="true" />
         <div className="mcs__blob mcs__blob--b" aria-hidden="true" />
         <div className="mcs__wrap">
@@ -440,12 +526,12 @@ export default function MachineCatalogSection() {
           {/* ── Header ── */}
           <div className="mcs__header">
             <div>
-              <div className="mcs__badge">Machine Catalogue</div>
-              <h2 className="mcs__title">
+              <div ref={badgeRef} className="mcs__badge">Machine Catalogue</div>
+              <h2 ref={titleRef} className="mcs__title">
                 {cms.headline1}<br />
                 <em>{cms.headline2}</em>
               </h2>
-              <p className="mcs__sub">
+              <p ref={subRef} className="mcs__sub">
                 {totalFamilies} product families · {totalModels}+ models · shipped to 80+ countries
               </p>
             </div>
@@ -458,12 +544,12 @@ export default function MachineCatalogSection() {
           </div>
 
           {/* ── Category tabs ── */}
-          <div className="mcs__tabs" role="tablist" aria-label="Filter by category">
+          <div ref={tabsRef} className="mcs__tabs" role="tablist" aria-label="Filter by category">
             <button
               role="tab"
               aria-selected={activeTab === "all"}
               className={`mcs__tab${activeTab === "all" ? " mcs__tab--active" : ""}`}
-              onClick={() => setActiveTab("all")}
+              onClick={() => { isFirstTabRef.current = false; setActiveTab("all"); }}
             >
               All machines
               <span className="mcs__tab-count">{tabCounts.all}</span>
@@ -476,7 +562,7 @@ export default function MachineCatalogSection() {
                   role="tab"
                   aria-selected={activeTab === slug}
                   className={`mcs__tab${activeTab === slug ? ` mcs__tab--active mcs__tab--${slug}` : ""}`}
-                  onClick={() => setActiveTab(slug)}
+                  onClick={() => { isFirstTabRef.current = false; setActiveTab(slug); }}
                   style={activeTab === slug ? { borderBottomColor: col?.accent } : undefined}
                 >
                   <span className="mcs__tab-icon">{CAT_ICONS[slug] ?? ""}</span>
@@ -488,7 +574,7 @@ export default function MachineCatalogSection() {
           </div>
 
           {/* ── Machine grid ── */}
-          <div className="mcs__grid" role="tabpanel">
+          <div ref={gridRef} className="mcs__grid" role="tabpanel">
             {filtered.map((fam, i) => {
               const spec = KEY_SPECS[fam.slug];
               const col = CAT_COLORS[fam.category];
@@ -496,7 +582,7 @@ export default function MachineCatalogSection() {
                 <Link
                   key={fam.slug}
                   href={`/products/${fam.category}/${fam.slug}`}
-                  className={`mcs-card mcs-card--${fam.category}`}
+                  className={`mcs-card mcs-card--${fam.category}${isFirstTabRef.current ? " mcs-card--gsap-entrance" : ""}`}
                   style={{ animationDelay: `${Math.min(i, 15) * 28}ms` }}
                 >
                   <div className="mcs-card__bg" aria-hidden="true">

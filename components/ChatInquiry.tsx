@@ -2,7 +2,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import type { ProductFamily, CategorySlug } from "@/lib/products";
-import { categories, familiesByCategory, familyImage } from "@/lib/products";
+import { categories, familiesByCategory, familyImage, familyBySlug } from "@/lib/products";
 
 /** Extracts a numeric magnitude from a spec value string (e.g. "2,100 mm"
  *  -> 2100) so it can be drawn as a bar. Non-numeric values (e.g. bag
@@ -96,6 +96,71 @@ export function MachinePicker({
             {options.map(f => <option key={f.slug} value={f.slug}>{f.name}</option>)}
           </select>
         </Field>
+      </div>
+
+      {family && family.models.length > 1 && (
+        <Field label="Model">
+          <select value={modelIdx} onChange={e => onModel(parseInt(e.target.value, 10))}>
+            {family.models.map((m, i) => <option key={m} value={i}>{m}</option>)}
+          </select>
+        </Field>
+      )}
+    </div>
+  );
+}
+
+/** Visual machine picker — a category tab bar above a scrollable grid of
+ *  machine cards (photo + name + series). Click a card to select it, then
+ *  a model dropdown appears beneath the grid if that family has more than
+ *  one model. Replaces plain dropdowns with something visitors can browse. */
+export function MachineGrid({
+  category, onCategory, family, onFamily, modelIdx, onModel,
+}: {
+  category: CategorySlug;
+  onCategory: (c: CategorySlug) => void;
+  family: ProductFamily | null;
+  onFamily: (f: ProductFamily | null) => void;
+  modelIdx: number;
+  onModel: (i: number) => void;
+}) {
+  const options = familiesByCategory(category);
+
+  return (
+    <div className="ci-mgrid">
+      <div className="ci-mgrid__tabs">
+        {categories.map(c => (
+          <button
+            key={c.slug}
+            type="button"
+            className={`ci-mgrid__tab${category === c.slug ? " ci-mgrid__tab--on" : ""}`}
+            onClick={() => { onCategory(c.slug as CategorySlug); onFamily(null); }}
+          >
+            {c.name}
+          </button>
+        ))}
+      </div>
+
+      <div className="ci-mgrid__grid">
+        {options.map(f => (
+          <button
+            key={f.slug}
+            type="button"
+            className={`ci-mgrid__card${family?.slug === f.slug ? " ci-mgrid__card--on" : ""}`}
+            onClick={() => { onFamily(f); onModel(0); }}
+          >
+            <span className="ci-mgrid__card-img-wrap">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={familyImage(f)} alt="" className="ci-mgrid__card-img" />
+              {family?.slug === f.slug && (
+                <span className="ci-mgrid__card-check">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="#04211e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </span>
+              )}
+            </span>
+            <span className="ci-mgrid__card-series">{f.series}</span>
+            <span className="ci-mgrid__card-name">{f.name}</span>
+          </button>
+        ))}
       </div>
 
       {family && family.models.length > 1 && (
@@ -455,6 +520,49 @@ export const chatStyles = `
   .ci-picker__row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
   @media (max-width: 560px) { .ci-picker__row { grid-template-columns: 1fr; } }
 
+  /* visual machine grid — category tabs + photo cards */
+  .ci-mgrid { display: flex; flex-direction: column; gap: 1rem; }
+  .ci-mgrid__tabs {
+    display: flex; gap: .4rem; flex-wrap: wrap;
+    padding-bottom: .25rem; border-bottom: 1px solid var(--bg-line);
+  }
+  .ci-mgrid__tab {
+    padding: .45rem .85rem; border-radius: 999px; border: 1px solid var(--bg-line);
+    background: var(--bg-raise); color: var(--ink-60);
+    font-family: var(--ff-mono); font-size: .68rem; letter-spacing: .04em;
+    cursor: pointer; transition: border-color .15s, color .15s, background .15s;
+    white-space: nowrap;
+  }
+  .ci-mgrid__tab:hover { color: var(--ink); }
+  .ci-mgrid__tab--on { background: var(--brand-teal); border-color: var(--brand-teal); color: #04211e; font-weight: 700; }
+  .ci-mgrid__grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .75rem;
+    max-height: 380px; overflow-y: auto; padding: .15rem;
+  }
+  .ci-mgrid__card {
+    display: flex; flex-direction: column; text-align: left;
+    background: var(--bg-raise); border: 1.5px solid var(--bg-line);
+    border-radius: .875rem; padding: .6rem; cursor: pointer;
+    transition: border-color .15s, transform .15s;
+  }
+  .ci-mgrid__card:hover { border-color: rgba(43,191,179,.5); transform: translateY(-2px); }
+  .ci-mgrid__card--on { border-color: var(--brand-teal); background: rgba(43,191,179,.06); }
+  .ci-mgrid__card-img-wrap {
+    position: relative; width: 100%; aspect-ratio: 4/3; border-radius: .6rem;
+    overflow: hidden; background: var(--bg-surface); margin-bottom: .55rem;
+  }
+  .ci-mgrid__card-img { width: 100%; height: 100%; object-fit: contain; }
+  .ci-mgrid__card-check {
+    position: absolute; top: .35rem; right: .35rem;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--brand-teal); display: flex; align-items: center; justify-content: center;
+  }
+  .ci-mgrid__card-series {
+    font-family: var(--ff-mono); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--brand-teal); margin-bottom: .15rem;
+  }
+  .ci-mgrid__card-name { font-size: .82rem; color: var(--ink); line-height: 1.3; font-weight: 600; }
+
   /* qty stepper */
   .ci-qty { display: inline-flex; align-items: center; border: 1px solid var(--bg-line); border-radius: .6rem; overflow: hidden; background: var(--bg-raise); width: fit-content; }
   .ci-qty__btn { width: 40px; height: 40px; background: none; border: none; color: var(--ink-60); font-size: 1.1rem; cursor: pointer; }
@@ -661,6 +769,105 @@ export const chatStyles = `
   }
   .ci-review-card__send:hover:not(:disabled) { background: var(--brand-teal-dk); }
   .ci-review-card__send:disabled { opacity: .5; cursor: default; }
+
+  /* AI review chat — pre-submission conversational step */
+  .ci-aichat {
+    background: var(--bg-raise); border: 1px solid var(--bg-line);
+    border-radius: 1rem; padding: 1.25rem;
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  .ci-aichat--intro {
+    align-items: center; text-align: center; padding: 2rem 1.5rem;
+    gap: .85rem;
+  }
+  .ci-aichat__intro-icon {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: rgba(43,191,179,.1); border: 1px solid rgba(43,191,179,.25);
+    color: var(--brand-teal);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ci-aichat__intro-title { font-family: var(--ff-display); font-size: 1.2rem; color: var(--ink); margin: 0; line-height: 1.3; }
+  .ci-aichat__intro-sub { font-size: .85rem; color: var(--ink-60); line-height: 1.6; max-width: 42ch; margin: 0; }
+  .ci-aichat__intro-actions { display: flex; gap: .75rem; flex-wrap: wrap; justify-content: center; margin-top: .4rem; }
+  .ci-aichat__start-btn {
+    padding: .75rem 1.5rem; border-radius: .7rem; border: none;
+    background: var(--brand-teal); color: #04211e; cursor: pointer;
+    font-family: var(--ff-display); font-size: .9rem; letter-spacing: .02em;
+    transition: background .15s;
+  }
+  .ci-aichat__start-btn:hover { background: var(--brand-teal-dk); }
+  .ci-aichat__skip-btn {
+    padding: .75rem 1.25rem; border-radius: .7rem; border: 1px solid var(--bg-line);
+    background: none; color: var(--ink-60); cursor: pointer; font-size: .85rem;
+    transition: border-color .15s, color .15s;
+  }
+  .ci-aichat__skip-btn:hover { border-color: var(--ink-35); color: var(--ink); }
+
+  .ci-aichat__thread {
+    display: flex; flex-direction: column; gap: .85rem;
+    max-height: 420px; overflow-y: auto; padding-right: .25rem;
+  }
+  .ci-aichat__msg { display: flex; flex-direction: column; gap: .5rem; max-width: 88%; }
+  .ci-aichat__msg--assistant { align-items: flex-start; align-self: flex-start; }
+  .ci-aichat__msg--user { align-items: flex-end; align-self: flex-end; }
+  .ci-aichat__bubble {
+    padding: .7rem .9rem; border-radius: .9rem;
+    font-size: .87rem; line-height: 1.55;
+  }
+  .ci-aichat__msg--assistant .ci-aichat__bubble {
+    background: var(--bg-surface); border: 1px solid var(--bg-line); color: var(--ink);
+    border-bottom-left-radius: .25rem;
+  }
+  .ci-aichat__msg--user .ci-aichat__bubble {
+    background: var(--brand-teal); color: #04211e; font-weight: 500;
+    border-bottom-right-radius: .25rem;
+  }
+  .ci-aichat__bubble--typing { display: flex; gap: .3rem; align-items: center; padding: .85rem 1rem; }
+  .ci-aichat__bubble--typing span {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--ink-35);
+    animation: ci-aichat-pulse 1.1s cubic-bezier(0.22,1,0.36,1) infinite;
+  }
+  .ci-aichat__bubble--typing span:nth-child(2) { animation-delay: .15s; }
+  .ci-aichat__bubble--typing span:nth-child(3) { animation-delay: .3s; }
+  @keyframes ci-aichat-pulse { 0%, 60%, 100% { opacity: .35; } 30% { opacity: 1; } }
+
+  .ci-aichat__suggestions { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .ci-aichat__sug {
+    padding: .45rem .8rem; border-radius: .6rem;
+    border: 1px dashed var(--brand-teal); background: rgba(43,191,179,.06);
+    color: var(--brand-teal); font-size: .78rem; cursor: pointer;
+    transition: background .15s;
+  }
+  .ci-aichat__sug:hover:not(:disabled) { background: rgba(43,191,179,.14); }
+  .ci-aichat__sug--applied {
+    border-style: solid; border-color: var(--bg-line); background: var(--bg-surface);
+    color: var(--ink-35); cursor: default;
+  }
+
+  .ci-aichat__composer { display: flex; gap: .6rem; align-items: center; }
+  .ci-aichat__composer input {
+    flex: 1; background: var(--bg-surface); border: 1px solid var(--bg-line);
+    border-radius: .7rem; color: var(--ink); padding: .7rem .9rem;
+    font-family: var(--ff-body); font-size: .87rem; outline: none;
+  }
+  .ci-aichat__composer input:focus { border-color: var(--brand-teal); }
+  .ci-aichat__composer input:disabled { opacity: .6; }
+  .ci-aichat__send {
+    flex-shrink: 0; width: 40px; height: 40px; border-radius: .7rem;
+    background: var(--brand-teal); color: #04211e; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .ci-aichat__send:hover:not(:disabled) { background: var(--brand-teal-dk); }
+  .ci-aichat__send:disabled { opacity: .4; cursor: default; }
+
+  .ci-aichat__footer { display: flex; justify-content: flex-end; padding-top: .25rem; border-top: 1px solid var(--bg-line); }
+  .ci-aichat__continue-btn {
+    padding: .65rem 1.1rem; border-radius: .6rem; border: 1px solid var(--bg-line);
+    background: none; color: var(--ink); cursor: pointer; font-size: .85rem;
+    transition: border-color .15s, color .15s;
+  }
+  .ci-aichat__continue-btn:hover { border-color: var(--brand-teal); color: var(--brand-teal); }
 
   /* photo gallery — used both inline in a field and in the review section */
   .ci-gallery { display: flex; flex-wrap: wrap; gap: .5rem; }

@@ -406,7 +406,7 @@ export default function TrustSection() {
         <div className="ts-inner">
 
           {/* Header */}
-          <div className="ts-header" ref={headerRef}>
+          <div className="ts-header" ref={headerRef} data-no-anim>
             <div>
               <div className="ts-kicker">Why manufacturers choose us</div>
               <h2 className="ts-headline">

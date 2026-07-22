@@ -247,7 +247,7 @@ export default function FlexoStrip() {
           </span>
 
           <div className="fls-title-clip">
-            <h2 ref={titleRef} style={{
+            <h2 ref={titleRef} data-no-anim style={{
               fontFamily:"var(--ff-display)",
               fontSize:"clamp(3rem,6vw,6rem)",
               color:"var(--ink)", lineHeight:.88,

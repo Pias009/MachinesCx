@@ -3,12 +3,11 @@ import type { ChatMessageDoc } from "@/models/ChatSession";
 import type { LocalAnswer } from "@/lib/localAgent";
 
 const BASE = "https://openrouter.ai/api/v1";
-const PRIMARY_MODEL = process.env.OPENROUTER_MODEL || "liquid/lfm-2.5-1.2b-instruct:free";
+const PRIMARY_MODEL = process.env.OPENROUTER_MODEL || "google/gemma-4-26b-a4b-it:free";
 const FALLBACK_MODELS = [
-  "meta-llama/llama-3.3-70b-instruct:free",
-  "meta-llama/llama-3.2-3b-instruct:free",
-  "google/gemma-4-26b-a4b-it:free",
-  "qwen/qwen3-coder:free",
+  "openai/gpt-oss-20b:free",
+  "nvidia/nemotron-3-super-120b-a12b:free",
+  "nvidia/nemotron-3-nano-30b-a3b:free",
 ];
 
 function getApiKey(): string {
@@ -67,9 +66,9 @@ export async function answerWithOpenRouter(
     ...messages.map(m => ({ role: m.role as "user" | "assistant", content: m.content })),
   ];
 
-  // Try the primary model + at most one fallback to keep latency tolerable.
-  // If both fail, the route falls back to the local engine instead.
-  const modelsToTry = [PRIMARY_MODEL, ...FALLBACK_MODELS.filter(m => m !== PRIMARY_MODEL)].slice(0, 2);
+  // Try the primary model plus up to 2 fallbacks to keep latency tolerable.
+  // If all fail, the route falls back to the local engine instead.
+  const modelsToTry = [PRIMARY_MODEL, ...FALLBACK_MODELS.filter(m => m !== PRIMARY_MODEL)].slice(0, 3);
   let lastErr: unknown;
 
   const TIMEOUT_MS = 7000;
@@ -127,9 +126,10 @@ export async function answerWithOpenRouter(
     }
 
     lastErr = res.status;
-    const detail = await res.text().catch(() => "");
-    // Only retry on rate-limit / provider errors; bail on bad request/auth
-    if (res.status !== 429 && res.status !== 502 && res.status !== 503) {
+    // 404 means this model id is gone/renamed on OpenRouter's end — try the
+    // next model instead of aborting; only bail early on auth failures.
+    if (res.status === 401 || res.status === 403) {
+      const detail = await res.text().catch(() => "");
       throw new Error(`OpenRouter ${res.status}: ${detail.slice(0, 300)}`);
     }
   }

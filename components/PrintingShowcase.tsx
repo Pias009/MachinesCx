@@ -56,6 +56,77 @@ export default function PrintingShowcase() {
   const [mounted,     setMounted]     = useState(false);
   const pendingRef    = useRef<number | null>(null);
   const sectionElRef  = useRef<HTMLElement>(null);
+  const brandLabelRef = useRef<HTMLHeadingElement>(null);
+  const counterRef    = useRef<HTMLDivElement>(null);
+  const carouselWrapRef = useRef<HTMLDivElement>(null);
+  const infoBlockRef   = useRef<HTMLDivElement>(null);
+  const ctaBlockRef    = useRef<HTMLDivElement>(null);
+
+  // ── "Press Warm-Up" scroll-in — GSAP + ScrollTrigger, fires once ──
+  // Animates a dedicated wrapper div per carousel item (never the role()-
+  // positioned item div itself, which the existing carousel/auto-advance
+  // logic owns exclusively via inline transform/filter) so this entrance
+  // can never fight the carousel's own repositioning or the 3s auto-advance
+  // interval. Never touches .ps-ghost-wrap or its children — that stays
+  // fully owned by the existing CSS rise-in/drop-out keyframes.
+  useEffect(() => {
+    let ctx: { revert?: () => void } = {};
+
+    (async () => {
+      const { gsap }          = await import("gsap");
+      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+      gsap.registerPlugin(ScrollTrigger);
+
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      ctx = gsap.context(() => {
+        const itemWraps = carouselWrapRef.current
+          ? Array.from(carouselWrapRef.current.querySelectorAll<HTMLElement>("[data-ps-carousel-item]"))
+          : [];
+
+        const els = [brandLabelRef.current, counterRef.current, infoBlockRef.current, ctaBlockRef.current, ...itemWraps];
+        if (reduced) {
+          gsap.set(els, { opacity: 1, clearProps: "all" });
+          return;
+        }
+
+        const trigger = { trigger: sectionElRef.current, start: "top 70%", toggleActions: "play none none none" };
+
+        // Brand label — masked rise (parent has overflow:hidden)
+        gsap.fromTo(brandLabelRef.current, { y: "100%" }, { y: "0%", duration: 0.7, ease: "expo.out", scrollTrigger: trigger });
+        gsap.fromTo(counterRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", delay: 0.15, scrollTrigger: trigger });
+
+        // Carousel — back-to-front settle: back role first, sides next, center last with overshoot
+        itemWraps.forEach(wrap => {
+          const roleAttr = wrap.getAttribute("data-ps-carousel-item");
+          const isCenter = roleAttr === "center";
+          const isBack = roleAttr === "back";
+          const delay = isBack ? 0 : (isCenter ? 0.36 : 0.18);
+          gsap.fromTo(wrap,
+            { opacity: 0, scale: 0.85, filter: "blur(6px)" },
+            {
+              opacity: 1, scale: 1, filter: "blur(0px)",
+              duration: isCenter ? 0.6 : 0.5,
+              ease: isCenter ? "back.out(1.2)" : "power2.out",
+              delay,
+              scrollTrigger: trigger,
+            }
+          );
+        });
+
+        // Bottom info block + CTA — rise in after the carousel settles
+        gsap.fromTo(infoBlockRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", delay: 0.55, scrollTrigger: trigger });
+        gsap.fromTo(ctaBlockRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", delay: 0.65, scrollTrigger: trigger });
+      }, sectionElRef);
+    })();
+
+    return () => { ctx.revert?.(); };
+    // Depends on `mounted`: this component renders `null` until mounted
+    // becomes true (see the `if (!mounted) return null` below), so refs
+    // aren't attached to real DOM nodes until that first true render —
+    // running this effect only on `mounted` (not on initial `[]` mount)
+    // ensures gsap.context() actually has real elements to work with.
+  }, [mounted]);
 
   useEffect(() => {
     setMounted(true);
@@ -183,7 +254,7 @@ export default function PrintingShowcase() {
   if (!mounted) return null;
 
   return (
-    <section ref={sectionElRef} data-ps style={{
+    <section ref={sectionElRef} data-ps data-no-anim style={{
       backgroundColor: "var(--bg-base)",
       fontFamily:      "var(--ff-body)",
       position:        "relative",
@@ -324,20 +395,22 @@ export default function PrintingShowcase() {
           gap:           "0.4rem",
           pointerEvents: "none",
         }}>
-          <h2 className="ps-brand-label" style={{
-            fontFamily:    "var(--ff-display)",
-            fontSize:      "clamp(2.4rem, 6vw, 4.5rem)",
-            letterSpacing: "0.01em",
-            lineHeight:    1,
-            color:         "#fff",
-            textAlign:     "center",
-            margin:        0,
-          }}>
-            Flexo{" "}
-            <span style={{ color: "var(--brand-teal)" }}>Printing Lines</span>
-          </h2>
+          <div style={{ overflow: "hidden" }}>
+            <h2 ref={brandLabelRef} className="ps-brand-label" style={{
+              fontFamily:    "var(--ff-display)",
+              fontSize:      "clamp(2.4rem, 6vw, 4.5rem)",
+              letterSpacing: "0.01em",
+              lineHeight:    1,
+              color:         "#fff",
+              textAlign:     "center",
+              margin:        0,
+            }}>
+              Flexo{" "}
+              <span style={{ color: "var(--brand-teal)" }}>Printing Lines</span>
+            </h2>
+          </div>
 
-          <div className="ps-counter" style={{
+          <div ref={counterRef} className="ps-counter" style={{
             fontFamily:    "var(--ff-mono)",
             fontSize:      "clamp(0.66rem, 1vw, 0.68rem)",
             letterSpacing: "0.2em",
@@ -357,35 +430,42 @@ export default function PrintingShowcase() {
         </div>
 
         {/* ── Carousel ── */}
-        <div style={{ position: "absolute", inset: 0, zIndex: 3 }}>
+        <div ref={carouselWrapRef} style={{ position: "absolute", inset: 0, zIndex: 3 }}>
           {MACHINES.map((machine, i) => (
             <div key={machine.model} style={itemStyle(role(i))}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={machine.src}
-                alt={machine.model}
-                draggable={false}
-                style={{
-                  width:          "100%",
-                  height:         "100%",
-                  objectFit:      "contain",
-                  objectPosition: "bottom center",
-                  userSelect:     "none",
-                  filter: role(i) === "center"
-                    ? `drop-shadow(0 12px 32px rgba(0,0,0,0.95))
-                       drop-shadow(0 32px 64px rgba(0,0,0,0.6))
-                       drop-shadow(0 0 60px ${machine.accent}33)`
-                    : `drop-shadow(0 6px 16px rgba(0,0,0,0.85))
-                       brightness(0.85)`,
-                  transition: `filter ${DURATION}ms ${ease}`,
-                }}
-              />
+              {/* Entrance-only wrapper — GSAP exclusively owns this element's
+                  scale/opacity/filter for the one-time "Press Warm-Up" reveal.
+                  The parent div above keeps its own role-based positioning
+                  transform untouched, so the entrance can never fight the
+                  carousel's auto-advance repositioning. */}
+              <div data-ps-carousel-item={role(i)} style={{ width: "100%", height: "100%" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={machine.src}
+                  alt={machine.model}
+                  draggable={false}
+                  style={{
+                    width:          "100%",
+                    height:         "100%",
+                    objectFit:      "contain",
+                    objectPosition: "bottom center",
+                    userSelect:     "none",
+                    filter: role(i) === "center"
+                      ? `drop-shadow(0 12px 32px rgba(0,0,0,0.95))
+                         drop-shadow(0 32px 64px rgba(0,0,0,0.6))
+                         drop-shadow(0 0 60px ${machine.accent}33)`
+                      : `drop-shadow(0 6px 16px rgba(0,0,0,0.85))
+                         brightness(0.85)`,
+                    transition: `filter ${DURATION}ms ${ease}`,
+                  }}
+                />
+              </div>
             </div>
           ))}
         </div>
 
         {/* ── Bottom-left info + nav ── */}
-        <div style={{
+        <div ref={infoBlockRef} style={{
           position:  "absolute",
           bottom:    "clamp(1.5rem,5vh,4rem)",
           left:      "clamp(1rem,6vw,5rem)",
@@ -487,7 +567,7 @@ export default function PrintingShowcase() {
         </div>
 
         {/* ── Bottom-right CTA ── */}
-        <div style={{
+        <div ref={ctaBlockRef} style={{
           position:  "absolute",
           bottom:    "clamp(1.5rem,5vh,4rem)",
           right:     "clamp(1rem,4vw,2.5rem)",

@@ -1,14 +1,14 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import AetherBtn from "@/components/AetherBtn";
-import { articles, articleBySlug } from "@/lib/news";
+import { articleBySlug, renderNewsBody } from "@/lib/news";
+import { getLiveNews } from "@/lib/liveNews";
 
-export function generateStaticParams() {
-  return articles.map((a) => ({ slug: a.slug }));
-}
+export const dynamic = "force-dynamic";
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const a = articleBySlug(params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const { articles } = await getLiveNews();
+  const a = articleBySlug({ articles }, params.slug);
   return {
     title: a ? `${a.title} — Ashal Innomach` : "Article",
     description: a?.excerpt,
@@ -21,8 +21,9 @@ function fmt(iso: string) {
   });
 }
 
-export default function ArticlePage({ params }: { params: { slug: string } }) {
-  const a = articleBySlug(params.slug);
+export default async function ArticlePage({ params }: { params: { slug: string } }) {
+  const { articles } = await getLiveNews();
+  const a = articleBySlug({ articles }, params.slug);
   if (!a) notFound();
 
   const related = articles
@@ -146,7 +147,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
 
         {/* body */}
         <div className="article-body"
-          dangerouslySetInnerHTML={{ __html: a.body }}
+          dangerouslySetInnerHTML={{ __html: renderNewsBody(a.body) }}
         />
 
         {/* sidebar */}

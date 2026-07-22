@@ -8,6 +8,7 @@ import productionLineJson from "@/data/production-line.json";
 import flexoStripJson from "@/data/flexo-strip.json";
 import printingShowcaseJson from "@/data/printing-showcase.json";
 import scrollhomeBagsJson from "@/data/scrollhome-bags.json";
+import newsJson from "@/data/news.json";
 
 export const CMS_SECTIONS = [
   "products",
@@ -17,6 +18,7 @@ export const CMS_SECTIONS = [
   "flexo-strip",
   "printing-showcase",
   "scrollhome-bags",
+  "news",
 ] as const;
 
 export type CmsSection = (typeof CMS_SECTIONS)[number];
@@ -35,6 +37,7 @@ const BUNDLED_DEFAULTS: Record<CmsSection, unknown> = {
   "flexo-strip": flexoStripJson,
   "printing-showcase": printingShowcaseJson,
   "scrollhome-bags": scrollhomeBagsJson,
+  "news": newsJson,
 };
 
 export async function readSection(section: CmsSection): Promise<unknown> {

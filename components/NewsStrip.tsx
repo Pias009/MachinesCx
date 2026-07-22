@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { latestArticles } from "@/lib/news";
-
-const news = latestArticles(6);
+import { latestArticles, type NewsArticle } from "@/lib/news";
 
 function fmt(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", {
@@ -13,14 +11,24 @@ function fmt(iso: string) {
 }
 
 export default function NewsStrip() {
+  const [news, setNews] = useState<NewsArticle[]>([]);
   const sectionRef  = useRef<HTMLElement>(null);
   const trackRef    = useRef<HTMLDivElement>(null);
   const headRef     = useRef<HTMLDivElement>(null);
   const eyebrowRef  = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    let alive = true;
+    fetch("/api/content/news")
+      .then(r => r.json())
+      .then(j => { if (alive && Array.isArray(j.articles)) setNews(latestArticles(j, 6)); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
+  useEffect(() => {
     const track = trackRef.current;
-    if (!track) return;
+    if (!track || news.length === 0) return;
     const el: HTMLDivElement = track;
 
     /* ── State ── */
@@ -182,7 +190,7 @@ export default function NewsStrip() {
       window.removeEventListener("mousemove",  onMouseMove);
       window.removeEventListener("mouseup",    onMouseUp);
     };
-  }, []);
+  }, [news]);
 
   /* Duplicate cards for seamless loop */
   const doubled = [...news, ...news];

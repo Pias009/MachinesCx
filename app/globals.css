@@ -2072,9 +2072,6 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 /* ── Products list page ── */
 @media (max-width: 640px) {
   .cat-hero { padding-top: 4.5rem; padding-bottom: 1.5rem; }
-  .mcs__grid { grid-template-columns: 1fr !important; }
-  .mcs-card--stat { min-height: 0 !important; }
-  .mcs-stat__num  { font-size: clamp(2.5rem, 8vw, 4rem) !important; }
 }
 
 /* =============================================================================

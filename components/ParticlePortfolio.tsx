@@ -76,9 +76,13 @@ export default function ParticlePortfolio(){
   const sectionRef = useRef<HTMLDivElement>(null!);
   const scrollRef  = useRef(0);
   const [active, setActive] = useState(0);
+  const [mobileOpen, setMobileOpen] = useState<number | null>(null);
 
-  const cms   = useCms<{ items: Step[] }>("production-line", { items: DEFAULT_STEPS });
-  const STEPS = cms.items && cms.items.length ? cms.items : DEFAULT_STEPS;
+  const cms = useCms<{ items: Step[] }>("production-line", { items: DEFAULT_STEPS });
+  // skip unfinished admin drafts (blank slug/name) so a half-filled CMS
+  // entry can never surface a broken card on the live site
+  const cmsItems = (cms.items ?? []).filter(it => it.slug && it.name);
+  const STEPS = cmsItems.length ? cmsItems : DEFAULT_STEPS;
   const N     = STEPS.length;
 
   const heroRef  = useRef<HTMLDivElement>(null);
@@ -347,9 +351,9 @@ export default function ParticlePortfolio(){
       {/* ══ MOBILE ══ */}
       <div className="pp-mobile pp-mobile-wrap" style={{
         background:"#070f0e", borderTop:"1px solid rgba(43,191,179,0.12)",
-        padding:"3.5rem 1.25rem 3rem", position:"relative", overflow:"hidden",
+        padding:"2.5rem 1.25rem 2.25rem", position:"relative", overflow:"hidden",
       }}>
-        <div style={{marginBottom:"2.25rem"}}>
+        <div style={{marginBottom:"1.5rem"}}>
           <div style={{fontFamily:"var(--ff-mono)",fontSize:"0.62rem",letterSpacing:"0.2em",
             textTransform:"uppercase",marginBottom:"0.75rem",
             background:"linear-gradient(135deg, var(--brand-teal), var(--brand-amber))",
@@ -366,48 +370,64 @@ export default function ParticlePortfolio(){
           </p>
         </div>
 
-        <div style={{position:"relative", paddingLeft:"1.9rem"}}>
-          <div aria-hidden style={{position:"absolute",left:"12px",top:"14px",bottom:"14px",width:"2px",
+        <div style={{position:"relative", paddingLeft:"1.6rem"}}>
+          <div aria-hidden style={{position:"absolute",left:"10px",top:"12px",bottom:"12px",width:"2px",
             background:"linear-gradient(to bottom, var(--brand-teal), rgba(43,191,179,0.15))"}}/>
           {STEPS.map((s,i)=>{
             const a = accentFor(i);
             const stepCss = { "--accent": a.hex } as React.CSSProperties;
+            const isOpen = mobileOpen === i;
             return (
-            <div key={s.slug} style={{position:"relative", marginBottom: i<N-1 ? "1.1rem" : 0, ...stepCss}}>
-              <div style={{position:"absolute",left:"-1.9rem",top:"1rem",width:"26px",height:"26px",
+            <div key={s.slug} style={{position:"relative", marginBottom: i<N-1 ? "0.5rem" : 0, ...stepCss}}>
+              <div style={{position:"absolute",left:"-1.6rem",top:"0.7rem",width:"20px",height:"20px",
                 borderRadius:"50%",background:a.hex,color:"#04211e",
-                fontFamily:"var(--ff-mono)",fontSize:"0.66rem",fontWeight:700,
+                fontFamily:"var(--ff-mono)",fontSize:"0.58rem",fontWeight:700,
                 display:"flex",alignItems:"center",justifyContent:"center",zIndex:1}}>
                 {i+1}
               </div>
               <div className="pp-mstep" style={{
                 background:"rgba(6,14,13,0.9)", border:`1px solid ${rgbFromHex(a.hex, 0.14)}`,
-                padding:"1rem 1.1rem",
               }}>
-                <div style={{display:"flex",gap:"1rem",alignItems:"center",marginBottom:"0.6rem"}}>
+                <button
+                  type="button"
+                  onClick={() => setMobileOpen(isOpen ? null : i)}
+                  aria-expanded={isOpen}
+                  style={{
+                    display:"flex", width:"100%", gap:"0.65rem", alignItems:"center",
+                    padding:"0.6rem 0.8rem", background:"none", border:"none", cursor:"pointer",
+                    textAlign:"left", font:"inherit", color:"inherit",
+                  }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={s.img} alt={s.name} className="pp-mstep__img"
-                    style={{width:"88px",height:"64px",objectFit:"contain",flexShrink:0,
+                    style={{width:"44px",height:"34px",objectFit:"contain",flexShrink:0,
                       filter:"drop-shadow(0 3px 10px rgba(0,0,0,0.7))"}}/>
-                  <div>
-                    <div className="pp-mstep__stage" style={{fontFamily:"var(--ff-display)",fontSize:"1.15rem",
-                      color:"#fff",lineHeight:1,textTransform:"uppercase",marginBottom:"0.25rem"}}>{s.stage}</div>
-                    <div className="pp-mstep__name" style={{fontFamily:"var(--ff-mono)",fontSize:"0.62rem",
+                  <div style={{flex:1, minWidth:0}}>
+                    <div className="pp-mstep__stage" style={{fontFamily:"var(--ff-display)",fontSize:"0.9rem",
+                      color:"#fff",lineHeight:1,textTransform:"uppercase",marginBottom:"0.2rem"}}>{s.stage}</div>
+                    <div className="pp-mstep__name" style={{fontFamily:"var(--ff-mono)",fontSize:"0.55rem",
                       letterSpacing:"0.1em",textTransform:"uppercase",color:"rgba(255,255,255,0.65)"}}>{s.name}</div>
                   </div>
-                </div>
-                <p className="pp-mstep__role" style={{fontFamily:"var(--ff-body)",fontSize:"0.82rem",
-                  color:"rgba(255,255,255,0.65)",lineHeight:1.6,margin:"0 0 0.6rem"}}>{s.role}</p>
-                <div style={{display:"flex",flexWrap:"wrap",gap:"0.4rem"}}>
-                  {s.quality.map(([l,v])=>(
-                    <span key={l} className="pp-mstep__q" style={{
-                      fontFamily:"var(--ff-mono)",fontSize:"0.62rem",letterSpacing:"0.06em",
-                      border:`1px solid ${rgbFromHex(a.hex, 0.2)}`,padding:"0.28rem 0.55rem",
-                      color:"rgba(255,255,255,0.72)"}}>
-                      {l}: <span style={{color:a.hex}}>{v}</span>
-                    </span>
-                  ))}
-                </div>
+                  <svg width="12" height="12" viewBox="0 0 10 6" fill="none" stroke={a.hex} strokeWidth="1.5"
+                    style={{flexShrink:0, transform: isOpen ? "rotate(180deg)" : "none", transition:"transform 0.2s ease"}}>
+                    <path d="M1 1l4 4 4-4" />
+                  </svg>
+                </button>
+                {isOpen && (
+                  <div style={{padding:"0 0.8rem 0.65rem"}}>
+                    <p className="pp-mstep__role" style={{fontFamily:"var(--ff-body)",fontSize:"0.74rem",
+                      color:"rgba(255,255,255,0.65)",lineHeight:1.5,margin:"0 0 0.45rem"}}>{s.role}</p>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:"0.3rem"}}>
+                      {s.quality.map(([l,v])=>(
+                        <span key={l} className="pp-mstep__q" style={{
+                          fontFamily:"var(--ff-mono)",fontSize:"0.56rem",letterSpacing:"0.05em",
+                          border:`1px solid ${rgbFromHex(a.hex, 0.2)}`,padding:"0.2rem 0.45rem",
+                          color:"rgba(255,255,255,0.72)"}}>
+                          {l}: <span style={{color:a.hex}}>{v}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           );})}

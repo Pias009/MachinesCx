@@ -440,27 +440,30 @@ export default function HeroSplash() {
           .hs__canvas { display: none; }
         }
 
-        /* ── responsive: collapse arch into a scrolling rail ── */
+        /* ── responsive: same half-circle arch, scaled down — the nodes
+           keep their absolute left/top % positions from the ARCH array
+           (set inline per-node), so the curve shape is identical to
+           desktop, just smaller ── */
         @media(max-width: 900px){
           .hs { min-height: auto; }
+          /* the dot/line network is dense relative to a narrow viewport and
+             clutters the headline — fade it down instead of showing it full
+             strength like on desktop, where it has room to breathe */
+          .hs__canvas { opacity: .18; }
           .hs__arch {
-            display: flex;
-            gap: 1rem;
-            min-height: 0;
-            padding: 0 1.25rem 3rem;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
+            min-height: clamp(220px, 62vw, 340px);
+            padding: 0 0.5rem 2rem;
           }
-          .hs__arch-line { display: none; }
-          .hs__node {
-            position: relative !important;
-            left: auto !important; top: auto !important;
-            transform: none !important;
-            flex: 0 0 auto;
-            width: clamp(150px, 44vw, 220px);
-            scroll-snap-align: center;
-          }
+          /* smaller cards so the 8%/29%/50%/71%/92% arch positions don't
+             overlap on a narrow viewport — the base clamp() floor (118px)
+             is desktop-sized, so this needs !important to win over the
+             inline width set per-node from the ARCH array. ~21vw at the
+             apex (scale 1) matches the ~21% gap between arch positions,
+             so adjacent cards touch edge-to-edge instead of overlapping */
+          .hs__node { width: calc(21vw * var(--hs-node-scale, 1)) !important; }
+          .hs__node-meta { padding: .5rem .55rem; }
+          .hs__node-series { font-size: .5rem; }
+          .hs__node-name { font-size: .66rem; -webkit-line-clamp: 1; }
         }
         @media(max-width:640px){
           .hs__main { padding: clamp(5.5rem, 14vh, 7rem) 1.25rem 1.25rem; }
@@ -543,7 +546,8 @@ export default function HeroSplash() {
                   left: `${pos.left}%`,
                   top: `${pos.top}%`,
                   width: `calc(clamp(118px, 14vw, 205px) * ${pos.scale})`,
-                }}
+                  "--hs-node-scale": pos.scale,
+                } as React.CSSProperties}
               >
                 <div className="hs__node-inner">
                   <Link

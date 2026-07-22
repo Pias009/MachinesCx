@@ -642,6 +642,108 @@ function FieldControl({ field, value, item, onChange, onItemChange }: {
         </div>
       );
     }
+    case "links": {
+      const rows = (value as { label: string; url: string }[]) ?? [];
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+          {rows.map((r, i) => (
+            <div key={i} style={{ display: "flex", gap: "0.5rem" }}>
+              <input style={{ ...inputStyle, flex: 1 }} value={r.label} placeholder="Link text (e.g. Full specification)"
+                onChange={e => { const n = rows.map(x => ({ ...x })); n[i].label = e.target.value; onChange(n); }} />
+              <input style={{ ...inputStyle, flex: 1 }} value={r.url} placeholder="/products/... or https://…"
+                onChange={e => { const n = rows.map(x => ({ ...x })); n[i].url = e.target.value; onChange(n); }} />
+              <button type="button" style={dangerBtn} onClick={() => onChange(rows.filter((_, j) => j !== i))}>Remove</button>
+            </div>
+          ))}
+          <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }} onClick={() => onChange([...rows, { label: "", url: "" }])}>+ Add link</button>
+        </div>
+      );
+    }
+    case "richtext": {
+      // block-based article body — {kind: heading|paragraph|list, text?, items?}[].
+      // Admins compose the article from typed blocks instead of writing HTML;
+      // renderNewsBody() in lib/news.ts turns this into the same p/h3/ul markup
+      // the article page already styles. **bold** is the only inline syntax.
+      type Block =
+        | { kind: "heading"; text: string }
+        | { kind: "paragraph"; text: string }
+        | { kind: "list"; items: string[] };
+      const rows = (value as Block[]) ?? [];
+      const BLOCK_LABEL: Record<Block["kind"], string> = {
+        heading: "Heading",
+        paragraph: "Paragraph",
+        list: "Bullet list",
+      };
+      const move = (i: number, dir: -1 | 1) => {
+        const j = i + dir;
+        if (j < 0 || j >= rows.length) return;
+        const n = rows.map(x => ({ ...x }));
+        [n[i], n[j]] = [n[j], n[i]];
+        onChange(n);
+      };
+      const setKind = (i: number, kind: Block["kind"]) => {
+        const n = rows.map(x => ({ ...x }));
+        n[i] = kind === "list" ? { kind, items: [""] } : { kind, text: "" };
+        onChange(n);
+      };
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          {rows.map((b, i) => (
+            <div key={i} style={{ borderRadius: 12, background: "rgba(255,255,255,0.04)", padding: "0.9rem", display: "flex", flexDirection: "column", gap: "0.6rem", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <select style={{ ...inputStyle, flex: "0 0 180px" }} value={b.kind}
+                  onChange={e => setKind(i, e.target.value as Block["kind"])}>
+                  {(Object.keys(BLOCK_LABEL) as Block["kind"][]).map(k => <option key={k} value={k} style={{ color: "#e0e0e0", background: "#111" }}>{BLOCK_LABEL[k]}</option>)}
+                </select>
+                <div style={{ flex: 1 }} />
+                <button type="button" title="Move up" style={iconBtn} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
+                <button type="button" title="Move down" style={iconBtn} disabled={i === rows.length - 1} onClick={() => move(i, 1)}>↓</button>
+                <button type="button" style={dangerBtn} onClick={() => onChange(rows.filter((_, j) => j !== i))}>Remove</button>
+              </div>
+
+              {b.kind === "heading" && (
+                <input style={inputStyle} value={b.text} placeholder="Heading text"
+                  onChange={e => { const n = rows.map(x => ({ ...x })); (n[i] as Block & { kind: "heading" }).text = e.target.value; onChange(n); }} />
+              )}
+
+              {b.kind === "paragraph" && (
+                <textarea style={{ ...inputStyle, minHeight: 90, resize: "vertical" }} value={b.text} placeholder="Paragraph text — use **bold** for emphasis"
+                  onChange={e => { const n = rows.map(x => ({ ...x })); (n[i] as Block & { kind: "paragraph" }).text = e.target.value; onChange(n); }} />
+              )}
+
+              {b.kind === "list" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                  {b.items.map((item, ii) => (
+                    <div key={ii} style={{ display: "flex", gap: "0.5rem" }}>
+                      <input style={{ ...inputStyle, flex: 1 }} value={item} placeholder="List item — use **bold** for emphasis"
+                        onChange={e => {
+                          const n = rows.map(x => ({ ...x })) as Block[];
+                          const items = [...(n[i] as Block & { kind: "list" }).items];
+                          items[ii] = e.target.value;
+                          (n[i] as Block & { kind: "list" }).items = items;
+                          onChange(n);
+                        }} />
+                      <button type="button" style={dangerBtn} onClick={() => {
+                        const n = rows.map(x => ({ ...x })) as Block[];
+                        (n[i] as Block & { kind: "list" }).items = (n[i] as Block & { kind: "list" }).items.filter((_, j) => j !== ii);
+                        onChange(n);
+                      }}>✕</button>
+                    </div>
+                  ))}
+                  <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }} onClick={() => {
+                    const n = rows.map(x => ({ ...x })) as Block[];
+                    (n[i] as Block & { kind: "list" }).items = [...(n[i] as Block & { kind: "list" }).items, ""];
+                    onChange(n);
+                  }}>+ Add item</button>
+                </div>
+              )}
+            </div>
+          ))}
+          <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }}
+            onClick={() => onChange([...rows, { kind: "paragraph", text: "" }])}>+ Add block</button>
+        </div>
+      );
+    }
     default:
       return null;
   }
@@ -696,12 +798,53 @@ function ItemFieldsPanel({ collection, item, onFieldChange, onFieldItemChange }:
   );
 }
 
+// ── category tiles — shown in place of the flat family list so 30+
+// products across categories don't have to be scrolled through as one
+// long list. Only used for the `families` collection (has a `category`
+// field); every other collection keeps the plain flat list. ──
+const CATEGORY_ICON: Record<string, string> = {
+  "film-blowing": "🎞️",
+  "bag-making": "🛍️",
+  "recycling": "♻️",
+  "printing": "🖨️",
+};
+function CategoryTiles({ categories, items, onSelect }: {
+  categories: Item[];
+  items: Item[];
+  onSelect: (slug: string) => void;
+}) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1rem" }}>
+      {categories.map(cat => {
+        const slug = String(cat.slug ?? "");
+        const count = items.filter(f => f.category === slug).length;
+        return (
+          <button key={slug} type="button" onClick={() => onSelect(slug)} style={{
+            textAlign: "left", padding: "1.5rem", borderRadius: 14,
+            background: "#111", border: "1px solid rgba(255,255,255,0.07)",
+            cursor: "pointer", color: "#fff",
+          }}>
+            <div style={{ fontSize: "1.8rem", marginBottom: "0.75rem" }}>{CATEGORY_ICON[slug] ?? "📦"}</div>
+            <div style={{ fontFamily: "var(--ff-display)", fontSize: "1.15rem", marginBottom: "0.35rem" }}>
+              {String(cat.name ?? slug)}
+            </div>
+            <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: "rgba(255,255,255,0.5)" }}>
+              {count} {count === 1 ? "machine" : "machines"}
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── main editor ────────────────────────────────────────────
 export default function Editor({ schema }: { schema: SectionSchema }) {
   const [data, setData] = useState<Json | null>(null);
   const [openIdx, setOpenIdx] = useState<Record<string, number>>({});
   const [status, setStatus] = useState<"idle" | "dirty" | "saving" | "saved" | "error">("idle");
   const [errMsg, setErrMsg] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -786,27 +929,62 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
 
       {/* collections */}
       {schema.collections.map(col => {
-        const items = ((data[col.key] as Item[]) ?? []);
+        const allItems = ((data[col.key] as Item[]) ?? []);
         const open = openIdx[col.key] ?? -1;
+        const isFamilies = col.key === "families";
+        const categoryList = isFamilies ? ((data.categories as Item[]) ?? []) : [];
+
+        // products: show category tiles until one is picked, then only that
+        // category's machines — with real indices mapped back into allItems
+        // so move/delete/edit still act on the right item in the full array.
+        const visibleIndices = isFamilies && activeCategory
+          ? allItems.reduce<number[]>((acc, it, idx) => { if (it.category === activeCategory) acc.push(idx); return acc; }, [])
+          : allItems.map((_, idx) => idx);
+        const items = visibleIndices.map(idx => allItems[idx]);
+
+        if (isFamilies && !activeCategory) {
+          return (
+            <section key={col.key} style={{ marginBottom: "2.5rem" }}>
+              <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.3rem", color: "#fff", margin: "0 0 1rem" }}>
+                {col.label} <span style={{ color: "rgba(255,255,255,0.4)", fontFamily: "var(--ff-body)", fontSize: "1rem", fontWeight: 400 }}>({allItems.length})</span>
+              </h2>
+              <CategoryTiles categories={categoryList} items={allItems} onSelect={setActiveCategory} />
+            </section>
+          );
+        }
+
+        const activeCategoryName = isFamilies && activeCategory
+          ? String(categoryList.find(c => c.slug === activeCategory)?.name ?? activeCategory)
+          : "";
+
         return (
           <section key={col.key} style={{ marginBottom: "2.5rem" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem", gap: "0.75rem", flexWrap: "wrap" }}>
               <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.3rem", color: "#fff", margin: 0 }}>
-                {col.label} <span style={{ color: "rgba(255,255,255,0.4)", fontFamily: "var(--ff-body)", fontSize: "1rem", fontWeight: 400 }}>({items.length})</span>
+                {isFamilies && (
+                  <button type="button" onClick={() => { setActiveCategory(null); setOpenIdx(o => ({ ...o, [col.key]: -1 })); }}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: "var(--brand-teal)", fontFamily: "var(--ff-body)", fontSize: "0.9rem", fontWeight: 700, marginRight: "0.9rem", verticalAlign: "middle" }}>
+                    ← Back to categories
+                  </button>
+                )}
+                {isFamilies ? activeCategoryName : col.label} <span style={{ color: "rgba(255,255,255,0.4)", fontFamily: "var(--ff-body)", fontSize: "1rem", fontWeight: 400 }}>({items.length})</span>
               </h2>
               {col.canAdd && (
                 <button type="button" style={smallBtn} onClick={() => {
-                  mutate(d => ({ ...d, [col.key]: [...items, JSON.parse(JSON.stringify(col.template ?? {}))] }));
-                  setOpenIdx(o => ({ ...o, [col.key]: items.length }));
+                  const template = JSON.parse(JSON.stringify(col.template ?? {}));
+                  if (isFamilies && activeCategory) template.category = activeCategory;
+                  mutate(d => ({ ...d, [col.key]: [...allItems, template] }));
+                  setOpenIdx(o => ({ ...o, [col.key]: allItems.length }));
                 }}>
-                  + Add {col.label.replace(/s$/, "").toLowerCase()}
+                  + Add {(col.singular ?? col.label.replace(/s$/, "")).toLowerCase()}
                 </button>
               )}
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-              {items.map((item, i) => {
-                const title = col.titleKeys.map(k => String(item[k] ?? "")).filter(Boolean).join(" — ") || `#${i + 1}`;
+              {items.map((item, listI) => {
+                const i = visibleIndices[listI]; // real index in allItems
+                const title = col.titleKeys.map(k => String(item[k] ?? "")).filter(Boolean).join(" — ") || `#${listI + 1}`;
                 const isOpen = open === i;
                 return (
                   <div key={i} style={{ borderRadius: 14, background: isOpen ? "#111" : "#0a0a0a", overflow: "hidden" }}>
@@ -820,17 +998,27 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
                           background: "rgba(43,191,179,0.16)", color: "var(--brand-teal)",
                           display: "flex", alignItems: "center", justifyContent: "center",
                           fontFamily: "var(--ff-body)", fontSize: "0.8rem", fontWeight: 700,
-                        }}>{i + 1}</span>
+                        }}>{listI + 1}</span>
                         {title}
                         <span style={{ marginLeft: "auto", color: "rgba(255,255,255,0.4)", fontSize: "0.85rem" }}>{isOpen ? "▲ Close" : "▼ Edit"}</span>
                       </button>
-                      <button type="button" title="Move up" style={iconBtn} disabled={i === 0}
-                        onClick={() => mutate(d => { const n = [...items]; [n[i - 1], n[i]] = [n[i], n[i - 1]]; return { ...d, [col.key]: n }; })}>↑</button>
-                      <button type="button" title="Move down" style={iconBtn} disabled={i === items.length - 1}
-                        onClick={() => mutate(d => { const n = [...items]; [n[i + 1], n[i]] = [n[i], n[i + 1]]; return { ...d, [col.key]: n }; })}>↓</button>
+                      <button type="button" title="Move up" style={iconBtn} disabled={listI === 0}
+                        onClick={() => mutate(d => {
+                          const n = [...allItems];
+                          const prevI = visibleIndices[listI - 1];
+                          [n[prevI], n[i]] = [n[i], n[prevI]];
+                          return { ...d, [col.key]: n };
+                        })}>↑</button>
+                      <button type="button" title="Move down" style={iconBtn} disabled={listI === items.length - 1}
+                        onClick={() => mutate(d => {
+                          const n = [...allItems];
+                          const nextI = visibleIndices[listI + 1];
+                          [n[nextI], n[i]] = [n[i], n[nextI]];
+                          return { ...d, [col.key]: n };
+                        })}>↓</button>
                       {col.canAdd && (
                         <button type="button" title="Delete" style={dangerBtn}
-                          onClick={() => { if (confirm(`Delete “${title}”?`)) mutate(d => ({ ...d, [col.key]: items.filter((_, j) => j !== i) })); }}>Delete</button>
+                          onClick={() => { if (confirm(`Delete “${title}”?`)) mutate(d => ({ ...d, [col.key]: allItems.filter((_, j) => j !== i) })); }}>Delete</button>
                       )}
                     </div>
 
@@ -840,12 +1028,12 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
                         collection={col}
                         item={item}
                         onFieldChange={(key, v) => mutate(d => {
-                          const n = items.map(x => ({ ...x }));
+                          const n = allItems.map(x => ({ ...x }));
                           n[i][key] = v;
                           return { ...d, [col.key]: n };
                         })}
                         onFieldItemChange={(key, v) => mutate(d => {
-                          const n = items.map(x => ({ ...x }));
+                          const n = allItems.map(x => ({ ...x }));
                           n[i][key] = v;
                           return { ...d, [col.key]: n };
                         })}

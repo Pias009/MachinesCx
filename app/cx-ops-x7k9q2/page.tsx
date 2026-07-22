@@ -12,6 +12,7 @@ const SECTION_ICON: Record<string, string> = {
   "flexo-strip": "🖨️",
   "printing-showcase": "🎞️",
   "scrollhome-bags": "🛍️",
+  "news": "📰",
 };
 
 export default function AdminHome() {

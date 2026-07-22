@@ -502,8 +502,19 @@ export default function MachineCatalogSection() {
           .mcs-card__name { font-size: .92rem; }
           .mcs-card__stat { font-size: 1.25rem; }
         }
-        @media(max-width:400px) {
-          .mcs__grid { grid-template-columns: 1fr 1fr; }
+        @media(max-width:480px) {
+          .mcs__grid { grid-template-columns: repeat(3, 1fr); }
+          .mcs-card { padding: .6rem; min-height: 118px; }
+          .mcs-card__cat { gap: .3rem; margin-bottom: .25rem; }
+          .mcs-card__cat-label { display: none; }
+          .mcs-card__series { font-size: .5rem; margin-bottom: .2rem; }
+          .mcs-card__name { font-size: .68rem; line-height: 1.15; }
+          .mcs-card__bottom { margin-top: .6rem; gap: .25rem; }
+          .mcs-card__stat { font-size: .9rem; }
+          .mcs-card__stat-label { font-size: .48rem; margin-top: .1rem; }
+          .mcs-card__arrow { width: 20px; height: 20px; }
+          .mcs-card__arrow svg { width: 10px; height: 10px; }
+          .mcs-card__bg { width: 55%; height: 75%; }
         }
 
         /* ── Light mode ── */
@@ -592,7 +603,7 @@ export default function MachineCatalogSection() {
                   <div className="mcs-card__top" style={{ position: "relative", zIndex: 1 }}>
                     <div className="mcs-card__cat">
                       <span className="mcs-card__cat-dot" style={{ background: col?.accent }} />
-                      {CAT_LABELS[fam.category]}
+                      <span className="mcs-card__cat-label">{CAT_LABELS[fam.category]}</span>
                     </div>
                     <div className="mcs-card__series" style={{ color: col?.accent }}>{fam.series}</div>
                     <div className="mcs-card__name">{fam.name.split("—")[0].trim()}</div>

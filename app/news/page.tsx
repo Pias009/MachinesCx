@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { articles } from "@/lib/news";
+import { getLiveNews } from "@/lib/liveNews";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "News — Wenzhou Ashal Innomach Technology",
@@ -13,10 +15,21 @@ function fmt(iso: string) {
   });
 }
 
-const sorted = [...articles].sort((a, b) => b.date.localeCompare(a.date));
-
-export default function NewsIndexPage() {
+export default async function NewsIndexPage() {
+  const { articles } = await getLiveNews();
+  const sorted = [...articles].sort((a, b) => b.date.localeCompare(a.date));
   const [featured, ...rest] = sorted;
+
+  if (!featured) {
+    return (
+      <div style={{
+        minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center",
+        fontFamily: "var(--ff-body)", color: "var(--ink-35)", paddingTop: "6rem",
+      }}>
+        No articles published yet.
+      </div>
+    );
+  }
 
   return (
     <>

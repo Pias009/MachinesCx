@@ -1142,6 +1142,14 @@ export default function ChatWidget() {
           }
           .asha-launcher { right: 16px; bottom: 16px; }
           .asha-reply-popup { right: 16px; bottom: 88px; width: calc(100vw - 32px); }
+          .asha-tooltip {
+            left: 16px; right: 16px; bottom: 86px;
+            width: auto;
+          }
+          .asha-tooltip-text {
+            white-space: normal; width: 100%;
+          }
+          .asha-tooltip-arrow { display: none; }
         }
       `}</style>
     </>

@@ -24,7 +24,9 @@ export type FieldKind =
   | "reviews"     // {name, title, rating, text}[] rows — real buyer reviews
   | "stagePhotos" // {packing?, freight?, install?: string[]} — 3 fixed delivery-stage proof photo galleries, each with unlimited photos
   | "customSections" // {kind, title, image?, text?, imageSide?, photos?}[] — admin-authored extra sections, fixed safe templates
-  | "parts";      // {name, detail, images?, installation?}[] rows — real machine parts, each with its own optional install steps
+  | "parts"       // {name, detail, images?, installation?}[] rows — real machine parts, each with its own optional install steps
+  | "richtext"    // {kind: heading|paragraph|list, text?, items?}[] — block-based article body, no raw HTML
+  | "links";      // {label, url}[] rows — simple call-to-action links
 
 export interface Field {
   key: string;
@@ -40,6 +42,10 @@ export interface Field {
 export interface Collection {
   key: string;             // property in the section JSON holding the array
   label: string;           // sidebar / heading label
+  /** singular form for the "+ Add …" button — falls back to stripping a
+   *  trailing "s" from `label` when omitted (breaks on irregular plurals
+   *  like "families", so set this explicitly for those). */
+  singular?: string;
   titleKeys: string[];     // item props used for the list title
   fields: Field[];
   /** ordered list of group names — controls tab order when fields use `group` */
@@ -67,6 +73,7 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
       {
         key: "families",
         label: "Product families",
+        singular: "product",
         titleKeys: ["series", "name"],
         canAdd: true,
         groups: ["📝 Basic Info", "📸 Photos", "🎬 Videos", "📊 Specifications", "🕸 Radar Chart", "🔩 Parts", "🚚 Setup & Delivery", "⭐ Reviews", "➕ Custom Sections"],
@@ -258,6 +265,40 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
           { key: "slug", label: "Product slug", kind: "text" },
           { key: "specs", label: "Spec rows", kind: "kvlist" },
           { key: "features", label: "Feature bullets", kind: "features" },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "news",
+    title: "News / Blog",
+    description: "Company news, product launches, technical guides, and event posts — shown on the homepage strip and the /news pages.",
+    collections: [
+      {
+        key: "articles",
+        label: "Articles",
+        titleKeys: ["title"],
+        canAdd: true,
+        singular: "article",
+        groups: ["📝 Basic Info", "📰 Article Body", "🔗 Related Links"],
+        template: {
+          slug: "new-article", title: "New article", date: new Date().toISOString().slice(0, 10),
+          category: "Company News", excerpt: "", image: "", tags: [],
+          body: [{ kind: "paragraph", text: "" }],
+          links: [],
+        },
+        fields: [
+          { key: "title", label: "Title", kind: "text", group: "📝 Basic Info" },
+          { key: "slug", label: "Slug (URL id)", kind: "text", hint: "lowercase-with-dashes, unique — this becomes /news/<slug>", group: "📝 Basic Info" },
+          { key: "date", label: "Date", kind: "text", hint: "YYYY-MM-DD — controls sort order, newest first", group: "📝 Basic Info" },
+          { key: "category", label: "Category", kind: "text", hint: "e.g. Product Launch, Technical, Sustainability, Events", group: "📝 Basic Info" },
+          { key: "excerpt", label: "Excerpt", kind: "textarea", hint: "short summary shown on cards and the article header", group: "📝 Basic Info" },
+          { key: "image", label: "Cover photo", kind: "image", group: "📝 Basic Info" },
+          { key: "tags", label: "Tags (one per line)", kind: "stringlist", group: "📝 Basic Info" },
+
+          { key: "body", label: "Article body", kind: "richtext", hint: "build the article from headings, paragraphs, and bullet lists — use **text** for bold. Renders styled exactly like the rest of the site, no HTML needed.", group: "📰 Article Body" },
+
+          { key: "links", label: "Related links", kind: "links", hint: "shown in the sidebar of the article page — e.g. link to the relevant product or a contact page", group: "🔗 Related Links" },
         ],
       },
     ],

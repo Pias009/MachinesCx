@@ -569,9 +569,52 @@ export default function ClientJourney() {
           .cj__head { grid-template-columns: 1fr; }
           .cj__head-right { display: none; }
           .cj__detail { grid-template-columns: 1fr; }
-          .cj__col-nav { flex-direction: column; }
-          .cj__nav-item { min-width: auto; }
-          .cj__pipe { grid-template-columns: repeat(4,1fr); }
+          .cj__col-nav {
+            grid-column: 1;
+            display: grid; grid-template-columns: 1fr 1fr;
+          }
+          .cj__nav-item {
+            min-width: auto;
+            border-bottom: 1px solid color-mix(in srgb, var(--accent) 6%, transparent);
+            border-left: none;
+            border-top: none;
+          }
+          /* 2-up grid — vertical divider between columns, no border under
+             the bottom row */
+          .cj__nav-item:nth-child(odd) { border-right: 1px solid color-mix(in srgb, var(--accent) 6%, transparent); }
+          .cj__nav-item:nth-last-child(-n+2) { border-bottom: none; }
+
+          /* pipe tracker — wrap into rows instead of forcing a horizontal
+             swipe; the connector line is drawn for a single row so it can't
+             represent wrapped rows and is hidden here in favour of the
+             progress bar underneath */
+          .cj__pipe-wrap { overflow-x: visible; }
+          .cj__pipe {
+            grid-template-columns: repeat(4,1fr);
+            gap: 1.5rem 0;
+            min-width: 0;
+          }
+          .cj__pipe > svg { display: none; }
+          .cj__node-hex { width: 60px; height: 60px; }
+          .cj__node-hex svg { width: 24px; height: 24px; }
+          .cj__node-label { font-size: .68rem; }
+
+          /* compact detail card — smaller icon/type, tighter padding */
+          .cj__col-icon, .cj__col-desc { padding: 1.25rem 1.5rem; min-height: 0; }
+          .cj__col-badge { margin-bottom: .9rem; }
+          .cj__big-icon { width: 56px; height: 56px; margin-bottom: .9rem; }
+          .cj__big-icon svg { width: 22px; height: 22px; }
+          .cj__step-heading { font-size: 1.7rem; margin-bottom: .35rem; }
+          .cj__step-tagline { font-size: .85rem; }
+          .cj__step-desc { font-size: .88rem; line-height: 1.6; margin-bottom: 1.1rem; }
+          .cj__metric { padding: .75rem .9rem; }
+          .cj__metric-val { font-size: 1.4rem; }
+          .cj__metric-label { font-size: .62rem; margin-top: .2rem; }
+          .cj__nav-item { padding: .6rem .9rem; gap: .55rem; }
+          .cj__nav-icon { width: 26px; height: 26px; }
+          .cj__nav-icon svg { width: 18px; height: 18px; }
+          .cj__nav-num { font-size: .6rem; }
+          .cj__nav-label { font-size: .82rem; }
         }
         @media (max-width: 480px) {
           .cj__pipe { grid-template-columns: repeat(4,1fr); }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
@@ -72,6 +72,11 @@ const DEFAULT_MODELS: FlexoModel[] = buildModels(localFamilies);
 export default function FlexoStrip() {
   const cms = useCms<{ items?: FlexoModel[] }>("flexo-strip", { items: DEFAULT_MODELS });
   const MODELS = cms.items && cms.items.length ? cms.items : DEFAULT_MODELS;
+
+  // mobile-only: cards start collapsed (image + name), tap to expand in
+  // place for specs + the "view full spec" link. Desktop always shows
+  // everything regardless of this state (see .fls-card__more CSS below).
+  const [openMobile, setOpenMobile] = useState<string | null>(null);
 
   const sectionRef  = useRef<HTMLElement>(null);
   const gridRef     = useRef<HTMLDivElement>(null);
@@ -163,15 +168,18 @@ export default function FlexoStrip() {
         }
         .fls-card {
           position: relative;
-          display: block;
           background: #0d1018;
           border: 1px solid rgba(255,255,255,0.08);
-          text-decoration: none;
           transition: border-color .25s, transform .25s;
         }
         .fls-card:hover {
           border-color: rgba(225,29,72,0.4);
           transform: translateY(-4px);
+        }
+        .fls-card__toggle {
+          display: block; width: 100%;
+          background: none; border: none; padding: 0; margin: 0;
+          cursor: default; text-align: left; font: inherit; color: inherit;
         }
         .fls-card__media {
           position: relative;
@@ -193,9 +201,14 @@ export default function FlexoStrip() {
         .fls-badge--hot      { background:var(--brand-red); color:#fff; }
         .fls-badge--flagship { background:#fff; color:var(--bg-base); }
 
-        .fls-card__body { padding: 1.1rem 1.25rem 1.3rem; display: flex; flex-direction: column; gap: .4rem; }
-        .fls-card__series { font-family: var(--ff-mono); font-size: 0.62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--brand-red); }
-        .fls-card__name   { font-family: var(--ff-display); font-size: 1.6rem; color: #fff; line-height: 1; }
+        .fls-card__head { padding: 1.1rem 1.25rem; display: flex; align-items: center; gap: .6rem; }
+        .fls-card__head-text { flex: 1; min-width: 0; }
+        .fls-card__series { font-family: var(--ff-mono); font-size: 0.62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--brand-red); display: block; }
+        .fls-card__name   { font-family: var(--ff-display); font-size: 1.6rem; color: #fff; line-height: 1; display: block; margin-top: .3rem; }
+        .fls-card__chev  { display: none; flex-shrink: 0; stroke: var(--brand-red); transition: transform .2s ease; }
+        .fls-card--open .fls-card__chev { transform: rotate(180deg); }
+
+        .fls-card__more { padding: 0 1.25rem 1.3rem; display: flex; flex-direction: column; gap: .4rem; }
         .fls-card__tag    { font-size: 0.82rem; color: rgba(255,255,255,0.6); line-height: 1.4; }
 
         .fls-card__specs { margin-top: .5rem; display: flex; flex-direction: column; gap: .1rem; }
@@ -209,6 +222,7 @@ export default function FlexoStrip() {
           background: none; border: none; padding: 0;
           font-family: var(--ff-mono); font-size: 0.76rem; font-weight: 700; letter-spacing: .1em;
           text-transform: uppercase; color: var(--brand-red);
+          text-decoration: none;
         }
 
         /* ── Light mode: keep cards dark with white text ── */
@@ -229,6 +243,21 @@ export default function FlexoStrip() {
 
         @media (max-width: 640px) {
           .fls-title-clip h2 { font-size: clamp(2rem, 9vw, 3.2rem) !important; }
+
+          /* 2-up grid, collapsed by default — tap a card to reveal specs */
+          .fls-grid { grid-template-columns: 1fr 1fr; gap: .75rem; }
+          .fls-card:hover { transform: none; }
+          .fls-card__toggle { cursor: pointer; }
+          .fls-card__head { padding: .7rem .8rem; gap: .35rem; }
+          .fls-card__series { font-size: 0.56rem; }
+          .fls-card__name   { font-size: 1.05rem; margin-top: .2rem; }
+          .fls-card__chev   { display: block; width: 10px; height: 10px; margin-top: .3rem; }
+          .fls-badge { top: .5rem; left: .5rem; font-size: 0.52rem; padding: .2rem .45rem; }
+
+          .fls-card__more { display: none; padding: 0 .8rem .9rem; }
+          .fls-card--open .fls-card__more { display: flex; }
+          .fls-card__tag { font-size: .74rem; }
+          .fls-card__spec-row { font-size: .62rem; }
         }
       `}</style>
 
@@ -273,29 +302,48 @@ export default function FlexoStrip() {
           </span>
         </div>
 
-        {/* ── 4-up card grid — every model visible, click through to its spec page ── */}
+        {/* ── 4-up card grid (2-up on mobile) — desktop always shows full
+            detail; mobile starts collapsed and expands in place on tap ── */}
         <div ref={gridRef} className="fls-grid">
-          {MODELS.map(model => (
-            <TransitionLink key={model.slug} href={`/products/printing#${model.slug}`} className="fls-card">
-              <div className="fls-card__media">
-                {model.hot      && <span className="fls-badge fls-badge--hot">Hot</span>}
-                {model.flagship && <span className="fls-badge fls-badge--flagship">Flagship</span>}
-                <img src={model.img} alt={model.label} />
-              </div>
-              <div className="fls-card__body">
-                <span className="fls-card__series">AI · {model.colours}-colour</span>
-                <span className="fls-card__name">{model.label}</span>
-                <span className="fls-card__tag">{model.tag}</span>
+          {MODELS.map(model => {
+            const isOpen = openMobile === model.slug;
+            return (
+              <div key={model.slug} className={`fls-card${isOpen ? " fls-card--open" : ""}`}>
+                <button
+                  type="button"
+                  className="fls-card__toggle"
+                  onClick={() => setOpenMobile(isOpen ? null : model.slug)}
+                  aria-expanded={isOpen}
+                >
+                  <div className="fls-card__media">
+                    {model.hot      && <span className="fls-badge fls-badge--hot">Hot</span>}
+                    {model.flagship && <span className="fls-badge fls-badge--flagship">Flagship</span>}
+                    <img src={model.img} alt={model.label} />
+                  </div>
+                  <div className="fls-card__head">
+                    <div className="fls-card__head-text">
+                      <span className="fls-card__series">AI · {model.colours}-colour</span>
+                      <span className="fls-card__name">{model.label}</span>
+                    </div>
+                    <svg className="fls-card__chev" width="12" height="12" viewBox="0 0 10 6" fill="none" strokeWidth="1.5">
+                      <path d="M1 1l4 4 4-4" />
+                    </svg>
+                  </div>
+                </button>
 
-                <div className="fls-card__specs">
-                  <div className="fls-card__spec-row"><span>Speed</span><span>{model.speed} m/min</span></div>
-                  <div className="fls-card__spec-row"><span>Registration</span><span>{model.reg}</span></div>
+                <div className="fls-card__more">
+                  <span className="fls-card__tag">{model.tag}</span>
+                  <div className="fls-card__specs">
+                    <div className="fls-card__spec-row"><span>Speed</span><span>{model.speed} m/min</span></div>
+                    <div className="fls-card__spec-row"><span>Registration</span><span>{model.reg}</span></div>
+                  </div>
+                  <TransitionLink href={`/products/printing#${model.slug}`} className="fls-card__cta">
+                    View full spec →
+                  </TransitionLink>
                 </div>
-
-                <span className="fls-card__cta">View full spec →</span>
               </div>
-            </TransitionLink>
-          ))}
+            );
+          })}
         </div>
 
         {/* ── Bottom spec strip ── */}

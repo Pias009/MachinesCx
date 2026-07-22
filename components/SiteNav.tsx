@@ -25,6 +25,9 @@ export default function SiteNav() {
   const [menuImg,    setMenuImg]    = useState<string>("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const closeTimer                  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ddListRef                   = useRef<HTMLDivElement | null>(null);
+  const [canScrollUp,   setCanScrollUp]   = useState(false);
+  const [canScrollDown, setCanScrollDown] = useState(false);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
@@ -44,6 +47,26 @@ export default function SiteNav() {
   const keepMenu = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
   };
+
+  const updateScrollState = () => {
+    const el = ddListRef.current;
+    if (!el) return;
+    setCanScrollUp(el.scrollTop > 4);
+    setCanScrollDown(el.scrollTop + el.clientHeight < el.scrollHeight - 4);
+  };
+
+  const scrollDdList = (dir: 1 | -1) => {
+    const el = ddListRef.current;
+    if (!el) return;
+    el.scrollBy({ top: dir * el.clientHeight * 0.8, behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    // wait a tick for the dropdown to mount before measuring
+    const raf = requestAnimationFrame(updateScrollState);
+    return () => cancelAnimationFrame(raf);
+  }, [open]);
 
   const activeFamilies = open
     ? familiesByCategory(open as Parameters<typeof familiesByCategory>[0])
@@ -216,12 +239,42 @@ export default function SiteNav() {
         @keyframes snBdIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* Dropdown list */
+        .sn__dd-list-wrap { flex: 1; position: relative; min-width: 0; }
         .sn__dd-list {
-          flex: 1; padding: 0.6rem 0;
-          max-height: 65vh; overflow-y: auto; scrollbar-width: none;
-          -ms-overflow-style: none;
+          padding: 0.6rem 0;
+          max-height: 65vh; overflow-y: auto;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(43,191,179,0.5) transparent;
         }
-        .sn__dd-list::-webkit-scrollbar { display: none; width: 0; height: 0; }
+        .sn__dd-list::-webkit-scrollbar { width: 6px; }
+        .sn__dd-list::-webkit-scrollbar-track { background: transparent; }
+        .sn__dd-list::-webkit-scrollbar-thumb {
+          background: rgba(43,191,179,0.5);
+          border-radius: 3px;
+        }
+        .sn__dd-list::-webkit-scrollbar-thumb:hover { background: rgba(43,191,179,0.8); }
+
+        /* Floating scroll buttons */
+        .sn__dd-scrollbtn {
+          position: absolute; left: 50%; transform: translateX(-50%);
+          width: 30px; height: 30px; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          background: rgba(15,23,42,0.92);
+          border: 1px solid rgba(43,191,179,0.4);
+          color: var(--brand-teal); cursor: pointer;
+          z-index: 320;
+          box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+          opacity: 0; pointer-events: none;
+          transition: opacity 0.18s ease, background 0.18s ease, transform 0.18s ease;
+        }
+        .sn__dd-scrollbtn--visible { opacity: 1; pointer-events: auto; }
+        .sn__dd-scrollbtn:hover {
+          background: rgba(43,191,179,0.18);
+          transform: translateX(-50%) scale(1.08);
+        }
+        .sn__dd-scrollbtn svg { width: 12px; height: 12px; }
+        .sn__dd-scrollbtn--up   { top: 6px; }
+        .sn__dd-scrollbtn--down { bottom: 6px; }
 
         .sn__dd-item {
           display: flex; align-items: center; gap: 1rem;
@@ -509,22 +562,46 @@ export default function SiteNav() {
 
       {open && (
         <div className="sn__dd" onMouseEnter={keepMenu} onMouseLeave={closeMenu}>
-          <div className="sn__dd-list">
-            {activeFamilies.map((fam) => (
-              <TransitionLink
-                key={fam.slug}
-                href={`/products/${open}/${fam.slug}`}
-                className={`sn__dd-item${menuImg === fam.slug ? " sn__dd-item--on" : ""}`}
-                onMouseEnter={() => setMenuImg(fam.slug)}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={machineImg(fam.slug)} alt="" className="sn__dd-thumb" />
-                <div>
-                  <span className="sn__dd-series">{fam.series}</span>
-                  <span className="sn__dd-tag">{fam.tagline}</span>
-                </div>
-              </TransitionLink>
-            ))}
+          <div className="sn__dd-list-wrap">
+            <div className="sn__dd-list" ref={ddListRef} onScroll={updateScrollState}>
+              {activeFamilies.map((fam) => (
+                <TransitionLink
+                  key={fam.slug}
+                  href={`/products/${open}/${fam.slug}`}
+                  className={`sn__dd-item${menuImg === fam.slug ? " sn__dd-item--on" : ""}`}
+                  onMouseEnter={() => setMenuImg(fam.slug)}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={machineImg(fam.slug)} alt="" className="sn__dd-thumb" />
+                  <div>
+                    <span className="sn__dd-series">{fam.series}</span>
+                    <span className="sn__dd-tag">{fam.tagline}</span>
+                  </div>
+                </TransitionLink>
+              ))}
+            </div>
+            <button
+              type="button"
+              aria-label="Scroll up"
+              className={`sn__dd-scrollbtn sn__dd-scrollbtn--up${canScrollUp ? " sn__dd-scrollbtn--visible" : ""}`}
+              onClick={() => scrollDdList(-1)}
+              tabIndex={canScrollUp ? 0 : -1}
+            >
+              <svg viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M1 5l4-4 4 4" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              aria-label="Scroll down"
+              className={`sn__dd-scrollbtn sn__dd-scrollbtn--down${canScrollDown ? " sn__dd-scrollbtn--visible" : ""}`}
+              onClick={() => scrollDdList(1)}
+              tabIndex={canScrollDown ? 0 : -1}
+            >
+              <svg viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M1 1l4 4 4-4" />
+              </svg>
+            </button>
           </div>
           <div className="sn__dd-preview">
             <div className="sn__dd-glow" />

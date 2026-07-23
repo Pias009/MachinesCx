@@ -1,5 +1,6 @@
 "use client";
 import { Suspense, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { familiesByCategory, type ProductFamily, type CategorySlug } from "@/lib/products";
 import TransitionLink from "@/components/TransitionLink";
 import {
@@ -202,8 +203,7 @@ function PartsInquiryInner() {
                 <Field label="Reference photo" hint="Shows the part or where it fits — optional">
                   <div style={{ display: "flex", gap: ".5rem", alignItems: "center", flexWrap: "wrap" }}>
                     {draftImages.map((src, i) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img key={i} src={src} alt="" style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 8, border: "1px solid var(--bg-line)" }} />
+                      <Image key={i} src={src} alt="" width={40} height={40} style={{ objectFit: "cover", borderRadius: 8, border: "1px solid var(--bg-line)" }} />
                     ))}
                     <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
                       style={{ padding: ".5rem .8rem", borderRadius: ".6rem", border: "1px dashed var(--bg-line)", background: "var(--bg-raise)", color: "var(--ink-60)", fontSize: ".8rem", cursor: "pointer" }}>

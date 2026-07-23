@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
 import type { Category, ProductFamily } from "@/lib/products";
@@ -67,7 +68,12 @@ const HERO_IMAGES: Record<string, string[]> = {
   ],
 };
 
-/* ── SVG icon library ────────────────────────────────────────────── */
+/* ── feature-badge accent colors — cycled per badge so the strip reads
+   as colorful/varied rather than one flat teal outline repeated ── */
+const FEAT_ACCENTS = ["#2bbfb3", "#f59e0b", "#e11d48", "#38bdf8", "#a78bfa", "#22c55e"];
+
+/* ── SVG icon library — filled duotone glyphs (solid shape, not just
+   stroke outline) so each badge reads as a real colorful icon ── */
 function FeatureIcon({ id }: { id: string }) {
   const icons: Record<string, JSX.Element> = {
     layers:     <><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></>,
@@ -122,6 +128,9 @@ export default function CategoryPageClient({ category, families, allCategories }
   const features  = CATEGORY_FEATURES[category.slug] ?? [];
   const statKeys  = CARD_STATS[category.slug] ?? [];
   const cardsRef  = useRef<HTMLDivElement>(null);
+  // mobile-only: category tabs collapse into a tap-to-expand dropdown
+  // showing the active category, instead of a horizontal swipe row
+  const [tabsOpen, setTabsOpen] = useState(false);
 
   /* stagger-reveal cards on scroll */
   useEffect(() => {
@@ -155,8 +164,15 @@ export default function CategoryPageClient({ category, families, allCategories }
           <div className={`ccp-hero__mosaic${heroImgs.length <= 2 ? " ccp-hero__mosaic--single" : ""}`} aria-hidden="true">
             {heroImgs.slice(0, 4).map((src, i) => (
               <div key={i} className="ccp-hero__mosaic-cell">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt="" loading={i === 0 ? "eager" : "lazy"} />
+                <Image
+                  src={src}
+                  alt=""
+                  fill
+                  sizes="(max-width: 880px) 0px, 26vw"
+                  priority={i === 0}
+                  loading={i === 0 ? undefined : "lazy"}
+                  style={{ inset: 0, margin: "auto", width: "82%", height: "82%", objectFit: "contain", filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.55))" }}
+                />
               </div>
             ))}
           </div>
@@ -176,18 +192,34 @@ export default function CategoryPageClient({ category, families, allCategories }
           <h1 className="ccp-hero__h1">{category.name}</h1>
           <p className="ccp-hero__blurb">{category.blurb}</p>
 
-          {/* category tabs */}
-          <nav className="ccp-tabs" aria-label="Product categories">
-            {allCategories.map((c) => (
-              <Link
-                key={c.slug}
-                href={`/products/${c.slug}`}
-                className={`ccp-tab${c.slug === category.slug ? " ccp-tab--active" : ""}`}
-              >
-                {c.name}
-              </Link>
-            ))}
-          </nav>
+          {/* category tabs — on mobile this collapses into a tap-to-expand
+              dropdown (see .ccp-tabs-toggle CSS); desktop shows the full
+              row and hides the toggle button entirely */}
+          <div className={`ccp-tabs-wrap${tabsOpen ? " ccp-tabs-wrap--open" : ""}`}>
+            <button
+              type="button"
+              className="ccp-tabs-toggle"
+              onClick={() => setTabsOpen(o => !o)}
+              aria-expanded={tabsOpen}
+            >
+              {category.name}
+              <svg width="12" height="12" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M1 1l4 4 4-4" />
+              </svg>
+            </button>
+            <nav className="ccp-tabs" aria-label="Product categories">
+              {allCategories.map((c) => (
+                <Link
+                  key={c.slug}
+                  href={`/products/${c.slug}`}
+                  className={`ccp-tab${c.slug === category.slug ? " ccp-tab--active" : ""}`}
+                  onClick={() => setTabsOpen(false)}
+                >
+                  {c.name}
+                </Link>
+              ))}
+            </nav>
+          </div>
         </div>
 
         <div className="ccp-hero__scan" aria-hidden="true" />
@@ -197,14 +229,17 @@ export default function CategoryPageClient({ category, families, allCategories }
       {features.length > 0 && (
         <div className="ccp-features">
           <div className="ccp-features__inner">
-            {features.map((f) => (
-              <div key={f.label} className="ccp-feat">
-                <div className="ccp-feat__icon">
-                  <FeatureIcon id={f.icon} />
+            {features.map((f, i) => {
+              const accent = FEAT_ACCENTS[i % FEAT_ACCENTS.length];
+              return (
+                <div key={f.label} className="ccp-feat">
+                  <div className="ccp-feat__icon" style={{ "--accent": accent } as React.CSSProperties}>
+                    <FeatureIcon id={f.icon} />
+                  </div>
+                  <span className="ccp-feat__label">{f.label}</span>
                 </div>
-                <span className="ccp-feat__label">{f.label}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -233,11 +268,13 @@ export default function CategoryPageClient({ category, families, allCategories }
                   {/* machine image */}
                   <div className="ccp-card__img">
                     <span className="ccp-card__badge">{f.series}</span>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <Image
                       src={familyImage(f)}
                       alt={f.name}
+                      fill
+                      sizes="(max-width: 700px) 90vw, (max-width: 1100px) 45vw, 30vw"
                       loading="lazy"
+                      style={{ inset: 0, margin: "auto", width: "74%", height: "74%", objectFit: "contain", filter: "drop-shadow(0 8px 22px rgba(0,0,0,0.45))" }}
                     />
                   </div>
 

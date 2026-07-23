@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import TransitionLink from "@/components/TransitionLink";
 import ThemeToggle from "@/components/ThemeToggle";
 import { categories, familiesByCategory } from "@/lib/products";
@@ -463,7 +464,7 @@ export default function SiteNav() {
         <div className="sn__inner">
 
           <TransitionLink href="/" className="sn__logo" aria-label="Ashal Innomach — home">
-            <img src="/logo.jpeg" alt="Ashal Innomach" className="sn__logo-img" />
+            <Image src="/logo.jpeg" alt="Ashal Innomach" className="sn__logo-img" width={40} height={40} priority />
             <span className="sn__logo-text">
               <span className="sn__logo-word sn__logo-word--hold">
                 <em>ASHAL</em>{" INNOMACH"}
@@ -571,8 +572,7 @@ export default function SiteNav() {
                   className={`sn__dd-item${menuImg === fam.slug ? " sn__dd-item--on" : ""}`}
                   onMouseEnter={() => setMenuImg(fam.slug)}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={machineImg(fam.slug)} alt="" className="sn__dd-thumb" />
+                  <Image src={machineImg(fam.slug)} alt="" width={52} height={38} className="sn__dd-thumb" />
                   <div>
                     <span className="sn__dd-series">{fam.series}</span>
                     <span className="sn__dd-tag">{fam.tagline}</span>
@@ -605,8 +605,7 @@ export default function SiteNav() {
           </div>
           <div className="sn__dd-preview">
             <div className="sn__dd-glow" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img key={menuImg} src={machineImg(menuImg)} alt="" className="sn__dd-preview-img" />
+            <Image key={menuImg} src={machineImg(menuImg)} alt="" width={160} height={160} className="sn__dd-preview-img" />
           </div>
         </div>
       )}

@@ -2,10 +2,11 @@
 import { useEffect, useState } from "react";
 
 export default function ThemeToggle() {
-  const [light, setLight] = useState(false);
+  // default theme is light — matches the data-theme="light" set on <html> in layout.tsx
+  const [light, setLight] = useState(true);
   const [mounted, setMounted] = useState(false);
 
-  // Read saved preference on mount (default theme is light)
+  // Read saved preference on mount
   useEffect(() => {
     setMounted(true);
     const saved = localStorage.getItem("theme");

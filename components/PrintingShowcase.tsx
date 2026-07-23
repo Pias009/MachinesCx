@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import NextImage from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import TransitionLink from "@/components/TransitionLink";
 import { useCms } from "@/lib/useCms";
@@ -438,15 +439,14 @@ export default function PrintingShowcase() {
                   The parent div above keeps its own role-based positioning
                   transform untouched, so the entrance can never fight the
                   carousel's auto-advance repositioning. */}
-              <div data-ps-carousel-item={role(i)} style={{ width: "100%", height: "100%" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+              <div data-ps-carousel-item={role(i)} style={{ width: "100%", height: "100%", position: "relative" }}>
+                <NextImage
                   src={machine.src}
                   alt={machine.model}
+                  fill
+                  sizes="(max-width: 700px) 90vw, 45vw"
                   draggable={false}
                   style={{
-                    width:          "100%",
-                    height:         "100%",
                     objectFit:      "contain",
                     objectPosition: "bottom center",
                     userSelect:     "none",

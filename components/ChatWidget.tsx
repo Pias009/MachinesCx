@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { HardHat, X } from "lucide-react";
 
 const AGENT_NAME = "ASHA";
@@ -78,8 +79,7 @@ function MachineCards({ slugs, onInquire, onExplore }: { slugs: string[]; onInqu
       {machines.map(m => (
         <div key={m.slug} className="asha-card">
           <div className="asha-card-img-col">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={m.image} alt={m.name} className="asha-card-img" />
+            <Image src={m.image} alt={m.name} fill sizes="100px" className="asha-card-img" />
           </div>
           <div className="asha-card-info-col">
             <div className="asha-card-name">{m.name}</div>
@@ -224,8 +224,7 @@ function MachineDetailView({ slug, onInquire }: { slug: string; onInquire: (slug
   return (
     <div className="asha-detail">
       <div className="asha-detail-hero">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={machine.image} alt={machine.name} className="asha-detail-hero-img" />
+        <Image src={machine.image} alt={machine.name} fill sizes="360px" className="asha-detail-hero-img" />
         <div className="asha-detail-hero-overlay">
           <div className="asha-detail-cat-badge">{machine.categoryName}</div>
           <div className="asha-detail-name">{machine.name}</div>
@@ -739,6 +738,7 @@ export default function ChatWidget() {
         }
 
         .asha-card-img-col {
+          position: relative;
           width: 100px; min-height: 100px;
           flex-shrink: 0;
           background: var(--bg-surface);
@@ -806,7 +806,7 @@ export default function ChatWidget() {
         }
 
         .asha-detail-hero {
-          position: relative; height: 150px;
+          position: relative; height: 150px; width: 100%;
           background: var(--bg-surface);
           display: flex; align-items: center; justify-content: center;
           overflow: hidden;

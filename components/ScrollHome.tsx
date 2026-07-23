@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import TransitionLink from "@/components/TransitionLink";
 import AetherBtn from "@/components/AetherBtn";
 import { useCms } from "@/lib/useCms";
@@ -449,10 +450,12 @@ export default function ScrollHome() {
           visibility: "hidden",
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={`/machines/${selectedProduct}.png`}
           alt={CARDS.find(c => c.slug === selectedProduct)?.name ?? ""}
+          width={600}
+          height={600}
+          priority
           style={{ width: "100%", height: "auto", objectFit: "contain",
             filter: "drop-shadow(0 24px 56px rgba(0,0,0,0.65))" }}
         />
@@ -544,14 +547,16 @@ export default function ScrollHome() {
             </TransitionLink>
           </div>
           {/* Machine image — mobile only */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/machines/t-pro-heatseal.png"
             alt="T-PRO Heat-seal converter"
             className="sh-machine-mobile"
+            width={320}
+            height={320}
             style={{
               display: "none",
               width: "100%", maxWidth: "320px",
+              height: "auto",
               margin: "2rem auto 0",
               filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.6))",
             }}
@@ -650,17 +655,17 @@ export default function ScrollHome() {
             borderBottom: "1px solid rgba(255,255,255,0.06)",
             padding: "1rem",
           }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={`/machines/${mobileCard.slug}.png`}
               alt={mobileCard.name}
+              fill
+              sizes="90vw"
               style={{
-                maxWidth: "85%", maxHeight: "100%",
-                width: "auto", height: "auto",
+                width: "85%", height: "100%",
+                margin: "auto",
                 objectFit: "contain",
                 filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.65))",
                 transition: "opacity 0.25s ease",
-                display: "block",
               }}
             />
           </div>
@@ -710,11 +715,12 @@ export default function ScrollHome() {
                   cursor: "pointer", transition: "background 0.18s",
                 }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={`/machines/${card.slug}.png`}
                   alt={card.name}
-                  style={{ width: 48, height: 36, objectFit: "contain",
+                  width={48}
+                  height={36}
+                  style={{ objectFit: "contain",
                     opacity: i === mobileIdx ? 1 : 0.45,
                     filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.6))",
                     transition: "opacity 0.18s",
@@ -920,17 +926,20 @@ export default function ScrollHome() {
                 }}
               >
                 <div style={{
+                  position: "relative",
                   width: "100%", aspectRatio: "16/10",
                   background: "rgba(255,255,255,0.04)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   overflow: "hidden",
                 }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={`/machines/${card.slug}.png`}
                     alt={card.name}
+                    fill
+                    sizes="(max-width: 700px) 45vw, 22vw"
                     style={{
-                      width: "82%", height: "82%", objectFit: "contain",
+                      width: "82%", height: "82%", margin: "auto",
+                      objectFit: "contain",
                       filter: "drop-shadow(0 10px 16px rgba(0,0,0,0.55))",
                     }}
                   />

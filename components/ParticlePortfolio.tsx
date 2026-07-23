@@ -1,5 +1,6 @@
 "use client";
 import React, { useRef, useEffect, useState } from "react";
+import NextImage from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ForgeBackground from "@/components/ForgeBackground";
@@ -208,6 +209,7 @@ export default function ParticlePortfolio(){
           pointer-events: none;
         }
         .pp-core__disc {
+          position: relative;
           width: clamp(100px, 10vw, 150px); height: clamp(100px, 10vw, 150px);
           border-radius: 50%;
           border: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
@@ -397,9 +399,8 @@ export default function ParticlePortfolio(){
                     padding:"0.6rem 0.8rem", background:"none", border:"none", cursor:"pointer",
                     textAlign:"left", font:"inherit", color:"inherit",
                   }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={s.img} alt={s.name} className="pp-mstep__img"
-                    style={{width:"44px",height:"34px",objectFit:"contain",flexShrink:0,
+                  <NextImage src={s.img} alt={s.name} className="pp-mstep__img" width={44} height={34}
+                    style={{objectFit:"contain",flexShrink:0,
                       filter:"drop-shadow(0 3px 10px rgba(0,0,0,0.7))"}}/>
                   <div style={{flex:1, minWidth:0}}>
                     <div className="pp-mstep__stage" style={{fontFamily:"var(--ff-display)",fontSize:"0.9rem",
@@ -498,8 +499,7 @@ export default function ParticlePortfolio(){
 
           <div className="pp-core" style={{zIndex:8, left:`${PROD.x}%`, top:`${PROD.y}%`, "--accent": curAccent.hex} as React.CSSProperties}>
             <div className="pp-core__disc">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/machines/bag-samples.png" alt="Finished bag products"/>
+              <NextImage src="/machines/bag-samples.png" alt="Finished bag products" fill sizes="150px" />
             </div>
             <div className="pp-core__label">Finished product</div>
           </div>
@@ -529,8 +529,8 @@ export default function ParticlePortfolio(){
                   boxShadow: isOn ? `0 0 18px ${rgbFromHex(a.hex, 0.5)}` : "none",
                   transition: "background 0.4s, color 0.4s, box-shadow 0.4s, border-color 0.4s",
                 }}>{i+1}</span>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={s.img} alt="" className="pp-node__img" style={{
+                <NextImage src={s.img} alt="" className="pp-node__img" width={320} height={320} style={{
+                  height: "auto",
                   transform:`scale(${sc})`,
                   filter: isOn
                     ? `drop-shadow(0 10px 30px ${rgbFromHex(a.hex, 0.3)}) drop-shadow(0 6px 18px rgba(0,0,0,0.8))`

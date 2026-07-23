@@ -45,24 +45,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${bebas.variable} ${inter.variable} ${jetbrains.variable}`}
     >
       <head>
-        {/* Prevent browser caching of chunks */}
-        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-        <meta httpEquiv="Pragma" content="no-cache" />
+        {/* Apply saved theme before first paint — avoids a flash of the
+            wrong theme (and pages "stuck" on light) that a useEffect-only
+            correction in ThemeToggle can't prevent on a fresh document load */}
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
-            // Unregister ALL service workers and clear ALL caches immediately
-            if ('serviceWorker' in navigator) {
-              navigator.serviceWorker.getRegistrations().then(function(regs) {
-                regs.forEach(function(r) { r.unregister(); });
-              });
+            var saved = localStorage.getItem('theme');
+            if (saved === 'dark') {
+              document.documentElement.removeAttribute('data-theme');
+            } else {
+              document.documentElement.setAttribute('data-theme', 'light');
             }
-            if ('caches' in window) {
-              caches.keys().then(function(keys) {
-                keys.forEach(function(k) { caches.delete(k); });
-              });
-            }
-
-            // Auto-reload once if any _next chunk 404s
+          })();
+        ` }} />
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            // Auto-reload once if a stale deploy's _next chunk 404s
+            // (content-hashed filenames mean this only fires after a
+            // real deploy, not on ordinary cached navigation)
             var reloaded = sessionStorage.getItem('cr');
             window.addEventListener('error', function(e) {
               var t = e && e.target;
@@ -70,7 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               var src = t.src || t.href || '';
               if (src.indexOf('/_next/') !== -1 && !reloaded) {
                 sessionStorage.setItem('cr', '1');
-                window.location.reload(true);
+                window.location.reload();
               }
             }, true);
 

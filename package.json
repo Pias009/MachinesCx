@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "rm -rf .next && next dev --port 3333",
+    "dev": "next dev --port 3333",
+    "dev:clean": "rm -rf .next && next dev --port 3333",
     "build": "next build",
     "start": "next start",
     "seed": "node scripts/seed.mjs",
@@ -34,7 +35,7 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.35",
     "playwright": "^1.61.0",
-    "qrcode": "^1.5.4",
+    "sharp": "^0.35.3",
     "typescript": "^5.4.5"
   }
 }

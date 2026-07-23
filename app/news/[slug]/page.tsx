@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import AetherBtn from "@/components/AetherBtn";
 import { articleBySlug, renderNewsBody } from "@/lib/news";
 import { getLiveNews } from "@/lib/liveNews";
@@ -120,15 +121,19 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 height: "3px",
                 background: "linear-gradient(to right, var(--brand-red), transparent)",
               }} />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={a.image}
-                alt={a.title}
-                style={{
-                  width: "80%", height: "80%", objectFit: "contain",
-                  filter: "drop-shadow(0 16px 40px rgba(15,23,42,0.14))",
-                }}
-              />
+              <div style={{ position: "absolute", inset: "10%" }}>
+                <Image
+                  src={a.image}
+                  alt={a.title}
+                  fill
+                  sizes="(max-width: 768px) 60vw, 380px"
+                  priority
+                  style={{
+                    objectFit: "contain",
+                    filter: "drop-shadow(0 16px 40px rgba(15,23,42,0.14))",
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -235,8 +240,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               {related.map((r) => (
                 <Link key={r.slug} href={`/news/${r.slug}`} className="ns-card">
                   <div className="ns-card__img-wrap">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={r.image} alt={r.title} className="ns-card__img" />
+                    <Image src={r.image} alt={r.title} className="ns-card__img" width={600} height={400} style={{ width: "100%", height: "auto" }} loading="lazy" />
                   </div>
                   <div className="ns-card__body">
                     <div className="ns-card__meta">

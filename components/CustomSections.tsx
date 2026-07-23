@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { CustomSection } from "@/lib/products";
 
 /* ── Admin-authored custom sections — 4 fixed, pre-styled templates ──
@@ -26,8 +27,7 @@ function Banner({ section }: { section: Extract<CustomSection, { kind: "banner" 
       </div>
       {section.image && (
         <div className="pdv2-cs-banner__media">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={section.image} alt={section.title} loading="lazy" />
+          <Image src={section.image} alt={section.title} fill sizes="(max-width: 900px) 100vw, 1200px" />
         </div>
       )}
       {section.text && (
@@ -59,8 +59,7 @@ function Split({ section }: { section: Extract<CustomSection, { kind: "split" }>
         <div className={`pdv2-cs-split__row${reversed ? " pdv2-cs-split__row--rev" : ""}`}>
           <div className="pdv2-cs-split__media">
             {section.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={section.image} alt={section.title} loading="lazy" />
+              <Image src={section.image} alt={section.title} fill sizes="(max-width: 900px) 90vw, 45vw" />
             ) : (
               <span className="pdv2-cs-split__media-empty" aria-hidden="true" />
             )}
@@ -83,8 +82,7 @@ function Gallery({ section }: { section: Extract<CustomSection, { kind: "gallery
           {photos.map((p, i) => (
             <div key={i} className="pdv2-cs-gallery__cell">
               <div className="pdv2-cs-gallery__img">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.src} alt={p.caption || section.title} loading="lazy" />
+                <Image src={p.src} alt={p.caption || section.title} fill sizes="(max-width: 700px) 45vw, 22vw" />
               </div>
               {p.caption && <span className="pdv2-cs-gallery__caption">{p.caption}</span>}
             </div>

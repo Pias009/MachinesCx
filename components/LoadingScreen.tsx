@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 const DURATION = 1200;
 
@@ -176,12 +177,12 @@ export default function LoadingScreen() {
             }}
           />
           <div style={{
+            position: "relative",
             width: "clamp(100px,13vw,150px)", height: "clamp(100px,13vw,150px)",
             borderRadius: "50%", overflow: "hidden",
             animation: "ls-breath 4s 1s ease-in-out infinite, ls-glow 4s 1s ease-in-out infinite",
           }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.jpeg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            <Image src="/logo.jpeg" alt="" fill sizes="150px" priority style={{ objectFit: "cover" }} />
           </div>
         </div>
 

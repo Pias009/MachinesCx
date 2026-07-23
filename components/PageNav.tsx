@@ -49,10 +49,7 @@ export default function PageNav() {
         [data-theme="light"] .pgnav__btn:hover { color: var(--brand-teal); }
 
         @media(max-width:640px){
-          .pgnav { top: 80px; left: 1rem; gap: .45rem; }
-          .pgnav__btn { height: 36px; padding: 0 .8rem; font-size: .66rem; }
-          .pgnav__btn-label { display: none; }
-          .pgnav__btn { padding: 0; width: 36px; justify-content: center; }
+          .pgnav { display: none; }
         }
       `}</style>
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { getLiveNews } from "@/lib/liveNews";
 
 export const dynamic = "force-dynamic";
@@ -60,8 +61,7 @@ export default async function NewsIndexPage() {
         {/* ── Featured article ── */}
         <Link href={`/news/${featured.slug}`} className="news-featured">
           <div className="news-featured__img-wrap">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={featured.image} alt={featured.title} className="news-featured__img" />
+            <Image src={featured.image} alt={featured.title} className="news-featured__img" width={1200} height={800} style={{ width: "100%", height: "auto" }} priority />
           </div>
           <div className="news-featured__body">
             <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginBottom: "1rem" }}>
@@ -106,8 +106,7 @@ export default async function NewsIndexPage() {
           {rest.map((a) => (
             <Link key={a.slug} href={`/news/${a.slug}`} className="ns-card">
               <div className="ns-card__img-wrap">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={a.image} alt={a.title} className="ns-card__img" />
+                <Image src={a.image} alt={a.title} className="ns-card__img" width={600} height={400} style={{ width: "100%", height: "auto" }} loading="lazy" />
               </div>
               <div className="ns-card__body">
                 <div className="ns-card__meta">

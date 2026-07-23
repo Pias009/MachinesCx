@@ -2,15 +2,18 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import dynamic from "next/dynamic";
 import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
 import ProcessIcon, { resolveIcon, type IconName } from "@/components/ProcessIcon";
 import DeliveryStageIcon, { resolveDeliveryStage } from "@/components/DeliveryStageIcon";
 import CustomSections from "@/components/CustomSections";
 import MachineParts from "@/components/MachineParts";
-import MachineDiagram from "@/components/MachineDiagram";
 import type { ProductFamily, Category } from "@/lib/products";
 import { familyImage, familyImages, parseYouTubeId, stagePhotos } from "@/lib/products";
+
+const MachineDiagram = dynamic(() => import("@/components/MachineDiagram"), { ssr: false });
 
 interface Props {
   family: ProductFamily;
@@ -36,31 +39,30 @@ const SAMPLE_TAB: Record<string, { label: string; heading: string; blurb: string
   "printing":     { label: "Print Sample", heading: "What This Press Produces", blurb: "Multi-colour printed film, registered and dried, ready for bag-making or lamination.", img: "/machines/flexo-6c-nobg.png" },
 };
 
-/* ── "Part N" breakdown rows — same real product photo, cropped/zoomed to
-   3 different regions per part via CSS object-position + scale. This
-   mirrors the reference site's component-photo rows without fabricating
-   distinct component photography we don't actually have. ── */
-interface PartDef { title: string; detail: string; icon: IconName; crops: { pos: string; zoom: number }[] }
+/* ── "Part N" breakdown rows — same real product photo shown in full per
+   part. This mirrors the reference site's component-photo rows without
+   fabricating distinct component photography we don't actually have. ── */
+interface PartDef { title: string; detail: string; icon: IconName }
 const PART_CROPS: Record<string, PartDef[]> = {
   "film-blowing": [
-    { title: "Extrusion & Screw", icon: "power",       detail: "Multi-screw co-extrusion feeds molten resin into the die head at controlled temperature zones.", crops: [{ pos: "20% 40%", zoom: 2.2 }, { pos: "35% 30%", zoom: 2.6 }, { pos: "15% 55%", zoom: 2.0 }] },
-    { title: "Die Head & Bubble", icon: "calibration", detail: "The film bubble forms above the die, cooled by the air ring for consistent gauge.", crops: [{ pos: "50% 15%", zoom: 1.8 }, { pos: "50% 5%",  zoom: 2.0 }, { pos: "45% 25%", zoom: 1.9 }] },
-    { title: "Haul-Off & Winding", icon: "assembly",   detail: "Collapsed film is drawn up the tower and wound into finished rolls.", crops: [{ pos: "60% 70%", zoom: 1.7 }, { pos: "75% 80%", zoom: 1.9 }, { pos: "65% 60%", zoom: 1.8 }] },
+    { title: "Extrusion & Screw", icon: "power",       detail: "Multi-screw co-extrusion feeds molten resin into the die head at controlled temperature zones." },
+    { title: "Die Head & Bubble", icon: "calibration", detail: "The film bubble forms above the die, cooled by the air ring for consistent gauge." },
+    { title: "Haul-Off & Winding", icon: "assembly",   detail: "Collapsed film is drawn up the tower and wound into finished rolls." },
   ],
   "bag-making": [
-    { title: "Unwind & Feeding",  icon: "power",       detail: "Photocell-tracked unwind feeds film into the machine at controlled tension.", crops: [{ pos: "15% 50%", zoom: 2.1 }, { pos: "25% 60%", zoom: 2.3 }, { pos: "10% 40%", zoom: 2.0 }] },
-    { title: "Sealing & Cutting", icon: "assembly",    detail: "Heat-seal bars and rotary cutters form and separate each bag at speed.", crops: [{ pos: "50% 45%", zoom: 2.0 }, { pos: "55% 55%", zoom: 2.2 }, { pos: "45% 35%", zoom: 1.9 }] },
-    { title: "Control Panel",     icon: "calibration", detail: "PLC touchscreen sets bag length, seal temperature and lane speed.", crops: [{ pos: "80% 30%", zoom: 2.4 }, { pos: "85% 20%", zoom: 2.6 }, { pos: "75% 40%", zoom: 2.2 }] },
+    { title: "Unwind & Feeding",  icon: "power",       detail: "Photocell-tracked unwind feeds film into the machine at controlled tension." },
+    { title: "Sealing & Cutting", icon: "assembly",    detail: "Heat-seal bars and rotary cutters form and separate each bag at speed." },
+    { title: "Control Panel",     icon: "calibration", detail: "PLC touchscreen sets bag length, seal temperature and lane speed." },
   ],
   "recycling": [
-    { title: "Crusher & Feeding", icon: "power",       detail: "Scrap film and edge trim are crushed and fed into the extruder at a controlled rate.", crops: [{ pos: "20% 45%", zoom: 2.0 }, { pos: "30% 55%", zoom: 2.2 }, { pos: "15% 35%", zoom: 1.9 }] },
-    { title: "Screen Changer",    icon: "assembly",    detail: "Auto screen-changer filters contamination without stopping the line.", crops: [{ pos: "50% 40%", zoom: 2.1 }, { pos: "55% 50%", zoom: 2.3 }, { pos: "45% 30%", zoom: 2.0 }] },
-    { title: "Pelletizing Head",  icon: "calibration", detail: "Molten resin is cut into uniform pellets and cooled for reuse.", crops: [{ pos: "75% 60%", zoom: 2.2 }, { pos: "80% 70%", zoom: 2.4 }, { pos: "70% 50%", zoom: 2.1 }] },
+    { title: "Crusher & Feeding", icon: "power",       detail: "Scrap film and edge trim are crushed and fed into the extruder at a controlled rate." },
+    { title: "Screen Changer",    icon: "assembly",    detail: "Auto screen-changer filters contamination without stopping the line." },
+    { title: "Pelletizing Head",  icon: "calibration", detail: "Molten resin is cut into uniform pellets and cooled for reuse." },
   ],
   "printing": [
-    { title: "Unwind & Registration", icon: "power",       detail: "Web tension and registration marks are tracked before the film reaches the first print station.", crops: [{ pos: "15% 45%", zoom: 2.0 }, { pos: "25% 55%", zoom: 2.2 }, { pos: "10% 35%", zoom: 1.9 }] },
-    { title: "CI Print Drum",         icon: "assembly",    detail: "Each colour station transfers ink from the anilox roller onto the central impression drum.", crops: [{ pos: "50% 40%", zoom: 2.1 }, { pos: "55% 30%", zoom: 2.3 }, { pos: "45% 50%", zoom: 2.0 }] },
-    { title: "Drying & Rewind",       icon: "calibration", detail: "Inline dryers set each colour before the finished print is wound onto the rewind shaft.", crops: [{ pos: "80% 55%", zoom: 2.2 }, { pos: "85% 65%", zoom: 2.4 }, { pos: "75% 45%", zoom: 2.1 }] },
+    { title: "Unwind & Registration", icon: "power",       detail: "Web tension and registration marks are tracked before the film reaches the first print station." },
+    { title: "CI Print Drum",         icon: "assembly",    detail: "Each colour station transfers ink from the anilox roller onto the central impression drum." },
+    { title: "Drying & Rewind",       icon: "calibration", detail: "Inline dryers set each colour before the finished print is wound onto the rewind shaft." },
   ],
 };
 
@@ -272,8 +274,13 @@ export default function ProductDetail({ family, category, related }: Props) {
         <div className="pdv2-collage" aria-hidden="true">
           {collagePool.map((f, i) => (
             <div key={`${f.slug}-${i}`} className="pdv2-collage__panel">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={familyImage(f)} alt="" />
+              <Image
+                src={familyImage(f)}
+                alt=""
+                fill
+                sizes="33vw"
+                style={{ width: "78%", height: "78%", left: 0, right: 0, top: 0, bottom: 0, margin: "auto", objectFit: "contain", filter: "drop-shadow(0 10px 24px rgba(0,0,0,0.5))" }}
+              />
             </div>
           ))}
         </div>
@@ -305,8 +312,15 @@ export default function ProductDetail({ family, category, related }: Props) {
               <div className="pdv2-main-img pdv2-main-img--solo">
                 <div className="pdv2-main-img__teal-bar" aria-hidden="true" />
                 <div className="pdv2-main-img__parallax" ref={heroImgRef}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={heroImg} alt={family.name} key={activePhoto} />
+                  <Image
+                    src={heroImg}
+                    alt={family.name}
+                    key={activePhoto}
+                    fill
+                    priority
+                    sizes="(max-width: 900px) 90vw, 56vw"
+                    style={{ width: "90%", height: "90%", left: 0, right: 0, top: 0, bottom: 0, margin: "auto", objectFit: "contain", filter: "drop-shadow(0 24px 56px rgba(0,0,0,0.55))" }}
+                  />
                 </div>
                 <span className="pdv2-main-img__badge">{family.series}</span>
               </div>
@@ -321,8 +335,7 @@ export default function ProductDetail({ family, category, related }: Props) {
                       onClick={() => setActivePhoto(i)}
                       aria-label={`Photo ${i + 1} of ${photos.length}`}
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={p} alt="" />
+                      <Image src={p} alt="" fill sizes="68px" style={{ objectFit: "contain", padding: "4px" }} />
                     </button>
                   ))}
                 </div>
@@ -434,10 +447,11 @@ export default function ProductDetail({ family, category, related }: Props) {
                   onClick={() => setVideoPlaying(true)}
                   aria-label="Play video"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={`https://img.youtube.com/vi/${videos[activeVideo].id}/maxresdefault.jpg`}
                     alt={videos[activeVideo].title}
+                    fill
+                    sizes="(max-width: 900px) 90vw, 56vw"
                     className="pdv2-video-poster__img"
                   />
                   <div className="pdv2-video-poster__overlay" />
@@ -473,8 +487,7 @@ export default function ProductDetail({ family, category, related }: Props) {
                     onClick={() => { setActiveVideo(i); setVideoPlaying(false); }}
                   >
                     <div className="pdv2-vlist-thumb">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={`https://img.youtube.com/vi/${v.id}/mqdefault.jpg`} alt="" />
+                      <Image src={`https://img.youtube.com/vi/${v.id}/mqdefault.jpg`} alt="" fill sizes="72px" style={{ objectFit: "cover" }} />
                       <div className="pdv2-vlist-play">
                         <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M5 3.5l8 4.5-8 4.5z"/></svg>
                       </div>
@@ -521,8 +534,7 @@ export default function ProductDetail({ family, category, related }: Props) {
               {/* machine breakdown — callout pins on the photo */}
               {callouts.length > 0 && (
                 <div className="pdv2-breakdown-frame" data-reveal="scale">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={heroImg} alt={family.name} className="pdv2-breakdown-frame__img" />
+                  <Image src={heroImg} alt={family.name} fill sizes="(max-width: 900px) 90vw, 70vw" className="pdv2-breakdown-frame__img" />
                   {callouts.map((c) => (
                     <div key={c.label} className="pdv2-pin" style={{ left: `${c.pos.x}%`, top: `${c.pos.y}%` }}>
                       <span className="pdv2-pin__dot" aria-hidden="true" />
@@ -535,18 +547,13 @@ export default function ProductDetail({ family, category, related }: Props) {
                 </div>
               )}
 
-              {/* Part N breakdown — real photo, cropped/zoomed per part, not fabricated component shots */}
+              {/* Part N breakdown — same real product photo shown in full per part, not fabricated component shots */}
               {parts.map((part, i) => (
                 <div key={part.title} className="pdv2-part" data-reveal>
                   <div className="pdv2-part__head">Part {i + 1} — {part.title}</div>
-                  <div className="pdv2-part__row">
-                    {part.crops.map((crop, ci) => (
-                      <div key={ci} className="pdv2-part__shot">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={heroImg} alt={`${family.name} — ${part.title}`} style={{ objectPosition: crop.pos, transform: `scale(${crop.zoom})` }} />
-                        <span className="pdv2-part__icon"><ProcessIcon name={part.icon} size={26} /></span>
-                      </div>
-                    ))}
+                  <div className="pdv2-part__shot">
+                    <Image src={heroImg} alt={`${family.name} — ${part.title}`} fill sizes="(max-width: 900px) 90vw, 70vw" />
+                    <span className="pdv2-part__icon"><ProcessIcon name={part.icon} size={26} /></span>
                   </div>
                   <p className="pdv2-part__detail">{part.detail}</p>
                 </div>
@@ -566,8 +573,7 @@ export default function ProductDetail({ family, category, related }: Props) {
                       <div key={i} className="pdv2-guide-card">
                         <div className="pdv2-guide-card__media">
                           {step.image ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={step.image} alt={step.title} loading="lazy" />
+                            <Image src={step.image} alt={step.title} fill sizes="(max-width: 700px) 90vw, 45vw" />
                           ) : (
                             <span className="pdv2-guide-card__icon">
                               <ProcessIcon name={resolveIcon(step.title)} size={40} />
@@ -626,8 +632,7 @@ export default function ProductDetail({ family, category, related }: Props) {
             <div className="pdv2-tabpane">
               <div className="pdv2-sample" data-reveal="scale">
                 <div className="pdv2-sample__img">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={sample.img} alt={sample.heading} />
+                  <Image src={sample.img} alt={sample.heading} fill sizes="(max-width: 700px) 90vw, 380px" style={{ width: "82%", height: "82%", left: 0, right: 0, top: 0, bottom: 0, margin: "auto" }} />
                 </div>
                 <div className="pdv2-sample__body">
                   <h3>{sample.heading}</h3>
@@ -661,8 +666,7 @@ export default function ProductDetail({ family, category, related }: Props) {
                     {uniqueGalleryPhotos.map((img, i) => (
                       <div key={i} className="pdv2-gallery-cell">
                         <div className="pdv2-gallery-cell__img">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={img.src} alt={img.caption} loading="lazy" />
+                          <Image src={img.src} alt={img.caption} fill sizes="(max-width: 700px) 45vw, 30vw" style={{ width: "82%", height: "82%", left: 0, right: 0, top: 0, bottom: 0, margin: "auto" }} />
                         </div>
                         <span className="pdv2-gallery-cell__caption">{img.caption}</span>
                       </div>
@@ -708,8 +712,7 @@ export default function ProductDetail({ family, category, related }: Props) {
                 <div className="pdv2-dv-box__media">
                   {photos.length > 0 ? (
                     <>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={photos[idx]} alt={`${stage.label} — photo ${idx + 1} of ${photos.length}`} loading="lazy" key={idx} />
+                      <Image src={photos[idx]} alt={`${stage.label} — photo ${idx + 1} of ${photos.length}`} fill sizes="(max-width: 900px) 100vw, 1280px" key={idx} />
                       {photos.length > 1 && (
                         <div className="pdv2-dv-box__nav">
                           <button type="button" className="pdv2-dv-box__nav-btn" onClick={() => setIdx(idx - 1)} aria-label="Previous photo">‹</button>
@@ -857,8 +860,7 @@ export default function ProductDetail({ family, category, related }: Props) {
               {related.map(r => (
                 <Link key={r.slug} href={`/products/${r.category}/${r.slug}`} className="pdv2-rel-card">
                   <div className="pdv2-rel-card__img">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={familyImage(r)} alt={r.name} loading="lazy" />
+                    <Image src={familyImage(r)} alt={r.name} fill sizes="(max-width: 700px) 45vw, 22vw" style={{ width: "86%", height: "86%", left: 0, right: 0, top: 0, bottom: 0, margin: "auto" }} />
                   </div>
                   <div className="pdv2-rel-card__body">
                     <span className="pdv2-rel-card__series">{r.series}</span>
@@ -876,8 +878,7 @@ export default function ProductDetail({ family, category, related }: Props) {
       ══════════════════════════════════════════════════ */}
       <section className="pdv2-cta-band" aria-label="Get in touch">
         <div className="pdv2-cta-band__img-side" aria-hidden="true">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/machines/bag-samples.png" alt="" />
+          <Image src="/machines/bag-samples.png" alt="" fill sizes="(max-width: 700px) 100vw, 50vw" style={{ objectFit: "cover", opacity: 0.55 }} />
           <div className="pdv2-cta-band__img-overlay" />
           <div className="pdv2-cta-band__img-text">
             <p>Be up to date with the latest<br/>news about Ashal Innomach</p>

@@ -114,6 +114,15 @@ export default function FlexoPrintingPage() {
         [data-theme="light"] .fp-dark [style*="color:#fff"],
         [data-theme="light"] .fp-dark [style*="color: white"],
         [data-theme="light"] .fp-dark [style*="color:white"] { color: #fff !important; }
+
+        @media (max-width: 860px) {
+          .fp-hero-grid { grid-template-columns: 1fr !important; }
+          .fp-hero-img { aspect-ratio: 4/3 !important; }
+          .fp-tier-grid { grid-template-columns: repeat(2,1fr) !important; }
+          .fp-kv-grid { grid-template-columns: repeat(2,1fr) !important; }
+          .fp-series-row { grid-template-columns: 1fr !important; }
+          .fp-substrate-grid { grid-template-columns: 1fr !important; }
+        }
       `}</style>
 
       {/* ── HERO GALLERY ── */}
@@ -131,10 +140,10 @@ export default function FlexoPrintingPage() {
             <span style={{ color:"rgba(255,255,255,0.78)" }}>Flexographic Printing</span>
           </p>
 
-          <div style={{ display:"grid", gridTemplateColumns:"1fr clamp(260px,34vw,480px)", gap:"3rem", alignItems:"end" }}>
+          <div className="fp-hero-grid" style={{ display:"grid", gridTemplateColumns:"1fr clamp(260px,34vw,480px)", gap:"3rem", alignItems:"end" }}>
 
             {/* main image */}
-            <div style={{ position:"relative", aspectRatio:"16/9", background:"#0d1614", display:"flex", alignItems:"center", justifyContent:"center" }}>
+            <div className="fp-hero-img" style={{ position:"relative", aspectRatio:"16/9", background:"#0d1614", display:"flex", alignItems:"center", justifyContent:"center" }}>
               <CldImage
                 src={GALLERY[activeImg].src}
                 alt={GALLERY[activeImg].alt}
@@ -207,7 +216,7 @@ export default function FlexoPrintingPage() {
             <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.68rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--slate-30)", marginBottom:".8rem" }}>
               Printing colours
             </div>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:".75rem" }}>
+            <div className="fp-tier-grid" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:".75rem" }}>
               {COLOUR_TIERS.map(ct => (
                 <button key={ct.slug} onClick={() => setActiveTier(ct.slug)}
                   className={`fp-tier-btn${activeTier===ct.slug?" fp-tier-btn--active":""}`}>
@@ -235,7 +244,7 @@ export default function FlexoPrintingPage() {
           </div>
 
           {/* selected model key specs */}
-          <div style={{
+          <div className="fp-kv-grid" style={{
             display:"grid", gridTemplateColumns:"repeat(4,1fr)",
             gap:"1px", background:"var(--line)",
             border:"1px solid var(--line)",
@@ -276,7 +285,7 @@ export default function FlexoPrintingPage() {
 
           <div style={{ display:"flex", flexDirection:"column", gap:"3rem" }}>
             {families.map((f, fi) => (
-              <article key={f.slug} style={{ display:"grid", gridTemplateColumns:"280px 1fr", gap:"3rem", paddingBottom:"3rem", borderBottom:"1px solid var(--line)" }}>
+              <article key={f.slug} className="fp-series-row" style={{ display:"grid", gridTemplateColumns:"280px 1fr", gap:"3rem", paddingBottom:"3rem", borderBottom:"1px solid var(--line)" }}>
 
                 {/* left — machine image + tier info */}
                 <div style={{ display:"flex", flexDirection:"column", gap:"1.2rem" }}>
@@ -314,7 +323,7 @@ export default function FlexoPrintingPage() {
       {/* ── SUBSTRATE SECTION ── */}
       <section className="fp-dark" style={{ background:"#0d1614", padding:"4rem 0" }}>
         <div className="wrap">
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4rem", alignItems:"center" }}>
+          <div className="fp-substrate-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4rem", alignItems:"center" }}>
             <div>
               <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--brand-red)", display:"block", marginBottom:".6rem" }}>
                 Substrate compatibility

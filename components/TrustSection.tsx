@@ -206,6 +206,40 @@ function RollingWords() {
 }
 
 // ─────────────────────────────────────────────
+// CAPABILITY DOSSIER — right-side panel replacing the plain paragraph.
+// Reads like a spec sheet: a proof-line with rolling word, then the
+// concrete reasons a manufacturer picks this vendor.
+// ─────────────────────────────────────────────
+const DOSSIER = [
+  { tag: "01", title: "Engineering", copy: "In-house R&D team designs and stress-tests every line before it ships." },
+  { tag: "02", title: "Export",      copy: "Direct factory pricing with full documentation for customs in 80+ countries." },
+  { tag: "03", title: "Aftercare",   copy: "Spare parts and technical support for the life of the machine, not just the warranty." },
+];
+
+function CapabilityDossier() {
+  return (
+    <div className="ts-dossier">
+      <p className="ts-desc">
+        Wenzhou Asal Innomach Technology, trusted in
+        <br/><RollingWords />
+      </p>
+
+      <ul className="ts-dossier__list">
+        {DOSSIER.map((d) => (
+          <li className="ts-dossier__item" key={d.tag}>
+            <span className="ts-dossier__tag">{d.tag}</span>
+            <span className="ts-dossier__body">
+              <span className="ts-dossier__title">{d.title}</span>
+              <span className="ts-dossier__copy">{d.copy}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // MAIN
 // ─────────────────────────────────────────────
 export default function TrustSection() {
@@ -267,7 +301,7 @@ export default function TrustSection() {
         /* ── header ── */
         .ts-header {
           display: grid; grid-template-columns: 1fr 1fr;
-          gap: 2rem 4rem; align-items: end;
+          gap: 2rem 4rem; align-items: start;
           margin-bottom: clamp(3rem, 5vw, 5rem);
           border-bottom: 1px solid rgba(255,255,255,.07);
           padding-bottom: clamp(2rem, 3.5vw, 3.5rem);
@@ -294,10 +328,15 @@ export default function TrustSection() {
           -webkit-text-fill-color: transparent;
           background-clip: text;
         }
+        .ts-dossier {
+          display: flex; flex-direction: column;
+          gap: clamp(1.25rem, 2.2vw, 1.75rem);
+          padding-top: .5rem;
+        }
         .ts-desc {
           color: rgba(248,250,252,0.75);
           font-size: clamp(.88rem, 1.15vw, 1rem);
-          line-height: 1.75; max-width: 42ch; align-self: end;
+          line-height: 1.75; max-width: 42ch;
         }
         .ts-roll {
           display: block;
@@ -321,6 +360,34 @@ export default function TrustSection() {
           -webkit-text-fill-color: transparent;
           background-clip: text;
           white-space: nowrap;
+        }
+
+        /* ── dossier list ── */
+        .ts-dossier__list {
+          list-style: none; margin: 0; padding: 0;
+          display: flex; flex-direction: column;
+        }
+        .ts-dossier__item {
+          display: flex; align-items: baseline; gap: 1rem;
+          padding: .85rem 0;
+          border-top: 1px solid rgba(255,255,255,.08);
+        }
+        .ts-dossier__tag {
+          font-family: var(--ff-mono); font-size: .68rem;
+          letter-spacing: .08em; color: var(--brand-amber);
+          flex: 0 0 auto; padding-top: .18rem;
+        }
+        .ts-dossier__body {
+          display: flex; flex-direction: column; gap: .2rem;
+        }
+        .ts-dossier__title {
+          font-family: var(--ff-display);
+          font-size: clamp(.95rem, 1.3vw, 1.05rem);
+          color: #f8fafc; letter-spacing: -.005em;
+        }
+        .ts-dossier__copy {
+          font-size: .82rem; line-height: 1.55;
+          color: rgba(248,250,252,.62); max-width: 40ch;
         }
 
         /* ── stats ── */
@@ -367,6 +434,7 @@ export default function TrustSection() {
           .ts-headline { font-size: clamp(2rem,8vw,3.2rem); }
           .ts-desc { font-size: 0.88rem; }
           .ts-stat__val { font-size: clamp(1.8rem,7vw,2.8rem); }
+          .ts-dossier__item { padding: .7rem 0; gap: .75rem; }
         }
         @media(max-width:440px){
           .ts-stats { grid-template-columns: repeat(2,1fr); }
@@ -392,6 +460,9 @@ export default function TrustSection() {
         [data-theme="light"] .ts-stat        { border-right-color: rgba(43,191,179,0.15); }
         [data-theme="light"] .ts-header      { border-bottom-color: rgba(43,191,179,0.18); }
         [data-theme="light"] .ts-roll__word { background: none; -webkit-text-fill-color: initial; color: var(--brand-amber); }
+        [data-theme="light"] .ts-dossier__item  { border-top-color: rgba(43,191,179,0.18); }
+        [data-theme="light"] .ts-dossier__title { color: #0d2220; }
+        [data-theme="light"] .ts-dossier__copy  { color: rgba(13,34,32,0.6); }
       `}</style>
 
       <section className="trust-section" aria-label="Why trust CX Machinery">
@@ -415,10 +486,7 @@ export default function TrustSection() {
                 Supported.
               </h2>
             </div>
-            <p className="ts-desc">
-              Wenzhou Asal Innomach Technology, trusted in
-              <br/><RollingWords />
-            </p>
+            <CapabilityDossier />
           </div>
 
           {/* Stats */}

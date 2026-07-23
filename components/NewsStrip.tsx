@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { latestArticles, type NewsArticle } from "@/lib/news";
 
 function fmt(iso: string) {
@@ -264,6 +265,7 @@ export default function NewsStrip() {
         }
         .ns2-img {
           width: 58%; height: 72%;
+          margin: auto; left: 0; right: 0; top: 0; bottom: 0;
           object-fit: contain;
           filter: drop-shadow(0 6px 16px rgba(0,0,0,0.5));
           transition: transform 0.45s cubic-bezier(0.16,1,0.3,1), filter .35s ease;
@@ -424,8 +426,7 @@ export default function NewsStrip() {
               aria-hidden={i >= news.length}
             >
               <div className="ns2-img-wrap">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={a.image} alt={a.title} className="ns2-img" />
+                <Image src={a.image} alt={a.title} fill sizes="(max-width: 700px) 90vw, 340px" className="ns2-img" />
                 <div className="ns2-img-bar" />
               </div>
 

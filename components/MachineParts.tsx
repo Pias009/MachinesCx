@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
 import type { MachinePart } from "@/lib/products";
 
 /* ── real, admin-added machine parts — separate from the older
@@ -17,8 +18,7 @@ function PartPhotos({ images, name }: { images: string[]; name: string }) {
   }
   return (
     <div className="pdv2-mp-card__media">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={photos[Math.min(active, photos.length - 1)]} alt={name} loading="lazy" />
+      <Image src={photos[Math.min(active, photos.length - 1)]} alt={name} fill sizes="(max-width: 700px) 90vw, 380px" />
       {photos.length > 1 && (
         <div className="pdv2-mp-thumbs" role="tablist" aria-label={`${name} photos`}>
           {photos.map((p, i) => (
@@ -30,8 +30,7 @@ function PartPhotos({ images, name }: { images: string[]; name: string }) {
               className={`pdv2-mp-thumb${active === i ? " pdv2-mp-thumb--on" : ""}`}
               onClick={() => setActive(i)}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p} alt="" />
+              <Image src={p} alt="" fill sizes="44px" />
             </button>
           ))}
         </div>
@@ -59,8 +58,7 @@ function PartCard({ part }: { part: MachinePart }) {
                   <div className="pdv2-mp-step__body">
                     {s.image && (
                       <div className="pdv2-mp-step__img">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={s.image} alt={s.title} loading="lazy" />
+                        <Image src={s.image!} alt={s.title} width={64} height={64} />
                       </div>
                     )}
                     <div>

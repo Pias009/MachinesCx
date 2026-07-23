@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { ProductFamily, CategorySlug } from "@/lib/products";
 import { categories, familiesByCategory, familyImage, familyBySlug } from "@/lib/products";
 
@@ -149,8 +150,7 @@ export function MachineGrid({
             onClick={() => { onFamily(f); onModel(0); }}
           >
             <span className="ci-mgrid__card-img-wrap">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={familyImage(f)} alt="" className="ci-mgrid__card-img" />
+              <Image src={familyImage(f)} alt="" fill sizes="(max-width: 700px) 45vw, 180px" className="ci-mgrid__card-img" />
               {family?.slug === f.slug && (
                 <span className="ci-mgrid__card-check">
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="#04211e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -286,8 +286,7 @@ export function ImageGallery({
     <div className="ci-gallery">
       {images.map((src, i) => (
         <div key={i} className="ci-gallery__item">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt="" />
+          <Image src={src} alt="" fill sizes="56px" />
           <button type="button" className="ci-gallery__remove" onClick={() => onRemove(i)} aria-label="Remove photo">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6m0-6l-6 6" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" /></svg>
           </button>
@@ -370,8 +369,7 @@ export function InsightPanel({
   return (
     <aside className="ci-insight">
       <div className="ci-insight__img-wrap">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={familyImage(family)} alt={family.name} className="ci-insight__img" />
+        <Image src={familyImage(family)} alt={family.name} fill sizes="320px" className="ci-insight__img" />
         <span className="ci-insight__live"><span className="ci-insight__live-dot" />Spec sheet</span>
       </div>
       <div className="ci-insight__series">{family.series}</div>
@@ -417,8 +415,7 @@ export function InsightPanel({
           <span className="ci-related__label">Related machines</span>
           {related.slice(0, 3).map(r => (
             <Link key={r.slug} href={`/products/${r.category}/${r.slug}`} className="ci-related__row" target="_blank" rel="noopener noreferrer">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={familyImage(r)} alt="" className="ci-related__img" />
+              <Image src={familyImage(r)} alt="" width={40} height={40} className="ci-related__img" />
               <span className="ci-related__name">{r.name}</span>
             </Link>
           ))}

@@ -661,8 +661,6 @@ export default function ScrollHome() {
               fill
               sizes="90vw"
               style={{
-                width: "85%", height: "100%",
-                margin: "auto",
                 objectFit: "contain",
                 filter: "drop-shadow(0 8px 20px rgba(0,0,0,0.65))",
                 transition: "opacity 0.25s ease",
@@ -938,8 +936,8 @@ export default function ScrollHome() {
                     fill
                     sizes="(max-width: 700px) 45vw, 22vw"
                     style={{
-                      width: "82%", height: "82%", margin: "auto",
                       objectFit: "contain",
+                      padding: "9%",
                       filter: "drop-shadow(0 10px 16px rgba(0,0,0,0.55))",
                     }}
                   />

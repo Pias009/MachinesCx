@@ -27,12 +27,12 @@ export default function Home() {
       <ClientJourney />
 
       {/* Below the fold — all deferred */}
-      <TrustSection />
-      <ParticlePortfolio />
+      <SectionReveal delay={80}><TrustSection /></SectionReveal>
+      <SectionReveal delay={80}><ParticlePortfolio /></SectionReveal>
       <SectionReveal delay={80}><FlexoStrip /></SectionReveal>
-      <PrintingShowcase />
-      <MachineCatalogSection />
-      <ConfiguratorCTA />
+      <SectionReveal delay={80}><PrintingShowcase /></SectionReveal>
+      <SectionReveal delay={80}><MachineCatalogSection /></SectionReveal>
+      <SectionReveal delay={80}><ConfiguratorCTA /></SectionReveal>
       <SectionReveal delay={80}><NewsStrip /></SectionReveal>
 
     </>

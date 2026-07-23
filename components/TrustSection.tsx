@@ -185,21 +185,39 @@ const ROLL_WORDS = [
 
 function RollingWords() {
   const [i, setI] = useState(0);
+  const [prev, setPrev] = useState<number | null>(null);
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
-    const id = setInterval(() => setI(n => (n + 1) % ROLL_WORDS.length), 2200);
+    const id = setInterval(() => {
+      setI(n => {
+        setPrev(n);
+        return (n + 1) % ROLL_WORDS.length;
+      });
+    }, 2400);
     return () => clearInterval(id);
   }, []);
 
+  // clear the outgoing word once its exit animation has finished
+  useEffect(() => {
+    if (prev === null) return;
+    const t = setTimeout(() => setPrev(null), 650);
+    return () => clearTimeout(t);
+  }, [prev]);
+
   return (
     <span className="ts-roll" aria-live="off">
-      <span className="ts-roll__track" style={{ transform: `translateY(-${i * 100}%)` }}>
-        {ROLL_WORDS.map((w, idx) => (
-          <span className="ts-roll__word" key={idx} aria-hidden={idx !== i}>{w}</span>
-        ))}
-      </span>
+      <span className="ts-roll__glow" aria-hidden="true" />
+      {ROLL_WORDS.map((w, idx) => {
+        if (idx !== i && idx !== prev) return null;
+        const state = idx === i ? "in" : "out";
+        return (
+          <span className={`ts-roll__word ts-roll__word--${state}`} key={idx} aria-hidden={idx !== i}>
+            {w}
+          </span>
+        );
+      })}
       <span className="sr-only">{ROLL_WORDS[i]}</span>
     </span>
   );
@@ -331,27 +349,55 @@ export default function TrustSection() {
         .ts-dossier {
           display: flex; flex-direction: column;
           gap: clamp(1.25rem, 2.2vw, 1.75rem);
-          padding-top: .5rem;
+          position: relative;
+          padding: clamp(1.5rem, 2.4vw, 2.25rem);
+          background: linear-gradient(155deg, rgba(20,38,35,0.65) 0%, rgba(10,22,20,0.55) 100%);
+          border: 1px solid rgba(255,255,255,0.09);
+          border-radius: 16px;
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          box-shadow: 0 24px 48px -24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+        .ts-dossier::before {
+          content: "";
+          position: absolute; top: 0; left: clamp(1.5rem, 2.4vw, 2.25rem);
+          width: 2.5rem; height: 2px;
+          background: linear-gradient(90deg, var(--brand-amber), var(--brand-rose));
         }
         .ts-desc {
-          color: rgba(248,250,252,0.75);
-          font-size: clamp(.88rem, 1.15vw, 1rem);
-          line-height: 1.75; max-width: 42ch;
+          color: #ffffff;
+          font-weight: 700;
+          font-size: clamp(1rem, 1.35vw, 1.15rem);
+          line-height: 1.6; max-width: 42ch;
+          letter-spacing: -.005em;
         }
         .ts-roll {
           display: block;
-          height: clamp(1.7rem, 2.6vw, 2.2rem);
-          overflow: hidden;
-          margin-top: .3rem;
+          position: relative;
+          height: clamp(1.9rem, 2.8vw, 2.4rem);
+          margin-top: .35rem;
+          perspective: 600px;
         }
-        .ts-roll__track {
-          display: flex; flex-direction: column;
-          transition: transform .6s cubic-bezier(0.16,1,0.3,1);
+        .ts-roll__glow {
+          position: absolute;
+          left: -1rem; top: 50%;
+          width: clamp(2.5rem, 6vw, 4rem); height: clamp(2.5rem, 6vw, 4rem);
+          transform: translateY(-50%);
+          background: radial-gradient(circle, rgba(245,158,11,0.35) 0%, transparent 72%);
+          filter: blur(6px);
+          pointer-events: none;
+          animation: ts-roll-glow-pulse 2.4s ease-in-out infinite;
+        }
+        @keyframes ts-roll-glow-pulse {
+          0%, 100% { opacity: .5; transform: translateY(-50%) scale(0.9); }
+          50%      { opacity: 1;  transform: translateY(-50%) scale(1.15); }
         }
         .ts-roll__word {
+          position: absolute;
+          left: 0; top: 0;
           display: block;
-          height: clamp(1.7rem, 2.6vw, 2.2rem);
-          line-height: clamp(1.7rem, 2.6vw, 2.2rem);
+          height: 100%;
+          line-height: clamp(1.9rem, 2.8vw, 2.4rem);
           font-family: var(--ff-display);
           font-size: clamp(1.3rem, 2.4vw, 1.9rem);
           letter-spacing: .01em;
@@ -360,6 +406,23 @@ export default function TrustSection() {
           -webkit-text-fill-color: transparent;
           background-clip: text;
           white-space: nowrap;
+          transform-style: preserve-3d;
+          will-change: transform, filter, opacity;
+        }
+        .ts-roll__word--in {
+          animation: ts-roll-in .6s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .ts-roll__word--out {
+          animation: ts-roll-out .5s cubic-bezier(0.4,0,0.7,0.4) both;
+        }
+        @keyframes ts-roll-in {
+          0%   { opacity: 0; transform: rotateX(-70deg) translateY(30%); filter: blur(10px); }
+          60%  { filter: blur(1px); }
+          100% { opacity: 1; transform: rotateX(0deg) translateY(0); filter: blur(0); }
+        }
+        @keyframes ts-roll-out {
+          0%   { opacity: 1; transform: rotateX(0deg) translateY(0); filter: blur(0); }
+          100% { opacity: 0; transform: rotateX(70deg) translateY(-30%); filter: blur(10px); }
         }
 
         /* ── dossier list ── */
@@ -387,7 +450,7 @@ export default function TrustSection() {
         }
         .ts-dossier__copy {
           font-size: .82rem; line-height: 1.55;
-          color: rgba(248,250,252,.62); max-width: 40ch;
+          color: rgba(248,250,252,.8); max-width: 40ch;
         }
 
         /* ── stats ── */
@@ -443,7 +506,8 @@ export default function TrustSection() {
         @media(prefers-reduced-motion:reduce){
           .ts-header{opacity:1!important;transform:none!important;transition:none!important;}
           .ts-stat::after{display:none;}
-          .ts-roll__track{transition:none!important;}
+          .ts-roll__word{animation:none!important;opacity:1!important;transform:none!important;filter:none!important;}
+          .ts-roll__glow{animation:none!important;}
         }
 
         /* ── Light mode ── */
@@ -452,7 +516,12 @@ export default function TrustSection() {
         [data-theme="light"] .ts-kicker::before { background: var(--brand-amber); }
         [data-theme="light"] .ts-headline   { color: #0d2220; }
         [data-theme="light"] .ts-headline em { background: none; -webkit-text-fill-color: initial; color: var(--brand-amber); }
-        [data-theme="light"] .ts-desc       { color: rgba(13,34,32,0.72); }
+        [data-theme="light"] .ts-desc       { color: rgba(13,34,32,0.85); }
+        [data-theme="light"] .ts-dossier {
+          background: linear-gradient(155deg, rgba(255,255,255,0.7) 0%, rgba(240,253,251,0.55) 100%);
+          border-color: rgba(43,191,179,0.18);
+          box-shadow: 0 24px 48px -28px rgba(13,34,32,0.18), inset 0 1px 0 rgba(255,255,255,0.5);
+        }
         [data-theme="light"] .ts-stat__val   { color: #0d2220; }
         [data-theme="light"] .ts-stat__label { color: rgba(13,34,32,0.72); }
         [data-theme="light"] .ts-stat__sub   { color: rgba(13,34,32,0.6); }

@@ -171,7 +171,6 @@ export default function CategoryPageClient({ category, families, allCategories }
                   sizes="(max-width: 880px) 0px, 26vw"
                   priority={i === 0}
                   loading={i === 0 ? undefined : "lazy"}
-                  style={{ inset: 0, margin: "auto", width: "82%", height: "82%", objectFit: "contain", filter: "drop-shadow(0 8px 24px rgba(0,0,0,0.55))" }}
                 />
               </div>
             ))}
@@ -274,7 +273,6 @@ export default function CategoryPageClient({ category, families, allCategories }
                       fill
                       sizes="(max-width: 700px) 90vw, (max-width: 1100px) 45vw, 30vw"
                       loading="lazy"
-                      style={{ inset: 0, margin: "auto", width: "74%", height: "74%", objectFit: "contain", filter: "drop-shadow(0 8px 22px rgba(0,0,0,0.45))" }}
                     />
                   </div>
 

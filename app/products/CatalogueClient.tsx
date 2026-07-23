@@ -56,7 +56,7 @@ export default function CatalogueClient({
             fill
             sizes="46vw"
             priority
-            style={{ inset: 0, margin: "auto", width: "90%", height: "78%", objectFit: "contain", filter: "drop-shadow(0 20px 40px rgba(15,23,42,0.15))" }}
+            style={{ objectFit: "contain", padding: "5% 11%", filter: "drop-shadow(0 20px 40px rgba(15,23,42,0.15))" }}
           />
         </div>
         <div className="wrap">
@@ -134,7 +134,6 @@ export default function CatalogueClient({
                       fill
                       sizes="(max-width: 700px) 90vw, (max-width: 1100px) 45vw, 30vw"
                       loading="lazy"
-                      style={{ inset: 0, margin: "auto", width: "88%", height: "86%", objectFit: "contain", filter: "drop-shadow(0 12px 22px rgba(15,23,42,0.12))" }}
                       className="machine-stage__img"
                     />
                   </div>

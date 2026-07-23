@@ -279,7 +279,6 @@ export default function ProductDetail({ family, category, related }: Props) {
                 alt=""
                 fill
                 sizes="33vw"
-                style={{ width: "78%", height: "78%", left: 0, right: 0, top: 0, bottom: 0, margin: "auto", objectFit: "contain", filter: "drop-shadow(0 10px 24px rgba(0,0,0,0.5))" }}
               />
             </div>
           ))}
@@ -319,7 +318,6 @@ export default function ProductDetail({ family, category, related }: Props) {
                     fill
                     priority
                     sizes="(max-width: 900px) 90vw, 56vw"
-                    style={{ width: "90%", height: "90%", left: 0, right: 0, top: 0, bottom: 0, margin: "auto", objectFit: "contain", filter: "drop-shadow(0 24px 56px rgba(0,0,0,0.55))" }}
                   />
                 </div>
                 <span className="pdv2-main-img__badge">{family.series}</span>
@@ -632,7 +630,7 @@ export default function ProductDetail({ family, category, related }: Props) {
             <div className="pdv2-tabpane">
               <div className="pdv2-sample" data-reveal="scale">
                 <div className="pdv2-sample__img">
-                  <Image src={sample.img} alt={sample.heading} fill sizes="(max-width: 700px) 90vw, 380px" style={{ width: "82%", height: "82%", left: 0, right: 0, top: 0, bottom: 0, margin: "auto" }} />
+                  <Image src={sample.img} alt={sample.heading} fill sizes="(max-width: 700px) 90vw, 380px" />
                 </div>
                 <div className="pdv2-sample__body">
                   <h3>{sample.heading}</h3>
@@ -666,7 +664,7 @@ export default function ProductDetail({ family, category, related }: Props) {
                     {uniqueGalleryPhotos.map((img, i) => (
                       <div key={i} className="pdv2-gallery-cell">
                         <div className="pdv2-gallery-cell__img">
-                          <Image src={img.src} alt={img.caption} fill sizes="(max-width: 700px) 45vw, 30vw" style={{ width: "82%", height: "82%", left: 0, right: 0, top: 0, bottom: 0, margin: "auto" }} />
+                          <Image src={img.src} alt={img.caption} fill sizes="(max-width: 700px) 45vw, 30vw" />
                         </div>
                         <span className="pdv2-gallery-cell__caption">{img.caption}</span>
                       </div>
@@ -860,7 +858,7 @@ export default function ProductDetail({ family, category, related }: Props) {
               {related.map(r => (
                 <Link key={r.slug} href={`/products/${r.category}/${r.slug}`} className="pdv2-rel-card">
                   <div className="pdv2-rel-card__img">
-                    <Image src={familyImage(r)} alt={r.name} fill sizes="(max-width: 700px) 45vw, 22vw" style={{ width: "86%", height: "86%", left: 0, right: 0, top: 0, bottom: 0, margin: "auto" }} />
+                    <Image src={familyImage(r)} alt={r.name} fill sizes="(max-width: 700px) 45vw, 22vw" />
                   </div>
                   <div className="pdv2-rel-card__body">
                     <span className="pdv2-rel-card__series">{r.series}</span>

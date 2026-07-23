@@ -74,7 +74,7 @@ export default function SiteFooter() {
       <div className="wrap">
 
         {/* ── Main footer grid ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr auto", gap: "clamp(2rem,4vw,3.5rem)", paddingBottom: "2.5rem", borderBottom: "1px solid rgba(255,255,255,0.06)" }} className="footer-main-grid">
+        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr auto", gap: "clamp(2rem,4vw,3.5rem)", paddingBottom: "2.5rem" }} className="footer-main-grid">
 
           {/* Brand + QR codes */}
           <div className="footer-brand-block" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
@@ -85,11 +85,11 @@ export default function SiteFooter() {
                 </span>
                 <div>
                   <div className="footer-brand">Ashal<span style={{ color: "var(--brand-red)" }}>·</span>Innomach</div>
-                  <div className="footer-founded" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.45)", marginTop: "0.25rem" }}>SINCE 2008 · WENZHOU, CHINA</div>
+                  <div className="footer-founded" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.1em", marginTop: "0.25rem" }}>SINCE 2008 · WENZHOU, CHINA</div>
                 </div>
               </div>
 
-              <p className="footer-blurb" style={{ fontFamily: "var(--ff-body)", fontSize: "0.82rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.7, maxWidth: "30ch", marginTop: "1.5rem" }}>
+              <p className="footer-blurb" style={{ fontFamily: "var(--ff-body)", fontSize: "0.82rem", lineHeight: 1.7, maxWidth: "30ch", marginTop: "1.5rem" }}>
                 Designing and manufacturing blown-film lines, bag-making converters, and recycling systems shipped to 60+ countries.
               </p>
             </div>
@@ -100,13 +100,13 @@ export default function SiteFooter() {
                 <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "0.4rem", border: "1px solid rgba(255,255,255,0.08)" }}>
                   <img src="/qr-whatsapp.png" alt="WhatsApp QR" width={80} height={80} style={{ display: "block" }} />
                 </div>
-                <span className="footer-qr-label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.55rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>WhatsApp</span>
+                <span className="footer-qr-label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.55rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>WhatsApp</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem" }}>
                 <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "0.4rem", border: "1px solid rgba(255,255,255,0.08)" }}>
                   <img src="/qr-website.png" alt="Website QR" width={80} height={80} style={{ display: "block" }} />
                 </div>
-                <span className="footer-qr-label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.55rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.4)", textTransform: "uppercase" }}>Website</span>
+                <span className="footer-qr-label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.55rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>Website</span>
               </div>
             </div>
           </div>
@@ -117,7 +117,7 @@ export default function SiteFooter() {
 
           {/* Contact + Social */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem", minWidth: "180px" }}>
-            <h4 className="footer-contact-heading" style={{ fontFamily: "var(--ff-display)", fontSize: "0.85rem", letterSpacing: "0.06em", color: "#fff", textTransform: "uppercase", marginBottom: "0.25rem" }}>Contact</h4>
+            <h4 className="footer-contact-heading" style={{ fontFamily: "var(--ff-display)", fontSize: "0.85rem", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "0.25rem" }}>Contact</h4>
 
             <a href={`tel:${PHONE_TEL}`} className="footer-contact-link">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
@@ -158,26 +158,26 @@ export default function SiteFooter() {
         </div>
 
         {/* ── Certifications bar ── */}
-        <div className="footer-certs" style={{ display: "flex", alignItems: "center", gap: "2rem", paddingBlock: "1.25rem", borderBottom: "1px solid rgba(255,255,255,0.06)", flexWrap: "wrap" }}>
-          <span className="footer-certs__label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>Certifications</span>
+        <div className="footer-certs" style={{ display: "flex", alignItems: "center", gap: "2rem", paddingBlock: "1.25rem", flexWrap: "wrap" }}>
+          <span className="footer-certs__label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase" }}>Certifications</span>
           <span className="footer-certs__badges" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
             {["CE Certified", "ISO 9001", "SGS Verified"].map((cert) => (
-              <span key={cert} className="footer-cert-badge" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.5)", padding: "0.25rem 0.6rem", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "2px" }}>{cert}</span>
+              <span key={cert} className="footer-cert-badge" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.06em", padding: "0.25rem 0.6rem", borderRadius: "2px" }}>{cert}</span>
             ))}
           </span>
           <span className="footer-certs__spacer" style={{ flex: 1 }} />
-          <span className="footer-certs__stats" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.6rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.35)" }}>60+ Countries · 6 Continents · 18+ Machine Families</span>
+          <span className="footer-certs__stats" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.6rem", letterSpacing: "0.1em" }}>60+ Countries · 6 Continents · 18+ Machine Families</span>
         </div>
 
         {/* ── Bottom bar ── */}
         <div className="footer-bar">
-          <p className="footer-copyright" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem", color: "rgba(255,255,255,0.45)" }}>© {new Date().getFullYear()} {BRAND}. All specifications subject to change without notice.</p>
+          <p className="footer-copyright" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem" }}>© {new Date().getFullYear()} {BRAND}. All specifications subject to change without notice.</p>
           <div className="footer-bar__legal" style={{ display: "flex", gap: "1.5rem" }}>
             {LEGAL_LINKS.map((l) => (
-              <Link key={l.label} href={l.href} className="footer-legal-link" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.68rem", color: "rgba(255,255,255,0.35)", textDecoration: "none", letterSpacing: "0.04em" }}>{l.label}</Link>
+              <Link key={l.label} href={l.href} className="footer-legal-link" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.68rem", textDecoration: "none", letterSpacing: "0.04em" }}>{l.label}</Link>
             ))}
           </div>
-          <p className="footer-bar__company" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem", color: "rgba(255,255,255,0.45)" }}>Wenzhou Ashal Innomach Technology Co., Ltd.</p>
+          <p className="footer-bar__company" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem" }}>Wenzhou Ashal Innomach Technology Co., Ltd.</p>
         </div>
       </div>
     </footer>

@@ -1006,9 +1006,20 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .footer-contact-static svg { color: var(--brand-teal); flex-shrink: 0; }
 .footer-contact-static { font-size: .9rem; color: rgba(255,255,255,0.55); }
 
+.footer-main-grid { border-bottom: 1px solid rgba(255,255,255,0.06); }
+
+/* ── Certifications bar ── */
+.footer-certs { border-bottom: 1px solid rgba(255,255,255,0.06); }
+.footer-certs__label { color: rgba(255,255,255,0.35); }
+.footer-certs__stats { color: rgba(255,255,255,0.35); }
+.footer-cert-badge { color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.1); }
+
 /* ── Bar ── */
 .footer-bar { border-top: 1px solid rgba(255,255,255,0.06); padding-block: 1.2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .5rem; }
 .footer-bar p { font-family: var(--ff-mono); font-size: .72rem; letter-spacing: .04em; color: rgba(255,255,255,0.45); }
+.footer-copyright { color: rgba(255,255,255,0.45); }
+.footer-legal-link { color: rgba(255,255,255,0.35); }
+.footer-bar__company { color: rgba(255,255,255,0.45); }
 
 /* ── Column links ── */
 .footer-col-link { font-family: var(--ff-body); font-size: .82rem; color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s; line-height: 1.6; }
@@ -1078,6 +1089,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 
 /* ── Light mode ── */
 [data-theme="light"] .footer            { background: #ffffff; border-top-color: rgba(43,191,179,0.18); }
+[data-theme="light"] .footer-main-grid  { border-bottom-color: rgba(43,191,179,0.18); }
 [data-theme="light"] .footer-logo       { border-color: rgba(43,191,179,0.25); }
 [data-theme="light"] .footer-brand      { color: #0d2220; }
 [data-theme="light"] .footer-founded    { color: rgba(13,34,32,0.55); }
@@ -1093,6 +1105,9 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 [data-theme="light"] .footer-contact-static { color: rgba(13,34,32,0.55); }
 [data-theme="light"] .footer-col-link { color: rgba(13,34,32,0.6); }
 [data-theme="light"] .footer-col-link:hover { color: #0d2220; }
+[data-theme="light"] .footer-col-title { color: #0d2220; }
+[data-theme="light"] .footer-col { border-top-color: rgba(43,191,179,0.18); }
+[data-theme="light"] .footer-col-chev { color: rgba(13,34,32,0.4); }
 [data-theme="light"] .footer-social-icon { background: rgba(13,34,32,0.06); color: rgba(13,34,32,0.5); }
 [data-theme="light"] .footer-social-icon:hover { background: var(--brand-teal); color: #fff; }
 [data-theme="light"] .footer-bar        { border-top-color: rgba(43,191,179,0.18); }

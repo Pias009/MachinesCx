@@ -491,7 +491,7 @@ export default function HeroSplash() {
 
         {/* Hero copy — pinned to the top */}
         <div className="hs__main">
-          {hero.eyebrow && <span className="hs__eyebrow">{hero.eyebrow}</span>}
+          {hero.eyebrow && <span className="hs__eyebrow" suppressHydrationWarning>{hero.eyebrow}</span>}
           <h1 className="hs__h1">
             <span>{hero.headline1}</span>
             {hero.headline2 && <em>{hero.headline2}</em>}

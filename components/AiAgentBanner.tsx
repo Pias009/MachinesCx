@@ -176,6 +176,17 @@ export default function AiAgentBanner() {
           .aib__content { flex-direction: column; align-items: flex-start; text-align: left; }
           .aib__actions { align-items: flex-start; }
         }
+
+        @media (max-width: 640px) {
+          .aib { min-height: 0; }
+          .aib__content { padding: 1.75rem 1.25rem; gap: 1.25rem; }
+          .aib__title { font-size: clamp(1.4rem, 6.5vw, 1.8rem); margin-bottom: 0.6rem; }
+          .aib__desc { font-size: 0.86rem; line-height: 1.55; }
+          .aib__eyebrow { margin-bottom: 0.65rem; }
+          .aib__actions { gap: 0.6rem; }
+          .aib__cta { padding: 0.8rem 1.4rem; font-size: 0.88rem; }
+          .aib__hint { font-size: 0.76rem; }
+        }
       `}</style>
 
       <section ref={sectionRef} className="aib" data-no-anim aria-label="Meet ASHA, our AI machine assistant">

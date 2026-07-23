@@ -458,6 +458,72 @@ export default function SiteNav() {
           .sn__cta    { display: none; }
           .sn__burger { display: flex; }
         }
+
+        /* ── Light mode ── */
+        [data-theme="light"] .sn {
+          background: rgba(255,255,255,0.78);
+          border-bottom-color: rgba(13,34,32,0.1);
+        }
+        [data-theme="light"] .sn--on {
+          background: rgba(255,255,255,0.94);
+          border-color: rgba(13,34,32,0.12);
+          box-shadow: 0 4px 32px rgba(13,34,32,0.08);
+        }
+        [data-theme="light"] .sn__logo { color: #0d2220; }
+        [data-theme="light"] .sn__cat-btn { color: rgba(13,34,32,0.75); }
+        [data-theme="light"] .sn__cat-btn:hover,
+        [data-theme="light"] .sn__cat--open .sn__cat-btn { color: #0d2220; }
+        [data-theme="light"] .sn__link { color: rgba(13,34,32,0.75); }
+        [data-theme="light"] .sn__link:hover { color: #0d2220; }
+        [data-theme="light"] .sn__divider { background: rgba(13,34,32,0.25); }
+
+        [data-theme="light"] .sn__dd {
+          background: rgba(255,255,255,0.98);
+          border-color: rgba(13,34,32,0.1);
+        }
+        [data-theme="light"] .sn__dd-item:hover,
+        [data-theme="light"] .sn__dd-item--on { background: rgba(13,34,32,0.05); }
+        [data-theme="light"] .sn__dd-series { color: #0d2220; }
+        [data-theme="light"] .sn__dd-tag { color: rgba(13,34,32,0.6); }
+        [data-theme="light"] .sn__dd-preview {
+          border-left-color: rgba(13,34,32,0.08);
+          background: rgba(13,34,32,0.02);
+        }
+        [data-theme="light"] .sn__dd-scrollbtn {
+          background: rgba(255,255,255,0.92);
+          border-color: rgba(43,191,179,0.3);
+        }
+        [data-theme="light"] .sn__dd-scrollbtn:hover { background: rgba(43,191,179,0.14); }
+
+        /* burger icon */
+        [data-theme="light"] .sn__burger span { background: #0d2220; }
+
+        /* mobile drawer */
+        [data-theme="light"] .sn__mobile {
+          background: #ffffff;
+          border-right-color: rgba(43,191,179,0.2);
+          box-shadow: 8px 0 40px rgba(13,34,32,0.12);
+        }
+        [data-theme="light"] .sn__mob-header {
+          border-bottom-color: rgba(43,191,179,0.14);
+          background: rgba(43,191,179,0.05);
+        }
+        [data-theme="light"] .sn__mob-logo { color: #0d2220; }
+        [data-theme="light"] .sn__mob-close {
+          background: rgba(13,34,32,0.05);
+          border-color: rgba(13,34,32,0.1);
+          color: rgba(13,34,32,0.6);
+        }
+        [data-theme="light"] .sn__mob-close:hover { background: rgba(43,191,179,0.14); color: var(--brand-teal); }
+        [data-theme="light"] .sn__mobile-link {
+          color: rgba(13,34,32,0.75);
+          border-bottom-color: rgba(13,34,32,0.06);
+        }
+        [data-theme="light"] .sn__mobile-link:hover {
+          color: #0d2220;
+          background: rgba(43,191,179,0.08);
+        }
+        [data-theme="light"] .sn__mob-bd { background: rgba(13,34,32,0.35); }
       `}</style>
 
       <nav className={`sn${scrolled ? " sn--on" : ""}`}>

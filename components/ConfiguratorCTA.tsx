@@ -8,104 +8,8 @@ export default function ConfiguratorCTA() {
   const raf = useRef<number>(0);
 
   const sectionRef  = useRef<HTMLElement>(null);
-  const indexRef    = useRef<HTMLDivElement>(null);
-  const eyebrowRef  = useRef<HTMLDivElement>(null);
-  const titleRef    = useRef<HTMLHeadingElement>(null);
-  const metricsRef  = useRef<HTMLDivElement>(null);
-  const rightRef    = useRef<HTMLDivElement>(null);
-  const badgeRef    = useRef<HTMLDivElement>(null);
-  const ctaRef      = useRef<HTMLDivElement>(null);
-  const hintRef     = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setMounted(true); }, []);
-
-  // ── "System Boot" scroll-in — GSAP + ScrollTrigger ───────────────────
-  useEffect(() => {
-    let ctx: { revert?: () => void } = {};
-    let cancelled = false;
-
-    const revealAll = () => {
-      const allEls = [indexRef.current, eyebrowRef.current, titleRef.current, metricsRef.current, rightRef.current, badgeRef.current, ctaRef.current, hintRef.current];
-      allEls.filter(Boolean).forEach(el => {
-        const e = el as HTMLElement;
-        e.style.opacity = "1"; e.style.transform = "none"; e.style.clipPath = "none";
-      });
-      if (hintRef.current) Array.from(hintRef.current.children).forEach(c => { (c as HTMLElement).style.opacity = "1"; (c as HTMLElement).style.transform = "none"; });
-      if (metricsRef.current) metricsRef.current.querySelectorAll<HTMLElement>(".cc__metric b, .cc__metric span").forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; });
-    };
-
-    (async () => {
-      try {
-      const { gsap }          = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      const { SplitText }     = await import("gsap/SplitText");
-      if (cancelled) return;
-      gsap.registerPlugin(ScrollTrigger, SplitText);
-
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-      ctx = gsap.context(() => {
-        const st = () => ({ trigger: sectionRef.current, start: "top 75%", end: "bottom 20%", toggleActions: "play reverse play reverse" });
-
-        const allEls = [indexRef.current, eyebrowRef.current, titleRef.current, metricsRef.current, rightRef.current, badgeRef.current, ctaRef.current, hintRef.current];
-        if (reduced) {
-          gsap.set(allEls, { opacity: 1, clearProps: "all" });
-          if (hintRef.current) gsap.set(hintRef.current.children, { opacity: 1, clearProps: "all" });
-          if (metricsRef.current) gsap.set(metricsRef.current.querySelectorAll(".cc__metric b, .cc__metric span"), { opacity: 1, clearProps: "all" });
-          return;
-        }
-
-        // Index label — slide in
-        gsap.fromTo(indexRef.current, { x: -16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power2.out", scrollTrigger: st() });
-
-        // Eyebrow — clip wipe, same language as AiAgentBanner
-        gsap.fromTo(eyebrowRef.current,
-          { clipPath: "inset(0 100% 0 0)", opacity: 0 },
-          { clipPath: "inset(0 0% 0 0)", opacity: 1, duration: 0.5, ease: "power2.out", delay: 0.1, scrollTrigger: st() }
-        );
-
-        // Title — word unfold with subtle 3D rotate
-        if (titleRef.current) {
-          const split = new SplitText(titleRef.current, { type: "words" });
-          gsap.fromTo(split.words,
-            { y: "70%", opacity: 0, rotateX: -15, transformOrigin: "0% 100%" },
-            { y: "0%", opacity: 1, rotateX: 0, duration: 0.7, ease: "expo.out", stagger: 0.06, delay: 0.2, scrollTrigger: st() }
-          );
-        }
-
-        // Metrics — number pop + label fade, staggered left-to-right
-        const metrics = metricsRef.current ? Array.from(metricsRef.current.querySelectorAll<HTMLElement>(".cc__metric")) : [];
-        metrics.forEach((m, i) => {
-          const num = m.querySelector("b");
-          const label = m.querySelector("span");
-          gsap.fromTo(num, { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.6)", delay: 0.55 + i * 0.08, scrollTrigger: st() });
-          gsap.fromTo(label, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out", delay: 0.65 + i * 0.08, scrollTrigger: st() });
-        });
-
-        // Right panel — power-on as one unit (brackets included, no pseudo-element targeting)
-        gsap.fromTo(rightRef.current,
-          { opacity: 0, scale: 0.96 },
-          { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out", delay: 0.3, scrollTrigger: st() }
-        );
-
-        // Inside panel — badge, CTA, hint rows print sequentially like a boot log
-        gsap.fromTo(badgeRef.current, { scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(1.7)", delay: 0.55, scrollTrigger: st() });
-        gsap.fromTo(ctaRef.current, { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out", delay: 0.68, scrollTrigger: st() });
-        const hintRows = hintRef.current ? Array.from(hintRef.current.children) : [];
-        gsap.fromTo(hintRows,
-          { y: 14, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.4, ease: "power2.out", stagger: 0.08, delay: 0.8, scrollTrigger: st() }
-        );
-      }, sectionRef);
-      } catch {
-        if (!cancelled) revealAll();
-      }
-    })();
-
-    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
-
-    return () => { cancelled = true; clearTimeout(fallback); ctx.revert?.(); };
-  }, []);
 
   useEffect(() => {
     if (!mounted) return;
@@ -238,8 +142,7 @@ export default function ConfiguratorCTA() {
         }
         .cc__title em {
           font-style:normal;
-          background: linear-gradient(120deg, var(--brand-teal), #7fe9df);
-          -webkit-background-clip: text; background-clip: text; color: transparent;
+          color: var(--brand-teal);
         }
         .cc__metrics {
           display:flex; gap:2rem; margin-top:.5rem;
@@ -285,10 +188,10 @@ export default function ConfiguratorCTA() {
           display: flex; align-items: center; gap: .8rem;
           padding: .85rem .25rem;
           border-bottom: 1px solid rgba(255,255,255,.06);
-          transition: padding-left .2s, background .2s;
+          transition: transform .2s, background .2s;
         }
         .cc__hint-row:last-child { border-bottom: none; }
-        .cc__hint-row:hover { padding-left: .8rem; background: rgba(43,191,179,.04); }
+        .cc__hint-row:hover { transform: translateX(.55rem); background: rgba(43,191,179,.04); }
         .cc__hint-step {
           display: flex; align-items: center; gap: .7rem;
           font-family: var(--ff-mono); font-size: 0.72rem;
@@ -334,22 +237,22 @@ export default function ConfiguratorCTA() {
 
         <div className="cc__content">
           <div className="cc__left">
-            <div ref={indexRef} className="cc__index"><b>01</b> / Configurator</div>
-            <div ref={eyebrowRef} className="cc__eyebrow">Custom configuration</div>
-            <h2 ref={titleRef} className="cc__title">
+            <div className="cc__index"><b>01</b> / Configurator</div>
+            <div className="cc__eyebrow">Custom configuration</div>
+            <h2 className="cc__title">
               Build your<br /><em>machine order.</em>
             </h2>
-            <div ref={metricsRef} className="cc__metrics">
+            <div className="cc__metrics">
               <div className="cc__metric"><b>120+</b><span>Models</span></div>
               <div className="cc__metric"><b>24h</b><span>Reply time</span></div>
               <div className="cc__metric"><b>∞</b><span>Configs</span></div>
             </div>
           </div>
 
-          <div ref={rightRef} className="cc__right">
-            <div ref={badgeRef} className="cc__badge"><span className="dot" />Engineers online</div>
+          <div className="cc__right">
+            <div className="cc__badge"><span className="dot" />Engineers online</div>
 
-            <div ref={ctaRef}>
+            <div>
               <TransitionLink href="/products" className="cc__cta">
                 Choose a machine
                 <span className="cc__cta-arr" aria-hidden="true">
@@ -360,7 +263,7 @@ export default function ConfiguratorCTA() {
               </TransitionLink>
             </div>
 
-            <div ref={hintRef} className="cc__hint" aria-label="Steps">
+            <div className="cc__hint" aria-label="Steps">
               {["Browse machines","Select & configure","Send inquiry"].map((s, i) => (
                 <div key={i} className="cc__hint-row">
                   <div className="cc__hint-step">

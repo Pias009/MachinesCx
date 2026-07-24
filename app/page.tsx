@@ -28,11 +28,7 @@ export default function Home() {
 
       {/* Below the fold — all deferred */}
       <SectionReveal delay={80}><TrustSection /></SectionReveal>
-      {/* skip: ParticlePortfolio pins its own content with position:sticky
-          inside a tall scroll runway — SectionReveal's overflow:hidden
-          wrapper breaks sticky positioning, which left a blank scroll
-          gap where the pinned diagram should have stayed in view */}
-      <ParticlePortfolio />
+      <SectionReveal delay={80}><ParticlePortfolio /></SectionReveal>
       <SectionReveal delay={80}><FlexoStrip /></SectionReveal>
       <SectionReveal delay={80}><PrintingShowcase /></SectionReveal>
       <SectionReveal delay={80}><MachineCatalogSection /></SectionReveal>

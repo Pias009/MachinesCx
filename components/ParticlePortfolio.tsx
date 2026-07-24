@@ -1,12 +1,7 @@
 "use client";
 import React, { useRef, useEffect, useState } from "react";
 import NextImage from "next/image";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import ForgeBackground from "@/components/ForgeBackground";
 import { useCms } from "@/lib/useCms";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const ACCENTS = [
   { hex: "#2bbfb3", name: "teal" },
@@ -75,9 +70,10 @@ function rgbFromHex(hex: string, a = 1) {
 
 export default function ParticlePortfolio(){
   const sectionRef = useRef<HTMLDivElement>(null!);
-  const scrollRef  = useRef(0);
   const [active, setActive] = useState(0);
   const [mobileOpen, setMobileOpen] = useState<number | null>(null);
+  const [visible, setVisible] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const cms = useCms<{ items: Step[] }>("production-line", { items: DEFAULT_STEPS });
   // skip unfinished admin drafts (blank slug/name) so a half-filled CMS
@@ -86,72 +82,43 @@ export default function ParticlePortfolio(){
   const STEPS = cmsItems.length ? cmsItems : DEFAULT_STEPS;
   const N     = STEPS.length;
 
-  const heroRef  = useRef<HTMLDivElement>(null);
-  const ringRef  = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  // Simple, reliable entrance — fade the whole section in once when it
+  // scrolls into view. No pinning, no scrub, no scroll-tied timeline.
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) { setVisible(true); return; }
 
-  useEffect(()=>{
-    const el = sectionRef.current; if(!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.15 },
+    );
+    obs.observe(el);
 
-    let camST: ScrollTrigger | null = null;
-    let master: gsap.core.Timeline | null = null;
-    let cancelled = false;
+    // Safety net — never leave the section permanently hidden.
+    const fallback = setTimeout(() => setVisible(true), 3000);
 
-    // Guaranteed-visible fallback — if the scrub timeline never engages
-    // (setup throws, trigger measurement race, etc.) the hero/ring panels
-    // must not be left sitting at opacity:0 forever.
-    const revealAll = () => {
-      if (heroRef.current) { heroRef.current.style.opacity = "1"; heroRef.current.style.transform = "none"; }
-      if (ringRef.current) { ringRef.current.style.opacity = "1"; ringRef.current.style.transform = "none"; }
-    };
+    return () => { obs.disconnect(); clearTimeout(fallback); };
+  }, []);
 
-    try {
-      camST = ScrollTrigger.create({
-        trigger:el, start:"top top", end:"bottom bottom", scrub:1.5,
-        onUpdate:(s)=>{ scrollRef.current = s.progress; },
-      });
-
-      master = gsap.timeline({
-        scrollTrigger:{ trigger:el, start:"top top", end:"bottom bottom", scrub:1.8 }
-      });
-
-      gsap.set(heroRef.current, { opacity: 0 });
-      gsap.set(ringRef.current, { opacity: 0 });
-
-      master.fromTo(heroRef.current,
-        { opacity:0, y:60 }, { opacity:1, y:0, ease:"power3.out", duration:0.10 }, 0);
-      master.to(heroRef.current,
-        { opacity:0, y:-40, ease:"power2.in", duration:0.06 }, 0.14);
-
-      master.fromTo(ringRef.current,
-        { opacity:0, scale:0.92 },
-        { opacity:1, scale:1, ease:"power2.out", duration:0.08 }, 0.20);
-      // hold the ring fully visible for the rest of the scroll — without
-      // this the timeline has no tween covering 0.28→1.0, so anything
-      // that nudges the scrub off-sync leaves it stuck at a fractional
-      // opacity for the remaining ~70% of this section's scroll distance
-      master.to(ringRef.current, { opacity:1, scale:1, duration:0.72 }, 0.28);
-
-      const range = 0.70;
-      const slot  = range / N;
-      STEPS.forEach((_, i) => {
-        master!.call(()=>{ setActive(i); }, [], 0.26 + i * slot);
-      });
-    } catch {
-      if (!cancelled) revealAll();
-    }
-
-    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
-
-    return ()=>{ cancelled = true; clearTimeout(fallback); camST?.kill(); master?.kill(); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Auto-advance through the steps, same pattern as ClientJourney.
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setActive(a => (a + 1) % N);
+    }, 4000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [N]);
 
-  useEffect(()=>{
-    if(!panelRef.current) return;
-    gsap.fromTo(panelRef.current,
-      { opacity:0, y:18 }, { opacity:1, y:0, duration:0.45, ease:"power3.out" });
-  }, [active]);
+  const restartTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => setActive(a => (a + 1) % N), 4000);
+  };
 
   const step = STEPS[active];
 
@@ -171,18 +138,23 @@ export default function ParticlePortfolio(){
   const curAccent = accentFor(active);
 
   return(
-    <section ref={sectionRef} className="pp-section" style={{height:"350vh", position:"relative"}}>
+    <section ref={sectionRef} className="pp-section">
 
       <style suppressHydrationWarning>{`
-        .pp-section { isolation: isolate; }
+        .pp-section { position: relative; isolation: isolate; }
         .pp-mobile  { display: none; }
         .pp-desktop { display: block; }
 
         @media (max-width: 900px) {
           .pp-mobile  { display: block; }
           .pp-desktop { display: none !important; }
-          .pp-section { height: auto !important; }
         }
+
+        .pp-desktop-in {
+          opacity: 0; transform: translateY(24px);
+          transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
+        }
+        .pp-desktop-in--visible { opacity: 1; transform: translateY(0); }
 
         @keyframes pp-flow { to { stroke-dashoffset: -400; } }
         .pp-ring-path {
@@ -260,15 +232,15 @@ export default function ParticlePortfolio(){
         }
 
         .pp-panel {
-          position: absolute; bottom: clamp(1rem, 2.5vh, 2rem);
-          left: clamp(1.25rem, 3vw, 3rem); right: clamp(1.25rem, 3vw, 3rem);
+          position: relative;
+          margin-top: clamp(1.5rem, 3vh, 2.5rem);
           z-index: 25;
           display: flex; align-items: center; gap: clamp(1rem, 2.5vw, 2.5rem);
           background: rgba(5,12,11,0.78);
           backdrop-filter: blur(12px);
           border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
           padding: 0.9rem clamp(1rem, 2vw, 1.75rem);
-          transition: border-color 0.4s;
+          transition: border-color 0.4s, opacity 0.35s ease;
         }
         .pp-panel__id { flex-shrink: 0; }
         .pp-panel__quality {
@@ -329,9 +301,7 @@ export default function ParticlePortfolio(){
         @media (max-width: 1100px) { .pp-panel__q--extra { display: none; } }
 
         .pp-ring-title {
-          position: absolute; top: clamp(1.5rem, 4vh, 3rem); left: 50%;
-          transform: translateX(-50%);
-          text-align: center; z-index: 20; pointer-events: none;
+          text-align: center; margin-bottom: clamp(1.5rem, 4vh, 2.5rem);
         }
         .pp-ring-title h3 {
           font-family: var(--ff-display); font-size: clamp(1.6rem, 2.6vw, 2.6rem);
@@ -345,11 +315,13 @@ export default function ParticlePortfolio(){
           transition: color 0.4s;
         }
 
-        [data-theme="light"] .pp-desktop-bg { background: transparent !important; }
-        [data-theme="light"] .pp-vignette   { opacity: 0 !important; }
+        .pp-diagram {
+          position: relative;
+          height: clamp(360px, 46vw, 560px);
+        }
+
         [data-theme="light"] .pp-headline   { color: #0d2220 !important; }
         [data-theme="light"] .pp-sub        { color: rgba(13,34,32,0.65) !important; }
-        [data-theme="light"] .pp-stat-val   { color: #0d2220 !important; }
         [data-theme="light"] .pp-ring-title h3 { color: #0d2220; }
         [data-theme="light"] .pp-node__name--dim { color: rgba(13,34,32,0.55) !important; }
         [data-theme="light"] .pp-panel {
@@ -373,6 +345,7 @@ export default function ParticlePortfolio(){
         @media (prefers-reduced-motion: reduce) {
           .pp-ring-path { animation: none; }
           .pp-node { transition: none; }
+          .pp-desktop-in { transition: none; }
         }
       `}</style>
 
@@ -462,48 +435,36 @@ export default function ParticlePortfolio(){
       </div>
 
       {/* ══ DESKTOP ══ */}
-      <div className="pp-desktop pp-desktop-bg" style={{position:"sticky",top:0,height:"100vh",overflow:"hidden",background:"#070f0e"}}>
-
-        <div style={{position:"absolute",inset:0,zIndex:1}}>
-          <ForgeBackground scrollProgress={scrollRef.current} />
-        </div>
-        <div className="pp-vignette" aria-hidden style={{position:"absolute",inset:0,zIndex:2,pointerEvents:"none",
-          background:"radial-gradient(ellipse 80% 60% at 50% 50%,transparent 40%,rgba(4,10,9,0.82) 100%)"}}/>
-
-        {/* ── PHASE 1 — hero ── */}
-        <div ref={heroRef} style={{
-          position:"absolute",inset:0,zIndex:10,
-          display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-          textAlign:"center",padding:"2rem",pointerEvents:"none",
-        }}>
-          <div style={{display:"flex",alignItems:"center",gap:"0.9rem",
+      <div className={`pp-desktop pp-desktop-in${visible ? " pp-desktop-in--visible" : ""}`} style={{
+        padding: "clamp(3rem,6vw,5rem) clamp(1.25rem,4vw,3rem)",
+        background: "#070f0e",
+      }}>
+        <div style={{textAlign:"center", marginBottom:"clamp(2.5rem,5vw,4rem)"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"0.9rem",
             fontFamily:"var(--ff-mono)",fontSize:"0.64rem",letterSpacing:"0.22em",
-            textTransform:"uppercase",marginBottom:"1.75rem",
+            textTransform:"uppercase",marginBottom:"1.25rem",
             background:"linear-gradient(135deg, var(--brand-teal), var(--brand-amber))",
             WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>
             <span style={{width:"2.5rem",height:"1px",background:"var(--brand-teal)",display:"inline-block",opacity:0.6}}/>
             One floor · one connected line
             <span style={{width:"2.5rem",height:"1px",background:"var(--brand-amber)",display:"inline-block",opacity:0.6}}/>
           </div>
-          <h2 className="pp-headline" style={{fontFamily:"var(--ff-display)",fontSize:"clamp(5rem,13vw,12rem)",
-            lineHeight:0.84,letterSpacing:"-0.03em",color:"#fff",margin:0,textTransform:"uppercase"}}>
-            Built for<br/><span style={{background:"linear-gradient(135deg,var(--brand-teal),var(--brand-amber))",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>the floor.</span>
+          <h2 className="pp-headline" style={{fontFamily:"var(--ff-display)",fontSize:"clamp(2.6rem,5.5vw,5rem)",
+            lineHeight:0.9,letterSpacing:"-0.02em",color:"#fff",margin:0,textTransform:"uppercase"}}>
+            Built for <span style={{background:"linear-gradient(135deg,var(--brand-teal),var(--brand-amber))",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>the floor.</span>
           </h2>
-          <p className="pp-sub" style={{fontFamily:"var(--ff-body)",fontSize:"clamp(0.9rem,1.2vw,1.05rem)",
-            color:"rgba(255,255,255,0.65)",lineHeight:1.7,maxWidth:"46ch",margin:"2rem 0 0",letterSpacing:"0.01em"}}>
-            Keep scrolling to walk the full production line — five machines set up in order,
-            from raw resin to the finished product at the centre.
+          <p className="pp-sub" style={{fontFamily:"var(--ff-body)",fontSize:"clamp(0.9rem,1.1vw,1.05rem)",
+            color:"rgba(255,255,255,0.65)",lineHeight:1.7,maxWidth:"46ch",margin:"1.25rem auto 0",letterSpacing:"0.01em"}}>
+            Five machines set up in order, from raw resin to the finished product at the centre.
           </p>
         </div>
 
-        {/* ── PHASE 2 — production ring ── */}
-        <div ref={ringRef} style={{position:"absolute",inset:0,zIndex:10}}>
+        <div className="pp-ring-title">
+          <span>The complete setup — in order</span>
+          <h3>End-to-end production line</h3>
+        </div>
 
-          <div className="pp-ring-title" style={{"--accent": curAccent.hex} as React.CSSProperties}>
-            <span>The complete setup — in order</span>
-            <h3>End-to-end production line</h3>
-          </div>
-
+        <div className="pp-diagram">
           <svg aria-hidden viewBox="0 0 100 100" preserveAspectRatio="none"
             style={{position:"absolute",inset:0,width:"100%",height:"100%",zIndex:5,pointerEvents:"none"}}>
             <path className="pp-ring-path--glow" d={PIPE_D} vectorEffect="non-scaling-stroke"/>
@@ -540,7 +501,7 @@ export default function ParticlePortfolio(){
               <button
                 key={s.slug}
                 className="pp-node"
-                onClick={()=>setActive(i)}
+                onClick={()=>{ setActive(i); restartTimer(); }}
                 aria-label={`Step ${i+1}: ${s.stage}`}
                 style={{
                   left:`${p.x}%`, top:`${p.y}%`,
@@ -569,30 +530,29 @@ export default function ParticlePortfolio(){
               </button>
             );
           })}
+        </div>
 
-          <div ref={panelRef} className="pp-panel" style={{"--accent": curAccent.hex} as React.CSSProperties}>
-            <div className="pp-panel__id">
-              <div className="pp-panel__step">Setup {String(active+1).padStart(2,"0")} / {String(N).padStart(2,"0")}</div>
-              <h4 className="pp-panel__stage">{step.stage}</h4>
-              <div className="pp-panel__name">{step.name}</div>
-            </div>
-            <p className="pp-panel__role">{step.role}</p>
-            <div className="pp-panel__quality">
-              {step.quality.map(([l,v],qi)=>(
-                <div key={l} className={`pp-panel__q${qi>1?" pp-panel__q--extra":""}`}>
-                  <span className="pp-panel__q-label">{l}</span>
-                  <span className="pp-panel__q-val">{v}</span>
-                </div>
-              ))}
-            </div>
-            <a className="pp-panel__cta" href={`/products/${step.cat}/${step.slug}`}>
-              View machine
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </a>
+        <div className="pp-panel" style={{"--accent": curAccent.hex} as React.CSSProperties}>
+          <div className="pp-panel__id">
+            <div className="pp-panel__step">Setup {String(active+1).padStart(2,"0")} / {String(N).padStart(2,"0")}</div>
+            <h4 className="pp-panel__stage">{step.stage}</h4>
+            <div className="pp-panel__name">{step.name}</div>
           </div>
-
+          <p className="pp-panel__role">{step.role}</p>
+          <div className="pp-panel__quality">
+            {step.quality.map(([l,v],qi)=>(
+              <div key={l} className={`pp-panel__q${qi>1?" pp-panel__q--extra":""}`}>
+                <span className="pp-panel__q-label">{l}</span>
+                <span className="pp-panel__q-val">{v}</span>
+              </div>
+            ))}
+          </div>
+          <a className="pp-panel__cta" href={`/products/${step.cat}/${step.slug}`}>
+            View machine
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </a>
         </div>
       </div>
     </section>

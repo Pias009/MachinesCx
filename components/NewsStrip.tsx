@@ -157,29 +157,44 @@ export default function NewsStrip() {
     window.addEventListener("mouseup",    onMouseUp);
 
     /* ── Scroll-triggered entrance ── */
+    let newsAnimCancelled = false;
+    const revealNewsAnim = () => {
+      [eyebrowRef.current, headRef.current, track].filter(Boolean).forEach(el => {
+        const e = el as HTMLElement;
+        e.style.opacity = "1"; e.style.transform = "none";
+      });
+    };
     (async () => {
-      const { gsap }          = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
+      try {
+        const { gsap }          = await import("gsap");
+        const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+        if (newsAnimCancelled) return;
+        gsap.registerPlugin(ScrollTrigger);
 
-      gsap.fromTo(eyebrowRef.current,
-        { opacity: 0, x: -24 },
-        { opacity: 1, x: 0, duration: 0.9, ease: "expo.out",
-          scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
-      );
-      gsap.fromTo(headRef.current,
-        { opacity: 0, y: 32 },
-        { opacity: 1, y: 0, duration: 1, ease: "expo.out", delay: 0.1,
-          scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
-      );
-      gsap.fromTo(track,
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 1, ease: "expo.out", delay: 0.22,
-          scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
-      );
+        gsap.fromTo(eyebrowRef.current,
+          { opacity: 0, x: -24 },
+          { opacity: 1, x: 0, duration: 0.9, ease: "expo.out",
+            scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
+        );
+        gsap.fromTo(headRef.current,
+          { opacity: 0, y: 32 },
+          { opacity: 1, y: 0, duration: 1, ease: "expo.out", delay: 0.1,
+            scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
+        );
+        gsap.fromTo(track,
+          { opacity: 0, y: 40 },
+          { opacity: 1, y: 0, duration: 1, ease: "expo.out", delay: 0.22,
+            scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
+        );
+      } catch {
+        if (!newsAnimCancelled) revealNewsAnim();
+      }
     })();
+    const newsAnimFallback = setTimeout(() => { if (!newsAnimCancelled) revealNewsAnim(); }, 4000);
 
     return () => {
+      newsAnimCancelled = true;
+      clearTimeout(newsAnimFallback);
       cancelAnimationFrame(raf);
       if (resumeTimer) clearTimeout(resumeTimer);
       el.removeEventListener("mouseenter",  onEnter);
@@ -197,7 +212,7 @@ export default function NewsStrip() {
   const doubled = [...news, ...news];
 
   return (
-    <section ref={sectionRef} style={{
+    <section ref={sectionRef} className="ns2-section" style={{
       background: "var(--bg-base)",
       borderTop: "1px solid rgba(255,255,255,0.06)",
       padding: "clamp(4rem,8vw,7rem) 0 clamp(4rem,8vw,6rem)",
@@ -451,6 +466,7 @@ export default function NewsStrip() {
           50%      { opacity:0.3; transform:scale(0.7); }
         }
         @media (max-width: 640px) {
+          .ns2-section { padding: clamp(2rem,6vw,3rem) 0 clamp(2rem,5vw,2.75rem) !important; }
           .ns2-card { width: clamp(220px, 72vw, 300px); }
           .ns2-title { font-size: .95rem; }
           .ns2-excerpt { -webkit-line-clamp: 2; font-size: .78rem; }

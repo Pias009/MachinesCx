@@ -112,61 +112,80 @@ export default function MachineCatalogSection() {
   // are handled entirely by the existing CSS `mcs-fade-in` keyframe.
   useEffect(() => {
     let ctx: { revert?: () => void } = {};
+    let cancelled = false;
+
+    const revealAll = () => {
+      [badgeRef.current, titleRef.current, subRef.current, tabsRef.current].filter(Boolean).forEach(el => {
+        const e = el as HTMLElement;
+        e.style.opacity = "1"; e.style.transform = "none";
+      });
+      if (gridRef.current) {
+        gridRef.current.setAttribute("data-mcs-batch-done", "");
+        gridRef.current.querySelectorAll<HTMLElement>(".mcs-card").forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; });
+      }
+    };
 
     (async () => {
-      const { gsap }          = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
+      try {
+        const { gsap }          = await import("gsap");
+        const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+        if (cancelled) return;
+        gsap.registerPlugin(ScrollTrigger);
 
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      ctx = gsap.context(() => {
-        if (gridRef.current?.hasAttribute("data-mcs-batch-done")) return;
+        ctx = gsap.context(() => {
+          if (gridRef.current?.hasAttribute("data-mcs-batch-done")) return;
 
-        const els = [badgeRef.current, titleRef.current, subRef.current, tabsRef.current];
-        if (reduced) {
-          gsap.set(els, { opacity: 1, clearProps: "all" });
-          if (gridRef.current) gsap.set(gridRef.current.querySelectorAll(".mcs-card"), { opacity: 1, clearProps: "all" });
-          gridRef.current?.setAttribute("data-mcs-batch-done", "");
-          return;
-        }
+          const els = [badgeRef.current, titleRef.current, subRef.current, tabsRef.current];
+          if (reduced) {
+            gsap.set(els, { opacity: 1, clearProps: "all" });
+            if (gridRef.current) gsap.set(gridRef.current.querySelectorAll(".mcs-card"), { opacity: 1, clearProps: "all" });
+            gridRef.current?.setAttribute("data-mcs-batch-done", "");
+            return;
+          }
 
-        const trigger = { trigger: gridRef.current, start: "top 88%", toggleActions: "play none none none" };
+          const trigger = { trigger: gridRef.current, start: "top 88%", toggleActions: "play none none none" };
 
-        gsap.fromTo(badgeRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out", scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
-        gsap.fromTo(titleRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power3.out", delay: 0.08, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
-        gsap.fromTo(subRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out", delay: 0.18, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
+          gsap.fromTo(badgeRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out", scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
+          gsap.fromTo(titleRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power3.out", delay: 0.08, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
+          gsap.fromTo(subRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out", delay: 0.18, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
 
-        // Tabs — border draws in, then each tab lifts with a fast stagger
-        if (tabsRef.current) {
-          gsap.fromTo(tabsRef.current, { scaleX: 0 }, { scaleX: 1, transformOrigin: "left center", duration: 0.5, ease: "power2.out", delay: 0.25, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
-          const tabs = Array.from(tabsRef.current.querySelectorAll<HTMLElement>(".mcs__tab"));
-          gsap.fromTo(tabs, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power2.out", stagger: 0.04, delay: 0.35, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
-        }
+          // Tabs — border draws in, then each tab lifts with a fast stagger
+          if (tabsRef.current) {
+            gsap.fromTo(tabsRef.current, { scaleX: 0 }, { scaleX: 1, transformOrigin: "left center", duration: 0.5, ease: "power2.out", delay: 0.25, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
+            const tabs = Array.from(tabsRef.current.querySelectorAll<HTMLElement>(".mcs__tab"));
+            gsap.fromTo(tabs, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power2.out", stagger: 0.04, delay: 0.35, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
+          }
 
-        // Grid — column-major "batch load" stagger, auto-detects columns from layout.
-        // Mark the grid done immediately (not just on tween start) so the CSS
-        // mount-fade is suppressed for the same frame GSAP takes over — otherwise
-        // the still-running CSS animation's computed opacity can briefly outrank
-        // GSAP's inline opacity:0 before the tween begins.
-        if (gridRef.current) {
-          gridRef.current.setAttribute("data-mcs-batch-done", "");
-          const cards = Array.from(gridRef.current.querySelectorAll<HTMLElement>(".mcs-card"));
-          gsap.fromTo(cards,
-            { opacity: 0, y: 18, scale: 0.97 },
-            {
-              opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power2.out",
-              stagger: { each: 0.05, grid: "auto", from: "start", axis: "x" },
-              scrollTrigger: trigger,
-            }
-          );
-        }
+          // Grid — column-major "batch load" stagger, auto-detects columns from layout.
+          // Mark the grid done immediately (not just on tween start) so the CSS
+          // mount-fade is suppressed for the same frame GSAP takes over — otherwise
+          // the still-running CSS animation's computed opacity can briefly outrank
+          // GSAP's inline opacity:0 before the tween begins.
+          if (gridRef.current) {
+            gridRef.current.setAttribute("data-mcs-batch-done", "");
+            const cards = Array.from(gridRef.current.querySelectorAll<HTMLElement>(".mcs-card"));
+            gsap.fromTo(cards,
+              { opacity: 0, y: 18, scale: 0.97 },
+              {
+                opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power2.out",
+                stagger: { each: 0.05, grid: "auto", from: "start", axis: "x" },
+                scrollTrigger: trigger,
+              }
+            );
+          }
 
-        ScrollTrigger.refresh();
-      }, sectionRef);
+          ScrollTrigger.refresh();
+        }, sectionRef);
+      } catch {
+        if (!cancelled) revealAll();
+      }
     })();
 
-    return () => { ctx.revert?.(); };
+    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
+
+    return () => { cancelled = true; clearTimeout(fallback); ctx.revert?.(); };
   }, []);
 
   const totalFamilies = allFamilies.length;
@@ -494,8 +513,8 @@ export default function MachineCatalogSection() {
           .mcs__grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
         }
         @media(max-width:640px) {
-          .mcs { padding: clamp(2.5rem,6vw,4rem) 0; }
-          .mcs__header { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
+          .mcs { padding: clamp(1.75rem,5vw,2.75rem) 0; }
+          .mcs__header { flex-direction: column; align-items: flex-start; gap: 1rem; margin-bottom: clamp(1.25rem,3vw,2rem); }
           .mcs__title { font-size: clamp(2.5rem,9vw,3.5rem); }
           .mcs__grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
           .mcs-card { padding: 1.1rem; min-height: 150px; }

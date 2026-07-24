@@ -71,57 +71,78 @@ export default function PrintingShowcase() {
   // interval. Never touches .ps-ghost-wrap or its children — that stays
   // fully owned by the existing CSS rise-in/drop-out keyframes.
   useEffect(() => {
+    if (!mounted) return;
     let ctx: { revert?: () => void } = {};
+    let cancelled = false;
+
+    const revealAll = () => {
+      const itemWraps = carouselWrapRef.current
+        ? Array.from(carouselWrapRef.current.querySelectorAll<HTMLElement>("[data-ps-carousel-item]"))
+        : [];
+      [brandLabelRef.current, counterRef.current, infoBlockRef.current, ctaBlockRef.current, ...itemWraps]
+        .filter(Boolean)
+        .forEach(el => {
+          const e = el as HTMLElement;
+          e.style.opacity = "1"; e.style.transform = "none"; e.style.filter = "none";
+        });
+    };
 
     (async () => {
-      const { gsap }          = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
+      try {
+        const { gsap }          = await import("gsap");
+        const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+        if (cancelled) return;
+        gsap.registerPlugin(ScrollTrigger);
 
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      ctx = gsap.context(() => {
-        const itemWraps = carouselWrapRef.current
-          ? Array.from(carouselWrapRef.current.querySelectorAll<HTMLElement>("[data-ps-carousel-item]"))
-          : [];
+        ctx = gsap.context(() => {
+          const itemWraps = carouselWrapRef.current
+            ? Array.from(carouselWrapRef.current.querySelectorAll<HTMLElement>("[data-ps-carousel-item]"))
+            : [];
 
-        const els = [brandLabelRef.current, counterRef.current, infoBlockRef.current, ctaBlockRef.current, ...itemWraps];
-        if (reduced) {
-          gsap.set(els, { opacity: 1, clearProps: "all" });
-          return;
-        }
+          const els = [brandLabelRef.current, counterRef.current, infoBlockRef.current, ctaBlockRef.current, ...itemWraps];
+          if (reduced) {
+            gsap.set(els, { opacity: 1, clearProps: "all" });
+            return;
+          }
 
-        const trigger = { trigger: sectionElRef.current, start: "top 70%", toggleActions: "play none none none" };
+          const trigger = { trigger: sectionElRef.current, start: "top 70%", end: "bottom 20%", toggleActions: "play reverse play reverse" };
 
-        // Brand label — masked rise (parent has overflow:hidden)
-        gsap.fromTo(brandLabelRef.current, { y: "100%" }, { y: "0%", duration: 0.7, ease: "expo.out", scrollTrigger: trigger });
-        gsap.fromTo(counterRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", delay: 0.15, scrollTrigger: trigger });
+          // Brand label — masked rise (parent has overflow:hidden)
+          gsap.fromTo(brandLabelRef.current, { y: "100%" }, { y: "0%", duration: 0.7, ease: "expo.out", scrollTrigger: trigger });
+          gsap.fromTo(counterRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", delay: 0.15, scrollTrigger: trigger });
 
-        // Carousel — back-to-front settle: back role first, sides next, center last with overshoot
-        itemWraps.forEach(wrap => {
-          const roleAttr = wrap.getAttribute("data-ps-carousel-item");
-          const isCenter = roleAttr === "center";
-          const isBack = roleAttr === "back";
-          const delay = isBack ? 0 : (isCenter ? 0.36 : 0.18);
-          gsap.fromTo(wrap,
-            { opacity: 0, scale: 0.85, filter: "blur(6px)" },
-            {
-              opacity: 1, scale: 1, filter: "blur(0px)",
-              duration: isCenter ? 0.6 : 0.5,
-              ease: isCenter ? "back.out(1.2)" : "power2.out",
-              delay,
-              scrollTrigger: trigger,
-            }
-          );
-        });
+          // Carousel — back-to-front settle: back role first, sides next, center last with overshoot
+          itemWraps.forEach(wrap => {
+            const roleAttr = wrap.getAttribute("data-ps-carousel-item");
+            const isCenter = roleAttr === "center";
+            const isBack = roleAttr === "back";
+            const delay = isBack ? 0 : (isCenter ? 0.36 : 0.18);
+            gsap.fromTo(wrap,
+              { opacity: 0, scale: 0.85, filter: "blur(6px)" },
+              {
+                opacity: 1, scale: 1, filter: "blur(0px)",
+                duration: isCenter ? 0.6 : 0.5,
+                ease: isCenter ? "back.out(1.2)" : "power2.out",
+                delay,
+                scrollTrigger: trigger,
+              }
+            );
+          });
 
-        // Bottom info block + CTA — rise in after the carousel settles
-        gsap.fromTo(infoBlockRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", delay: 0.55, scrollTrigger: trigger });
-        gsap.fromTo(ctaBlockRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", delay: 0.65, scrollTrigger: trigger });
-      }, sectionElRef);
+          // Bottom info block + CTA — rise in after the carousel settles
+          gsap.fromTo(infoBlockRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", delay: 0.55, scrollTrigger: trigger });
+          gsap.fromTo(ctaBlockRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", delay: 0.65, scrollTrigger: trigger });
+        }, sectionElRef);
+      } catch {
+        if (!cancelled) revealAll();
+      }
     })();
 
-    return () => { ctx.revert?.(); };
+    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
+
+    return () => { cancelled = true; clearTimeout(fallback); ctx.revert?.(); };
     // Depends on `mounted`: this component renders `null` until mounted
     // becomes true (see the `if (!mounted) return null` below), so refs
     // aren't attached to real DOM nodes until that first true render —

@@ -22,17 +22,30 @@ export default function ConfiguratorCTA() {
   // ── "System Boot" scroll-in — GSAP + ScrollTrigger ───────────────────
   useEffect(() => {
     let ctx: { revert?: () => void } = {};
+    let cancelled = false;
+
+    const revealAll = () => {
+      const allEls = [indexRef.current, eyebrowRef.current, titleRef.current, metricsRef.current, rightRef.current, badgeRef.current, ctaRef.current, hintRef.current];
+      allEls.filter(Boolean).forEach(el => {
+        const e = el as HTMLElement;
+        e.style.opacity = "1"; e.style.transform = "none"; e.style.clipPath = "none";
+      });
+      if (hintRef.current) Array.from(hintRef.current.children).forEach(c => { (c as HTMLElement).style.opacity = "1"; (c as HTMLElement).style.transform = "none"; });
+      if (metricsRef.current) metricsRef.current.querySelectorAll<HTMLElement>(".cc__metric b, .cc__metric span").forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; });
+    };
 
     (async () => {
+      try {
       const { gsap }          = await import("gsap");
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
       const { SplitText }     = await import("gsap/SplitText");
+      if (cancelled) return;
       gsap.registerPlugin(ScrollTrigger, SplitText);
 
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       ctx = gsap.context(() => {
-        const st = () => ({ trigger: sectionRef.current, start: "top 75%", toggleActions: "play none none none" });
+        const st = () => ({ trigger: sectionRef.current, start: "top 75%", end: "bottom 20%", toggleActions: "play reverse play reverse" });
 
         const allEls = [indexRef.current, eyebrowRef.current, titleRef.current, metricsRef.current, rightRef.current, badgeRef.current, ctaRef.current, hintRef.current];
         if (reduced) {
@@ -84,9 +97,14 @@ export default function ConfiguratorCTA() {
           { y: 0, opacity: 1, duration: 0.4, ease: "power2.out", stagger: 0.08, delay: 0.8, scrollTrigger: st() }
         );
       }, sectionRef);
+      } catch {
+        if (!cancelled) revealAll();
+      }
     })();
 
-    return () => { ctx.revert?.(); };
+    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
+
+    return () => { cancelled = true; clearTimeout(fallback); ctx.revert?.(); };
   }, []);
 
   useEffect(() => {
@@ -289,12 +307,12 @@ export default function ConfiguratorCTA() {
         }
         @media(max-width:640px){
           .cc { min-height: auto; }
-          .cc__content { padding: clamp(2.5rem,6vw,4rem) 1.25rem; flex-direction: column; gap: 2rem; align-items: stretch; }
+          .cc__content { padding: clamp(1.75rem,4.5vw,2.5rem) 1.25rem; flex-direction: column; gap: 1.25rem; align-items: stretch; }
           .cc__left, .cc__right { flex: 1 1 100%; max-width: 100%; }
           .cc__title { font-size: clamp(2rem,8vw,3.5rem); }
-          .cc__desc { font-size: 0.88rem; margin-bottom: 1.5rem; }
+          .cc__desc { font-size: 0.88rem; margin-bottom: 1rem; }
           .cc__cta { font-size: .72rem; }
-          .cc__metrics { gap: 1.5rem; }
+          .cc__metrics { gap: 1.25rem; }
         }
         @media(max-width:480px){
           .cc__title { font-size: clamp(1.7rem,9vw,2.6rem); }

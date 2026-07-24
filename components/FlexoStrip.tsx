@@ -87,66 +87,82 @@ export default function FlexoStrip() {
 
   useEffect(() => {
     let ctx: { revert?: () => void } = {};
+    let cancelled = false;
+
+    const revealAll = () => {
+      if (eyebrowRef.current) { eyebrowRef.current.style.opacity = "1"; eyebrowRef.current.style.transform = "none"; }
+      if (lineRef.current) { lineRef.current.style.opacity = "1"; lineRef.current.style.transform = "none"; }
+      if (titleRef.current) { titleRef.current.style.opacity = "1"; }
+      if (gridRef.current) gridRef.current.querySelectorAll<HTMLElement>(".fls-card").forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; });
+      if (stripRef.current) { stripRef.current.style.opacity = "1"; stripRef.current.style.transform = "none"; }
+    };
 
     (async () => {
-      const { gsap }          = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      const { SplitText }     = await import("gsap/SplitText");
-      gsap.registerPlugin(ScrollTrigger, SplitText);
+      try {
+        const { gsap }          = await import("gsap");
+        const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+        const { SplitText }     = await import("gsap/SplitText");
+        if (cancelled) return;
+        gsap.registerPlugin(ScrollTrigger, SplitText);
 
-      ctx = gsap.context(() => {
-        const easeExp = "expo.out";
+        ctx = gsap.context(() => {
+          const easeExp = "expo.out";
 
-        /* ── Eyebrow draw ── */
-        gsap.fromTo(eyebrowRef.current,
-          { opacity: 0, x: -24 },
-          { opacity: 1, x: 0, duration: 1, ease: easeExp,
-            scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
-        );
-
-        /* ── Ink line ── */
-        gsap.fromTo(lineRef.current,
-          { scaleX: 0, transformOrigin: "left center", opacity: 0 },
-          { scaleX: 1, opacity: 1, duration: 1.4, ease: easeExp, delay: 0.2,
-            scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
-        );
-
-        /* ── Title split ── */
-        if (titleRef.current) {
-          const split = new SplitText(titleRef.current, { type: "chars" });
-          gsap.fromTo(split.chars,
-            { y: "110%", opacity: 0, rotateX: -50, transformOrigin: "0% 50% -20px" },
-            { y: "0%", opacity: 1, rotateX: 0, duration: 0.9, ease: easeExp,
-              stagger: 0.022, delay: 0.1,
-              scrollTrigger: { trigger: sectionRef.current, start: "top 82%", toggleActions: "play none none none" } }
+          /* ── Eyebrow draw ── */
+          gsap.fromTo(eyebrowRef.current,
+            { opacity: 0, x: -24 },
+            { opacity: 1, x: 0, duration: 1, ease: easeExp,
+              scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
           );
-        }
 
-        /* ── Cards fade/lift in, staggered ── */
-        const cards = gridRef.current
-          ? Array.from(gridRef.current.querySelectorAll<HTMLElement>(".fls-card"))
-          : [];
-        gsap.fromTo(cards,
-          { y: 32, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.8, ease: easeExp, stagger: 0.08, delay: 0.2,
-            scrollTrigger: { trigger: gridRef.current, start: "top 85%", toggleActions: "play none none none" } }
-        );
+          /* ── Ink line ── */
+          gsap.fromTo(lineRef.current,
+            { scaleX: 0, transformOrigin: "left center", opacity: 0 },
+            { scaleX: 1, opacity: 1, duration: 1.4, ease: easeExp, delay: 0.2,
+              scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
+          );
 
-        /* ── Bottom strip slides up ── */
-        gsap.fromTo(stripRef.current,
-          { y: 36, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.9, ease: easeExp,
-            scrollTrigger: { trigger: stripRef.current, start: "top 90%", toggleActions: "play none none none" } }
-        );
+          /* ── Title split ── */
+          if (titleRef.current) {
+            const split = new SplitText(titleRef.current, { type: "chars" });
+            gsap.fromTo(split.chars,
+              { y: "110%", opacity: 0, rotateX: -50, transformOrigin: "0% 50% -20px" },
+              { y: "0%", opacity: 1, rotateX: 0, duration: 0.9, ease: easeExp,
+                stagger: 0.022, delay: 0.1,
+                scrollTrigger: { trigger: sectionRef.current, start: "top 82%", toggleActions: "play none none none" } }
+            );
+          }
 
-      }, sectionRef);
+          /* ── Cards fade/lift in, staggered ── */
+          const cards = gridRef.current
+            ? Array.from(gridRef.current.querySelectorAll<HTMLElement>(".fls-card"))
+            : [];
+          gsap.fromTo(cards,
+            { y: 32, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.8, ease: easeExp, stagger: 0.08, delay: 0.2,
+              scrollTrigger: { trigger: gridRef.current, start: "top 85%", toggleActions: "play none none none" } }
+          );
+
+          /* ── Bottom strip slides up ── */
+          gsap.fromTo(stripRef.current,
+            { y: 36, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.9, ease: easeExp,
+              scrollTrigger: { trigger: stripRef.current, start: "top 90%", toggleActions: "play none none none" } }
+          );
+
+        }, sectionRef);
+      } catch {
+        if (!cancelled) revealAll();
+      }
     })();
 
-    return () => { ctx.revert?.(); };
+    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
+
+    return () => { cancelled = true; clearTimeout(fallback); ctx.revert?.(); };
   }, []);
 
   return (
-    <section ref={sectionRef} style={{
+    <section ref={sectionRef} className="fls-section" style={{
       background: "var(--bg-base)",
       borderTop: "1px solid rgba(255,255,255,0.06)",
       padding: "clamp(5rem,9vw,9rem) 0 clamp(4rem,7vw,7rem)",
@@ -242,6 +258,8 @@ export default function FlexoStrip() {
         [data-theme="light"] .fls-card [style*="color: rgba(255,255,255,.5"] { color: rgba(255,255,255,0.5) !important; }
 
         @media (max-width: 640px) {
+          .fls-section { padding: clamp(2.5rem,7vw,3.5rem) 0 clamp(2rem,5vw,3rem) !important; }
+          .fls-header { margin-bottom: clamp(1.5rem,4vw,2.25rem) !important; }
           .fls-title-clip h2 { font-size: clamp(2rem, 9vw, 3.2rem) !important; }
 
           /* 2-up grid, collapsed by default — tap a card to reveal specs */
@@ -263,7 +281,7 @@ export default function FlexoStrip() {
 
       <div className="wrap" style={{ position:"relative", zIndex:1 }}>
         {/* ── Header ── */}
-        <div style={{ marginBottom:"clamp(2.5rem,5vw,4rem)" }}>
+        <div className="fls-header" style={{ marginBottom:"clamp(2.5rem,5vw,4rem)" }}>
           <span ref={eyebrowRef} style={{
             display:"inline-flex", alignItems:"center", gap:".75rem",
             fontFamily:"var(--ff-mono)", fontSize:"0.7rem",

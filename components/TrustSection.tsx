@@ -261,19 +261,99 @@ function CapabilityDossier() {
 // MAIN
 // ─────────────────────────────────────────────
 export default function TrustSection() {
-  const headerRef = useRef<HTMLDivElement>(null);
+  const sectionRef  = useRef<HTMLElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const dossierRef  = useRef<HTMLDivElement>(null);
+  const statsRef    = useRef<HTMLDivElement>(null);
 
-  useEffect(()=>{
-    const el=headerRef.current; if(!el)return;
-    el.style.opacity="0"; el.style.transform="translateY(20px)";
-    const ob=new IntersectionObserver(([e])=>{
-      if(!e.isIntersecting)return; ob.disconnect();
-      el.style.transition="opacity 0.7s cubic-bezier(0.16,1,0.3,1),transform 0.7s cubic-bezier(0.16,1,0.3,1)";
-      el.style.opacity="1"; el.style.transform="translateY(0)";
-    },{threshold:0.2});
-    ob.observe(el);
-    return()=>ob.disconnect();
-  },[]);
+  // ── "Ledger Stamp" scroll-in — distinct from every other homepage
+  // section: the headline shears in on a skew (not a plain fade/slide),
+  // the dossier rows wipe open left-to-right like a clip-path ledger
+  // stamping down one line at a time, and the stat cards pop in with a
+  // scale-overshoot instead of a rise. All three reverse on scroll-up.
+  useEffect(() => {
+    let ctx: { revert?: () => void } = {};
+    let cancelled = false;
+
+    const revealAll = () => {
+      const els = [headlineRef.current, dossierRef.current, statsRef.current].filter(Boolean) as HTMLElement[];
+      els.forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; el.style.filter = "none"; el.style.clipPath = "none"; });
+      const cards = statsRef.current ? Array.from(statsRef.current.querySelectorAll<HTMLElement>(".ts-stat")) : [];
+      cards.forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; });
+      const rows = dossierRef.current ? Array.from(dossierRef.current.querySelectorAll<HTMLElement>(".ts-desc, .ts-dossier__item")) : [];
+      rows.forEach(el => { el.style.opacity = "1"; el.style.clipPath = "none"; });
+    };
+
+    (async () => {
+      try {
+        const { gsap }          = await import("gsap");
+        const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+        if (cancelled) return;
+        gsap.registerPlugin(ScrollTrigger);
+
+        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        ctx = gsap.context(() => {
+          const trigger = {
+            trigger: sectionRef.current,
+            start: "top 78%",
+            end: "bottom 15%",
+            toggleActions: "play reverse play reverse",
+          };
+
+          if (reduced) {
+            gsap.set([headlineRef.current, dossierRef.current, statsRef.current], { opacity: 1, clearProps: "all" });
+            return;
+          }
+
+          // Headline — skewed shear-in, settles flat
+          if (headlineRef.current) {
+            gsap.fromTo(headlineRef.current,
+              { opacity: 0, skewY: 6, y: 36 },
+              { opacity: 1, skewY: 0, y: 0, duration: 0.9, ease: "expo.out", scrollTrigger: trigger }
+            );
+          }
+
+          // Dossier rows — clip-path wipe, one line stamping down after another
+          const dossierRows = dossierRef.current
+            ? Array.from(dossierRef.current.querySelectorAll<HTMLElement>(".ts-desc, .ts-dossier__item"))
+            : [];
+          gsap.fromTo(dossierRows,
+            { opacity: 0, clipPath: "inset(0 100% 0 0)" },
+            {
+              opacity: 1, clipPath: "inset(0 0% 0 0)",
+              duration: 0.55, ease: "power3.out",
+              stagger: 0.12, delay: 0.15,
+              scrollTrigger: trigger,
+            }
+          );
+
+          // Stat cards — scale-overshoot pop, staggered left to right
+          const statCards = statsRef.current
+            ? Array.from(statsRef.current.querySelectorAll<HTMLElement>(".ts-stat"))
+            : [];
+          gsap.fromTo(statCards,
+            { opacity: 0, scale: 0.82 },
+            {
+              opacity: 1, scale: 1,
+              duration: 0.55, ease: "back.out(1.7)",
+              stagger: 0.08, delay: 0.3,
+              scrollTrigger: trigger,
+            }
+          );
+        }, sectionRef);
+      } catch {
+        if (!cancelled) revealAll();
+      }
+    })();
+
+    // Safety net — GSAP/ScrollTrigger setup succeeded but a trigger never
+    // fired for any reason (null ref race, layout quirk): never leave
+    // this section's content permanently invisible.
+    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
+
+    return () => { cancelled = true; clearTimeout(fallback); ctx.revert?.(); };
+  }, []);
 
   return (
     <>
@@ -492,16 +572,17 @@ export default function TrustSection() {
         }
 
         @media(max-width:640px){
-          .trust-section { padding-top: clamp(3rem,8vw,5rem); padding-bottom: clamp(2.5rem,6vw,4rem); }
-          .ts-header { gap: 1.25rem 1.5rem; margin-bottom: clamp(2rem,4vw,3rem); padding-bottom: clamp(1.5rem,3vw,2rem); }
+          .trust-section { padding-top: clamp(2rem,6vw,3rem); padding-bottom: clamp(1.5rem,4vw,2.5rem); }
+          .ts-header { gap: 1rem 1.25rem; margin-bottom: clamp(1.25rem,3vw,2rem); padding-bottom: clamp(1rem,2.5vw,1.5rem); }
           .ts-headline { font-size: clamp(2rem,8vw,3.2rem); }
           .ts-desc { font-size: 0.88rem; }
+          .ts-dossier { gap: 1rem; padding: 1.1rem; }
           .ts-stat__val { font-size: clamp(1.8rem,7vw,2.8rem); }
-          .ts-dossier__item { padding: .7rem 0; gap: .75rem; }
+          .ts-dossier__item { padding: .6rem 0; gap: .75rem; }
         }
         @media(max-width:440px){
           .ts-stats { grid-template-columns: repeat(2,1fr); }
-          .ts-stat { padding: 1rem; }
+          .ts-stat { padding: 0.85rem; }
         }
         @media(prefers-reduced-motion:reduce){
           .ts-header{opacity:1!important;transform:none!important;transition:none!important;}
@@ -534,7 +615,7 @@ export default function TrustSection() {
         [data-theme="light"] .ts-dossier__copy  { color: rgba(13,34,32,0.6); }
       `}</style>
 
-      <section className="trust-section" aria-label="Why trust CX Machinery">
+      <section className="trust-section" aria-label="Why trust CX Machinery" ref={sectionRef}>
 
         <div className="ts__blob ts__blob--1" aria-hidden="true" />
         <div className="ts__blob ts__blob--2" aria-hidden="true" />
@@ -546,20 +627,22 @@ export default function TrustSection() {
         <div className="ts-inner">
 
           {/* Header */}
-          <div className="ts-header" ref={headerRef} data-no-anim>
+          <div className="ts-header" data-no-anim>
             <div>
               <div className="ts-kicker">Why manufacturers choose us</div>
-              <h2 className="ts-headline">
+              <h2 className="ts-headline" ref={headlineRef}>
                 Engineered.<br/>
                 <em>Proven.</em><br/>
                 Supported.
               </h2>
             </div>
-            <CapabilityDossier />
+            <div ref={dossierRef}>
+              <CapabilityDossier />
+            </div>
           </div>
 
           {/* Stats */}
-          <div className="ts-stats" role="list">
+          <div className="ts-stats" role="list" ref={statsRef}>
             {STATS.map(s=>(
               <div role="listitem" key={s.label}>
                 <StatItem {...s}/>

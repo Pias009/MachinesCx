@@ -20,23 +20,33 @@ export default function SectionReveal({ children, skip, delay = 0 }: Props) {
     const c = contentRef.current;
     if (!w || !c) return;
 
+    let revealed = false;
+    const reveal = () => {
+      if (revealed) return;
+      revealed = true;
+      w.classList.add("sr-wiper--sweep");
+      c.classList.add("sr-content--in");
+      w.style.transform = "translateY(-100%)";
+      // drop pointer-events after slide so content is interactive
+      setTimeout(() => { w.style.pointerEvents = "none"; }, 900);
+    };
+
     const obs = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setTimeout(() => {
-            w.classList.add("sr-wiper--sweep");
-            c.classList.add("sr-content--in");
-            w.style.transform = "translateY(-100%)";
-            // drop pointer-events after slide so content is interactive
-            setTimeout(() => { w.style.pointerEvents = "none"; }, 900);
-          }, delay);
+          setTimeout(reveal, delay);
           obs.unobserve(entry.target);
         }
       },
       { threshold: 0.08 },
     );
     obs.observe(w);
-    return () => obs.disconnect();
+
+    // Safety net — if the observer never fires (ref race, layout quirk,
+    // browser oddity), don't leave the content permanently hidden.
+    const fallback = setTimeout(reveal, 4000);
+
+    return () => { obs.disconnect(); clearTimeout(fallback); };
   }, [skip, delay]);
 
   if (skip) return <>{children}</>;

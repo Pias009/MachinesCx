@@ -93,31 +93,57 @@ export default function ParticlePortfolio(){
   useEffect(()=>{
     const el = sectionRef.current; if(!el) return;
 
-    const camST = ScrollTrigger.create({
-      trigger:el, start:"top top", end:"bottom bottom", scrub:1.5,
-      onUpdate:(s)=>{ scrollRef.current = s.progress; },
-    });
+    let camST: ScrollTrigger | null = null;
+    let master: gsap.core.Timeline | null = null;
+    let cancelled = false;
 
-    const master = gsap.timeline({
-      scrollTrigger:{ trigger:el, start:"top top", end:"bottom bottom", scrub:1.8 }
-    });
+    // Guaranteed-visible fallback — if the scrub timeline never engages
+    // (setup throws, trigger measurement race, etc.) the hero/ring panels
+    // must not be left sitting at opacity:0 forever.
+    const revealAll = () => {
+      if (heroRef.current) { heroRef.current.style.opacity = "1"; heroRef.current.style.transform = "none"; }
+      if (ringRef.current) { ringRef.current.style.opacity = "1"; ringRef.current.style.transform = "none"; }
+    };
 
-    master.fromTo(heroRef.current,
-      { opacity:0, y:60 }, { opacity:1, y:0, ease:"power3.out", duration:0.10 }, 0);
-    master.to(heroRef.current,
-      { opacity:0, y:-40, ease:"power2.in", duration:0.06 }, 0.14);
+    try {
+      camST = ScrollTrigger.create({
+        trigger:el, start:"top top", end:"bottom bottom", scrub:1.5,
+        onUpdate:(s)=>{ scrollRef.current = s.progress; },
+      });
 
-    master.fromTo(ringRef.current,
-      { opacity:0, scale:0.92 },
-      { opacity:1, scale:1, ease:"power2.out", duration:0.08 }, 0.20);
+      master = gsap.timeline({
+        scrollTrigger:{ trigger:el, start:"top top", end:"bottom bottom", scrub:1.8 }
+      });
 
-    const range = 0.70;
-    const slot  = range / N;
-    STEPS.forEach((_, i) => {
-      master.call(()=>{ setActive(i); }, [], 0.26 + i * slot);
-    });
+      gsap.set(heroRef.current, { opacity: 0 });
+      gsap.set(ringRef.current, { opacity: 0 });
 
-    return ()=>{ camST.kill(); master.kill(); };
+      master.fromTo(heroRef.current,
+        { opacity:0, y:60 }, { opacity:1, y:0, ease:"power3.out", duration:0.10 }, 0);
+      master.to(heroRef.current,
+        { opacity:0, y:-40, ease:"power2.in", duration:0.06 }, 0.14);
+
+      master.fromTo(ringRef.current,
+        { opacity:0, scale:0.92 },
+        { opacity:1, scale:1, ease:"power2.out", duration:0.08 }, 0.20);
+      // hold the ring fully visible for the rest of the scroll — without
+      // this the timeline has no tween covering 0.28→1.0, so anything
+      // that nudges the scrub off-sync leaves it stuck at a fractional
+      // opacity for the remaining ~70% of this section's scroll distance
+      master.to(ringRef.current, { opacity:1, scale:1, duration:0.72 }, 0.28);
+
+      const range = 0.70;
+      const slot  = range / N;
+      STEPS.forEach((_, i) => {
+        master!.call(()=>{ setActive(i); }, [], 0.26 + i * slot);
+      });
+    } catch {
+      if (!cancelled) revealAll();
+    }
+
+    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
+
+    return ()=>{ cancelled = true; clearTimeout(fallback); camST?.kill(); master?.kill(); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [N]);
 
@@ -145,7 +171,7 @@ export default function ParticlePortfolio(){
   const curAccent = accentFor(active);
 
   return(
-    <section ref={sectionRef} className="pp-section" style={{height:"600vh", position:"relative"}}>
+    <section ref={sectionRef} className="pp-section" style={{height:"350vh", position:"relative"}}>
 
       <style suppressHydrationWarning>{`
         .pp-section { isolation: isolate; }
@@ -353,9 +379,9 @@ export default function ParticlePortfolio(){
       {/* ══ MOBILE ══ */}
       <div className="pp-mobile pp-mobile-wrap" style={{
         background:"#070f0e", borderTop:"1px solid rgba(43,191,179,0.12)",
-        padding:"2.5rem 1.25rem 2.25rem", position:"relative", overflow:"hidden",
+        padding:"1.75rem 1.25rem 1.5rem", position:"relative", overflow:"hidden",
       }}>
-        <div style={{marginBottom:"1.5rem"}}>
+        <div style={{marginBottom:"1.1rem"}}>
           <div style={{fontFamily:"var(--ff-mono)",fontSize:"0.62rem",letterSpacing:"0.2em",
             textTransform:"uppercase",marginBottom:"0.75rem",
             background:"linear-gradient(135deg, var(--brand-teal), var(--brand-amber))",
@@ -448,7 +474,7 @@ export default function ParticlePortfolio(){
         <div ref={heroRef} style={{
           position:"absolute",inset:0,zIndex:10,
           display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-          textAlign:"center",padding:"2rem",opacity:0,pointerEvents:"none",
+          textAlign:"center",padding:"2rem",pointerEvents:"none",
         }}>
           <div style={{display:"flex",alignItems:"center",gap:"0.9rem",
             fontFamily:"var(--ff-mono)",fontSize:"0.64rem",letterSpacing:"0.22em",
@@ -471,7 +497,7 @@ export default function ParticlePortfolio(){
         </div>
 
         {/* ── PHASE 2 — production ring ── */}
-        <div ref={ringRef} style={{position:"absolute",inset:0,zIndex:10,opacity:0}}>
+        <div ref={ringRef} style={{position:"absolute",inset:0,zIndex:10}}>
 
           <div className="pp-ring-title" style={{"--accent": curAccent.hex} as React.CSSProperties}>
             <span>The complete setup — in order</span>

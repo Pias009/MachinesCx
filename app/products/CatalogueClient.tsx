@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { familyImage } from "@/lib/products";
 import type { Category, ProductFamily } from "@/lib/products";
+import ProductStage3D from "@/components/ProductStage3D";
 
 function SearchIcon() {
   return (
@@ -23,6 +23,14 @@ function ClearIcon() {
   );
 }
 
+function ArrowIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+      <path d="M2.5 6.5h8M8 3l3 3.5-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function CatalogueClient({
   categories,
   families,
@@ -32,6 +40,22 @@ export default function CatalogueClient({
 }) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | "all">("all");
+  const [heroIdx, setHeroIdx] = useState(0);
+
+  // ── rotating hero showcase — one representative machine per category,
+  // cycling automatically so the hero itself reads as a live product tour,
+  // not a single static photo. Pauses would add complexity for no real gain
+  // here since the tilt/glow interaction already rewards a lingering cursor.
+  const heroMachines = useMemo(
+    () => categories.map((c) => families.find((f) => f.category === c.slug)).filter((f): f is ProductFamily => !!f),
+    [categories, families]
+  );
+  useEffect(() => {
+    if (heroMachines.length < 2) return;
+    const id = setInterval(() => setHeroIdx((i) => (i + 1) % heroMachines.length), 5000);
+    return () => clearInterval(id);
+  }, [heroMachines.length]);
+  const heroFamily = heroMachines[heroIdx % Math.max(heroMachines.length, 1)];
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -43,113 +67,115 @@ export default function CatalogueClient({
     });
   }, [families, query, activeCategory]);
 
+  // grouped by category only in the unfiltered "all" browse state — the
+  // moment someone searches or filters, a flat result grid answers the
+  // question faster than category scaffolding around it.
+  const grouped = activeCategory === "all" && !query.trim()
+    ? categories
+        .map((c) => ({ category: c, items: filtered.filter((f) => f.category === c.slug) }))
+        .filter((g) => g.items.length > 0)
+    : null;
+
   const countFor = (slug: string | "all") =>
     slug === "all" ? families.length : families.filter((f) => f.category === slug).length;
 
   return (
     <>
-      <header className="cat-hero">
-        <div className="cat-hero__media" aria-hidden>
-          <Image
-            src="/machines/abcde-2200.png"
-            alt=""
-            fill
-            sizes="46vw"
-            priority
-            style={{ objectFit: "contain", padding: "5% 11%", filter: "drop-shadow(0 20px 40px rgba(15,23,42,0.15))" }}
-          />
-        </div>
-        <div className="wrap">
-          <p style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--ink-35)" }}>
-            <Link href="/" style={{ color: "var(--ink-35)" }}>Home</Link> /&nbsp;
-            <span style={{ color: "var(--ink)" }}>Catalogue</span>
-          </p>
-          <h1>Full catalogue.</h1>
-          <p style={{ color: "var(--ink-35)", maxWidth: "52ch", marginTop: "1rem" }}>
-            Every machine family, with full bilingual specification tables. Search
-            by name or model, or filter by category.
-          </p>
+      <header className="cat2-hero">
+        <div className="cat2-hero__grid" aria-hidden="true" />
+        <div className="wrap cat2-hero__inner">
+          <div className="cat2-hero__col">
+            <p className="cat2-crumb">
+              <Link href="/">Home</Link>
+              <span>/</span>
+              <span className="cat2-crumb__cur">Catalogue</span>
+            </p>
+            <h1 className="cat2-hero__h1">The full line-up.</h1>
+            <p className="cat2-hero__sub">
+              {families.length} machine families across {categories.length} process lines, each with full bilingual specification tables.
+            </p>
 
-          <div className="cat-search">
-            <span className="cat-search__icon"><SearchIcon /></span>
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search machines, models, keywords…"
-              aria-label="Search catalogue"
-              className="cat-search__input"
-            />
-            {query && (
-              <button
-                type="button"
-                className="cat-search__clear"
-                onClick={() => setQuery("")}
-                aria-label="Clear search"
-              >
-                <ClearIcon />
-              </button>
-            )}
+            <div className="cat2-toolbar">
+              <div className="cat2-search">
+                <span className="cat2-search__icon"><SearchIcon /></span>
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search machines, models, keywords"
+                  aria-label="Search catalogue"
+                  className="cat2-search__input"
+                />
+                {query && (
+                  <button type="button" className="cat2-search__clear" onClick={() => setQuery("")} aria-label="Clear search">
+                    <ClearIcon />
+                  </button>
+                )}
+              </div>
+
+              <nav className="cat2-filter" aria-label="Filter by category">
+                <button
+                  type="button"
+                  className={`cat2-filter__pill ${activeCategory === "all" ? "cat2-filter__pill--active" : ""}`}
+                  onClick={() => setActiveCategory("all")}
+                >
+                  All <span className="cat2-filter__count">{countFor("all")}</span>
+                </button>
+                {categories.map((c) => (
+                  <button
+                    key={c.slug}
+                    type="button"
+                    className={`cat2-filter__pill ${activeCategory === c.slug ? "cat2-filter__pill--active" : ""}`}
+                    onClick={() => setActiveCategory(c.slug)}
+                  >
+                    {c.name} <span className="cat2-filter__count">{countFor(c.slug)}</span>
+                  </button>
+                ))}
+              </nav>
+            </div>
           </div>
 
-          <nav className="cat-filter" aria-label="Filter by category">
-            <button
-              type="button"
-              className={`cat-filter__pill ${activeCategory === "all" ? "cat-filter__pill--active" : ""}`}
-              onClick={() => setActiveCategory("all")}
-            >
-              All <span className="cat-filter__count">{countFor("all")}</span>
-            </button>
-            {categories.map((c) => (
-              <button
-                key={c.slug}
-                type="button"
-                className={`cat-filter__pill ${activeCategory === c.slug ? "cat-filter__pill--active" : ""}`}
-                onClick={() => setActiveCategory(c.slug)}
-              >
-                {c.name} <span className="cat-filter__count">{countFor(c.slug)}</span>
-              </button>
-            ))}
-          </nav>
+          {heroFamily && (
+            <div className="cat2-hero__stage">
+              <ProductStage3D
+                variant="hero"
+                src={familyImage(heroFamily)}
+                alt={heroFamily.name}
+                badge={heroFamily.series}
+                photoKey={heroFamily.slug}
+                priority
+                sizes="(max-width: 900px) 90vw, 42vw"
+              />
+              {heroMachines.length > 1 && (
+                <div className="cat2-hero__dots" role="tablist" aria-label="Featured machine">
+                  {heroMachines.map((f, i) => (
+                    <button
+                      key={f.slug}
+                      role="tab"
+                      aria-selected={i === heroIdx}
+                      aria-label={f.name}
+                      className={`cat2-hero__dot${i === heroIdx ? " cat2-hero__dot--on" : ""}`}
+                      onClick={() => setHeroIdx(i)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
-      <section style={{ background: "var(--bg-base)", padding: "clamp(3rem,6vw,5rem) 0" }}>
+      <section className="cat2-results">
         <div className="wrap">
-          <div className="cat-results-head">
-            <span className="cat-results-count">
+          <div className="cat2-results-head">
+            <span className="cat2-results-count">
               {filtered.length} machine{filtered.length !== 1 ? "s" : ""}
-              {query && <> matching “{query}”</>}
+              {query && <> matching "{query}"</>}
             </span>
           </div>
 
-          {filtered.length > 0 ? (
-            <div className="families-scroll">
-              {filtered.map((f) => (
-                <Link key={f.slug} href={`/products/${f.category}#${f.slug}`} className="fam-card">
-                  <div className="machine-stage">
-                    <Image
-                      src={familyImage(f)}
-                      alt={f.name}
-                      fill
-                      sizes="(max-width: 700px) 90vw, (max-width: 1100px) 45vw, 30vw"
-                      loading="lazy"
-                      className="machine-stage__img"
-                    />
-                  </div>
-                  <div className="fam-card__body">
-                    <span className="fam-card__series">{f.series}</span>
-                    <span className="fam-card__name">{f.name}</span>
-                    <span className="fam-card__tag">{f.tagline}</span>
-                    <div className="fam-card__models">
-                      {f.models.map((m) => <span key={m} className="chip">{m}</span>)}
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="cat-empty">
+          {filtered.length === 0 && (
+            <div className="cat2-empty">
               <p>No machines match your search.</p>
               <button
                 type="button"
@@ -160,8 +186,92 @@ export default function CatalogueClient({
               </button>
             </div>
           )}
+
+          {grouped
+            ? grouped.map(({ category, items }) => (
+                <div key={category.slug} className="cat2-group">
+                  <div className="cat2-group__head">
+                    <h2 className="cat2-group__title">{category.name}</h2>
+                    <p className="cat2-group__tag">{category.tagline}</p>
+                    <Link href={`/products/${category.slug}`} className="cat2-group__link">
+                      View line <ArrowIcon />
+                    </Link>
+                  </div>
+                  <FamilyGrid items={items} />
+                </div>
+              ))
+            : filtered.length > 0 && <FamilyGrid items={filtered} />}
         </div>
       </section>
     </>
+  );
+}
+
+function FamilyGrid({ items }: { items: ProductFamily[] }) {
+  // the first item is pulled out into its own full-width feature strip so
+  // it can never leave a dangling hole in the grid below — a spanning cell
+  // inside an auto-fill grid only tiles cleanly for specific item counts,
+  // and this catalogue's group sizes are admin-controlled, so it can't
+  // assume a count that divides evenly.
+  const [lead, ...rest] = items;
+  if (!lead) return null;
+  return (
+    <>
+      <FeatureCard family={lead} />
+      {rest.length > 0 && (
+        <div className="cat2-grid">
+          {rest.map((f) => <FamilyCard key={f.slug} family={f} />)}
+        </div>
+      )}
+    </>
+  );
+}
+
+function FeatureCard({ family: f }: { family: ProductFamily }) {
+  return (
+    <Link href={`/products/${f.category}#${f.slug}`} className="cat2-feature">
+      <div className="cat2-feature__stage">
+        <ProductStage3D
+          variant="hero"
+          src={familyImage(f)}
+          alt={f.name}
+          badge={f.series}
+          photoKey={f.slug}
+          eager
+          sizes="(max-width: 900px) 90vw, 48vw"
+        />
+      </div>
+      <div className="cat2-feature__body">
+        <span className="cat2-card__series">{f.series}</span>
+        <span className="cat2-feature__name">{f.name}</span>
+        <span className="cat2-card__tag">{f.tagline}</span>
+        <div className="cat2-card__models">
+          {f.models.map((m) => <span key={m} className="chip">{m}</span>)}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function FamilyCard({ family: f }: { family: ProductFamily }) {
+  return (
+    <Link href={`/products/${f.category}#${f.slug}`} className="cat2-card">
+      <ProductStage3D
+        variant="card"
+        src={familyImage(f)}
+        alt={f.name}
+        photoKey={f.slug}
+        eager
+        sizes="(max-width: 700px) 90vw, (max-width: 1100px) 45vw, 30vw"
+      />
+      <div className="cat2-card__body">
+        <span className="cat2-card__series">{f.series}</span>
+        <span className="cat2-card__name">{f.name}</span>
+        <span className="cat2-card__tag">{f.tagline}</span>
+        <div className="cat2-card__models">
+          {f.models.map((m) => <span key={m} className="chip">{m}</span>)}
+        </div>
+      </div>
+    </Link>
   );
 }

@@ -10,6 +10,7 @@ import ProcessIcon, { resolveIcon, type IconName } from "@/components/ProcessIco
 import DeliveryStageIcon, { resolveDeliveryStage } from "@/components/DeliveryStageIcon";
 import CustomSections from "@/components/CustomSections";
 import MachineParts from "@/components/MachineParts";
+import ProductStage3D from "@/components/ProductStage3D";
 import type { ProductFamily, Category } from "@/lib/products";
 import { familyImage, familyImages, parseYouTubeId, stagePhotos } from "@/lib/products";
 
@@ -133,32 +134,6 @@ export default function ProductDetail({ family, category, related }: Props) {
   const materials = family.materials?.split(",").map(s => s.trim()) ?? [];
   const photos    = familyImages(family);
   const heroImg = photos[Math.min(activePhoto, photos.length - 1)];
-
-  /* subtle parallax on the hero product photo — image drifts slower than
-     the page as it scrolls past. Transform-only (GPU-composited), and the
-     rAF loop only runs while the hero is actually in view. */
-  const heroImgRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const el = heroImgRef.current;
-    if (reduced || !el) return;
-    let raf = 0;
-    let inView = false;
-    const tick = () => {
-      const rect = el.getBoundingClientRect();
-      const mid = rect.top + rect.height / 2 - window.innerHeight / 2;
-      const offset = Math.max(-24, Math.min(24, mid * -0.06));
-      el.style.transform = `translateY(${offset}px)`;
-      if (inView) raf = requestAnimationFrame(tick);
-    };
-    const obs = new IntersectionObserver(([entry]) => {
-      inView = entry.isIntersecting;
-      if (inView) raf = requestAnimationFrame(tick);
-      else cancelAnimationFrame(raf);
-    });
-    obs.observe(el);
-    return () => { obs.disconnect(); cancelAnimationFrame(raf); };
-  }, [activePhoto]);
 
   /* facility strip — 3 diagonal panels of real machines from this category
      (this one + up to 2 related), standing in for a factory-floor collage
@@ -308,20 +283,13 @@ export default function ProductDetail({ family, category, related }: Props) {
 
             {/* ── LEFT: product photo gallery (unlimited photos) ── */}
             <div className="pdv2-gallery" data-reveal="scale">
-              <div className="pdv2-main-img pdv2-main-img--solo">
-                <div className="pdv2-main-img__teal-bar" aria-hidden="true" />
-                <div className="pdv2-main-img__parallax" ref={heroImgRef}>
-                  <Image
-                    src={heroImg}
-                    alt={family.name}
-                    key={activePhoto}
-                    fill
-                    priority
-                    sizes="(max-width: 900px) 90vw, 56vw"
-                  />
-                </div>
-                <span className="pdv2-main-img__badge">{family.series}</span>
-              </div>
+              <ProductStage3D
+                src={heroImg}
+                alt={family.name}
+                badge={family.series}
+                photoKey={activePhoto}
+                priority
+              />
               {photos.length > 1 && (
                 <div className="pdv2-thumbs" role="tablist" aria-label="Product photos">
                   {photos.map((p, i) => (
@@ -333,7 +301,7 @@ export default function ProductDetail({ family, category, related }: Props) {
                       onClick={() => setActivePhoto(i)}
                       aria-label={`Photo ${i + 1} of ${photos.length}`}
                     >
-                      <Image src={p} alt="" fill sizes="68px" style={{ objectFit: "contain", padding: "4px" }} />
+                      <Image src={p} alt="" fill loading="eager" sizes="68px" style={{ objectFit: "contain", padding: "4px" }} />
                     </button>
                   ))}
                 </div>

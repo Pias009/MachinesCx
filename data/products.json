@@ -112,23 +112,28 @@
       "installation": [
         {
           "title": "Site & foundation check",
-          "detail": "Confirm floor load rating, ceiling clearance for the tower haul-off, and a level concrete pad at the marked footprint before the machine arrives."
+          "detail": "Confirm floor load rating, ceiling clearance for the tower haul-off, and a level concrete pad at the marked footprint before the machine arrives.",
+          "image": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784475562/cx-machinery/zozsjky029iyownsltvu.jpg"
         },
         {
           "title": "Power & utilities hookup",
-          "detail": "Connect 3-phase supply to the main distribution cabinet, plumb compressed air to the air-ring manifold, and route cooling water if fitted."
+          "detail": "Connect 3-phase supply to the main distribution cabinet, plumb compressed air to the air-ring manifold, and route cooling water if fitted.",
+          "image": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784475565/cx-machinery/ng70kjlqjyw09ks53fst.jpg"
         },
         {
           "title": "Mechanical assembly",
-          "detail": "Our engineers position the extruder, die head and tower sections, align the haul-off frame, and torque all structural fasteners to spec."
+          "detail": "Our engineers position the extruder, die head and tower sections, align the haul-off frame, and torque all structural fasteners to spec.",
+          "image": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784475570/cx-machinery/vcgmjlbeiwyemzegqeud.jpg"
         },
         {
           "title": "Calibration & trial run",
-          "detail": "Screw temperature zones are tuned, the die gap is set, and a trial film run verifies gauge uniformity before handover."
+          "detail": "Screw temperature zones are tuned, the die gap is set, and a trial film run verifies gauge uniformity before handover.",
+          "image": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784475582/cx-machinery/norwig4mx5puijehnnaa.jpg"
         },
         {
           "title": "Operator training",
-          "detail": "On-site training covers startup/shutdown sequence, gauge control, common fault codes, and routine maintenance."
+          "detail": "On-site training covers startup/shutdown sequence, gauge control, common fault codes, and routine maintenance.",
+          "image": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784475586/cx-machinery/hbm6bsjplk1yqxbvyfvx.jpg"
         }
       ],
       "deliveryGuide": [
@@ -160,17 +165,25 @@
       ],
       "gallery": [
         {
-          "src": "/machines/abcde-2200.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949139/cx-machinery/machines/abcde-2200.png",
           "caption": "ABCDE-2200 Five-Layer Co-extrusion Line — factory floor render"
         },
         {
-          "src": "/machines/abcde-2200.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949139/cx-machinery/machines/abcde-2200.png",
           "caption": "ABCDE-2200 Five-Layer Co-extrusion Line — film-blowing line detail view"
         }
       ],
       "images": [
-        "/uploads/maxim-berg-3E2xgrlNXq4-unsplash-mr6kyw88.jpg",
-        "/machines/abcde-2200.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949135/cx-machinery/uploads/maxim-berg-3E2xgrlNXq4-unsplash-mr6kyw88.jpg",
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949139/cx-machinery/machines/abcde-2200.png"
+      ],
+      "parts": [
+        {
+          "name": "",
+          "detail": "",
+          "images": [],
+          "installation": []
+        }
       ]
     },
     {
@@ -334,16 +347,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/abc-multilayer-small.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949143/cx-machinery/machines/abc-multilayer-small.png",
           "caption": "ABC Multi-layer Line — 800 / 1000 / 1200 — factory floor render"
         },
         {
-          "src": "/machines/abc-multilayer-small.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949143/cx-machinery/machines/abc-multilayer-small.png",
           "caption": "ABC Multi-layer Line — 800 / 1000 / 1200 — film-blowing line detail view"
         }
       ],
       "images": [
-        "/machines/abc-multilayer-small.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949143/cx-machinery/machines/abc-multilayer-small.png"
       ]
     },
     {
@@ -506,16 +519,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/abc-multilayer-large.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949147/cx-machinery/machines/abc-multilayer-large.png",
           "caption": "ABC Multi-layer Line — 1500 / 1800 / 2300 — factory floor render"
         },
         {
-          "src": "/machines/abc-multilayer-large.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949147/cx-machinery/machines/abc-multilayer-large.png",
           "caption": "ABC Multi-layer Line — 1500 / 1800 / 2300 — film-blowing line detail view"
         }
       ],
       "images": [
-        "/machines/abc-multilayer-large.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949147/cx-machinery/machines/abc-multilayer-large.png"
       ]
     },
     {
@@ -679,16 +692,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/abc-cx-series.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949150/cx-machinery/machines/abc-cx-series.png",
           "caption": "CX-ABC Multi-layer Line — 1300 / 1600 / 2200 — factory floor render"
         },
         {
-          "src": "/machines/abc-cx-series.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949150/cx-machinery/machines/abc-cx-series.png",
           "caption": "CX-ABC Multi-layer Line — 1300 / 1600 / 2200 — film-blowing line detail view"
         }
       ],
       "images": [
-        "/machines/abc-cx-series.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949150/cx-machinery/machines/abc-cx-series.png"
       ]
     },
     {
@@ -867,16 +880,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/aba-1000-1500.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949152/cx-machinery/machines/aba-1000-1500.png",
           "caption": "ABA Three-layer Line — 1000 / 1200 / 1500 — factory floor render"
         },
         {
-          "src": "/machines/aba-1000-1500.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949152/cx-machinery/machines/aba-1000-1500.png",
           "caption": "ABA Three-layer Line — 1000 / 1200 / 1500 — film-blowing line detail view"
         }
       ],
       "images": [
-        "/machines/aba-1000-1500.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949152/cx-machinery/machines/aba-1000-1500.png"
       ]
     },
     {
@@ -1055,16 +1068,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/aba-800-1200.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949156/cx-machinery/machines/aba-800-1200.png",
           "caption": "ABA Three-layer Line — 800 / 1000 / 1200 (four-screw) — factory floor render"
         },
         {
-          "src": "/machines/aba-800-1200.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949156/cx-machinery/machines/aba-800-1200.png",
           "caption": "ABA Three-layer Line — 800 / 1000 / 1200 (four-screw) — film-blowing line detail view"
         }
       ],
       "images": [
-        "/machines/aba-800-1200.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949156/cx-machinery/machines/aba-800-1200.png"
       ]
     },
     {
@@ -1244,16 +1257,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/aba-cx-series.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949158/cx-machinery/machines/aba-cx-series.png",
           "caption": "CX-ABA Three-layer Line — 700 / 900 / 1100 — factory floor render"
         },
         {
-          "src": "/machines/aba-cx-series.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949158/cx-machinery/machines/aba-cx-series.png",
           "caption": "CX-ABA Three-layer Line — 700 / 900 / 1100 — film-blowing line detail view"
         }
       ],
       "images": [
-        "/machines/aba-cx-series.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949158/cx-machinery/machines/aba-cx-series.png"
       ]
     },
     {
@@ -1418,16 +1431,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/s-mini-double.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949161/cx-machinery/machines/s-mini-double.jpg",
           "caption": "S Mini Double-head Line — 400×2 / 600×2 — factory floor render"
         },
         {
-          "src": "/machines/s-mini-double.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949161/cx-machinery/machines/s-mini-double.jpg",
           "caption": "S Mini Double-head Line — 400×2 / 600×2 — film-blowing line detail view"
         }
       ],
       "images": [
-        "/machines/s-mini-double.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949161/cx-machinery/machines/s-mini-double.jpg"
       ]
     },
     {
@@ -1607,16 +1620,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/s-wide.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949163/cx-machinery/machines/s-wide.png",
           "caption": "S Single-layer Line — 1200 / 1500 / 1800 — factory floor render"
         },
         {
-          "src": "/machines/s-wide.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949163/cx-machinery/machines/s-wide.png",
           "caption": "S Single-layer Line — 1200 / 1500 / 1800 — film-blowing line detail view"
         }
       ],
       "images": [
-        "/machines/s-wide.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949163/cx-machinery/machines/s-wide.png"
       ]
     },
     {
@@ -1796,16 +1809,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/s-standard.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949165/cx-machinery/machines/s-standard.png",
           "caption": "S Single-layer Line — 600 / 800 / 1000 — factory floor render"
         },
         {
-          "src": "/machines/s-standard.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949165/cx-machinery/machines/s-standard.png",
           "caption": "S Single-layer Line — 600 / 800 / 1000 — film-blowing line detail view"
         }
       ],
       "images": [
-        "/machines/s-standard.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949165/cx-machinery/machines/s-standard.png"
       ]
     },
     {
@@ -2009,16 +2022,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/sb-printing-line.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949167/cx-machinery/machines/sb-printing-line.png",
           "caption": "SB Blowing & Printing Line — 600 / 800 / 1000 — factory floor render"
         },
         {
-          "src": "/machines/sb-printing-line.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949167/cx-machinery/machines/sb-printing-line.png",
           "caption": "SB Blowing & Printing Line — 600 / 800 / 1000 — film-blowing line detail view"
         }
       ],
       "images": [
-        "/machines/sb-printing-line.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949167/cx-machinery/machines/sb-printing-line.png"
       ]
     },
     {
@@ -2144,16 +2157,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/cx-25-lab.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949170/cx-machinery/machines/cx-25-lab.png",
           "caption": "CX-25 Lab Film Line — factory floor render"
         },
         {
-          "src": "/machines/cx-25-lab.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949170/cx-machinery/machines/cx-25-lab.png",
           "caption": "CX-25 Lab Film Line — film-blowing line detail view"
         }
       ],
       "images": [
-        "/machines/cx-25-lab.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949170/cx-machinery/machines/cx-25-lab.png"
       ]
     },
     {
@@ -2268,16 +2281,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/t-pro-heatseal.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949172/cx-machinery/machines/t-pro-heatseal.png",
           "caption": "T-PRO Heat-Seal Bag Machine — 500×3 / 600×2 — factory floor render"
         },
         {
-          "src": "/machines/t-pro-heatseal.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949172/cx-machinery/machines/t-pro-heatseal.png",
           "caption": "T-PRO Heat-Seal Bag Machine — 500×3 / 600×2 — bag-making machine detail view"
         }
       ],
       "images": [
-        "/machines/t-pro-heatseal.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949172/cx-machinery/machines/t-pro-heatseal.png"
       ]
     },
     {
@@ -2390,16 +2403,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/tg-pro.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949174/cx-machinery/machines/tg-pro.png",
           "caption": "TG-500×2 PRO Bag Machine — factory floor render"
         },
         {
-          "src": "/machines/tg-pro.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949174/cx-machinery/machines/tg-pro.png",
           "caption": "TG-500×2 PRO Bag Machine — bag-making machine detail view"
         }
       ],
       "images": [
-        "/machines/tg-pro.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949174/cx-machinery/machines/tg-pro.png"
       ]
     },
     {
@@ -2500,16 +2513,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/tb-320.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949176/cx-machinery/machines/tb-320.png",
           "caption": "CX-TB-320×6 Multi-lane Bag Machine — factory floor render"
         },
         {
-          "src": "/machines/tb-320.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949176/cx-machinery/machines/tb-320.png",
           "caption": "CX-TB-320×6 Multi-lane Bag Machine — bag-making machine detail view"
         }
       ],
       "images": [
-        "/machines/tb-320.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949176/cx-machinery/machines/tb-320.png"
       ]
     },
     {
@@ -2632,16 +2645,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/f-pro-bottomseal.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949179/cx-machinery/machines/f-pro-bottomseal.jpg",
           "caption": "F-PRO Bottom-Seal Bag Machine — 1000 / 1300 / 1600 — factory floor render"
         },
         {
-          "src": "/machines/f-pro-bottomseal.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949179/cx-machinery/machines/f-pro-bottomseal.jpg",
           "caption": "F-PRO Bottom-Seal Bag Machine — 1000 / 1300 / 1600 — bag-making machine detail view"
         }
       ],
       "images": [
-        "/machines/f-pro-bottomseal.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949179/cx-machinery/machines/f-pro-bottomseal.jpg"
       ]
     },
     {
@@ -2756,16 +2769,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/heatseal-750-1150.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949180/cx-machinery/machines/heatseal-750-1150.png",
           "caption": "Heat-Seal Bag Machine — 750 / 950 / 1150 — factory floor render"
         },
         {
-          "src": "/machines/heatseal-750-1150.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949180/cx-machinery/machines/heatseal-750-1150.png",
           "caption": "Heat-Seal Bag Machine — 750 / 950 / 1150 — bag-making machine detail view"
         }
       ],
       "images": [
-        "/machines/heatseal-750-1150.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949180/cx-machinery/machines/heatseal-750-1150.png"
       ]
     },
     {
@@ -2880,16 +2893,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/heatseal-750-1150-hd.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949182/cx-machinery/machines/heatseal-750-1150-hd.png",
           "caption": "Heavy Heat-Seal Bag Machine — 750 / 950 / 1150 — factory floor render"
         },
         {
-          "src": "/machines/heatseal-750-1150-hd.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949182/cx-machinery/machines/heatseal-750-1150-hd.png",
           "caption": "Heavy Heat-Seal Bag Machine — 750 / 950 / 1150 — bag-making machine detail view"
         }
       ],
       "images": [
-        "/machines/heatseal-750-1150-hd.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949182/cx-machinery/machines/heatseal-750-1150-hd.png"
       ]
     },
     {
@@ -2997,16 +3010,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/heatseal-narrow.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949184/cx-machinery/machines/heatseal-narrow.png",
           "caption": "Narrow Heat-Seal Bag Machine — 350 / 450 — factory floor render"
         },
         {
-          "src": "/machines/heatseal-narrow.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949184/cx-machinery/machines/heatseal-narrow.png",
           "caption": "Narrow Heat-Seal Bag Machine — 350 / 450 — bag-making machine detail view"
         }
       ],
       "images": [
-        "/machines/heatseal-narrow.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949184/cx-machinery/machines/heatseal-narrow.png"
       ]
     },
     {
@@ -3121,16 +3134,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/rb-vegetable.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949186/cx-machinery/machines/rb-vegetable.jpg",
           "caption": "CX-RB Vest & Vegetable Bag Machine — 400×2 / 500×2 — factory floor render"
         },
         {
-          "src": "/machines/rb-vegetable.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949186/cx-machinery/machines/rb-vegetable.jpg",
           "caption": "CX-RB Vest & Vegetable Bag Machine — 400×2 / 500×2 — bag-making machine detail view"
         }
       ],
       "images": [
-        "/machines/rb-vegetable.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949186/cx-machinery/machines/rb-vegetable.jpg"
       ]
     },
     {
@@ -3239,16 +3252,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/rgb-rollbag.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949187/cx-machinery/machines/rgb-rollbag.png",
           "caption": "CX-RGB Roll Bag Machine — 1000 / 1200 — factory floor render"
         },
         {
-          "src": "/machines/rgb-rollbag.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949187/cx-machinery/machines/rgb-rollbag.png",
           "caption": "CX-RGB Roll Bag Machine — 1000 / 1200 — bag-making machine detail view"
         }
       ],
       "images": [
-        "/machines/rgb-rollbag.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949187/cx-machinery/machines/rgb-rollbag.png"
       ]
     },
     {
@@ -3349,16 +3362,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/rollbag-continuous.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949190/cx-machinery/machines/rollbag-continuous.png",
           "caption": "Continuous Roll Bag Machine — factory floor render"
         },
         {
-          "src": "/machines/rollbag-continuous.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949190/cx-machinery/machines/rollbag-continuous.png",
           "caption": "Continuous Roll Bag Machine — bag-making machine detail view"
         }
       ],
       "images": [
-        "/machines/rollbag-continuous.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949190/cx-machinery/machines/rollbag-continuous.png"
       ]
     },
     {
@@ -3467,16 +3480,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/sb-pe-pbat.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949193/cx-machinery/machines/sb-pe-pbat.png",
           "caption": "CX-SB Bag Machine — 800 / 500×2 — factory floor render"
         },
         {
-          "src": "/machines/sb-pe-pbat.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949193/cx-machinery/machines/sb-pe-pbat.png",
           "caption": "CX-SB Bag Machine — 800 / 500×2 — bag-making machine detail view"
         }
       ],
       "images": [
-        "/machines/sb-pe-pbat.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949193/cx-machinery/machines/sb-pe-pbat.png"
       ]
     },
     {
@@ -3578,16 +3591,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/cx-260.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949196/cx-machinery/machines/cx-260.jpg",
           "caption": "CX-260 Bag Machine — factory floor render"
         },
         {
-          "src": "/machines/cx-260.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949196/cx-machinery/machines/cx-260.jpg",
           "caption": "CX-260 Bag Machine — bag-making machine detail view"
         }
       ],
       "images": [
-        "/machines/cx-260.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949196/cx-machinery/machines/cx-260.jpg"
       ]
     },
     {
@@ -3703,16 +3716,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/gb-garbage.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949198/cx-machinery/machines/gb-garbage.png",
           "caption": "CX-GB Roll Bag Machine — 1000 / 1200 — factory floor render"
         },
         {
-          "src": "/machines/gb-garbage.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949198/cx-machinery/machines/gb-garbage.png",
           "caption": "CX-GB Roll Bag Machine — 1000 / 1200 — bag-making machine detail view"
         }
       ],
       "images": [
-        "/machines/gb-garbage.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949198/cx-machinery/machines/gb-garbage.png"
       ]
     },
     {
@@ -3828,16 +3841,16 @@
       ],
       "gallery": [
         {
-          "src": "/machines/cx-pelletizing.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949201/cx-machinery/machines/cx-pelletizing.png",
           "caption": "CX Recycling & Pelletizing Line — 100 / 120 — factory floor render"
         },
         {
-          "src": "/machines/cx-pelletizing.png",
+          "src": "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949201/cx-machinery/machines/cx-pelletizing.png",
           "caption": "CX Recycling & Pelletizing Line — 100 / 120 — recycling line detail view"
         }
       ],
       "images": [
-        "/machines/cx-pelletizing.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949201/cx-machinery/machines/cx-pelletizing.png"
       ]
     },
     {
@@ -4050,7 +4063,7 @@
         }
       ],
       "images": [
-        "/machines/flexo-1.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949204/cx-machinery/machines/flexo-1.jpg"
       ]
     },
     {
@@ -4263,7 +4276,7 @@
         }
       ],
       "images": [
-        "/machines/flexo-2.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949208/cx-machinery/machines/flexo-2.jpg"
       ]
     },
     {
@@ -4476,7 +4489,7 @@
         }
       ],
       "images": [
-        "/machines/flexo-6c-nobg.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949212/cx-machinery/machines/flexo-6c-nobg.png"
       ]
     },
     {
@@ -4689,7 +4702,7 @@
         }
       ],
       "images": [
-        "/machines/flexo-4.png"
+        "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949216/cx-machinery/machines/flexo-4.jpg"
       ]
     }
   ]

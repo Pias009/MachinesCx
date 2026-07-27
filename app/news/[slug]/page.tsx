@@ -61,7 +61,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             <span style={{ color: "#0f172a" }}>{a.category}</span>
           </p>
 
-          <div style={{
+          <div className="article-hero-grid" style={{
             display: "grid",
             gridTemplateColumns: "1fr auto",
             gap: "clamp(2rem,5vw,5rem)",
@@ -108,7 +108,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             </div>
 
             {/* right — hero image */}
-            <div style={{
+            <div className="article-hero-img" style={{
               width: "clamp(200px,28vw,380px)",
               background: "#ffffff",
               border: "1px solid #e2e8f0",
@@ -140,7 +140,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       </div>
 
       {/* ── Article body + sidebar ── */}
-      <div style={{
+      <div className="article-content-grid" style={{
         background: "#f8fafc",
         maxWidth: 1280, margin: "0 auto",
         padding: "clamp(3rem,6vw,5rem) clamp(1.25rem,4vw,3rem)",
@@ -313,7 +313,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         .ns-card__cta { font-family: var(--ff-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand-red); }
 
         @media (max-width: 768px) {
-          .article-body + aside { display: none; }
+          .article-hero-grid { grid-template-columns: 1fr !important; }
+          .article-hero-img { width: 100% !important; max-width: 260px; }
+          .article-content-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </>

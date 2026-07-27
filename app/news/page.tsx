@@ -155,6 +155,11 @@ export default async function NewsIndexPage() {
         @media (max-width: 680px) {
           .news-featured { grid-template-columns: 1fr; }
           .news-featured__img-wrap { border-right: none; border-bottom: 1px solid var(--bg-line); min-height: 220px; }
+          .news-featured__body { padding: 1.5rem; }
+        }
+
+        @media (max-width: 480px) {
+          .ns-card__body { padding: 0.9rem 0.9rem 1.2rem; }
         }
 
         /* reuse ns-card styles from NewsStrip */

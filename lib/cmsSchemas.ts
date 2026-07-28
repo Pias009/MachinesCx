@@ -68,7 +68,13 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
   {
     slug: "products",
     title: "Products",
-    description: "Full product catalogue — every family, model and spec table across the site.",
+    description: "Full product catalogue — every family, model and spec table across the site. " +
+      "Photo size cheat-sheet (each field's own hint below has the full detail): " +
+      "Product photos & Site gallery & Machine parts & Custom sections (split/gallery) → 1200×900px (4:3), shown in full, not cropped. " +
+      "Installation steps → 1200×900px (4:3), but this one IS cropped to fill — center the subject. " +
+      "Delivery stage photos & Custom section banners → 2100×900px (21:9 wide banner), cropped top/bottom — keep detail centered. " +
+      "Radar center image → 900×900px (square), cropped into a circle. " +
+      "Product demo videos → no photo needed, thumbnail comes from YouTube automatically.",
     collections: [
       {
         key: "families",
@@ -100,25 +106,25 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
           { key: "materials", label: "Materials", kind: "text", group: "📝 Basic Info" },
           { key: "slug", label: "Slug (URL id)", kind: "text", hint: "lowercase-with-dashes, unique — only change if you know this affects the page URL", group: "📝 Basic Info" },
 
-          { key: "images", label: "Product photos", kind: "images", hint: "upload as many as you like — the first one is used as the main photo everywhere this machine appears", group: "📸 Photos" },
-          { key: "gallery", label: "Site gallery photos", kind: "gallery", hint: "real installation / factory / delivery photos, shown further down the product page", group: "📸 Photos" },
+          { key: "images", label: "Product photos", kind: "images", hint: "upload as many as you like — the first one is used as the main photo everywhere this machine appears. Best size: 1600×1280px (5:4), machine centered on a plain/transparent background — this photo is shown in full (never cropped), so keep the subject away from the edges.", group: "📸 Photos" },
+          { key: "gallery", label: "Site gallery photos", kind: "gallery", hint: "real installation / factory / delivery photos, shown further down the product page. Best size: 1200×900px (4:3) — shown in full, not cropped.", group: "📸 Photos" },
 
-          { key: "videos", label: "Product demo videos", kind: "videos", hint: "paste a real YouTube link or video ID — leave empty to show a 'video coming soon' placeholder instead of a broken/fake video", group: "🎬 Videos" },
+          { key: "videos", label: "Product demo videos", kind: "videos", hint: "paste a real YouTube link or video ID — leave empty to show a 'video coming soon' placeholder instead of a broken/fake video. Thumbnail is pulled from YouTube automatically at 16:9, no upload needed.", group: "🎬 Videos" },
 
           { key: "specs", label: "Spec table", kind: "specs", hint: "model columns are added/renamed/removed directly in this table", group: "📊 Specifications" },
 
-          { key: "radarImage", label: "Radar center image", kind: "image", hint: "the photo that appears at the center of the spider-web chart on the product page — leave empty to use the first product photo", group: "🕸 Radar Chart" },
+          { key: "radarImage", label: "Radar center image", kind: "image", hint: "the photo that appears at the center of the spider-web chart on the product page — leave empty to use the first product photo. Best size: 900×900px (square, 1:1) — displayed in a circle, so keep the subject centered; the corners get cropped off.", group: "🕸 Radar Chart" },
           { key: "radarSpecs", label: "Radar spec labels (one per line)", kind: "stringlist", hint: "which specs appear on the spider-web chart — type the exact spec labels, one per line, matching the spec table above. Defaults to common specs if left empty.", group: "🕸 Radar Chart" },
 
-          { key: "parts", label: "Machine parts / components", kind: "parts", hint: "add one or more real parts of this machine — name, detail text, real photos. Give a part its own install steps only if it needs a separate installation sequence.", group: "🔩 Parts" },
+          { key: "parts", label: "Machine parts / components", kind: "parts", hint: "add one or more real parts of this machine — name, detail text, real photos. Give a part its own install steps only if it needs a separate installation sequence. Part photos best size: 1200×900px (4:3), shown in full. Small thumbnail selectors (44×44px and 64×64px, both square) are cropped to fit — keep the subject centered in the source photo.", group: "🔩 Parts" },
 
-          { key: "installation", label: "Installation / setup steps", kind: "steps", hint: "add a photo or diagram per step — auto-picks an icon from words like foundation / power / assembly / calibration / training in the title", group: "🚚 Setup & Delivery" },
+          { key: "installation", label: "Installation / setup steps", kind: "steps", hint: "add a photo or diagram per step — auto-picks an icon from words like foundation / power / assembly / calibration / training in the title. Best size: 1200×900px (4:3) — this photo IS cropped to fill the frame, so keep the important detail centered, not near the edges.", group: "🚚 Setup & Delivery" },
           { key: "deliveryGuide", label: "Delivery guide (timeline)", kind: "phases", hint: "auto-picks an icon from words like order / production / test / shipping / install in the label", group: "🚚 Setup & Delivery" },
-          { key: "deliveryStagePhotos", label: "Delivery stage proof photos", kind: "stagePhotos", hint: "real photos of this machine crated, in a container, and installed on-site — upload as many as you like per stage, each falls back to a technical icon until at least one is uploaded", group: "🚚 Setup & Delivery" },
+          { key: "deliveryStagePhotos", label: "Delivery stage proof photos", kind: "stagePhotos", hint: "real photos of this machine crated, in a container, and installed on-site — upload as many as you like per stage, each falls back to a technical icon until at least one is uploaded. Best size: 2100×900px (21:9, wide banner) — this photo IS cropped top/bottom to fill a cinematic banner, so frame the subject centrally and avoid important detail near the top/bottom edges. A tall/square photo will lose most of its top and bottom.", group: "🚚 Setup & Delivery" },
 
           { key: "reviews", label: "Buyer reviews", kind: "reviews", hint: "only real reviews you've collected — leave empty to show an honest 'be the first to review' state instead of fake ratings", group: "⭐ Reviews" },
 
-          { key: "customSections", label: "Custom sections", kind: "customSections", hint: "add extra sections to this product page — pick a template, fill in title/image/text. Appears automatically on the live page, in the order listed here, right after the delivery timeline.", group: "➕ Custom Sections" },
+          { key: "customSections", label: "Custom sections", kind: "customSections", hint: "add extra sections to this product page — pick a template, fill in title/image/text. Appears automatically on the live page, in the order listed here, right after the delivery timeline. Image sizes (all cropped to fill, so center the subject): Banner template → 2100×900px (21:9, wide). Split template → 1200×900px (4:3). Gallery template → 1200×900px (4:3) per photo.", group: "➕ Custom Sections" },
         ],
       },
       {
@@ -240,7 +246,7 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
         label: "Carousel machines",
         titleKeys: ["model", "series"],
         canAdd: true,
-        template: { model: "AI-XX", series: "X-Colour Press", src: "", speed: "", reg: "", accent: "#e11d48" },
+        template: { model: "AI-XX", series: "X-Colour Press", src: "", speed: "", reg: "", accent: "#e11d48", hot: false },
         fields: [
           { key: "model", label: "Model", kind: "text" },
           { key: "series", label: "Series", kind: "text" },
@@ -248,6 +254,7 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
           { key: "speed", label: "Max speed", kind: "text" },
           { key: "reg", label: "Registration", kind: "text" },
           { key: "accent", label: "Accent color (hex)", kind: "text" },
+          { key: "hot", label: "Hot model badge", kind: "boolean" },
         ],
       },
     ],

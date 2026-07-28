@@ -3029,8 +3029,9 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-info-card {
   background: var(--bg-surface);
   border: 1px solid var(--bg-line);
-  padding: 1.5rem;
-  display: flex; flex-direction: column; gap: 1.25rem;
+  border-radius: 16px;
+  padding: 1.75rem;
+  display: flex; flex-direction: column; gap: 1.5rem;
   height: 100%;
   box-shadow: 0 1px 0 rgba(43,191,179,0.06) inset,
               0 24px 48px -24px rgba(0,0,0,0.45);
@@ -3040,11 +3041,15 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   box-shadow: 0 1px 0 rgba(43,191,179,0.1) inset,
               0 32px 64px -24px rgba(0,0,0,0.55);
 }
+/* content stacks naturally; trust row is pinned to the card's
+   bottom edge so short spec lists don't leave a dead gap above it */
+.pdv2-trust-row { margin-top: auto; }
 
 /* model selector */
 .pdv2-model-strip {
   display: flex; align-items: flex-start; gap: 0.85rem; flex-wrap: wrap;
-  padding: 1rem; border: 1px solid var(--bg-line); background: var(--bg-surface);
+  padding: 1rem 1.1rem; border: 1px solid var(--bg-line); border-radius: 10px;
+  background: var(--bg-surface);
 }
 .pdv2-model-strip__label {
   font-family: var(--ff-mono); font-size: 0.66rem;
@@ -3055,7 +3060,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-mchip {
   font-family: var(--ff-mono); font-size: 0.7rem;
   letter-spacing: 0.08em; text-transform: uppercase;
-  padding: 0.35rem 0.8rem; border: 1px solid var(--bg-line);
+  padding: 0.35rem 0.8rem; border: 1px solid var(--bg-line); border-radius: 6px;
   background: transparent; color: var(--ink-60);
   cursor: pointer;
   transition: border-color 0.18s, color 0.18s, transform 0.18s cubic-bezier(0.16,1,0.3,1);
@@ -3065,44 +3070,56 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-mchip--on {
   background: var(--brand-teal); border-color: var(--brand-teal);
   color: #0d2220; font-weight: 700;
+  box-shadow: 0 4px 14px -4px rgba(43,191,179,0.55);
 }
 
 /* spec panel */
 .pdv2-spec-panel {
   border: 1px solid var(--bg-line);
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 16px 32px -20px rgba(0,0,0,0.5);
 }
 .pdv2-spec-panel__head {
-  display: flex; justify-content: space-between;
-  padding: 0.65rem 1rem;
-  background: var(--brand-teal);
-  font-family: var(--ff-mono); font-size: 0.68rem;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.75rem 1.1rem;
+  background: linear-gradient(120deg, var(--brand-teal), var(--brand-teal-dk, var(--brand-teal)));
+  font-family: var(--ff-mono); font-size: 0.7rem;
   letter-spacing: 0.14em; text-transform: uppercase;
-  color: #0d2220; font-weight: 700;
+  color: #06110f; font-weight: 800;
 }
 .pdv2-spec-row {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 0.65rem 1rem;
+  padding: 0.7rem 1.1rem;
   border-bottom: 1px solid var(--bg-line);
   transition: background 0.12s;
 }
+.pdv2-spec-row:nth-child(even) { background: rgba(43,191,179,0.025); }
 .pdv2-spec-row:last-child { border-bottom: none; }
-.pdv2-spec-row:hover { background: rgba(43,191,179,0.04); }
+.pdv2-spec-row:hover { background: rgba(43,191,179,0.06); }
 .pdv2-spec-row__label {
   font-family: var(--ff-mono); font-size: 0.65rem;
   letter-spacing: 0.06em; color: var(--ink-60);
   overflow-wrap: anywhere; min-width: 0; flex-shrink: 1;
 }
 .pdv2-spec-row__val {
-  font-family: var(--ff-mono); font-size: 0.72rem;
+  font-family: var(--ff-mono); font-size: 0.74rem;
   font-weight: 700; color: var(--ink); letter-spacing: 0.04em;
   text-align: right; max-width: 55%;
   overflow-wrap: anywhere; min-width: 0;
 }
+.pdv2-spec-row--empty {
+  justify-content: center; padding: 1.4rem 1.1rem;
+}
+.pdv2-spec-row--empty .pdv2-spec-row__label {
+  color: var(--ink-35); font-style: italic; text-align: center;
+}
 
 /* materials */
-.pdv2-mats { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.pdv2-mats {
+  display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+  padding: 0.9rem 1.1rem; border: 1px solid var(--bg-line); border-radius: 10px;
+}
 .pdv2-mats__label {
   font-family: var(--ff-mono); font-size: 0.66rem;
   letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-35);
@@ -3112,7 +3129,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-mat-tag {
   font-family: var(--ff-mono); font-size: 0.66rem;
   letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 0.28rem 0.65rem; border: 1px solid var(--bg-line);
+  padding: 0.3rem 0.7rem; border: 1px solid var(--bg-line); border-radius: 999px;
   color: var(--ink-60); background: var(--bg-surface);
   transition: border-color 0.15s, color 0.15s;
 }
@@ -3123,7 +3140,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-back-btn {
   font-family: var(--ff-mono); font-size: 0.68rem;
   letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink-35); border: 1px solid var(--bg-line);
+  color: var(--ink-35); border: 1px solid var(--bg-line); border-radius: 8px;
   padding: 0.75rem 1.1rem;
   display: inline-flex; align-items: center; gap: 0.4rem;
   transition: border-color 0.18s, color 0.18s,
@@ -3135,7 +3152,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 /* trust row */
 .pdv2-trust-row {
   display: flex; gap: 1.75rem; flex-wrap: wrap;
-  padding-top: 1.1rem; border-top: 1px solid var(--bg-line);
+  padding-top: 1.25rem; border-top: 1px solid var(--bg-line);
 }
 .pdv2-trust-item {
   display: flex; align-items: center; gap: 0.65rem;
@@ -3144,7 +3161,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 }
 .pdv2-trust-item svg {
   color: var(--brand-teal); flex-shrink: 0;
-  width: 24px; height: 24px;
+  width: 22px; height: 22px;
 }
 
 /* ════════════════════════════════════════
@@ -3478,37 +3495,26 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-vlist-item--on .pdv2-vlist-title { color: var(--ink); }
 
 /* ════════════════════════════════════════
-   ANIMATED PROCESS ICONS (install + delivery)
+   PROCESS ICONS (install + delivery) — real lucide glyphs
 ════════════════════════════════════════ */
 .pico {
   display: inline-flex; align-items: center; justify-content: center;
   color: var(--brand-teal); flex-shrink: 0;
 }
-/* duotone glyphs: solid tinted fill scales/fades in, heavier accent
-   stroke on top draws itself — bigger, bolder, custom-made silhouettes
-   instead of a generic thin single-stroke icon-kit look */
-.pico__fill {
+.pico__svg {
   opacity: 0; transform: scale(0.7); transform-origin: center;
   transition: opacity 0.5s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1);
 }
-.pico__accent path, .pico__accent circle, .pico__accent rect {
-  stroke-dasharray: 60; stroke-dashoffset: 60;
-  transition: stroke-dashoffset 0.9s cubic-bezier(0.16,1,0.3,1) 0.15s;
+.pico--drawn .pico__svg {
+  opacity: 1; transform: scale(1);
+  animation: pico-breathe 3.2s ease-in-out 0.6s infinite;
 }
-.pico--drawn .pico__fill { opacity: 1; transform: scale(1); }
-.pico--drawn .pico__accent path,
-.pico--drawn .pico__accent circle,
-.pico--drawn .pico__accent rect { stroke-dashoffset: 0; }
-/* small idle life once drawn — a slow breathing scale, not a spin (keeps the glyph legible) */
-.pico--drawn .pico__svg { animation: pico-breathe 3.2s ease-in-out 1s infinite; }
 @keyframes pico-breathe {
   0%, 100% { transform: scale(1); }
   50%      { transform: scale(1.08); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .pico__fill { opacity: 1 !important; transform: scale(1) !important; transition: none; }
-  .pico__accent path, .pico__accent circle, .pico__accent rect { stroke-dashoffset: 0 !important; transition: none; }
-  .pico--drawn .pico__svg { animation: none; }
+  .pico__svg { opacity: 1 !important; transform: scale(1) !important; transition: none; animation: none !important; }
 }
 
 
@@ -3551,37 +3557,76 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
 }
 .pdv2-guide-card:hover .pdv2-guide-card__media img { transform: scale(1.06); }
+
+/* icon panel — the real lucide glyph is the focal point: large, boxed,
+   bracket-cornered. Quiet radial ground instead of a busy grid texture
+   so attention stays on the icon and the title/body text below it. */
+.pdv2-guide-card__media--schematic {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(43,191,179,0.14), transparent 68%),
+    var(--bg-surface);
+}
+.pdv2-guide-card__ghost {
+  position: absolute; right: 0.6rem; bottom: -0.1rem;
+  font-family: var(--ff-display); font-size: 3.6rem; line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(43,191,179,0.18);
+  letter-spacing: -0.02em;
+  user-select: none;
+}
+.pdv2-guide-card__bracket {
+  position: absolute; width: 26px; height: 26px;
+  border-color: rgba(43,191,179,0.4);
+  opacity: 0; transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+.pdv2-guide-card__bracket--tl {
+  top: 0.85rem; left: 0.85rem;
+  border-top: 1.5px solid; border-left: 1.5px solid;
+  transform: translate(4px, 4px);
+}
+.pdv2-guide-card__bracket--br {
+  bottom: 0.85rem; right: 0.85rem;
+  border-bottom: 1.5px solid; border-right: 1.5px solid;
+  transform: translate(-4px, -4px);
+}
+.pdv2-guide-card:hover .pdv2-guide-card__bracket { opacity: 1; transform: translate(0, 0); }
 .pdv2-guide-card__icon {
-  width: 84px; height: 84px; border-radius: 50%;
+  position: relative; z-index: 1;
+  width: 92px; height: 92px;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(43,191,179,0.08);
-  border: 1px solid rgba(43,191,179,0.25);
   color: var(--brand-teal);
-  transition: background 0.25s, border-color 0.25s, transform 0.25s;
+  background: rgba(43,191,179,0.08);
+  border: 1px solid rgba(43,191,179,0.3);
+  border-radius: 1rem;
+  filter: drop-shadow(0 0 18px rgba(43,191,179,0.22));
+  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), background 0.3s, border-color 0.3s;
 }
 .pdv2-guide-card:hover .pdv2-guide-card__icon {
-  background: rgba(43,191,179,0.16);
-  border-color: var(--brand-teal);
   transform: scale(1.06);
+  background: rgba(43,191,179,0.14);
+  border-color: rgba(43,191,179,0.55);
 }
 .pdv2-guide-card__num {
-  position: absolute; top: 0.75rem; left: 0.75rem;
-  font-family: var(--ff-display); font-size: 1.6rem;
-  color: #fff; line-height: 1; letter-spacing: 0.01em;
-  background: rgba(5,12,11,0.72); backdrop-filter: blur(4px);
-  padding: 0.3rem 0.7rem;
+  position: absolute; top: 0.75rem; left: 0.85rem;
+  font-family: var(--ff-mono); font-size: 0.72rem;
+  font-weight: 600; letter-spacing: 0.14em;
+  color: var(--brand-teal); line-height: 1;
+  z-index: 1;
 }
+.pdv2-guide-card__num::before { content: "STEP / "; color: var(--ink-35); }
+.pdv2-guide-card__media--schematic .pdv2-guide-card__num { top: 0.85rem; left: 0.95rem; }
 .pdv2-guide-card__body {
-  padding: 1.25rem 1.4rem 1.5rem;
-  display: flex; flex-direction: column; gap: 0.5rem;
+  padding: 1.4rem 1.5rem 1.6rem;
+  display: flex; flex-direction: column; gap: 0.6rem;
 }
 .pdv2-guide-card__title {
-  font-family: var(--ff-display); font-size: 1.25rem;
-  color: var(--ink); line-height: 1.15;
+  font-family: var(--ff-display); font-size: 1.4rem;
+  letter-spacing: 0.01em;
+  color: var(--ink); line-height: 1.12;
   overflow-wrap: anywhere;
 }
 .pdv2-guide-card__detail {
-  font-family: var(--ff-body); font-size: 0.88rem;
+  font-family: var(--ff-body); font-size: 0.92rem;
   color: var(--ink-60); line-height: 1.65;
   overflow-wrap: anywhere;
 }
@@ -3728,6 +3773,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.5rem;
+  margin-top: clamp(2rem, 4vw, 3rem);
 }
 .pdv2-delivery-card {
   position: relative;
@@ -3796,6 +3842,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
    technical icon tile until a real photo is uploaded per stage. ── */
 .pdv2-dv-box {
   border-top: 1px solid var(--bg-line);
+  padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
 }
 .pdv2-dv-box:first-of-type { border-top: none; }
 .pdv2-dv-box__label {
@@ -4083,13 +4130,13 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-rating-bars { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.45rem; }
 .pdv2-rating-bar {
   display: flex; align-items: center; gap: 0.6rem;
-  font-family: var(--ff-mono); font-size: 0.7rem; color: #0d2220;
+  font-family: var(--ff-mono); font-size: 0.75rem; font-weight: 600; color: #0d2220;
 }
 .pdv2-rating-bar__track {
-  flex: 1; height: 4px; background: rgba(13,34,32,0.15); overflow: hidden;
+  flex: 1; height: 4px; background: rgba(13,34,32,0.2); overflow: hidden;
 }
 .pdv2-rating-bar__fill { height: 100%; background: #0d2220; }
-.pdv2-rating-bar__pct { width: 2.5rem; text-align: right; opacity: 0.6; }
+.pdv2-rating-bar__pct { width: 2.5rem; text-align: right; opacity: 0.85; }
 
 /* review card */
 .pdv2-review-carousel {}
@@ -4317,6 +4364,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 [data-theme=light] .pdv2-guide-card__media { background: #fff; border-color: rgba(13,34,32,0.12); }
 [data-theme=light] .pdv2-guide-card__title  { color: #0d2220; }
 [data-theme=light] .pdv2-guide-card__detail { color: rgba(13,34,32,0.7); }
+[data-theme=light] .pdv2-guide-card__num::before { color: rgba(13,34,32,0.4); }
 [data-theme=light] .pdv2-mp             { background: #ffffff; border-color: rgba(13,34,32,0.12); }
 [data-theme=light] .pdv2-mp-card        { background: #fff; border-color: rgba(13,34,32,0.12); }
 [data-theme=light] .pdv2-mp-card__media { background: #ffffff; border-color: rgba(13,34,32,0.12); }

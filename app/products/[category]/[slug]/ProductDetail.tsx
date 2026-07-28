@@ -130,7 +130,6 @@ export default function ProductDetail({ family, category, related }: Props) {
   const specKeys = PANEL_SPEC_KEYS[family.category]  ?? PANEL_SPEC_KEYS["film-blowing"];
   const sample    = SAMPLE_TAB[family.category] ?? SAMPLE_TAB["film-blowing"];
   const parts     = PART_CROPS[family.category] ?? PART_CROPS["film-blowing"];
-  const hasModels = family.models.length > 1;
   const materials = family.materials?.split(",").map(s => s.trim()) ?? [];
   const photos    = familyImages(family);
   const heroImg = photos[Math.min(activePhoto, photos.length - 1)];
@@ -179,6 +178,19 @@ export default function ProductDetail({ family, category, related }: Props) {
     const row = findSpec(key);
     if (!row) return [];
     return [{ label: row.label, value: row.values[Math.min(activeModel, row.values.length - 1)] }];
+  });
+
+  /* the model selector is only worth showing when picking a different
+     model actually changes something the visitor can see — matching it
+     against the same rows the panel displays (not the raw spec sheet)
+     means a product whose panel keys don't resolve to any real spec rows
+     (e.g. a fixture using placeholder label names) correctly hides the
+     picker instead of offering chips that click but change nothing */
+  const hasModels = family.models.length > 1 && specKeys.some(key => {
+    const row = findSpec(key);
+    if (!row) return false;
+    const seen = new Set(family.models.map((_, i) => row.values[Math.min(i, row.values.length - 1)]));
+    return seen.size > 1;
   });
 
   /* entrance animation — each section reveals as it scrolls into view,
@@ -336,12 +348,16 @@ export default function ProductDetail({ family, category, related }: Props) {
                   <span>Specification</span>
                   <span>{hasModels ? family.models[activeModel] : family.models[0]}</span>
                 </div>
-                {panelSpecs.map(s => (
+                {panelSpecs.length > 0 ? panelSpecs.map(s => (
                   <div key={s.label} className="pdv2-spec-row">
                     <span className="pdv2-spec-row__label">{s.label}</span>
                     <span className="pdv2-spec-row__val">{s.value}</span>
                   </div>
-                ))}
+                )) : (
+                  <div className="pdv2-spec-row pdv2-spec-row--empty">
+                    <span className="pdv2-spec-row__label">Full specification available on request</span>
+                  </div>
+                )}
               </div>
 
               {/* materials */}
@@ -492,6 +508,7 @@ export default function ProductDetail({ family, category, related }: Props) {
                 specs={family.specs}
                 specKeys={calloutKeys}
                 modelIndex={activeModel}
+                onModelChange={setActiveModel}
                 models={family.models}
                 family={family}
                 category={category.slug}
@@ -525,9 +542,11 @@ export default function ProductDetail({ family, category, related }: Props) {
                 </div>
               ))}
 
-              {/* installation guide — visual, image-led cards instead of a
-                  text grid. Each step's photo/diagram is admin-controlled;
-                  falls back to a large icon tile when no photo is set. */}
+              {/* installation guide — engineering-spec-sheet cards. Every
+                  card carries its step on schematic linework + index
+                  typography (real SVG icons, not a photo/logo placeholder)
+                  so the set stays consistent and premium regardless of
+                  whether a site photo has been uploaded for this step. */}
               {family.installation && family.installation.length > 0 && (
                 <>
                   <div className="pdv2-section-head pdv2-section-head--tab" data-reveal>
@@ -537,14 +556,13 @@ export default function ProductDetail({ family, category, related }: Props) {
                   <div className="pdv2-guide-grid" data-reveal="scale">
                     {family.installation.map((step, i) => (
                       <div key={i} className="pdv2-guide-card">
-                        <div className="pdv2-guide-card__media">
-                          {step.image ? (
-                            <Image src={step.image} alt={step.title} fill sizes="(max-width: 700px) 90vw, 45vw" />
-                          ) : (
-                            <span className="pdv2-guide-card__icon">
-                              <ProcessIcon name={resolveIcon(step.title)} size={40} />
-                            </span>
-                          )}
+                        <div className="pdv2-guide-card__media pdv2-guide-card__media--schematic">
+                          <span className="pdv2-guide-card__ghost" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                          <span className="pdv2-guide-card__bracket pdv2-guide-card__bracket--tl" aria-hidden="true" />
+                          <span className="pdv2-guide-card__bracket pdv2-guide-card__bracket--br" aria-hidden="true" />
+                          <span className="pdv2-guide-card__icon">
+                            <ProcessIcon name={resolveIcon(step.title)} size={48} />
+                          </span>
                           <span className="pdv2-guide-card__num">{String(i + 1).padStart(2, "0")}</span>
                         </div>
                         <div className="pdv2-guide-card__body">

@@ -4704,6 +4704,138 @@
       "images": [
         "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784949216/cx-machinery/machines/flexo-4.jpg"
       ]
+    },
+    {
+      "slug": "dummy-test-x9000",
+      "category": "film-blowing",
+      "series": "TEST · UI Check",
+      "name": "DUMMY-X9000 Test Product (UI Check Only)",
+      "tagline": "Placeholder product used only to verify page layout with video + random images.",
+      "models": [
+        "X9000-A",
+        "X9000-B"
+      ],
+      "materials": "N/A — test entry",
+      "images": [
+        "https://picsum.photos/seed/dummyx9000-1/1200/900",
+        "https://picsum.photos/seed/dummyx9000-2/1200/900",
+        "https://picsum.photos/seed/dummyx9000-3/1200/900",
+        "https://picsum.photos/seed/dummyx9000-4/1200/900"
+      ],
+      "specs": [
+        {
+          "label": "Test Width",
+          "values": [
+            "1000mm",
+            "1500mm"
+          ]
+        },
+        {
+          "label": "Test Output",
+          "values": [
+            "100 KG/H",
+            "150 KG/H"
+          ]
+        },
+        {
+          "label": "Test Power",
+          "values": [
+            "50KW",
+            "75KW"
+          ]
+        },
+        {
+          "label": "Dimension / Weight",
+          "values": [
+            "10x5x6m / 8T",
+            "12x5x6m / 10T"
+          ]
+        }
+      ],
+      "installation": [
+        {
+          "title": "Sample install step one",
+          "detail": "Dummy detail text for checking how the installation step layout renders with placeholder content and a random image.",
+          "image": "https://picsum.photos/seed/dummyinstall1/900/600"
+        },
+        {
+          "title": "Sample install step two",
+          "detail": "Second dummy install step, again with a random placeholder photo to verify spacing and image cropping.",
+          "image": "https://picsum.photos/seed/dummyinstall2/900/600"
+        }
+      ],
+      "deliveryGuide": [
+        {
+          "label": "Production",
+          "duration": "5-7 days",
+          "detail": "Dummy production phase text."
+        },
+        {
+          "label": "Shipping",
+          "duration": "10-14 days",
+          "detail": "Dummy shipping phase text."
+        },
+        {
+          "label": "Commissioning",
+          "duration": "2-3 days",
+          "detail": "Dummy commissioning phase text."
+        }
+      ],
+      "gallery": [
+        {
+          "src": "https://picsum.photos/seed/dummygallery1/1000/700",
+          "caption": "Dummy gallery photo one"
+        },
+        {
+          "src": "https://picsum.photos/seed/dummygallery2/1000/700",
+          "caption": "Dummy gallery photo two"
+        },
+        {
+          "src": "https://picsum.photos/seed/dummygallery3/1000/700",
+          "caption": "Dummy gallery photo three"
+        }
+      ],
+      "videos": [
+        {
+          "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          "title": "Dummy product demo video"
+        }
+      ],
+      "reviews": [
+        {
+          "name": "Test Buyer",
+          "title": "QA / Test Account",
+          "rating": 5,
+          "text": "This is a dummy review used only to check how the review card renders on the product detail page."
+        },
+        {
+          "name": "Another Tester",
+          "title": "Internal QA",
+          "rating": 4,
+          "text": "Second dummy review to verify multiple review cards stack correctly."
+        }
+      ],
+      "deliveryStagePhotos": {
+        "packing": "https://picsum.photos/seed/dummypacking/900/600",
+        "freight": "https://picsum.photos/seed/dummyfreight/900/600",
+        "install": "https://picsum.photos/seed/dummyinstallphoto/900/600"
+      },
+      "parts": [
+        {
+          "name": "Dummy Part One",
+          "detail": "Placeholder part description for UI testing.",
+          "images": [
+            "https://picsum.photos/seed/dummypart1a/700/500",
+            "https://picsum.photos/seed/dummypart1b/700/500"
+          ]
+        }
+      ],
+      "radarImage": "https://picsum.photos/seed/dummyradar/900/900",
+      "radarSpecs": [
+        "Test Width",
+        "Test Output",
+        "Test Power"
+      ]
     }
   ]
 }

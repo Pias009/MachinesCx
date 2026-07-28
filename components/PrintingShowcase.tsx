@@ -17,6 +17,7 @@ interface PrintingMachine {
   speed: string;
   reg: string;
   accent: string;
+  hot?: boolean;
 }
 
 function familyToMachine(f: ProductFamily, idx: number): PrintingMachine {
@@ -33,6 +34,7 @@ function familyToMachine(f: ProductFamily, idx: number): PrintingMachine {
     speed: speedSpec ? speedSpec.values[0] : "",
     reg: regSpec ? regSpec.values[0] : "",
     accent: ACCENTS[idx % ACCENTS.length],
+    hot: f.slug === "flexo-4c",
   };
 }
 
@@ -357,6 +359,32 @@ export default function PrintingShowcase() {
           .ps-ghost-text--in {
             animation: ps-rise-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
           }
+          .ps-hot-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-family: var(--ff-mono);
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand-rose), #ff6b6b);
+            padding: 0.3rem 0.65rem;
+            border-radius: 999px;
+            margin-bottom: 0.7rem;
+            box-shadow: 0 4px 16px -4px rgba(225,29,72,0.6);
+            animation: ps-hot-pulse 2s ease-in-out infinite;
+          }
+          .ps-hot-badge svg { width: 11px; height: 11px; }
+          @keyframes ps-hot-pulse {
+            0%, 100% { box-shadow: 0 4px 16px -4px rgba(225,29,72,0.6); }
+            50%      { box-shadow: 0 4px 22px -2px rgba(225,29,72,0.9); }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .ps-hot-badge { animation: none; }
+          }
+          [data-theme="light"] .ps-hot-badge { color: #fff !important; }
 
           /* ── Light mode overrides ── */
           [data-theme="light"] section[data-ps] {
@@ -501,6 +529,14 @@ export default function PrintingShowcase() {
             marginBottom: "0.8rem",
             transition: `background ${DURATION}ms ${ease}`,
           }} />
+
+          {/* Hot model badge */}
+          {m.hot && (
+            <span className="ps-hot-badge">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-.4 3.5-2.2 5.6-4 7.5-1.8 2-3 3.8-3 6.2C5 20.1 8.1 22 12 22s7-1.9 7-6.3c0-2-.8-3.6-1.8-5-.4 1.6-1.3 2.6-2.4 2.6-1.4 0-2.3-1.2-1.9-2.8.6-2.3-.2-5.4-1.9-6.5z"/></svg>
+              Hot Model
+            </span>
+          )}
 
           {/* Model + series */}
           <p className="ps-model-name" style={{
@@ -668,6 +704,12 @@ export default function PrintingShowcase() {
                   }}>
                     {mac.model}
                   </span>
+                  {mac.hot && (
+                    <span style={{
+                      width: 5, height: 5, borderRadius: "50%",
+                      background: "var(--brand-rose)", flexShrink: 0,
+                    }} aria-label="Hot model" />
+                  )}
                   <span style={{
                     fontFamily: "var(--ff-mono)", fontSize: "0.62rem",
                     color: "rgba(255,255,255,0.6)", letterSpacing: "0.1em",

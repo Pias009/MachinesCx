@@ -7,6 +7,7 @@ const nextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "img.youtube.com" },
+      { protocol: "https", hostname: "picsum.photos" }, // dummy-test-x9000 placeholder images only
     ],
   },
   generateBuildId: async () => `build-${Date.now()}`,

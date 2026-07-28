@@ -8,6 +8,7 @@ interface Props {
   specs: SpecRow[];
   specKeys: string[];
   modelIndex: number;
+  onModelChange?: (index: number) => void;
   models: string[];
   family: ProductFamily;
   category?: string;
@@ -62,7 +63,7 @@ const RADAR_DEFAULTS: Record<string, string[]> = {
   "printing": ["Max Web Width", "Max Mechanical Speed", "Printing Colours", "Max Printing Width", "Repeat Length Range", "Machine Weight", "Max Unwind/Rewind Dia."],
 };
 
-export default function MachineDiagram({ image, name, specs, specKeys, modelIndex, models, family, category }: Props) {
+export default function MachineDiagram({ image, name, specs, specKeys, modelIndex, onModelChange, models, family, category }: Props) {
   const radarRef = useRef<HTMLCanvasElement>(null);
   const radarChart = useRef<{ destroy: () => void } | null>(null);
   const [chartsReady, setChartsReady] = useState(false);
@@ -359,13 +360,23 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
           letter-spacing: 0.06em;
           padding: 0.4rem 0.9rem;
           border: 1px solid var(--bg-line);
+          background: transparent;
           color: var(--ink-60);
           font-weight: 500;
+          cursor: pointer;
+          transition: border-color 0.18s, color 0.18s, background 0.18s, transform 0.18s cubic-bezier(0.16,1,0.3,1);
         }
+        .md-model-chip:hover {
+          border-color: rgba(43,191,179,0.4);
+          color: var(--ink);
+          transform: translateY(-1px);
+        }
+        .md-model-chip:active { transform: scale(0.95); }
         .md-model-chip--on {
           border-color: var(--brand-teal);
           color: var(--brand-teal);
           background: rgba(43,191,179,0.08);
+          font-weight: 700;
         }
 
         @keyframes md-fade-up {
@@ -411,11 +422,19 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
         </div>
       )}
 
-      {/* model chips */}
+      {/* model chips — switch the whole page's active model on click */}
       {models.length > 1 && (
-        <div className="md-models">
+        <div className="md-models" role="group" aria-label="Select model">
           {models.map((m, i) => (
-            <span key={m} className={`md-model-chip${i === modelIndex ? " md-model-chip--on" : ""}`}>{m}</span>
+            <button
+              key={m}
+              type="button"
+              className={`md-model-chip${i === modelIndex ? " md-model-chip--on" : ""}`}
+              onClick={() => onModelChange?.(i)}
+              aria-pressed={i === modelIndex}
+            >
+              {m}
+            </button>
           ))}
         </div>
       )}

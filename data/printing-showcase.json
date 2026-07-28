@@ -1,6 +1,6 @@
 {
   "items": [
-    { "src": "/machines/flexo-2-nobg.png", "model": "AI-4C", "series": "4-Colour Press", "speed": "200 m/min", "reg": "±0.15 mm", "accent": "#e11d48" },
+    { "src": "/machines/flexo-2-nobg.png", "model": "AI-4C", "series": "4-Colour Press", "speed": "200 m/min", "reg": "±0.15 mm", "accent": "#e11d48", "hot": true },
     { "src": "/machines/flexo-1-nobg.png", "model": "AI-2C", "series": "2-Colour Press", "speed": "120 m/min", "reg": "±0.20 mm", "accent": "#e11d48" },
     { "src": "/machines/flexo-6c-nobg.png", "model": "AI-6C", "series": "6-Colour Press", "speed": "260 m/min", "reg": "±0.10 mm", "accent": "#e11d48" },
     { "src": "/machines/flexo-5-nobg.png", "model": "AI-8C", "series": "8-Colour Press", "speed": "350 m/min", "reg": "±0.10 mm", "accent": "#e11d48" }

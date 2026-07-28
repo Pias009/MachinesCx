@@ -172,6 +172,8 @@ export default function ClientJourney() {
   }, [active]);
 
   const step = STEPS[active];
+  const STEP_COLORS = ["var(--brand-teal)", "var(--brand-amber)", "var(--brand-rose)"];
+  const stepColor = STEP_COLORS[active % STEP_COLORS.length];
 
   return (
     <>
@@ -189,8 +191,24 @@ export default function ClientJourney() {
         .cj::after {
           content: "";
           position: absolute; top: 0; left: 0; right: 0;
-          height: 2px; background: linear-gradient(90deg, var(--brand-teal), var(--brand-amber), var(--brand-rose));
+          height: 4px; background: linear-gradient(90deg, var(--brand-teal), var(--brand-amber), var(--brand-rose), var(--brand-teal));
+          background-size: 200% 100%;
+          animation: cj-flow 6s linear infinite;
           z-index: 1;
+        }
+        @keyframes cj-flow {
+          0% { background-position: 0% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .cj::before {
+          content: "";
+          position: absolute; inset: 0;
+          background:
+            radial-gradient(circle at 12% 20%, rgba(43,191,179,0.16), transparent 45%),
+            radial-gradient(circle at 88% 15%, rgba(245,158,11,0.14), transparent 40%),
+            radial-gradient(circle at 50% 100%, rgba(225,29,72,0.12), transparent 45%);
+          pointer-events: none;
+          z-index: 0;
         }
 
         .cj__wrap {
@@ -205,14 +223,15 @@ export default function ClientJourney() {
           margin-bottom: clamp(2rem,4vw,3rem);
         }
         .cj__label {
-          font-family: var(--ff-mono); font-size: .72rem;
+          font-family: var(--ff-mono); font-weight: 700; font-size: .72rem;
           letter-spacing: .2em; text-transform: uppercase;
-          color: var(--brand-teal); margin-bottom: .75rem;
+          color: var(--brand-amber); margin-bottom: .75rem;
           display: flex; align-items: center; gap: .7rem;
         }
         .cj__label::before {
           content: ""; display: inline-block;
-          width: 1.75rem; height: 1px; background: var(--brand-teal);
+          width: 1.75rem; height: 3px; border-radius: 2px;
+          background: linear-gradient(90deg, var(--brand-teal), var(--brand-amber));
         }
         .cj__title {
           font-family: var(--ff-display); font-weight: 800;
@@ -222,27 +241,31 @@ export default function ClientJourney() {
         }
         .cj__title em {
           font-style: normal;
-          background: linear-gradient(135deg, var(--brand-teal), var(--brand-amber));
+          background: linear-gradient(135deg, var(--brand-teal), var(--brand-amber) 55%, var(--brand-rose));
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
         }
         .cj__count {
-          font-family: var(--ff-mono); font-size: .78rem;
+          font-family: var(--ff-mono); font-weight: 700; font-size: .78rem;
           letter-spacing: .14em; text-transform: uppercase;
-          color: rgba(255,255,255,0.4);
-          border: 1px solid rgba(255,255,255,0.14);
+          color: #fff;
+          border: 1px solid transparent;
+          background:
+            linear-gradient(#0d1716, #0d1716) padding-box,
+            linear-gradient(135deg, var(--brand-teal), var(--brand-amber), var(--brand-rose)) border-box;
           padding: .5rem .9rem;
           white-space: nowrap;
         }
-        .cj__count b { color: var(--brand-teal); font-weight: 700; }
+        .cj__count b { color: var(--brand-amber); font-weight: 800; }
 
         /* ── single fixed-height panel: index left, detail right ── */
         .cj__panel {
           display: grid;
           grid-template-columns: 320px 1fr;
-          border: 1px solid rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.12);
           background: rgba(255,255,255,0.015);
+          box-shadow: 0 30px 60px -30px rgba(0,0,0,0.6);
         }
 
         .cj__index {
@@ -267,40 +290,40 @@ export default function ClientJourney() {
         .cj__index-row:last-child { border-bottom: none; }
         .cj__index-row:hover { background: rgba(255,255,255,0.03); }
         .cj__index-row--active {
-          background: color-mix(in srgb, var(--brand-teal) 8%, transparent);
-          border-left-color: var(--brand-teal);
+          background: color-mix(in srgb, var(--step-color, var(--brand-teal)) 12%, transparent);
+          border-left-color: var(--step-color, var(--brand-teal));
         }
         .cj__index-num {
-          font-family: var(--ff-mono); font-weight: 600; font-size: .74rem;
-          color: rgba(255,255,255,0.35);
-          border: 1px solid rgba(255,255,255,0.14);
+          font-family: var(--ff-mono); font-weight: 700; font-size: .74rem;
+          color: rgba(255,255,255,0.65);
+          border: 1px solid rgba(255,255,255,0.22);
           border-radius: 50%;
           width: 30px; height: 30px;
           display: flex; align-items: center; justify-content: center;
           transition: color .2s, border-color .2s, background .2s;
         }
         .cj__index-row--active .cj__index-num {
-          color: var(--brand-teal);
-          border-color: var(--brand-teal);
-          background: color-mix(in srgb, var(--brand-teal) 14%, transparent);
+          color: #0d1716;
+          border-color: var(--step-color, var(--brand-teal));
+          background: var(--step-color, var(--brand-teal));
         }
         .cj__index-text { min-width: 0; }
         .cj__index-label {
-          font-family: var(--ff-display); font-weight: 700; font-size: .95rem;
+          font-family: var(--ff-display); font-weight: 800; font-size: .95rem;
           letter-spacing: .01em; text-transform: uppercase;
-          color: rgba(255,255,255,0.5);
+          color: rgba(255,255,255,0.82);
           display: block; line-height: 1.2;
           transition: color .2s;
         }
         .cj__index-row--active .cj__index-label { color: #fff; }
         .cj__index-tagline {
-          font-family: var(--ff-body); font-size: .74rem;
-          color: rgba(255,255,255,0.28);
-          display: block; margin-top: .1rem;
+          font-family: var(--ff-body); font-weight: 500; font-size: .76rem;
+          color: rgba(255,255,255,0.48);
+          display: block; margin-top: .15rem;
           overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
           transition: color .2s;
         }
-        .cj__index-row--active .cj__index-tagline { color: rgba(255,255,255,0.5); }
+        .cj__index-row--active .cj__index-tagline { color: rgba(255,255,255,0.7); }
 
         .cj__detail {
           padding: clamp(1.75rem,3vw,2.75rem);
@@ -312,16 +335,18 @@ export default function ClientJourney() {
           margin-bottom: 1.5rem;
         }
         .cj__detail-icon {
-          width: 56px; height: 56px; flex-shrink: 0;
+          width: 60px; height: 60px; flex-shrink: 0;
           display: flex; align-items: center; justify-content: center;
-          border: 1px solid color-mix(in srgb, var(--brand-teal) 40%, transparent);
-          background: color-mix(in srgb, var(--brand-teal) 10%, transparent);
-          color: var(--brand-teal);
+          border-radius: 14px;
+          border: 1px solid color-mix(in srgb, var(--step-color, var(--brand-teal)) 45%, transparent);
+          background: color-mix(in srgb, var(--step-color, var(--brand-teal)) 16%, transparent);
+          color: var(--step-color, var(--brand-teal));
+          box-shadow: 0 0 24px -6px color-mix(in srgb, var(--step-color, var(--brand-teal)) 55%, transparent);
         }
         .cj__detail-eyebrow {
-          font-family: var(--ff-mono); font-size: .68rem;
+          font-family: var(--ff-mono); font-weight: 700; font-size: .68rem;
           letter-spacing: .16em; text-transform: uppercase;
-          color: var(--brand-teal); margin-bottom: .4rem; display: block;
+          color: var(--step-color, var(--brand-teal)); margin-bottom: .4rem; display: block;
         }
         .cj__detail-heading {
           font-family: var(--ff-display); font-weight: 800;
@@ -354,9 +379,9 @@ export default function ClientJourney() {
           color: #fff;
         }
         .cj__metric-label {
-          font-family: var(--ff-mono); font-size: .62rem;
+          font-family: var(--ff-mono); font-weight: 700; font-size: .62rem;
           letter-spacing: .1em; text-transform: uppercase;
-          color: var(--brand-teal); display: block; margin-top: .35rem;
+          color: var(--step-color, var(--brand-teal)); display: block; margin-top: .35rem;
         }
 
         .cj__footer {
@@ -370,25 +395,29 @@ export default function ClientJourney() {
           color: rgba(255,255,255,0.7);
         }
         .cj__footer-text strong {
-          background: linear-gradient(135deg, var(--brand-teal), var(--brand-amber));
+          background: linear-gradient(135deg, var(--brand-teal), var(--brand-amber), var(--brand-rose));
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
+          font-weight: 800;
           font-size: .78rem;
         }
         .cj__cta {
           display: inline-flex; align-items: center; gap: .65rem;
-          padding: .8rem 1.75rem;
-          border: 1px solid color-mix(in srgb, var(--brand-teal) 30%, transparent);
-          color: var(--brand-teal);
-          font-family: var(--ff-mono); font-size: .68rem;
+          padding: .85rem 1.9rem;
+          border: none; border-radius: 999px;
+          background: linear-gradient(135deg, var(--brand-teal), var(--brand-amber));
+          color: #0d1716;
+          font-family: var(--ff-mono); font-weight: 700; font-size: .68rem;
           letter-spacing: .14em; text-transform: uppercase;
           text-decoration: none;
-          transition: background .18s, border-color .18s;
+          box-shadow: 0 8px 24px -8px color-mix(in srgb, var(--brand-amber) 60%, transparent);
+          transition: transform .18s, box-shadow .18s, background .3s;
         }
         .cj__cta:hover {
-          background: color-mix(in srgb, var(--brand-teal) 8%, transparent);
-          border-color: var(--brand-teal);
+          background: linear-gradient(135deg, var(--brand-amber), var(--brand-rose));
+          transform: translateY(-2px);
+          box-shadow: 0 12px 30px -8px color-mix(in srgb, var(--brand-rose) 55%, transparent);
         }
 
         @media (max-width: 860px) {
@@ -420,10 +449,11 @@ export default function ClientJourney() {
         [data-theme="light"] .cj__panel { background: #fff; border-color: rgba(13,34,32,0.1); }
         [data-theme="light"] .cj__index { border-color: rgba(13,34,32,0.1); }
         [data-theme="light"] .cj__index-row { border-color: rgba(13,34,32,0.06); }
-        [data-theme="light"] .cj__index-label { color: rgba(13,34,32,0.5); }
+        [data-theme="light"] .cj__index-num { color: rgba(13,34,32,0.55); border-color: rgba(13,34,32,0.2); }
+        [data-theme="light"] .cj__index-label { color: rgba(13,34,32,0.72); }
         [data-theme="light"] .cj__index-row--active .cj__index-label { color: #0d2220; }
-        [data-theme="light"] .cj__index-tagline { color: rgba(13,34,32,0.35); }
-        [data-theme="light"] .cj__index-row--active .cj__index-tagline { color: rgba(13,34,32,0.6); }
+        [data-theme="light"] .cj__index-tagline { color: rgba(13,34,32,0.5); }
+        [data-theme="light"] .cj__index-row--active .cj__index-tagline { color: rgba(13,34,32,0.75); }
         [data-theme="light"] .cj__detail-heading { color: #0d2220; }
         [data-theme="light"] .cj__detail-tagline { color: rgba(13,34,32,0.6); }
         [data-theme="light"] .cj__detail-desc { color: rgba(13,34,32,0.68); }
@@ -431,6 +461,8 @@ export default function ClientJourney() {
         [data-theme="light"] .cj__metric { border-color: rgba(13,34,32,0.1); }
         [data-theme="light"] .cj__metric-val { color: #0d2220; }
         [data-theme="light"] .cj__footer-text { color: rgba(13,34,32,0.6); }
+        [data-theme="light"] .cj__count { background: linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg, var(--brand-teal), var(--brand-amber), var(--brand-rose)) border-box; color: #0d2220; }
+        [data-theme="light"] .cj__cta { color: #0d1716; }
       `}</style>
 
       <section className="cj" ref={sectionRef} aria-label="Our process — inquiry to production">
@@ -447,7 +479,7 @@ export default function ClientJourney() {
             </div>
           </div>
 
-          <div className="cj__panel" ref={panelRef} data-no-anim>
+          <div className="cj__panel" ref={panelRef} data-no-anim style={{ ["--step-color" as string]: stepColor }}>
             <div className="cj__index" role="tablist" aria-label="Process steps">
               {STEPS.map((s, i) => {
                 const isActive = active === i;
@@ -459,6 +491,7 @@ export default function ClientJourney() {
                     onClick={() => setActive(i)}
                     role="tab"
                     aria-selected={isActive}
+                    style={isActive ? { ["--step-color" as string]: STEP_COLORS[i % STEP_COLORS.length] } : undefined}
                   >
                     <span className="cj__index-num">{s.num}</span>
                     <span className="cj__index-text">

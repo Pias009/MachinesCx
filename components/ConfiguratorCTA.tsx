@@ -1,8 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import TransitionLink from "@/components/TransitionLink";
 
 export default function ConfiguratorCTA() {
+  const t = useTranslations("configuratorCTA");
   const [mounted, setMounted] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const raf = useRef<number>(0);
@@ -223,7 +225,7 @@ export default function ConfiguratorCTA() {
         }
       `}</style>
 
-      <section ref={sectionRef} className="cc" data-no-anim aria-label="Build your configuration">
+      <section ref={sectionRef} className="cc" data-no-anim aria-label={t("sectionAria")}>
         <div className="cc__spline" aria-hidden="true">
           <iframe
             src="https://my.spline.design/retrofuturisticcircuitloop-JngSBMetOQh9Jn4XS5OxTiIc/"
@@ -237,24 +239,24 @@ export default function ConfiguratorCTA() {
 
         <div className="cc__content">
           <div className="cc__left">
-            <div className="cc__index"><b>01</b> / Configurator</div>
-            <div className="cc__eyebrow">Custom configuration</div>
+            <div className="cc__index"><b>01</b> / {t("indexLabel")}</div>
+            <div className="cc__eyebrow">{t("eyebrow")}</div>
             <h2 className="cc__title">
-              Build your<br /><em>machine order.</em>
+              {t("titleLine1")}<br /><em>{t("titleEm")}</em>
             </h2>
             <div className="cc__metrics">
-              <div className="cc__metric"><b>120+</b><span>Models</span></div>
-              <div className="cc__metric"><b>24h</b><span>Reply time</span></div>
-              <div className="cc__metric"><b>∞</b><span>Configs</span></div>
+              <div className="cc__metric"><b>120+</b><span>{t("metricModels")}</span></div>
+              <div className="cc__metric"><b>24h</b><span>{t("metricReply")}</span></div>
+              <div className="cc__metric"><b>∞</b><span>{t("metricConfigs")}</span></div>
             </div>
           </div>
 
           <div className="cc__right">
-            <div className="cc__badge"><span className="dot" />Engineers online</div>
+            <div className="cc__badge"><span className="dot" />{t("badge")}</div>
 
             <div>
               <TransitionLink href="/products" className="cc__cta">
-                Choose a machine
+                {t("cta")}
                 <span className="cc__cta-arr" aria-hidden="true">
                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                     <path d="M2.5 6.5h8M8 3l3 3.5-3 3" stroke="#f8fafc" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
@@ -263,8 +265,8 @@ export default function ConfiguratorCTA() {
               </TransitionLink>
             </div>
 
-            <div className="cc__hint" aria-label="Steps">
-              {["Browse machines","Select & configure","Send inquiry"].map((s, i) => (
+            <div className="cc__hint" aria-label={t("stepsAria")}>
+              {(t.raw("steps") as string[]).map((s, i) => (
                 <div key={i} className="cc__hint-row">
                   <div className="cc__hint-step">
                     <span className="cc__hint-num">{i + 1}</span>

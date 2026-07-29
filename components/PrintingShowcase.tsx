@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import NextImage from "next/image";
+import { useTranslations } from "next-intl";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import TransitionLink from "@/components/TransitionLink";
 import { useCms } from "@/lib/useCms";
@@ -47,6 +48,7 @@ const FALLBACK_MACHINES = buildMachines(localFamilies as ProductFamily[]);
 const DURATION = 650;
 
 export default function PrintingShowcase() {
+  const t = useTranslations("printingShowcase");
   const cms = useCms<{ items?: PrintingMachine[] }>("printing-showcase", { items: FALLBACK_MACHINES });
   const MACHINES = cms.items && cms.items.length ? cms.items : FALLBACK_MACHINES;
   const N = MACHINES.length;
@@ -455,8 +457,8 @@ export default function PrintingShowcase() {
               textAlign:     "center",
               margin:        0,
             }}>
-              Flexo{" "}
-              <span style={{ color: "var(--brand-teal)" }}>Printing Lines</span>
+              {t("titlePrefix")}{" "}
+              <span style={{ color: "var(--brand-teal)" }}>{t("titleEm")}</span>
             </h2>
           </div>
 
@@ -470,7 +472,7 @@ export default function PrintingShowcase() {
             alignItems:    "center",
             gap:           "0.6rem",
           }}>
-            <span>AI Series CI Press</span>
+            <span>{t("seriesLabel")}</span>
             <span style={{ color: "var(--brand-teal)" }}>·</span>
             <span>
               <span style={{ color: "#fff", fontWeight: 700 }}>{String(active + 1).padStart(2,"0")}</span>
@@ -534,7 +536,7 @@ export default function PrintingShowcase() {
           {m.hot && (
             <span className="ps-hot-badge">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c-.4 3.5-2.2 5.6-4 7.5-1.8 2-3 3.8-3 6.2C5 20.1 8.1 22 12 22s7-1.9 7-6.3c0-2-.8-3.6-1.8-5-.4 1.6-1.3 2.6-2.4 2.6-1.4 0-2.3-1.2-1.9-2.8.6-2.3-.2-5.4-1.9-6.5z"/></svg>
-              Hot Model
+              {t("hotModel")}
             </span>
           )}
 
@@ -569,9 +571,9 @@ export default function PrintingShowcase() {
               marginBottom:  "1.5rem",
             }}>
               {[
-                { label: "Max speed", value: m.speed },
-                { label: "Registration", value: m.reg },
-                { label: "Substrates", value: "9 types" },
+                { label: t("maxSpeed"), value: m.speed },
+                { label: t("registration"), value: m.reg },
+                { label: t("substrates"), value: t("substratesValue") },
               ].map(kv => (
                 <div key={kv.label}>
                   <div className="ps-spec-label" style={{ fontFamily:"var(--ff-mono)", fontSize:"0.64rem", letterSpacing:".18em", textTransform:"uppercase", color:"rgba(255,255,255,0.6)", marginBottom:".2rem" }}>{kv.label}</div>
@@ -587,7 +589,7 @@ export default function PrintingShowcase() {
               <button
                 key={dir}
                 onClick={() => navigate(dir)}
-                aria-label={dir === "prev" ? "Previous" : "Next"}
+                aria-label={dir === "prev" ? t("prev") : t("next")}
                 className="ps-nav-btn"
                 style={{
                   width:           isMobile ? 44 : 56,
@@ -658,7 +660,7 @@ export default function PrintingShowcase() {
               (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.2)";
             }}
           >
-            View all presses
+            {t("viewAll")}
             <ArrowRight size={14} strokeWidth={2} />
           </TransitionLink>
 
@@ -708,7 +710,7 @@ export default function PrintingShowcase() {
                     <span style={{
                       width: 5, height: 5, borderRadius: "50%",
                       background: "var(--brand-rose)", flexShrink: 0,
-                    }} aria-label="Hot model" />
+                    }} aria-label={t("hotModel")} />
                   )}
                   <span style={{
                     fontFamily: "var(--ff-mono)", fontSize: "0.62rem",

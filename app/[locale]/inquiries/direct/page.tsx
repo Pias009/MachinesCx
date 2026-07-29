@@ -1,6 +1,8 @@
 "use client";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { families, familiesByCategory, type ProductFamily, type CategorySlug } from "@/lib/products";
 import TransitionLink from "@/components/TransitionLink";
 import {
@@ -20,6 +22,8 @@ interface FormData {
 const EMPTY_FORM: FormData = { name: "", company: "", email: "", phone: "", country: "", message: "" };
 
 function DirectInquiryInner() {
+  const t = useTranslations("directInquiry");
+  const tToast = useTranslations("toasts");
   const searchParams = useSearchParams();
   const [category, setCategory] = useState<CategorySlug>("film-blowing");
   const [family, setFamily] = useState<ProductFamily | null>(null);
@@ -53,8 +57,10 @@ function DirectInquiryInner() {
       if (!res.ok) throw new Error("Upload failed");
       const j = await res.json();
       setImages(prev => [...prev, j.url]);
+      toast.success(tToast("photoUploaded"));
     } catch {
       // non-fatal — visitor can retry or continue without a photo
+      toast.error(tToast("photoUploadFailed"), { description: tToast("photoUploadFailedDesc") });
     } finally {
       setUploading(false);
     }
@@ -104,13 +110,13 @@ function DirectInquiryInner() {
   }, [family]);
 
   const reviewRows = useMemo<ReviewRow[]>(() => [
-    { key: "qty", label: "Quantity", value: String(qty), onChange: v => setQty(Math.max(1, parseInt(v, 10) || 1)) },
-    { key: "notes", label: "Notes", value: notes, kind: "textarea", placeholder: "Any customization notes", onChange: setNotes },
-    { key: "name", label: "Name", value: form.name, onChange: v => setForm(f => ({ ...f, name: v })) },
-    { key: "email", label: "Email", value: form.email, onChange: v => setForm(f => ({ ...f, email: v })) },
-    { key: "company", label: "Company", value: form.company, placeholder: "Optional", onChange: v => setForm(f => ({ ...f, company: v })) },
-    { key: "message", label: "Message", value: form.message, kind: "textarea", placeholder: "Optional", onChange: v => setForm(f => ({ ...f, message: v })) },
-  ], [qty, notes, form]);
+    { key: "qty", label: t("reviewRows.qty"), value: String(qty), onChange: v => setQty(Math.max(1, parseInt(v, 10) || 1)) },
+    { key: "notes", label: t("reviewRows.notes"), value: notes, kind: "textarea", placeholder: t("reviewRows.notesPlaceholder"), onChange: setNotes },
+    { key: "name", label: t("reviewRows.name"), value: form.name, onChange: v => setForm(f => ({ ...f, name: v })) },
+    { key: "email", label: t("reviewRows.email"), value: form.email, onChange: v => setForm(f => ({ ...f, email: v })) },
+    { key: "company", label: t("reviewRows.company"), value: form.company, placeholder: t("optional"), onChange: v => setForm(f => ({ ...f, company: v })) },
+    { key: "message", label: t("reviewRows.message"), value: form.message, kind: "textarea", placeholder: t("optional"), onChange: v => setForm(f => ({ ...f, message: v })) },
+  ], [qty, notes, form, t]);
 
   if (sent) {
     return (
@@ -122,8 +128,8 @@ function DirectInquiryInner() {
               <div className="ci-success__icon">
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M6 14l5 5 11-11" stroke="var(--brand-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </div>
-              <h1 className="ci-success__title">Thanks, {form.name}!</h1>
-              <p className="ci-success__sub">Our team will review this and reply to {form.email} within 24 hours.</p>
+              <h1 className="ci-success__title">{t("successTitle", { name: form.name })}</h1>
+              <p className="ci-success__sub">{t("successSub", { email: form.email })}</p>
             </div>
           </div>
         </div>
@@ -140,16 +146,16 @@ function DirectInquiryInner() {
             <TransitionLink href="/inquiries">
               <span className="ci-back">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                All inquiry types
+                {t("backLink")}
               </span>
             </TransitionLink>
             <div className="ci-heading">
-              <div className="ci-eyebrow">Direct Inquiry</div>
-              <h1 className="ci-h1">Quick <em>machine inquiry.</em></h1>
+              <div className="ci-eyebrow">{t("eyebrow")}</div>
+              <h1 className="ci-h1">{t("titlePrefix")} <em>{t("titleEm")}</em></h1>
             </div>
 
             <div className="ci-convo">
-              <Section title="Machine">
+              <Section title={t("machineSection")}>
                 <MachinePicker
                   category={category}
                   onCategory={setCategory}
@@ -159,40 +165,40 @@ function DirectInquiryInner() {
                   onModel={setModelIdx}
                 />
                 <div className="ci-row">
-                  <Field label="Quantity">
+                  <Field label={t("quantity")}>
                     <div className="ci-qty">
                       <button type="button" className="ci-qty__btn" onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
                       <span className="ci-qty__val">{qty}</span>
                       <button type="button" className="ci-qty__btn" onClick={() => setQty(q => q + 1)}>+</button>
                     </div>
                   </Field>
-                  <Field label="Customization notes" hint="Voltage, automation, certification…">
-                    <input type="text" placeholder="Optional" value={notes} onChange={e => setNotes(e.target.value)} />
+                  <Field label={t("customNotes")} hint={t("customNotesHint")}>
+                    <input type="text" placeholder={t("customNotesPlaceholder")} value={notes} onChange={e => setNotes(e.target.value)} />
                   </Field>
                 </div>
               </Section>
 
-              <Section title="Your details">
+              <Section title={t("yourDetails")}>
                 <div className="ci-row">
-                  <Field label="Name" required>
+                  <Field label={t("name")} required>
                     <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
                   </Field>
-                  <Field label="Email" required>
+                  <Field label={t("email")} required>
                     <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
                   </Field>
                 </div>
                 <div className="ci-row">
-                  <Field label="Company">
-                    <input type="text" placeholder="Optional" value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))} />
+                  <Field label={t("company")}>
+                    <input type="text" placeholder={t("optional")} value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))} />
                   </Field>
-                  <Field label="Phone">
-                    <input type="tel" placeholder="Optional" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
+                  <Field label={t("phone")}>
+                    <input type="tel" placeholder={t("optional")} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
                   </Field>
                 </div>
-                <Field label="Message" hint="Anything else you'd like us to know?">
-                  <textarea rows={3} placeholder="Optional" value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
+                <Field label={t("message")} hint={t("messageHint")}>
+                  <textarea rows={3} placeholder={t("optional")} value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
                 </Field>
-                <Field label="Reference photos">
+                <Field label={t("referencePhotos")}>
                   <ImageGallery
                     images={images}
                     uploading={uploading}
@@ -214,12 +220,12 @@ function DirectInquiryInner() {
                     disabled={!family || !form.name.trim() || !form.email.trim()}
                     onClick={() => setReviewing(true)}
                   >
-                    Review inquiry →
+                    {t("reviewButton")}
                   </button>
                 </div>
               ) : (
                 <ReviewCard
-                  title={<>Review your inquiry for <strong>{family?.name}</strong> ({family?.models[modelIdx]}).</>}
+                  title={<>{t("reviewTitlePrefix")} <strong>{family?.name}</strong> ({family?.models[modelIdx]}).</>}
                   rows={reviewRows}
                   images={images}
                   uploading={uploading}
@@ -237,8 +243,8 @@ function DirectInquiryInner() {
             modelIdx={modelIdx}
             related={related}
             tip={
-              !family ? { text: <>Not sure which line fits? <strong>Pick a category</strong> above to browse machines.</> } :
-              { text: <>Mention your <strong>target output (kg/h)</strong> and film type in notes — it helps us size the right model fast.</> }
+              !family ? { text: <>{t("tipNoFamily")}</> } :
+              { text: <>{t("tipWithFamily")}</> }
             }
           />
         </div>

@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { usePathname } from "@/i18n/navigation";
 import Image from "next/image";
 import TransitionLink from "@/components/TransitionLink";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { categories, familiesByCategory } from "@/lib/products";
 
 // Static logo — no cycling, brand name is stable and trustworthy for B2B
@@ -21,6 +23,7 @@ function machineImg(slug: string) {
 
 export default function SiteNav() {
   const pathname = usePathname();
+  const t = useTranslations("nav");
   const [scrolled,   setScrolled]   = useState(false);
   const [open,       setOpen]       = useState<string | null>(null);
   const [menuImg,    setMenuImg]    = useState<string>("");
@@ -198,7 +201,7 @@ export default function SiteNav() {
 
         /* ── CTA button ── */
         .sn__cta {
-          margin-left: auto; flex-shrink: 0;
+          margin-inline-start: auto; flex-shrink: 0;
           font-family: var(--ff-display); font-size: 0.95rem;
           letter-spacing: 0.06em; text-transform: uppercase;
           color: #080e0d; text-decoration: none;
@@ -336,7 +339,7 @@ export default function SiteNav() {
           flex-direction: column; justify-content: center; align-items: center;
           gap: 5px; width: 40px; height: 40px;
           background: none; border: none; cursor: pointer;
-          margin-left: auto; padding: 0; flex-shrink: 0;
+          margin-inline-start: auto; padding: 0; flex-shrink: 0;
         }
         .sn__burger span {
           display: block; width: 22px; height: 1.5px;
@@ -456,6 +459,7 @@ export default function SiteNav() {
         @media (max-width: 768px) {
           .sn__links  { display: none; }
           .sn__cta    { display: none; }
+          .sn__actions .ls { display: none; }
           .sn__burger { display: flex; }
         }
 
@@ -529,7 +533,7 @@ export default function SiteNav() {
       <nav className={`sn${scrolled ? " sn--on" : ""}`}>
         <div className="sn__inner">
 
-          <TransitionLink href="/" className="sn__logo" aria-label="Ashal Innomach — home">
+          <TransitionLink href="/" className="sn__logo" aria-label={t("logoAria")}>
             <Image src="/logo.jpeg" alt="Ashal Innomach" className="sn__logo-img" width={40} height={40} priority />
             <span className="sn__logo-text">
               <span className="sn__logo-word sn__logo-word--hold">
@@ -558,19 +562,20 @@ export default function SiteNav() {
 
             <span className="sn__divider" />
 
-            <TransitionLink href="/products" className="sn__link sn__link--hide">All Products</TransitionLink>
-            <TransitionLink href="/news"     className="sn__link sn__link--hide">News</TransitionLink>
-            <TransitionLink href="/about"    className="sn__link sn__link--hide">About</TransitionLink>
+            <TransitionLink href="/products" className="sn__link sn__link--hide">{t("allProducts")}</TransitionLink>
+            <TransitionLink href="/news"     className="sn__link sn__link--hide">{t("news")}</TransitionLink>
+            <TransitionLink href="/about"    className="sn__link sn__link--hide">{t("about")}</TransitionLink>
           </div>
 
           <div className="sn__actions">
+            <LanguageSwitcher />
             <ThemeToggle />
-            <TransitionLink href="/inquiries" className="sn__cta">Get a Quote</TransitionLink>
+            <TransitionLink href="/inquiries" className="sn__cta">{t("getQuote")}</TransitionLink>
 
             {/* Hamburger — mobile only */}
             <button
               className={`sn__burger${mobileOpen ? " sn__burger--open" : ""}`}
-              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-label={mobileOpen ? t("closeMenu") : t("openMenu")}
               onClick={() => setMobileOpen(v => !v)}
             >
               <span /><span /><span />
@@ -595,7 +600,7 @@ export default function SiteNav() {
           <TransitionLink href="/" className="sn__mob-logo" onClick={() => setMobileOpen(false)}>
             <em>ASHAL</em>{" INNOMACH"}
           </TransitionLink>
-          <button className="sn__mob-close" aria-label="Close menu" onClick={() => setMobileOpen(false)}>
+          <button className="sn__mob-close" aria-label={t("closeMenu")} onClick={() => setMobileOpen(false)}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
               <path d="M2 2l12 12M14 2L2 14"/>
             </svg>
@@ -609,16 +614,17 @@ export default function SiteNav() {
               {cat.name}
             </TransitionLink>
           ))}
-          <TransitionLink href="/products" className="sn__mobile-link" onClick={() => setMobileOpen(false)}>All Products</TransitionLink>
-          <TransitionLink href="/news"     className="sn__mobile-link" onClick={() => setMobileOpen(false)}>News</TransitionLink>
-          <TransitionLink href="/about"    className="sn__mobile-link" onClick={() => setMobileOpen(false)}>About</TransitionLink>
-          <TransitionLink href="/inquiries"  className="sn__mobile-link" onClick={() => setMobileOpen(false)}>Contact</TransitionLink>
+          <TransitionLink href="/products" className="sn__mobile-link" onClick={() => setMobileOpen(false)}>{t("allProducts")}</TransitionLink>
+          <TransitionLink href="/news"     className="sn__mobile-link" onClick={() => setMobileOpen(false)}>{t("news")}</TransitionLink>
+          <TransitionLink href="/about"    className="sn__mobile-link" onClick={() => setMobileOpen(false)}>{t("about")}</TransitionLink>
+          <TransitionLink href="/inquiries"  className="sn__mobile-link" onClick={() => setMobileOpen(false)}>{t("contact")}</TransitionLink>
         </div>
 
-        {/* CTA pinned to bottom */}
-        <div style={{ padding:"1.25rem", borderTop:"1px solid rgba(43,191,179,0.12)", flexShrink:0 }}>
+        {/* Language + CTA pinned to bottom */}
+        <div style={{ padding:"1.25rem", borderTop:"1px solid rgba(43,191,179,0.12)", flexShrink:0, display:"flex", flexDirection:"column", gap:"0.85rem" }}>
+          <LanguageSwitcher />
           <TransitionLink href="/inquiries" className="sn__mobile-cta" onClick={() => setMobileOpen(false)}>
-            Get a Quote
+            {t("getQuote")}
           </TransitionLink>
         </div>
       </div>

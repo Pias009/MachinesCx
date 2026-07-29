@@ -1,10 +1,13 @@
 "use client";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import TransitionLink from "@/components/TransitionLink";
 
 export default function PageNav() {
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations("pageNav");
 
   // Hide on the homepage and on the hidden admin area
   if (!pathname || pathname === "/" || pathname.startsWith("/cx-ops-x7k9q2")) {
@@ -16,7 +19,7 @@ export default function PageNav() {
       <style suppressHydrationWarning>{`
         .pgnav {
           position: fixed;
-          top: 84px; left: clamp(1rem, 4vw, 2.5rem);
+          top: 84px; inset-inline-start: clamp(1rem, 4vw, 2.5rem);
           z-index: 150;
           display: flex; align-items: center; gap: .6rem;
         }
@@ -40,6 +43,7 @@ export default function PageNav() {
           transform: translateY(-1px);
         }
         .pgnav__btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+        [dir="rtl"] .pgnav__btn-back-icon { transform: scaleX(-1); }
 
         [data-theme="light"] .pgnav__btn {
           color: var(--slate);
@@ -58,19 +62,19 @@ export default function PageNav() {
           type="button"
           className="pgnav__btn"
           onClick={() => router.back()}
-          aria-label="Go back"
+          aria-label={t("back")}
         >
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <svg className="pgnav__btn-back-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M10 3L5 8l5 5" />
           </svg>
-          <span className="pgnav__btn-label">Back</span>
+          <span className="pgnav__btn-label">{t("back")}</span>
         </button>
 
-        <TransitionLink href="/" className="pgnav__btn" aria-label="Go to home">
+        <TransitionLink href="/" className="pgnav__btn" aria-label={t("home")}>
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
             <path d="M2.5 7L8 2.5 13.5 7M4 6v7.5h8V6" />
           </svg>
-          <span className="pgnav__btn-label">Home</span>
+          <span className="pgnav__btn-label">{t("home")}</span>
         </TransitionLink>
       </div>
     </>

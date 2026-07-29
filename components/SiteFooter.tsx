@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { BRAND } from "@/lib/products";
 
@@ -9,34 +9,6 @@ const PHONE_DISPLAY = "+86 577 8888 8888";
 const PHONE_TEL = "+8657788888888";
 const WHATSAPP_NUMBER = "8657788888888";
 const EMAIL = "info@cxmachinery.com";
-
-const PRODUCT_LINKS = [
-  { label: "Film Blowing Machines", href: "/products/film-blowing" },
-  { label: "Bag Making Machines", href: "/products/bag-making" },
-  { label: "Recycling Lines", href: "/products/recycling" },
-  { label: "Printing Machines", href: "/products/printing" },
-  { label: "Complete Catalogue", href: "/products" },
-];
-
-const COMPANY_LINKS = [
-  { label: "About Us", href: "/about" },
-  { label: "Our Factory", href: "/about" },
-  { label: "News & Updates", href: "/news" },
-  { label: "Careers", href: "/about" },
-];
-
-const SUPPORT_LINKS = [
-  { label: "Request a Quote", href: "/inquiries" },
-  { label: "Spare Parts", href: "/inquiries" },
-  { label: "Technical Support", href: "/inquiries" },
-  { label: "Contact Us", href: "/inquiries" },
-  { label: "Talk to an Engineer", href: "/inquiries" },
-];
-
-const LEGAL_LINKS = [
-  { label: "Privacy Policy", href: "#" },
-  { label: "Terms of Service", href: "#" },
-];
 
 /* mobile-only accordion — desktop ignores `open` entirely via CSS
    (see .footer-col-toggle / .footer-col-body display rules) so this
@@ -67,7 +39,36 @@ function FooterColumn({ title, links }: { title: string; links: { label: string;
 
 export default function SiteFooter() {
   const pathname = usePathname();
+  const t = useTranslations("footer");
   if (pathname?.startsWith("/cx-ops-x7k9q2")) return null;
+
+  const PRODUCT_LINKS = [
+    { label: t("productLinks.filmBlowing"), href: "/products/film-blowing" },
+    { label: t("productLinks.bagMaking"), href: "/products/bag-making" },
+    { label: t("productLinks.recycling"), href: "/products/recycling" },
+    { label: t("productLinks.printing"), href: "/products/printing" },
+    { label: t("productLinks.catalogue"), href: "/products" },
+  ];
+
+  const COMPANY_LINKS = [
+    { label: t("companyLinks.about"), href: "/about" },
+    { label: t("companyLinks.factory"), href: "/about" },
+    { label: t("companyLinks.news"), href: "/news" },
+    { label: t("companyLinks.careers"), href: "/about" },
+  ];
+
+  const SUPPORT_LINKS = [
+    { label: t("supportLinks.quote"), href: "/inquiries" },
+    { label: t("supportLinks.parts"), href: "/inquiries" },
+    { label: t("supportLinks.technical"), href: "/inquiries" },
+    { label: t("supportLinks.contact"), href: "/inquiries" },
+    { label: t("supportLinks.engineer"), href: "/inquiries" },
+  ];
+
+  const LEGAL_LINKS = [
+    { label: t("legal.privacy"), href: "#" },
+    { label: t("legal.terms"), href: "#" },
+  ];
 
   return (
     <footer className="footer">
@@ -85,12 +86,12 @@ export default function SiteFooter() {
                 </span>
                 <div>
                   <div className="footer-brand">Ashal<span style={{ color: "var(--brand-red)" }}>·</span>Innomach</div>
-                  <div className="footer-founded" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.1em", marginTop: "0.25rem" }}>SINCE 2008 · WENZHOU, CHINA</div>
+                  <div className="footer-founded" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.1em", marginTop: "0.25rem" }}>{t("since")}</div>
                 </div>
               </div>
 
               <p className="footer-blurb" style={{ fontFamily: "var(--ff-body)", fontSize: "0.82rem", lineHeight: 1.7, maxWidth: "30ch", marginTop: "1.5rem" }}>
-                Designing and manufacturing blown-film lines, bag-making converters, and recycling systems shipped to 60+ countries.
+                {t("blurb")}
               </p>
             </div>
 
@@ -98,26 +99,26 @@ export default function SiteFooter() {
             <div className="footer-qr-row" style={{ display: "flex", gap: "1rem" }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem" }}>
                 <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "0.4rem", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <img src="/qr-whatsapp.png" alt="WhatsApp QR" width={80} height={80} style={{ display: "block" }} />
+                  <img src="/qr-whatsapp.png" alt={t("whatsapp")} width={80} height={80} style={{ display: "block" }} />
                 </div>
-                <span className="footer-qr-label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.55rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>WhatsApp</span>
+                <span className="footer-qr-label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.55rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>{t("whatsapp")}</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem" }}>
                 <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "0.4rem", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <img src="/qr-website.png" alt="Website QR" width={80} height={80} style={{ display: "block" }} />
+                  <img src="/qr-website.png" alt={t("website")} width={80} height={80} style={{ display: "block" }} />
                 </div>
-                <span className="footer-qr-label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.55rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>Website</span>
+                <span className="footer-qr-label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.55rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>{t("website")}</span>
               </div>
             </div>
           </div>
 
-          <FooterColumn title="Products" links={PRODUCT_LINKS} />
-          <FooterColumn title="Company" links={COMPANY_LINKS} />
-          <FooterColumn title="Support" links={SUPPORT_LINKS} />
+          <FooterColumn title={t("columns.products")} links={PRODUCT_LINKS} />
+          <FooterColumn title={t("columns.company")} links={COMPANY_LINKS} />
+          <FooterColumn title={t("columns.support")} links={SUPPORT_LINKS} />
 
           {/* Contact + Social */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem", minWidth: "180px" }}>
-            <h4 className="footer-contact-heading" style={{ fontFamily: "var(--ff-display)", fontSize: "0.85rem", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "0.25rem" }}>Contact</h4>
+            <h4 className="footer-contact-heading" style={{ fontFamily: "var(--ff-display)", fontSize: "0.85rem", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "0.25rem" }}>{t("contactHeading")}</h4>
 
             <a href={`tel:${PHONE_TEL}`} className="footer-contact-link">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
@@ -126,7 +127,7 @@ export default function SiteFooter() {
 
             <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="footer-contact-link">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm5.8 14.06c-.24.68-1.4 1.3-1.93 1.35-.5.05-1.03.24-3.43-.72-2.9-1.16-4.76-4.13-4.9-4.32-.14-.19-1.17-1.56-1.17-2.98 0-1.42.75-2.11 1.02-2.4.27-.29.58-.36.78-.36.2 0 .39.002.56.01.18.008.42-.07.66.5.24.58.82 2 .89 2.14.07.14.12.31.02.5-.1.19-.15.31-.3.47-.15.17-.31.37-.44.5-.15.14-.3.3-.13.59.17.3.76 1.25 1.63 2.02 1.12.99 2.06 1.3 2.36 1.45.3.14.47.12.65-.07.18-.19.75-.88.95-1.18.2-.3.4-.25.66-.15.27.1 1.71.81 2 .96.29.14.48.21.55.33.07.12.07.68-.17 1.36Z"/></svg>
-              WhatsApp
+              {t("whatsapp")}
             </a>
 
             <a href={`mailto:${EMAIL}`} className="footer-contact-link">
@@ -136,7 +137,7 @@ export default function SiteFooter() {
 
             <span className="footer-contact-static">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              Wenzhou, Zhejiang, China
+              {t("location")}
             </span>
 
             {/* Social icons */}
@@ -159,25 +160,25 @@ export default function SiteFooter() {
 
         {/* ── Certifications bar ── */}
         <div className="footer-certs" style={{ display: "flex", alignItems: "center", gap: "2rem", paddingBlock: "1.25rem", flexWrap: "wrap" }}>
-          <span className="footer-certs__label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase" }}>Certifications</span>
+          <span className="footer-certs__label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase" }}>{t("certifications")}</span>
           <span className="footer-certs__badges" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-            {["CE Certified", "ISO 9001", "SGS Verified"].map((cert) => (
+            {[t("certBadges.ce"), t("certBadges.iso"), t("certBadges.sgs")].map((cert) => (
               <span key={cert} className="footer-cert-badge" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.06em", padding: "0.25rem 0.6rem", borderRadius: "2px" }}>{cert}</span>
             ))}
           </span>
           <span className="footer-certs__spacer" style={{ flex: 1 }} />
-          <span className="footer-certs__stats" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.6rem", letterSpacing: "0.1em" }}>60+ Countries · 6 Continents · 18+ Machine Families</span>
+          <span className="footer-certs__stats" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.6rem", letterSpacing: "0.1em" }}>{t("stats")}</span>
         </div>
 
         {/* ── Bottom bar ── */}
         <div className="footer-bar">
-          <p className="footer-copyright" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem" }}>© {new Date().getFullYear()} {BRAND}. All specifications subject to change without notice.</p>
+          <p className="footer-copyright" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem" }}>{t("copyright", { year: new Date().getFullYear(), brand: BRAND })}</p>
           <div className="footer-bar__legal" style={{ display: "flex", gap: "1.5rem" }}>
             {LEGAL_LINKS.map((l) => (
               <Link key={l.label} href={l.href} className="footer-legal-link" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.68rem", textDecoration: "none", letterSpacing: "0.04em" }}>{l.label}</Link>
             ))}
           </div>
-          <p className="footer-bar__company" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem" }}>Wenzhou Ashal Innomach Technology Co., Ltd.</p>
+          <p className="footer-bar__company" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem" }}>{t("companyName")}</p>
         </div>
       </div>
     </footer>

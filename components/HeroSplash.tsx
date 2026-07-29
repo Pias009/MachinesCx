@@ -1,12 +1,24 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useCms } from "@/lib/useCms";
 import type { ProductFamily } from "@/lib/products";
 import localProducts from "@/data/products.json";
-import localHero from "@/data/home-hero.json";
+import localHeroEn from "@/data/home-hero.json";
+import localHeroAr from "@/data/home-hero.ar.json";
+import localHeroHi from "@/data/home-hero.hi.json";
 import WispBackground from "@/components/WispBackground";
+
+/* the CMS/DB only stores one (English-shaped) copy of this section, so a
+   live admin edit always shows in English regardless of locale — these
+   locale fallbacks only cover the case where no DB override exists yet */
+const HERO_BY_LOCALE: Record<string, typeof localHeroEn> = {
+  en: localHeroEn,
+  ar: localHeroAr,
+  hi: localHeroHi,
+};
 
 // react-three-fiber Canvas must be client-only (SSR breaks the hero subtree)
 const WaveBackground = dynamic(() => import("@/components/WaveBackground"), {
@@ -90,6 +102,9 @@ export default function HeroSplash() {
     return () => obs.disconnect();
   }, []);
 
+  const t = useTranslations("heroSplash");
+  const locale = useLocale();
+  const localHero = HERO_BY_LOCALE[locale] ?? localHeroEn;
   const hero = useCms<HeroCms>("home-hero", localHero as HeroCms);
   const products = useCms<{ families: ProductFamily[] }>("products", localProducts as { families: ProductFamily[] });
   const families = products.families ?? localFamilies;
@@ -476,7 +491,7 @@ export default function HeroSplash() {
         }
       `}</style>
 
-      <section className={`hs${isLight ? " hs--light" : ""}`} aria-label="Wenzhou Ashal Innomach — Hero">
+      <section className={`hs${isLight ? " hs--light" : ""}`} aria-label={t("sectionAria")}>
 
         {/* Decorative floating shapes */}
         <div className="hs__shape hs__shape--1" aria-hidden="true" />
@@ -510,7 +525,7 @@ export default function HeroSplash() {
         </div>
 
         {/* ── ARCH of 5 video/media cards ── */}
-        <div className="hs__arch" ref={archRef} aria-label="Featured machines">
+        <div className="hs__arch" ref={archRef} aria-label={t("archAria")}>
           {/* curved guide line */}
           <svg
             className="hs__arch-line"

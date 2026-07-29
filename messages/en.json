@@ -1,0 +1,800 @@
+{
+  "nav": {
+    "allProducts": "All Products",
+    "news": "News",
+    "about": "About",
+    "contact": "Contact",
+    "getQuote": "Get a Quote",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "logoAria": "Ashal Innomach — home"
+  },
+  "pageNav": {
+    "back": "Back",
+    "home": "Home"
+  },
+  "languageSwitcher": {
+    "label": "Language",
+    "en": "English",
+    "ar": "Arabic",
+    "hi": "Hindi"
+  },
+  "footer": {
+    "blurb": "Designing and manufacturing blown-film lines, bag-making converters, and recycling systems shipped to 60+ countries.",
+    "since": "SINCE 2008 · WENZHOU, CHINA",
+    "whatsapp": "WhatsApp",
+    "website": "Website",
+    "columns": {
+      "products": "Products",
+      "company": "Company",
+      "support": "Support"
+    },
+    "productLinks": {
+      "filmBlowing": "Film Blowing Machines",
+      "bagMaking": "Bag Making Machines",
+      "recycling": "Recycling Lines",
+      "printing": "Printing Machines",
+      "catalogue": "Complete Catalogue"
+    },
+    "companyLinks": {
+      "about": "About Us",
+      "factory": "Our Factory",
+      "news": "News & Updates",
+      "careers": "Careers"
+    },
+    "supportLinks": {
+      "quote": "Request a Quote",
+      "parts": "Spare Parts",
+      "technical": "Technical Support",
+      "contact": "Contact Us",
+      "engineer": "Talk to an Engineer"
+    },
+    "legal": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    },
+    "contactHeading": "Contact",
+    "location": "Wenzhou, Zhejiang, China",
+    "certifications": "Certifications",
+    "certBadges": {
+      "ce": "CE Certified",
+      "iso": "ISO 9001",
+      "sgs": "SGS Verified"
+    },
+    "stats": "60+ Countries · 6 Continents · 18+ Machine Families",
+    "copyright": "© {year} {brand}. All specifications subject to change without notice.",
+    "companyName": "Wenzhou Ashal Innomach Technology Co., Ltd."
+  },
+  "homeAgent": {
+    "eyebrow": "AI Machine Assistant",
+    "titlePrefix": "Ask",
+    "titleName": "ASHA",
+    "titleSuffix": "— get the right machine, instantly.",
+    "desc": "Our AI agent knows every machine in this catalogue. Ask a spec question, compare models side by side, or get routed straight to the page you need — available around the clock.",
+    "cta": "Talk to ASHA",
+    "hint": "No forms. Just ask."
+  },
+  "heroSplash": {
+    "sectionAria": "Wenzhou Ashal Innomach — Hero",
+    "archAria": "Featured machines"
+  },
+  "scrollHome": {
+    "heroWords": ["WENZHOU", "ASHAL", "INNOMACH", "TECHNOLOGY"],
+    "hero1": {
+      "titleLine1": "Film to bag",
+      "titleLine2": "at 300/min.",
+      "desc": "Multi-lane heat-seal and bottom-seal converters for PE and biodegradable PBAT+PLA film.",
+      "ctaPrimary": "Bag making lines →",
+      "ctaSecondary": "Request a quote",
+      "mobileMachineAlt": "T-PRO Heat-seal converter"
+    },
+    "hero2": {
+      "titleLine1": "Every bag type.",
+      "titleLine2": "One machine.",
+      "desc": "Heat-seal flat bags, bottom-seal bags and roll bags — all from the same platform. Up to 6 lanes, 600 pieces per minute.",
+      "specs": {
+        "output": "Output",
+        "outputVal": "600 pcs / min",
+        "filmWidth": "Film width",
+        "filmWidthVal": "750 – 1150 mm",
+        "lanes": "Lanes",
+        "lanesVal": "Up to 6"
+      },
+      "cta": "Full spec table →"
+    },
+    "hot": {
+      "wordHot": "Hot",
+      "wordMachines": "Machines",
+      "specifications": "Specifications",
+      "keyFeatures": "Key features",
+      "hotMachine": "Hot Machine",
+      "cta": "Full spec table →",
+      "prevAria": "Previous machine",
+      "nextAria": "Next machine",
+      "scrollLeftAria": "Scroll machines left",
+      "scrollRightAria": "Scroll machines right"
+    },
+    "cards": {
+      "t-pro-heatseal": "T-PRO · Heat-seal converter",
+      "f-pro-bottomseal": "F-PRO · Bottom-seal converter",
+      "rgb-rollbag": "RGB · Roll-bag machine",
+      "rb-vegetable": "RB · Vest-bag machine",
+      "abcde-2200": "ABCDE-2200 · 5-layer co-ex line",
+      "abc-multilayer-large": "ABC · Multi-layer blown film",
+      "s-wide": "S · Single-layer wide",
+      "cx-pelletizing": "CX · Recycling pelletizer"
+    },
+    "products": {
+      "t-pro-heatseal": {
+        "specs": [
+          { "label": "Series", "value": "T-PRO" },
+          { "label": "Type", "value": "Heat-seal converter" },
+          { "label": "Film width", "value": "750 – 1150 mm" },
+          { "label": "Speed", "value": "600 pcs / min" },
+          { "label": "Lanes", "value": "Up to 6" },
+          { "label": "Material", "value": "PE · PBAT+PLA" },
+          { "label": "Drive", "value": "Servo + frequency" }
+        ],
+        "features": [
+          { "head": "Multi-lane", "body": "Up to 6 lanes for high-volume simultaneous output." },
+          { "head": "Biodegradable ready", "body": "Compatible with PBAT+PLA blends out of the box." },
+          { "head": "Servo precision", "body": "±0.5 mm sealing repeat accuracy across all lanes." },
+          { "head": "Fast changeover", "body": "Tool-free width adjustment in under 15 minutes." }
+        ]
+      },
+      "f-pro-bottomseal": {
+        "specs": [
+          { "label": "Series", "value": "F-PRO" },
+          { "label": "Type", "value": "Bottom-seal converter" },
+          { "label": "Film width", "value": "600 – 1000 mm" },
+          { "label": "Speed", "value": "280 pcs / min" },
+          { "label": "Lanes", "value": "Up to 4" },
+          { "label": "Material", "value": "PE · PP" },
+          { "label": "Drive", "value": "Servo driven" }
+        ],
+        "features": [
+          { "head": "Bottom seal", "body": "Continuous bottom-seal for flat bags with precision tension control." },
+          { "head": "Compact footprint", "body": "Space-saving design for medium-volume production lines." },
+          { "head": "Easy operation", "body": "Touchscreen HMI with recipe memory for quick batch switching." },
+          { "head": "Low maintenance", "body": "Fewer moving parts with sealed bearing assemblies throughout." }
+        ]
+      },
+      "rgb-rollbag": {
+        "specs": [
+          { "label": "Series", "value": "RGB" },
+          { "label": "Type", "value": "Roll-bag machine" },
+          { "label": "Film width", "value": "500 – 900 mm" },
+          { "label": "Speed", "value": "200 pcs / min" },
+          { "label": "Lanes", "value": "Up to 3" },
+          { "label": "Material", "value": "PE · LDPE" },
+          { "label": "Drive", "value": "Inverter + servo" }
+        ],
+        "features": [
+          { "head": "Roll format", "body": "Produces perforated roll bags for automatic dispensing systems." },
+          { "head": "Perforation unit", "body": "Integrated blade perforation with adjustable pitch and depth." },
+          { "head": "Winding system", "body": "Automatic roll winding with tension control for uniform rolls." },
+          { "head": "Quick sizing", "body": "Motorized width adjustment with digital position readout." }
+        ]
+      },
+      "rb-vegetable": {
+        "specs": [
+          { "label": "Series", "value": "RB" },
+          { "label": "Type", "value": "Vest-bag machine" },
+          { "label": "Film width", "value": "800 – 1200 mm" },
+          { "label": "Speed", "value": "250 pcs / min" },
+          { "label": "Lanes", "value": "Up to 4" },
+          { "label": "Material", "value": "HDPE · MDPE" },
+          { "label": "Drive", "value": "Full servo" }
+        ],
+        "features": [
+          { "head": "T-shirt bags", "body": "Designed for vest/T-shirt bags with reinforced die-cut handles." },
+          { "head": "Die-cut unit", "body": "Integrated punch module for consistent handle cutouts." },
+          { "head": "Stacking conveyor", "body": "Automated counting and stacking for pack-ready output." },
+          { "head": "High throughput", "body": "Up to 250 bags per minute with multi-lane parallel processing." }
+        ]
+      },
+      "abcde-2200": {
+        "specs": [
+          { "label": "Series", "value": "ABCDE-2200" },
+          { "label": "Type", "value": "5-layer co-ex line" },
+          { "label": "Film width", "value": "2200 mm max" },
+          { "label": "Output", "value": "350 kg / h" },
+          { "label": "Layers", "value": "5" },
+          { "label": "Material", "value": "PE · PP · PA · EVOH" },
+          { "label": "Drive", "value": "AC vector" }
+        ],
+        "features": [
+          { "head": "Multi-layer", "body": "5-layer co-extrusion for advanced barrier and seal properties." },
+          { "head": "High output", "body": "350 kg/h throughput with internal bubble cooling system." },
+          { "head": "Web width", "body": "2200 mm lay-flat for large-format film applications." },
+          { "head": "Precision gauging", "body": "Online thickness measurement with closed-loop auto adjustment." }
+        ]
+      },
+      "abc-multilayer-large": {
+        "specs": [
+          { "label": "Series", "value": "ABC" },
+          { "label": "Type", "value": "Multi-layer blown film" },
+          { "label": "Film width", "value": "1800 mm max" },
+          { "label": "Output", "value": "280 kg / h" },
+          { "label": "Layers", "value": "3" },
+          { "label": "Material", "value": "PE · PP" },
+          { "label": "Drive", "value": "AC vector" }
+        ],
+        "features": [
+          { "head": "3-layer co-ex", "body": "High-performance 3-layer blown film for general packaging." },
+          { "head": "Energy efficient", "body": "Low-energy IBC design with optimized air ring technology." },
+          { "head": "Consistent gauge", "body": "Auto-profiled die gap for uniform film thickness across the web." },
+          { "head": "User-friendly", "body": "Recipe-based controls with touch panel and data logging." }
+        ]
+      },
+      "s-wide": {
+        "specs": [
+          { "label": "Series", "value": "S" },
+          { "label": "Type", "value": "Single-layer wide" },
+          { "label": "Film width", "value": "2500 mm max" },
+          { "label": "Output", "value": "200 kg / h" },
+          { "label": "Layers", "value": "1" },
+          { "label": "Material", "value": "LDPE · LLDPE" },
+          { "label": "Drive", "value": "AC inverter" }
+        ],
+        "features": [
+          { "head": "Ultra-wide", "body": "2500 mm lay-flat width for industrial film applications." },
+          { "head": "Simple operation", "body": "Single-layer extrusion with minimal operator training required." },
+          { "head": "Low investment", "body": "Cost-effective solution for high-volume commodity film production." },
+          { "head": "Flexible output", "body": "Runs LDPE and LLDPE with quick resin changeover." }
+        ]
+      },
+      "cx-pelletizing": {
+        "specs": [
+          { "label": "Series", "value": "CX" },
+          { "label": "Type", "value": "Recycling pelletizer" },
+          { "label": "Output", "value": "150 – 300 kg / h" },
+          { "label": "Material", "value": "PE · PP · Pet" },
+          { "label": "Pellet size", "value": "3 – 4 mm" },
+          { "label": "Power", "value": "75 – 160 kW" },
+          { "label": "Drive", "value": "AC vector + servo" }
+        ],
+        "features": [
+          { "head": "Closed-loop", "body": "Converts post-industrial waste into high-quality reusable pellets." },
+          { "head": "Integrated cutter", "body": "Hot-face die-face cutting with underwater pelletizing system." },
+          { "head": "Filtration", "body": "Continuous melt filtration with automatic screen changer." },
+          { "head": "Energy recovery", "body": "Integrated heat recovery system reduces total power consumption." }
+        ]
+      }
+    }
+  },
+  "clientJourney": {
+    "sectionAria": "Our process — inquiry to production",
+    "eyebrow": "End-to-end process",
+    "titleLine1": "From inquiry",
+    "titleLine2": "to",
+    "titleEm": "full production.",
+    "stagePrefix": "Stage",
+    "stepsAria": "Process steps",
+    "stepOfLabel": "Step {num} of {total}",
+    "footerText": "Ready when you are —",
+    "footerStrong": "engineers available 24/7",
+    "cta": "Start your inquiry",
+    "steps": {
+      "inquiry": {
+        "label": "Inquiry",
+        "tagline": "Tell us what you need",
+        "desc": "Send us your film specs, bag type, or print requirements. Our engineers reply within 24 hours with a tailored recommendation.",
+        "metric1v": "24h", "metric1l": "Response time",
+        "metric2v": "Free", "metric2l": "Consultation"
+      },
+      "quotation": {
+        "label": "Quotation",
+        "tagline": "Exact price, no surprises",
+        "desc": "You receive a detailed technical quotation with machine spec sheet, power requirements, footprint, and lead time — before any commitment.",
+        "metric1v": "72h", "metric1l": "Full quote",
+        "metric2v": "Fixed", "metric2l": "Price guaranteed"
+      },
+      "order": {
+        "label": "Order",
+        "tagline": "Lock your configuration",
+        "desc": "PI signed, deposit received. Your machine enters the production queue with a dedicated build number and factory engineer assigned.",
+        "metric1v": "30%", "metric1l": "Deposit",
+        "metric2v": "Named", "metric2l": "Engineer"
+      },
+      "manufacturing": {
+        "label": "Manufacturing",
+        "tagline": "Built in Wenzhou",
+        "desc": "Your line is built to order in our ISO 9001 certified factory. Steel cutting, extrusion screw grinding, electrical assembly — all in-house. Video updates on request.",
+        "metric1v": "ISO", "metric1l": "9001 certified",
+        "metric2v": "100%", "metric2l": "In-house"
+      },
+      "delivery": {
+        "label": "Delivery",
+        "tagline": "Door-to-door, worldwide",
+        "desc": "Seaworthy packaging, full export documentation, and real-time container tracking. We handle customs HS codes. Delivery to 80+ countries.",
+        "metric1v": "80+", "metric1l": "Countries",
+        "metric2v": "Full", "metric2l": "Documentation"
+      },
+      "commissioning": {
+        "label": "Commissioning",
+        "tagline": "Running in days, not weeks",
+        "desc": "Our technician arrives on-site to install, calibrate, and run the first production batch beside your operators. Average installation: 5–8 days.",
+        "metric1v": "5–8", "metric1l": "Days install",
+        "metric2v": "On-site", "metric2l": "Technician"
+      },
+      "training": {
+        "label": "Training",
+        "tagline": "Your team, fully capable",
+        "desc": "Hands-on operator training, maintenance schedules, and a full spare-parts kit. Manuals in English and your local language.",
+        "metric1v": "2–3", "metric1l": "Days training",
+        "metric2v": "Manual", "metric2l": "Included"
+      },
+      "aftersales": {
+        "label": "After-Sales",
+        "tagline": "Lifetime support",
+        "desc": "Remote diagnostics via video call, spare parts dispatched within 48h, and optional annual service contracts. We're with you for the life of the machine.",
+        "metric1v": "48h", "metric1l": "Parts dispatch",
+        "metric2v": "Lifetime", "metric2l": "Support"
+      }
+    }
+  },
+  "trustSection": {
+    "sectionAria": "Why trust Ashal Innomach",
+    "kicker": "Why manufacturers choose us",
+    "headlineLine1": "Engineered.",
+    "headlineEm": "Proven.",
+    "headlineLine3": "Supported.",
+    "descPrefix": "Wenzhou Asal Innomach Technology, trusted in",
+    "rollWords": ["Film Blowing.", "Bag Making.", "Recycling Lines.", "Flexographic Printing.", "80+ Countries.", "Lifetime Support."],
+    "dossier": [
+      { "title": "Engineering", "copy": "In-house R&D team designs and stress-tests every line before it ships." },
+      { "title": "Export", "copy": "Direct factory pricing with full documentation for customs in 80+ countries." },
+      { "title": "Aftercare", "copy": "Spare parts and technical support for the life of the machine, not just the warranty." }
+    ],
+    "stats": [
+      { "value": "25+", "label": "Years Manufacturing", "sub": "Est. since the early 2000s" },
+      { "value": "80+", "label": "Countries Served", "sub": "Active global export network" },
+      { "value": "4", "label": "Machine Categories", "sub": "Film · Bag · Recycling · Print" },
+      { "value": "500+", "label": "Machines Installed", "sub": "Across four continents" }
+    ]
+  },
+  "particlePortfolio": {
+    "mobileKicker": "One floor · One line · Setup 01–{count}",
+    "mobileHeadlineLine1": "Built for",
+    "mobileHeadlineEm": "the floor.",
+    "mobileSub": "Five machines, one connected production line — from raw resin to finished bags, with the scrap looped straight back in.",
+    "desktopKicker": "One floor · one connected line",
+    "desktopHeadlinePrefix": "Built for",
+    "desktopHeadlineEm": "the floor.",
+    "desktopSub": "Five machines set up in order, from raw resin to the finished product at the centre.",
+    "ringEyebrow": "The complete setup — in order",
+    "ringTitle": "End-to-end production line",
+    "finishedProduct": "Finished product",
+    "finishedProductAlt": "Finished bag products",
+    "stepAriaLabel": "Step {num}: {stage}",
+    "setupLabel": "Setup {num} / {total}",
+    "viewMachine": "View machine",
+    "steps": {
+      "abcde-2200": {
+        "stage": "Film Extrusion",
+        "name": "ABCDE-2200 Five-Layer",
+        "role": "The line starts here — resin is melted and blown into a 5-layer co-extruded film, 2100 mm wide.",
+        "quality": [["Thickness tolerance", "±2%"], ["Output", "400 kg/h"], ["Layers", "5"]]
+      },
+      "flexo-6c": {
+        "stage": "Flexo Printing",
+        "name": "AI-6C CI Flexo Press",
+        "role": "The blown film is printed in up to 6 colours on the central-impression drum at 260 m/min.",
+        "quality": [["Registration", "±0.1 mm"], ["Print speed", "260 m/min"], ["Colours", "6"]]
+      },
+      "t-pro-heatseal": {
+        "stage": "Bag Converting",
+        "name": "T-PRO Heat-Seal Machine",
+        "role": "Printed film is sealed and cut into finished bags across multiple lanes at production speed.",
+        "quality": [["Seal speed", "300 pcs/min"], ["Lanes", "2–3"], ["Bag width", "500–600 mm"]]
+      },
+      "rgb-rollbag": {
+        "stage": "Roll Winding",
+        "name": "CX-RGB Roll Bag Machine",
+        "role": "Bags are perforated and wound onto rolls with automatic core cutting for retail-ready packs.",
+        "quality": [["Roll width", "1000–1200 mm"], ["Perforation", "Inline"], ["Core", "Auto-cut"]]
+      },
+      "cx-pelletizing": {
+        "stage": "Closed-Loop Recycling",
+        "name": "CX Pelletizing Line",
+        "role": "Edge trim and scrap from every stage return here — recovered into resin and fed back to step 01.",
+        "quality": [["Resin recovery", "99%"], ["Output", "100–120 kg/h"], ["Screen", "Auto-changer"]]
+      }
+    }
+  },
+  "flexoStrip": {
+    "eyebrow": "New — Flexographic Printing",
+    "title": "AI Series Flexo Press.",
+    "subtitle": "2 to 8 colours, 500–2000 mm.",
+    "hotBadge": "Hot",
+    "flagshipBadge": "Flagship",
+    "colourLabel": "colour",
+    "speedLabel": "Speed",
+    "registrationLabel": "Registration",
+    "viewFullSpec": "View full spec →",
+    "requestSpecSheet": "Request spec sheet →",
+    "specs": [
+      { "label": "Substrates", "value": "PE · PP · PET · BOPP · Paper · Non-woven" },
+      { "label": "Plate types", "value": "1.14 / 1.7 / 2.84 mm" },
+      { "label": "Anilox", "value": "Ceramic, 200–600 LPI" },
+      { "label": "Power", "value": "380V 3PH 50/60Hz" }
+    ],
+    "models": {
+      "flexo-2c": { "tag": "Entry CI Press" },
+      "flexo-4c": { "tag": "Mid-range · Hot Model" },
+      "flexo-6c": { "tag": "High-speed CI Press" },
+      "flexo-8c": { "tag": "Flagship · Max Output" }
+    }
+  },
+  "printingShowcase": {
+    "titlePrefix": "Flexo",
+    "titleEm": "Printing Lines",
+    "seriesLabel": "AI Series CI Press",
+    "hotModel": "Hot Model",
+    "maxSpeed": "Max speed",
+    "registration": "Registration",
+    "substrates": "Substrates",
+    "substratesValue": "9 types",
+    "prev": "Previous",
+    "next": "Next",
+    "viewAll": "View all presses"
+  },
+  "machineCatalog": {
+    "sectionAria": "Machine catalogue",
+    "badge": "Machine Catalogue",
+    "headline1": "Every machine.",
+    "headline2": "Find your perfect fit.",
+    "subFamilies": "product families",
+    "subModels": "models",
+    "subShipped": "shipped to 80+ countries",
+    "fullCatalogue": "Full catalogue",
+    "filterAria": "Filter by category",
+    "allMachines": "All machines",
+    "footerFamily": "product family",
+    "footerFamilies": "product families",
+    "footerShown": "shown",
+    "viewAllSpecs": "View all specs & datasheets",
+    "categories": {
+      "film-blowing": "Film Blowing",
+      "bag-making": "Bag Making",
+      "recycling": "Recycling",
+      "printing": "Flexo Printing"
+    },
+    "specs": {
+      "abcde-2200": { "stat": "400 kg/h", "label": "Max output" },
+      "abc-multilayer-small": { "stat": "3-layer", "label": "Co-extrusion" },
+      "abc-multilayer-large": { "stat": "5-layer", "label": "Co-extrusion" },
+      "abc-cx-series": { "stat": "3-layer", "label": "Multi-layer" },
+      "aba-1000-1500": { "stat": "3-layer", "label": "ABA" },
+      "aba-800-1200": { "stat": "4-screw", "label": "ABA" },
+      "aba-cx-series": { "stat": "3-layer", "label": "CX Series" },
+      "s-mini-double": { "stat": "×2 heads", "label": "Double-head" },
+      "s-wide": { "stat": "2100 mm", "label": "Roller width" },
+      "s-standard": { "stat": "1000 mm", "label": "Max width" },
+      "sb-printing-line": { "stat": "6-colour", "label": "Blow + print" },
+      "cx-25-lab": { "stat": "25 mm", "label": "Benchtop" },
+      "t-pro-heatseal": { "stat": "300 pcs/min", "label": "Throughput" },
+      "tg-pro": { "stat": "500 mm", "label": "Bag width" },
+      "tb-320": { "stat": "×6 lanes", "label": "Multi-lane" },
+      "f-pro-bottomseal": { "stat": "1600 mm", "label": "Max width" },
+      "heatseal-750-1150": { "stat": "1150 mm", "label": "Max width" },
+      "heatseal-750-1150-hd": { "stat": "Heavy", "label": "Duty grade" },
+      "heatseal-narrow": { "stat": "450 mm", "label": "Max width" },
+      "rb-vegetable": { "stat": "×2 lanes", "label": "Vest & veg" },
+      "rgb-rollbag": { "stat": "1200 mm", "label": "Roll bag" },
+      "rollbag-continuous": { "stat": "Continuous", "label": "Roll bag" },
+      "sb-pe-pbat": { "stat": "PE/PBAT", "label": "Material" },
+      "cx-260": { "stat": "260 mm", "label": "Width" },
+      "gb-garbage": { "stat": "1200 mm", "label": "Roll bag" },
+      "cx-pelletizing": { "stat": "99%", "label": "Resin recovery" },
+      "flexo-2c": { "stat": "2-colour", "label": "CI flexo" },
+      "flexo-4c": { "stat": "4-colour", "label": "CI flexo" },
+      "flexo-6c": { "stat": "260 m/min", "label": "Print speed" },
+      "flexo-8c": { "stat": "8-colour", "label": "CI flexo" }
+    }
+  },
+  "configuratorCTA": {
+    "sectionAria": "Build your configuration",
+    "indexLabel": "Configurator",
+    "eyebrow": "Custom configuration",
+    "titleLine1": "Build your",
+    "titleEm": "machine order.",
+    "metricModels": "Models",
+    "metricReply": "Reply time",
+    "metricConfigs": "Configs",
+    "badge": "Engineers online",
+    "cta": "Choose a machine",
+    "stepsAria": "Steps",
+    "steps": ["Browse machines", "Select & configure", "Send inquiry"]
+  },
+  "newsStrip": {
+    "eyebrow": "Latest news",
+    "titleLine1": "From the factory",
+    "titleEm": "floor.",
+    "autoScrolling": "Auto-scrolling",
+    "allNews": "All news →",
+    "readArticle": "Read article →"
+  },
+  "about": {
+    "pageTitle": "About — Wenzhou Ashal Innomach Technology",
+    "hero": {
+      "eyebrow": "Company Profile",
+      "titleLine1": "Wenzhou Ashal",
+      "titleLine2": "Innomach Technology",
+      "imgAlt": "Ashal Innomach Technology headquarters building"
+    },
+    "whoWeAre": {
+      "kicker": "Who We Are",
+      "p1": "Designs and manufactures blown-film lines, bag-making converters, and recycling systems for polymer film processors across six continents. Founded in 2008, we have grown from a single machine type to a full portfolio of 18+ machine families — every product designed in-house, fabricated in our 12,000 m² Wenzhou facility, and tested before it ships.",
+      "p2": "Our customers range from single-line converters running one shift a day to multi-site groups running 24/7 on four continents. The machine has to work the same way for both."
+    },
+    "stats": [
+      { "suffix": "", "label": "Founded" },
+      { "suffix": "+", "label": "Countries" },
+      { "suffix": "", "label": "kg/h Max Output" },
+      { "suffix": "+", "label": "Machine Families" }
+    ],
+    "photoStrip": {
+      "hqAlt": "Wenzhou headquarters and manufacturing facility exterior",
+      "hqCaption": "Wenzhou HQ & Manufacturing Facility",
+      "floorAlt": "Production warehouse floor",
+      "floorCaption": "Production Floor — Bay A",
+      "assemblyAlt": "Machine assembly warehouse",
+      "assemblyCaption": "Assembly & Testing — Bay B"
+    },
+    "charts": {
+      "kicker": "By The Numbers",
+      "title": "Growth, Output & Reach",
+      "exportTitle": "Countries Exported To",
+      "exportUnit": "by year, cumulative",
+      "exportAria": "Bar chart of countries exported to, growing from 32 in 2020 to 60 in 2025",
+      "familyTitle": "Machine Family Distribution",
+      "familyUnit": "share of catalogue, %",
+      "familyAria": "Donut chart: Blown Film 38%, Bag Making 29%, Recycling 18%, Printing 15%",
+      "familiesLabel": "FAMILIES",
+      "familyNames": { "blownFilm": "Blown Film", "bagMaking": "Bag Making", "recycling": "Recycling", "printing": "Printing" },
+      "capacityTitle": "Output Capacity by Line",
+      "capacityUnit": "max throughput, kg/h",
+      "capacityAria": "Horizontal bar chart comparing max output: S-Series 120, ABA 220, ABC 300, ABCDE-2200 400 kilograms per hour",
+      "capacitySubs": { "sSeries": "single-layer", "aba": "3-layer co-ex", "abc": "5-layer co-ex", "abcde": "flagship line" }
+    },
+    "story": {
+      "kicker": "Our Story",
+      "title": "From one line to a full machinery portfolio",
+      "p1": "Ashal Innomach started with a single-layer blown-film line and a small team of mechanical engineers who had spent the previous decade on the shop floors of Wenzhou's established machinery makers. The founding premise was simple: build fewer machine types, but build them better.",
+      "p2": "Today we produce eighteen machine families across blown film, bag making, and recycling. Every product is designed in-house, fabricated in our 12,000 m² Wenzhou facility, and tested before it ships."
+    },
+    "timeline": {
+      "kicker": "Timeline",
+      "items": [
+        { "y": "2008", "e": "Company founded in Wenzhou. First single-layer blown-film line." },
+        { "y": "2011", "e": "ABA three-layer co-extrusion line. First export to Southeast Asia." },
+        { "y": "2014", "e": "Bag-making division launched with the F-PRO bottom-seal converter." },
+        { "y": "2017", "e": "CE certification. ABC multi-layer line certified for PBAT+PLA." },
+        { "y": "2019", "e": "CX recycling line released. Factory expanded to 12,000 m²." },
+        { "y": "2022", "e": "ABCDE-2200 enters development. Offices in Germany & Vietnam." },
+        { "y": "2025", "e": "ABCDE-2200 ships. RGB roll-bag machine updated." }
+      ]
+    },
+    "categories": {
+      "kicker": "Product Portfolio",
+      "title": "Machine Families",
+      "items": [
+        { "name": "Blown Film", "desc": "1–5 layer co-extrusion lines" },
+        { "name": "Bag Making", "desc": "Bottom-seal, side-seal, roll-bag" },
+        { "name": "Recycling", "desc": "Pelletizing & recovery lines" },
+        { "name": "Printing", "desc": "1–6 color flexographic" }
+      ]
+    },
+    "values": {
+      "kicker": "How We Work",
+      "title": "Four things we never compromise on",
+      "items": [
+        { "h": "Engineering First", "b": "Every machine starts on the drawing board, not the sales brochure. We over-engineer where it matters — drive trains, die heads, frame rigidity — and simplify everything else." },
+        { "h": "Long-Term Support", "b": "We supply spare parts and provide remote process support for every machine we have ever built. A ten-year-old line deserves the same attention as a new one." },
+        { "h": "Material Agnostic", "b": "Our lines run LDPE, LLDPE, HDPE, PP, PBAT+PLA and blends. We do not design for one resin family and leave the rest as an afterthought." },
+        { "h": "Factory Transparency", "b": "Buyers are welcome on the production floor at any stage of a build. We encourage factory acceptance tests and third-party inspection." }
+      ]
+    },
+    "materials": {
+      "kicker": "Material Compatibility",
+      "title": "Resins & Materials We Process",
+      "items": [
+        { "n": "LDPE", "f": "Low-Density Polyethylene" }, { "n": "LLDPE", "f": "Linear Low-Density PE" }, { "n": "HDPE", "f": "High-Density Polyethylene" },
+        { "n": "PP", "f": "Polypropylene" }, { "n": "PA", "f": "Polyamide / Nylon" }, { "n": "EVOH", "f": "Ethylene Vinyl Alcohol" },
+        { "n": "PBAT", "f": "Biodegradable Copolyester" }, { "n": "PLA", "f": "Polylactic Acid" }, { "n": "Blends", "f": "Custom Formulations" }
+      ]
+    },
+    "specs": {
+      "keySpecs": "Key Specifications",
+      "groups": [
+        { "label": "Blown Film", "specs": [["Layers", "1 to 5"], ["Film Width", "150–2,200 mm"], ["Output", "Up to 400 kg/h"], ["Die Diameters", "50–600 mm"], ["Extruders", "20–90 mm L/D 30:1"]] },
+        { "label": "Bag Making", "specs": [["Bag Types", "Bottom, side, t-shirt, die-cut, roll"], ["Seal Width", "Up to 1,200 mm"], ["Speed", "Up to 200 bags/min"], ["Film Thickness", "0.008–0.30 mm"], ["Recycling", "100–500 kg/h"]] }
+      ]
+    },
+    "global": {
+      "kicker": "Global Reach",
+      "title": "60+ Countries Across Six Continents",
+      "marketsTitle": "Key Markets",
+      "markets": "Vietnam, Indonesia, Thailand, Philippines, India, Bangladesh, Pakistan, Turkey, Egypt, Nigeria, Kenya, Colombia, Peru, Germany, and 45+ more countries.",
+      "officesTitle": "Regional Offices",
+      "officeGermany": "Germany:", "officeGermanyDesc": "European sales & support",
+      "officeVietnam": "Vietnam:", "officeVietnamDesc": "SEA operations & training",
+      "officeHQ": "Wenzhou HQ:", "officeHQDesc": "Manufacturing & R&D"
+    },
+    "support": {
+      "kicker": "After-Sales",
+      "title": "Lifetime Support",
+      "desc": "We supply spare parts and provide remote process support for every machine we have ever built. A ten-year-old line deserves the same attention as a new one.",
+      "deliveryKicker": "Delivery",
+      "deliveryTitle": "From Factory to Floor",
+      "deliveryItems": [["Production", "25–45 days"], ["Packing", "Export-standard wooden crate"], ["Shipping", "FOB Wenzhou / CIF destination"], ["Commissioning", "On-site install & training"], ["Warranty", "12 months from commissioning"]]
+    },
+    "contact": {
+      "kicker": "Contact",
+      "title": "Get in Touch",
+      "items": [["Company", "Wenzhou Ashal Innomach Technology"], ["Location", "Wenzhou, Zhejiang, China"], ["Factory", "12,000 m² manufacturing facility"], ["Website", "www.cxmachinery.com"], ["Response", "Within 24 business hours"], ["Languages", "English, Chinese, Vietnamese, German"]],
+      "cardTitle": "Ready to talk about your next line?",
+      "cardDesc": "Request a quote or talk to an engineer about your specific requirements.",
+      "requestQuote": "Request a Quote →",
+      "browseMachines": "Browse Machines"
+    }
+  },
+  "contact": {
+    "eyebrow": "Contact",
+    "titlePrefix": "Let's",
+    "titleEm": "talk.",
+    "sub": "Reach us directly using any of the details below, or send an inquiry and our engineering team will get back to you within 24 hours.",
+    "methods": {
+      "call": "Call Us",
+      "whatsapp": "WhatsApp",
+      "email": "Email",
+      "address": "Address",
+      "addressValue": "Wenzhou, Zhejiang, China"
+    },
+    "cta": {
+      "title": "Send an Inquiry",
+      "desc": "Tell us what you're looking for — select machines, request a quote, or ask about spare parts. Our team reviews every inquiry personally."
+    }
+  },
+  "inquiriesHub": {
+    "eyebrow": "Inquiries",
+    "titlePrefix": "How can we",
+    "titleEm": "help?",
+    "sub": "Pick the option that matches what you need. Every inquiry is reviewed by our engineering team and answered within 24 hours.",
+    "lead": {
+      "badge": "Recommended",
+      "title": "Talk to Our Engineer",
+      "desc": "Select machines, customize specs, add parts — we build a detailed configuration sheet and our engineers review it personally."
+    },
+    "quickLabel": "Or, if you already know exactly what you need",
+    "direct": {
+      "title": "Direct Inquiry",
+      "desc": "Quick inquiry about any machine, with optional notes."
+    },
+    "parts": {
+      "title": "Part Inquiry",
+      "desc": "Spare parts or replacement components, with photos."
+    }
+  },
+  "directInquiry": {
+    "backLink": "All inquiry types",
+    "eyebrow": "Direct Inquiry",
+    "titlePrefix": "Quick",
+    "titleEm": "machine inquiry.",
+    "machineSection": "Machine",
+    "quantity": "Quantity",
+    "customNotes": "Customization notes",
+    "customNotesHint": "Voltage, automation, certification…",
+    "customNotesPlaceholder": "Optional",
+    "yourDetails": "Your details",
+    "name": "Name",
+    "email": "Email",
+    "company": "Company",
+    "optional": "Optional",
+    "phone": "Phone",
+    "message": "Message",
+    "messageHint": "Anything else you'd like us to know?",
+    "referencePhotos": "Reference photos",
+    "reviewButton": "Review inquiry →",
+    "reviewTitlePrefix": "Review your inquiry for",
+    "reviewRows": { "qty": "Quantity", "notes": "Notes", "notesPlaceholder": "Any customization notes", "name": "Name", "email": "Email", "company": "Company", "message": "Message" },
+    "successTitle": "Thanks, {name}!",
+    "successSub": "Our team will review this and reply to {email} within 24 hours.",
+    "tipNoFamily": "Not sure which line fits? Pick a category above to browse machines.",
+    "tipWithFamily": "Mention your target output (kg/h) and film type in notes — it helps us size the right model fast."
+  },
+  "partsInquiry": {
+    "backLink": "All inquiry types",
+    "eyebrow": "Part Inquiry",
+    "titlePrefix": "Need a",
+    "titleEm": "spare part?",
+    "partsSection": "Parts",
+    "partsSubtitle": "Add as many parts as you need.",
+    "noMachineSpecified": "no machine specified",
+    "photo": "photo",
+    "photos": "photos",
+    "partName": "Part name",
+    "partNameHint": "e.g. Die Head, Screw, Barrel, Heating Element",
+    "machine": "Machine",
+    "machineHint": "Optional — pick one if you know it, or leave blank",
+    "notSureSkip": "Not sure / skip",
+    "quantity": "Quantity",
+    "specsRefNumbers": "Specs / reference numbers",
+    "optional": "Optional",
+    "referencePhoto": "Reference photo",
+    "referencePhotoHint": "Shows the part or where it fits — optional",
+    "uploading": "Uploading…",
+    "addPhoto": "+ Add photo",
+    "addThisPart": "Add this part",
+    "yourDetails": "Your details",
+    "name": "Name",
+    "email": "Email",
+    "company": "Company",
+    "phone": "Phone",
+    "message": "Message",
+    "messageHint": "Anything else you'd like us to know?",
+    "reviewButton": "Review inquiry →",
+    "reviewTitlePrefix": "Review your parts inquiry —",
+    "reviewTitlePart": "part",
+    "reviewTitleParts": "parts",
+    "reviewTitleSuffix": ". Click any answer to edit it.",
+    "reviewRows": { "name": "Name", "email": "Email", "company": "Company", "message": "Message" },
+    "successTitle": "Thanks, {name}!",
+    "successSub": "Our team will review your parts list and reply to {email} within 24 hours.",
+    "tipNoParts": "Use the name printed on the part itself if you have it — exact terms help our engineers match it faster.",
+    "tipWithParts": "Add as many parts as you need before sending — nothing sends until you press send inquiry."
+  },
+  "talkToEngineer": {
+    "backLink": "All inquiry types",
+    "backToAiReview": "Back to AI review",
+    "backToMachines": "Back to machines & parts",
+    "eyebrow": "Talk to an Engineer",
+    "titlePrefix": "Build your",
+    "titleEm": "custom order.",
+    "machinesSection": "Machines",
+    "machinesSubtitle": "Add as many as you need. Not sure yet? Skip this and mention it in your message below.",
+    "quantity": "Quantity",
+    "customNotes": "Customization notes",
+    "customNotesHint": "Voltage, automation, certification…",
+    "optional": "Optional",
+    "addMachineToOrder": "Add this machine to your order",
+    "partsSection": "Parts",
+    "partsSubtitle": "Add specific parts to this order — optional.",
+    "photo": "photo",
+    "photos": "photos",
+    "partName": "Part name",
+    "partNameHint": "e.g. Die Head, Screw, Barrel, Heating Element",
+    "partNamePlaceholder": "Optional — leave blank if none",
+    "specsRefNumbers": "Specs / reference numbers",
+    "referencePhoto": "Reference photo",
+    "uploading": "Uploading…",
+    "addPhoto": "+ Add photo",
+    "addPartToOrder": "Add this part to your order",
+    "continueButton": "Continue →",
+    "aiReviewSection": "AI review",
+    "aiReviewSubtitle": "Optional — our AI looks over what you've picked, asks a couple of questions, and can suggest additions.",
+    "yourDetails": "Your details",
+    "name": "Name",
+    "email": "Email",
+    "company": "Company",
+    "phone": "Phone",
+    "message": "Message",
+    "messageHint": "Anything else you'd like us to know?",
+    "referencePhotos": "Reference photos",
+    "reviewButton": "Review inquiry →",
+    "reviewTitle": "Here's your configuration sheet — click any answer below to edit it, then send whenever you're ready.",
+    "reviewRows": { "name": "Name", "email": "Email", "company": "Company", "message": "Message" },
+    "successTitle": "Thanks, {name}!",
+    "successSub": "Our engineering team will review your configuration sheet and reply to {email} within 24 hours.",
+    "tipEmpty": "Add as many machines and parts as you need — nothing sends until you press send inquiry.",
+    "tipReady": "Ready to review? Fill in your name and email above, then check everything before sending.",
+    "tipDefault": "Each model trades off speed vs. footprint — check the spec panel as you pick."
+  },
+  "toasts": {
+    "photoUploaded": "Photo added",
+    "photoUploadFailed": "Couldn't upload photo",
+    "photoUploadFailedDesc": "Please try again or continue without it."
+  }
+}

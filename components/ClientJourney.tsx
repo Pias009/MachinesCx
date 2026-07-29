@@ -1,20 +1,18 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import TransitionLink from "@/components/TransitionLink";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ─── Step data ────────────────────────────────────────────
-const STEPS = [
+// ─── Step order + icons — copy comes from the clientJourney.steps
+// translation namespace, keyed by id ─────────────────────────────
+const STEP_META = [
   {
     id: "inquiry",
     num: "01",
-    label: "Inquiry",
-    tagline: "Tell us what you need",
-    desc: "Send us your film specs, bag type, or print requirements. Our engineers reply within 24 hours with a tailored recommendation.",
-    metrics: [{ v: "24h", l: "Response time" }, { v: "Free", l: "Consultation" }],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="7" width="26" height="18" rx="1.5" fill="currentColor" fillOpacity=".14" stroke="none"/>
@@ -27,10 +25,6 @@ const STEPS = [
   {
     id: "quotation",
     num: "02",
-    label: "Quotation",
-    tagline: "Exact price, no surprises",
-    desc: "You receive a detailed technical quotation with machine spec sheet, power requirements, footprint, and lead time — before any commitment.",
-    metrics: [{ v: "72h", l: "Full quote" }, { v: "Fixed", l: "Price guaranteed" }],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
         <rect x="6" y="3" width="20" height="26" rx="1.5" fill="currentColor" fillOpacity=".14" stroke="none"/>
@@ -44,10 +38,6 @@ const STEPS = [
   {
     id: "order",
     num: "03",
-    label: "Order",
-    tagline: "Lock your configuration",
-    desc: "PI signed, deposit received. Your machine enters the production queue with a dedicated build number and factory engineer assigned.",
-    metrics: [{ v: "30%", l: "Deposit" }, { v: "Named", l: "Engineer" }],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
         <path d="M6 4h14l6 6v18H6z" fill="currentColor" fillOpacity=".14" stroke="none"/>
@@ -60,10 +50,6 @@ const STEPS = [
   {
     id: "manufacturing",
     num: "04",
-    label: "Manufacturing",
-    tagline: "Built in Wenzhou",
-    desc: "Your line is built to order in our ISO 9001 certified factory. Steel cutting, extrusion screw grinding, electrical assembly — all in-house. Video updates on request.",
-    metrics: [{ v: "ISO", l: "9001 certified" }, { v: "100%", l: "In-house" }],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 26V14l7-5v5l7-5v5l7-5v17" fill="currentColor" fillOpacity=".1" stroke="none"/>
@@ -79,10 +65,6 @@ const STEPS = [
   {
     id: "delivery",
     num: "05",
-    label: "Delivery",
-    tagline: "Door-to-door, worldwide",
-    desc: "Seaworthy packaging, full export documentation, and real-time container tracking. We handle customs HS codes. Delivery to 80+ countries.",
-    metrics: [{ v: "80+", l: "Countries" }, { v: "Full", l: "Documentation" }],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
         <rect x="1" y="11" width="18" height="14" rx="1.5" fill="currentColor" fillOpacity=".14" stroke="none"/>
@@ -97,10 +79,6 @@ const STEPS = [
   {
     id: "commissioning",
     num: "06",
-    label: "Commissioning",
-    tagline: "Running in days, not weeks",
-    desc: "Our technician arrives on-site to install, calibrate, and run the first production batch beside your operators. Average installation: 5–8 days.",
-    metrics: [{ v: "5–8", l: "Days install" }, { v: "On-site", l: "Technician" }],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="16" cy="16" r="5" fill="currentColor" fillOpacity=".22"/>
@@ -112,10 +90,6 @@ const STEPS = [
   {
     id: "training",
     num: "07",
-    label: "Training",
-    tagline: "Your team, fully capable",
-    desc: "Hands-on operator training, maintenance schedules, and a full spare-parts kit. Manuals in English and your local language.",
-    metrics: [{ v: "2–3", l: "Days training" }, { v: "Manual", l: "Included" }],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="8" r="4" fill="currentColor" fillOpacity=".22"/>
@@ -128,10 +102,6 @@ const STEPS = [
   {
     id: "aftersales",
     num: "08",
-    label: "After-Sales",
-    tagline: "Lifetime support",
-    desc: "Remote diagnostics via video call, spare parts dispatched within 48h, and optional annual service contracts. We're with you for the life of the machine.",
-    metrics: [{ v: "48h", l: "Parts dispatch" }, { v: "Lifetime", l: "Support" }],
     icon: (
       <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
         <path d="M6 10a10 10 0 0120 0c0 8-10 18-10 18S6 18 6 10z" fill="currentColor" fillOpacity=".16" stroke="currentColor"/>
@@ -142,7 +112,22 @@ const STEPS = [
   },
 ];
 
+type StepCopy = { label: string; tagline: string; desc: string; metric1v: string; metric1l: string; metric2v: string; metric2l: string };
+
 export default function ClientJourney() {
+  const t = useTranslations("clientJourney");
+  const stepsCopy = t.raw("steps") as Record<string, StepCopy>;
+  const STEPS = STEP_META.map((m) => {
+    const c = stepsCopy[m.id];
+    return {
+      ...m,
+      label: c.label,
+      tagline: c.tagline,
+      desc: c.desc,
+      metrics: [{ v: c.metric1v, l: c.metric1l }, { v: c.metric2v, l: c.metric2l }],
+    };
+  });
+
   const [active, setActive] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
   const headRef    = useRef<HTMLDivElement>(null);
@@ -183,10 +168,6 @@ export default function ClientJourney() {
           background: #070f0e;
           padding: clamp(4rem,7vw,6rem) 0;
           overflow: hidden;
-          background-image:
-            linear-gradient(rgba(43,191,179,0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(43,191,179,0.05) 1px, transparent 1px);
-          background-size: 48px 48px;
         }
         .cj::after {
           content: "";
@@ -465,22 +446,22 @@ export default function ClientJourney() {
         [data-theme="light"] .cj__cta { color: #0d1716; }
       `}</style>
 
-      <section className="cj" ref={sectionRef} aria-label="Our process — inquiry to production">
+      <section className="cj" ref={sectionRef} aria-label={t("sectionAria")}>
         <div className="cj__wrap">
           <div className="cj__head" ref={headRef} data-no-anim>
             <div>
-              <div className="cj__label">End-to-end process</div>
+              <div className="cj__label">{t("eyebrow")}</div>
               <h2 className="cj__title">
-                From inquiry<br />to <em>full production.</em>
+                {t("titleLine1")}<br />{t("titleLine2")} <em>{t("titleEm")}</em>
               </h2>
             </div>
             <div className="cj__count" aria-hidden>
-              Stage <b>{String(active + 1).padStart(2, "0")}</b> / {STEPS.length}
+              {t("stagePrefix")} <b>{String(active + 1).padStart(2, "0")}</b> / {STEPS.length}
             </div>
           </div>
 
           <div className="cj__panel" ref={panelRef} data-no-anim style={{ ["--step-color" as string]: stepColor }}>
-            <div className="cj__index" role="tablist" aria-label="Process steps">
+            <div className="cj__index" role="tablist" aria-label={t("stepsAria")}>
               {STEPS.map((s, i) => {
                 const isActive = active === i;
                 return (
@@ -507,7 +488,7 @@ export default function ClientJourney() {
               <div className="cj__detail-top">
                 <div className="cj__detail-icon" aria-hidden>{step.icon}</div>
                 <div>
-                  <span className="cj__detail-eyebrow">Step {step.num} of {STEPS.length}</span>
+                  <span className="cj__detail-eyebrow">{t("stepOfLabel", { num: step.num, total: STEPS.length })}</span>
                   <h3 className="cj__detail-heading">{step.label}</h3>
                   <p className="cj__detail-tagline">{step.tagline}</p>
                 </div>
@@ -528,15 +509,15 @@ export default function ClientJourney() {
 
           <div className="cj__footer">
             <p className="cj__footer-text">
-              Ready when you are —&nbsp;
-              <strong>engineers available 24/7</strong>
+              {t("footerText")}&nbsp;
+              <strong>{t("footerStrong")}</strong>
             </p>
-            <Link href="/inquiries" className="cj__cta">
-              Start your inquiry
+            <TransitionLink href="/inquiries" className="cj__cta">
+              {t("cta")}
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </Link>
+            </TransitionLink>
           </div>
         </div>
       </section>

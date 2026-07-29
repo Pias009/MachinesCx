@@ -1,6 +1,8 @@
 "use client";
 import { Suspense, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { familiesByCategory, type ProductFamily, type CategorySlug } from "@/lib/products";
 import TransitionLink from "@/components/TransitionLink";
 import {
@@ -29,6 +31,8 @@ interface FormData {
 const EMPTY_FORM: FormData = { name: "", company: "", email: "", phone: "", country: "", message: "" };
 
 function PartsInquiryInner() {
+  const t = useTranslations("partsInquiry");
+  const tToast = useTranslations("toasts");
   const [parts, setParts] = useState<PartEntry[]>([]);
   const [draftName, setDraftName] = useState("");
   const [draftCat, setDraftCat] = useState<CategorySlug>("film-blowing");
@@ -55,8 +59,10 @@ function PartsInquiryInner() {
       if (!res.ok) throw new Error("Upload failed");
       const j = await res.json();
       setDraftImages(prev => [...prev, j.url]);
+      toast.success(tToast("photoUploaded"));
     } catch {
       // upload errors are non-fatal — the visitor can retry or continue without a photo
+      toast.error(tToast("photoUploadFailed"), { description: tToast("photoUploadFailedDesc") });
     } finally {
       setUploading(false);
     }
@@ -117,11 +123,11 @@ function PartsInquiryInner() {
   }, [draftMachine]);
 
   const reviewRows = useMemo<ReviewRow[]>(() => [
-    { key: "name", label: "Name", value: form.name, onChange: v => setForm(f => ({ ...f, name: v })) },
-    { key: "email", label: "Email", value: form.email, onChange: v => setForm(f => ({ ...f, email: v })) },
-    { key: "company", label: "Company", value: form.company, placeholder: "Optional", onChange: v => setForm(f => ({ ...f, company: v })) },
-    { key: "message", label: "Message", value: form.message, kind: "textarea", placeholder: "Optional", onChange: v => setForm(f => ({ ...f, message: v })) },
-  ], [form]);
+    { key: "name", label: t("reviewRows.name"), value: form.name, onChange: v => setForm(f => ({ ...f, name: v })) },
+    { key: "email", label: t("reviewRows.email"), value: form.email, onChange: v => setForm(f => ({ ...f, email: v })) },
+    { key: "company", label: t("reviewRows.company"), value: form.company, placeholder: t("optional"), onChange: v => setForm(f => ({ ...f, company: v })) },
+    { key: "message", label: t("reviewRows.message"), value: form.message, kind: "textarea", placeholder: t("optional"), onChange: v => setForm(f => ({ ...f, message: v })) },
+  ], [form, t]);
 
   if (sent) {
     return (
@@ -133,8 +139,8 @@ function PartsInquiryInner() {
               <div className="ci-success__icon">
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M6 14l5 5 11-11" stroke="var(--brand-teal)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </div>
-              <h1 className="ci-success__title">Thanks, {form.name}!</h1>
-              <p className="ci-success__sub">Our team will review your parts list and reply to {form.email} within 24 hours.</p>
+              <h1 className="ci-success__title">{t("successTitle", { name: form.name })}</h1>
+              <p className="ci-success__sub">{t("successSub", { email: form.email })}</p>
             </div>
           </div>
         </div>
@@ -151,30 +157,30 @@ function PartsInquiryInner() {
             <TransitionLink href="/inquiries">
               <span className="ci-back">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                All inquiry types
+                {t("backLink")}
               </span>
             </TransitionLink>
             <div className="ci-heading">
-              <div className="ci-eyebrow">Part Inquiry</div>
-              <h1 className="ci-h1">Need a <em>spare part?</em></h1>
+              <div className="ci-eyebrow">{t("eyebrow")}</div>
+              <h1 className="ci-h1">{t("titlePrefix")} <em>{t("titleEm")}</em></h1>
             </div>
 
             <div className="ci-convo">
-              <Section title="Parts" subtitle="Add as many parts as you need.">
+              <Section title={t("partsSection")} subtitle={t("partsSubtitle")}>
                 {parts.map((p, i) => (
                   <EntryRow
                     key={i}
-                    title={`${p.name} — ${p.machine || "no machine specified"} · qty ${p.quantity}`}
-                    meta={[p.notes, p.images.length ? `${p.images.length} photo${p.images.length > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ") || undefined}
+                    title={`${p.name} — ${p.machine || t("noMachineSpecified")} · qty ${p.quantity}`}
+                    meta={[p.notes, p.images.length ? `${p.images.length} ${p.images.length > 1 ? t("photos") : t("photo")}` : ""].filter(Boolean).join(" · ") || undefined}
                     onRemove={() => removePart(i)}
                   />
                 ))}
 
-                <Field label="Part name" hint="e.g. Die Head, Screw, Barrel, Heating Element">
+                <Field label={t("partName")} hint={t("partNameHint")}>
                   <input type="text" value={draftName} onChange={e => setDraftName(e.target.value)} />
                 </Field>
 
-                <Field label="Machine" hint="Optional — pick one if you know it, or leave blank">
+                <Field label={t("machine")} hint={t("machineHint")}>
                   <MachinePicker
                     category={draftCat}
                     onCategory={setDraftCat}
@@ -183,59 +189,59 @@ function PartsInquiryInner() {
                     modelIdx={draftModelIdx}
                     onModel={setDraftModelIdx}
                     allowNone
-                    noneLabel="Not sure / skip"
+                    noneLabel={t("notSureSkip")}
                   />
                 </Field>
 
                 <div className="ci-row">
-                  <Field label="Quantity">
+                  <Field label={t("quantity")}>
                     <div className="ci-qty">
                       <button type="button" className="ci-qty__btn" onClick={() => setDraftQty(q => Math.max(1, q - 1))}>−</button>
                       <span className="ci-qty__val">{draftQty}</span>
                       <button type="button" className="ci-qty__btn" onClick={() => setDraftQty(q => q + 1)}>+</button>
                     </div>
                   </Field>
-                  <Field label="Specs / reference numbers">
-                    <input type="text" placeholder="Optional" value={draftNotes} onChange={e => setDraftNotes(e.target.value)} />
+                  <Field label={t("specsRefNumbers")}>
+                    <input type="text" placeholder={t("optional")} value={draftNotes} onChange={e => setDraftNotes(e.target.value)} />
                   </Field>
                 </div>
 
-                <Field label="Reference photo" hint="Shows the part or where it fits — optional">
+                <Field label={t("referencePhoto")} hint={t("referencePhotoHint")}>
                   <div style={{ display: "flex", gap: ".5rem", alignItems: "center", flexWrap: "wrap" }}>
                     {draftImages.map((src, i) => (
                       <Image key={i} src={src} alt="" width={40} height={40} style={{ objectFit: "cover", borderRadius: 8, border: "1px solid var(--bg-line)" }} />
                     ))}
                     <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
                       style={{ padding: ".5rem .8rem", borderRadius: ".6rem", border: "1px dashed var(--bg-line)", background: "var(--bg-raise)", color: "var(--ink-60)", fontSize: ".8rem", cursor: "pointer" }}>
-                      {uploading ? "Uploading…" : "+ Add photo"}
+                      {uploading ? t("uploading") : t("addPhoto")}
                     </button>
                     <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" style={{ display: "none" }}
                       onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f); e.target.value = ""; }} />
                   </div>
                 </Field>
 
-                <AddAnotherButton onClick={addPart}>Add this part</AddAnotherButton>
+                <AddAnotherButton onClick={addPart}>{t("addThisPart")}</AddAnotherButton>
               </Section>
 
-              <Section title="Your details">
+              <Section title={t("yourDetails")}>
                 <div className="ci-row">
-                  <Field label="Name" required>
+                  <Field label={t("name")} required>
                     <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
                   </Field>
-                  <Field label="Email" required>
+                  <Field label={t("email")} required>
                     <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
                   </Field>
                 </div>
                 <div className="ci-row">
-                  <Field label="Company">
-                    <input type="text" placeholder="Optional" value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))} />
+                  <Field label={t("company")}>
+                    <input type="text" placeholder={t("optional")} value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))} />
                   </Field>
-                  <Field label="Phone">
-                    <input type="tel" placeholder="Optional" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
+                  <Field label={t("phone")}>
+                    <input type="tel" placeholder={t("optional")} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
                   </Field>
                 </div>
-                <Field label="Message" hint="Anything else you'd like us to know?">
-                  <textarea rows={3} placeholder="Optional" value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
+                <Field label={t("message")} hint={t("messageHint")}>
+                  <textarea rows={3} placeholder={t("optional")} value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
                 </Field>
               </Section>
 
@@ -249,12 +255,12 @@ function PartsInquiryInner() {
                     disabled={parts.length === 0 || !form.name.trim() || !form.email.trim()}
                     onClick={() => setReviewing(true)}
                   >
-                    Review inquiry →
+                    {t("reviewButton")}
                   </button>
                 </div>
               ) : (
                 <ReviewCard
-                  title={<>Review your parts inquiry — <strong>{parts.length} part{parts.length > 1 ? "s" : ""}</strong>. Click any answer to edit it.</>}
+                  title={<>{t("reviewTitlePrefix")} <strong>{parts.length} {parts.length > 1 ? t("reviewTitleParts") : t("reviewTitlePart")}</strong>{t("reviewTitleSuffix")}</>}
                   rows={reviewRows}
                   onSend={send}
                   sending={sending}
@@ -268,8 +274,8 @@ function PartsInquiryInner() {
             modelIdx={draftModelIdx}
             related={related}
             tip={
-              parts.length === 0 ? { text: <>Use the name printed on the part itself if you have it — <strong>exact terms</strong> help our engineers match it faster.</> } :
-              { text: <>Add as many parts as you need before sending — nothing sends until you press <strong>send inquiry</strong>.</> }
+              parts.length === 0 ? { text: <>{t("tipNoParts")}</> } :
+              { text: <>{t("tipWithParts")}</> }
             }
           />
         </div>

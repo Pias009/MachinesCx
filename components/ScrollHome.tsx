@@ -2,21 +2,23 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import TransitionLink from "@/components/TransitionLink";
 import AetherBtn from "@/components/AetherBtn";
 import { useCms } from "@/lib/useCms";
 
-// Machine cards shown at the bottom of §3
-const CARDS = [
-  { slug: "t-pro-heatseal",    name: "T-PRO · Heat-seal converter"     },
-  { slug: "f-pro-bottomseal",  name: "F-PRO · Bottom-seal converter"   },
-  { slug: "rgb-rollbag",       name: "RGB · Roll-bag machine"          },
-  { slug: "rb-vegetable",      name: "RB · Vest-bag machine"           },
-  { slug: "abcde-2200",        name: "ABCDE-2200 · 5-layer co-ex line" },
-  { slug: "abc-multilayer-large", name: "ABC · Multi-layer blown film"  },
-  { slug: "s-wide",            name: "S · Single-layer wide"           },
-  { slug: "cx-pelletizing",    name: "CX · Recycling pelletizer"       },
-];
+// Machine card slugs shown at the bottom of §3 — display names come from
+// the scrollHome.cards translation namespace, keyed by slug
+const CARD_SLUGS = [
+  "t-pro-heatseal",
+  "f-pro-bottomseal",
+  "rgb-rollbag",
+  "rb-vegetable",
+  "abcde-2200",
+  "abc-multilayer-large",
+  "s-wide",
+  "cx-pelletizing",
+] as const;
 
 type Spec = { label: string; value: string };
 type Feature = { head: string; body: string };
@@ -26,155 +28,21 @@ type ProductDetail = {
   features: Feature[];
 };
 
-const DEFAULT_PRODUCT_DATA: Record<string, ProductDetail> = {
-  "t-pro-heatseal": {
-    specs: [
-      { label: "Series",     value: "T-PRO"               },
-      { label: "Type",       value: "Heat-seal converter"  },
-      { label: "Film width", value: "750 – 1150 mm"       },
-      { label: "Speed",      value: "600 pcs / min"       },
-      { label: "Lanes",      value: "Up to 6"             },
-      { label: "Material",   value: "PE · PBAT+PLA"       },
-      { label: "Drive",      value: "Servo + frequency"   },
-    ],
-    features: [
-      { head: "Multi-lane",          body: "Up to 6 lanes for high-volume simultaneous output." },
-      { head: "Biodegradable ready", body: "Compatible with PBAT+PLA blends out of the box."    },
-      { head: "Servo precision",     body: "±0.5 mm sealing repeat accuracy across all lanes."  },
-      { head: "Fast changeover",     body: "Tool-free width adjustment in under 15 minutes."    },
-    ],
-  },
-  "f-pro-bottomseal": {
-    specs: [
-      { label: "Series",     value: "F-PRO"               },
-      { label: "Type",       value: "Bottom-seal converter" },
-      { label: "Film width", value: "600 – 1000 mm"       },
-      { label: "Speed",      value: "280 pcs / min"       },
-      { label: "Lanes",      value: "Up to 4"             },
-      { label: "Material",   value: "PE · PP"             },
-      { label: "Drive",      value: "Servo driven"        },
-    ],
-    features: [
-      { head: "Bottom seal",       body: "Continuous bottom-seal for flat bags with precision tension control." },
-      { head: "Compact footprint", body: "Space-saving design for medium-volume production lines."             },
-      { head: "Easy operation",    body: "Touchscreen HMI with recipe memory for quick batch switching."      },
-      { head: "Low maintenance",   body: "Fewer moving parts with sealed bearing assemblies throughout."       },
-    ],
-  },
-  "rgb-rollbag": {
-    specs: [
-      { label: "Series",     value: "RGB"                 },
-      { label: "Type",       value: "Roll-bag machine"     },
-      { label: "Film width", value: "500 – 900 mm"        },
-      { label: "Speed",      value: "200 pcs / min"       },
-      { label: "Lanes",      value: "Up to 3"             },
-      { label: "Material",   value: "PE · LDPE"           },
-      { label: "Drive",      value: "Inverter + servo"    },
-    ],
-    features: [
-      { head: "Roll format",       body: "Produces perforated roll bags for automatic dispensing systems."    },
-      { head: "Perforation unit",  body: "Integrated blade perforation with adjustable pitch and depth."      },
-      { head: "Winding system",    body: "Automatic roll winding with tension control for uniform rolls."     },
-      { head: "Quick sizing",      body: "Motorized width adjustment with digital position readout."          },
-    ],
-  },
-  "rb-vegetable": {
-    specs: [
-      { label: "Series",     value: "RB"                  },
-      { label: "Type",       value: "Vest-bag machine"     },
-      { label: "Film width", value: "800 – 1200 mm"       },
-      { label: "Speed",      value: "250 pcs / min"       },
-      { label: "Lanes",      value: "Up to 4"             },
-      { label: "Material",   value: "HDPE · MDPE"         },
-      { label: "Drive",      value: "Full servo"          },
-    ],
-    features: [
-      { head: "T-shirt bags",      body: "Designed for vest/T-shirt bags with reinforced die-cut handles."   },
-      { head: "Die-cut unit",      body: "Integrated punch module for consistent handle cutouts."             },
-      { head: "Stacking conveyor", body: "Automated counting and stacking for pack-ready output."            },
-      { head: "High throughput",   body: "Up to 250 bags per minute with multi-lane parallel processing."    },
-    ],
-  },
-  "abcde-2200": {
-    specs: [
-      { label: "Series",     value: "ABCDE-2200"           },
-      { label: "Type",       value: "5-layer co-ex line"   },
-      { label: "Film width", value: "2200 mm max"          },
-      { label: "Output",     value: "350 kg / h"           },
-      { label: "Layers",     value: "5"                    },
-      { label: "Material",   value: "PE · PP · PA · EVOH" },
-      { label: "Drive",      value: "AC vector"            },
-    ],
-    features: [
-      { head: "Multi-layer",       body: "5-layer co-extrusion for advanced barrier and seal properties."    },
-      { head: "High output",       body: "350 kg/h throughput with internal bubble cooling system."          },
-      { head: "Web width",         body: "2200 mm lay-flat for large-format film applications."             },
-      { head: "Precision gauging", body: "Online thickness measurement with closed-loop auto adjustment."    },
-    ],
-  },
-  "abc-multilayer-large": {
-    specs: [
-      { label: "Series",     value: "ABC"                 },
-      { label: "Type",       value: "Multi-layer blown film" },
-      { label: "Film width", value: "1800 mm max"          },
-      { label: "Output",     value: "280 kg / h"           },
-      { label: "Layers",     value: "3"                    },
-      { label: "Material",   value: "PE · PP"              },
-      { label: "Drive",      value: "AC vector"            },
-    ],
-    features: [
-      { head: "3-layer co-ex",     body: "High-performance 3-layer blown film for general packaging."        },
-      { head: "Energy efficient",  body: "Low-energy IBC design with optimized air ring technology."         },
-      { head: "Consistent gauge",  body: "Auto-profiled die gap for uniform film thickness across the web."  },
-      { head: "User-friendly",     body: "Recipe-based controls with touch panel and data logging."           },
-    ],
-  },
-  "s-wide": {
-    specs: [
-      { label: "Series",     value: "S"                   },
-      { label: "Type",       value: "Single-layer wide"    },
-      { label: "Film width", value: "2500 mm max"          },
-      { label: "Output",     value: "200 kg / h"           },
-      { label: "Layers",     value: "1"                    },
-      { label: "Material",   value: "LDPE · LLDPE"         },
-      { label: "Drive",      value: "AC inverter"          },
-    ],
-    features: [
-      { head: "Ultra-wide",        body: "2500 mm lay-flat width for industrial film applications."          },
-      { head: "Simple operation",  body: "Single-layer extrusion with minimal operator training required."   },
-      { head: "Low investment",    body: "Cost-effective solution for high-volume commodity film production." },
-      { head: "Flexible output",   body: "Runs LDPE and LLDPE with quick resin changeover."                 },
-    ],
-  },
-  "cx-pelletizing": {
-    specs: [
-      { label: "Series",     value: "CX"                  },
-      { label: "Type",       value: "Recycling pelletizer" },
-      { label: "Output",     value: "150 – 300 kg / h"     },
-      { label: "Material",   value: "PE · PP · Pet"        },
-      { label: "Pellet size", value: "3 – 4 mm"            },
-      { label: "Power",      value: "75 – 160 kW"          },
-      { label: "Drive",      value: "AC vector + servo"    },
-    ],
-    features: [
-      { head: "Closed-loop",       body: "Converts post-industrial waste into high-quality reusable pellets."  },
-      { head: "Integrated cutter", body: "Hot-face die-face cutting with underwater pelletizing system."      },
-      { head: "Filtration",        body: "Continuous melt filtration with automatic screen changer."          },
-      { head: "Energy recovery",   body: "Integrated heat recovery system reduces total power consumption."   },
-    ],
-  },
-};
-
 // Machine is fixed top:0 left:0. GSAP drives x/y only — no CSS centering.
 // §1 → 75vw × 50vh  |  §2 → 25vw × 50vh  |  §3 → 50vw × 50vh
 
 export default function ScrollHome() {
-  // live CMS content (admin panel) with hardcoded fallback
+  const t = useTranslations("scrollHome");
+
+  // live CMS content (admin panel, English-only) overrides the translated
+  // fallback below when the admin has edited this section
   const cmsBags = useCms<{ items: ({ slug: string } & ProductDetail)[] }>("scrollhome-bags", { items: [] });
+  const defaultProductData = t.raw("products") as Record<string, ProductDetail>;
   const PRODUCT_DATA: Record<string, ProductDetail> =
     cmsBags.items && cmsBags.items.length
       ? Object.fromEntries(cmsBags.items.map(({ slug, ...rest }) => [slug, rest]))
-      : DEFAULT_PRODUCT_DATA;
+      : defaultProductData;
+  const CARDS = CARD_SLUGS.map((slug) => ({ slug, name: t(`cards.${slug}`) }));
   const machineRef   = useRef<HTMLDivElement>(null);
   const sec1Ref      = useRef<HTMLElement>(null);
   const sec2Ref      = useRef<HTMLDivElement>(null);
@@ -405,6 +273,20 @@ export default function ScrollHome() {
         }
 
       });
+
+      // Scrubbed triggers above recompute self.progress from GSAP's own
+      // scroll-event sampling — a fast jump (anchor link, scrollbar
+      // drag, browser back/forward, bfcache restore) can land inside
+      // §2/§3 without enough intermediate samples, leaving the machine
+      // image's x/y stuck at whatever an earlier trigger last set until
+      // the user scrolls again. ScrollTrigger.update() replays the last
+      // *cached* progress and doesn't fix this; only refresh() re-derives
+      // progress from the real scroll position. Do that once the jump
+      // settles (ScrollTrigger's own scrollEnd event fires regardless of
+      // cause) so the machine never renders stuck mid-flight.
+      const resync = () => ScrollTrigger.refresh();
+      ScrollTrigger.addEventListener("scrollEnd", resync);
+      ctx.revert = ((orig) => () => { ScrollTrigger.removeEventListener("scrollEnd", resync); orig?.(); })(ctx.revert);
     })();
 
     return () => { ctx.revert?.(); };
@@ -477,7 +359,7 @@ export default function ScrollHome() {
 
           {/* ── Company name — letter rise, replays on scroll into view ── */}
           {(() => {
-            const WORDS = ["WENZHOU", "ASHAL", "INNOMACH", "TECHNOLOGY"];
+            const WORDS = t.raw("heroWords") as string[];
             return (
               <div ref={heroNameRef} style={{ marginBottom: "2rem" }}>
                 <div style={{
@@ -519,8 +401,8 @@ export default function ScrollHome() {
             fontSize: "clamp(3rem, 9vw, 7rem)",
             lineHeight: 0.92, color: "#fff",
           }}>
-            Film to bag<br />
-            <span style={{ color: "var(--brand-red)" }}>at 300/min.</span>
+            {t("hero1.titleLine1")}<br />
+            <span style={{ color: "var(--brand-red)" }}>{t("hero1.titleLine2")}</span>
           </h1>
 
           <p style={{
@@ -528,12 +410,12 @@ export default function ScrollHome() {
             color: "rgba(255,255,255,0.75)", maxWidth: "44ch", marginTop: "1.5rem",
             lineHeight: 1.72, letterSpacing: "0.01em",
           }}>
-            Multi-lane heat-seal and bottom-seal converters for PE and biodegradable PBAT+PLA film.
+            {t("hero1.desc")}
           </p>
 
           <div style={{ display: "flex", gap: "1rem", marginTop: "2.5rem", flexWrap: "wrap" }}>
             <AetherBtn><TransitionLink href="/products/bag-making">
-              Bag making lines →
+              {t("hero1.ctaPrimary")}
             </TransitionLink></AetherBtn>
             <TransitionLink href="/inquiries" style={{
               display: "inline-flex", alignItems: "center", gap: "0.5rem",
@@ -543,13 +425,13 @@ export default function ScrollHome() {
               transition: "border-color 0.2s, color 0.2s",
               textDecoration: "none",
             }}>
-              Request a quote
+              {t("hero1.ctaSecondary")}
             </TransitionLink>
           </div>
           {/* Machine image — mobile only */}
           <Image
             src="/machines/t-pro-heatseal.png"
-            alt="T-PRO Heat-seal converter"
+            alt={t("hero1.mobileMachineAlt")}
             className="sh-machine-mobile"
             width={320}
             height={320}
@@ -590,8 +472,8 @@ export default function ScrollHome() {
             fontSize: "clamp(2.5rem, 6vw, 5rem)",
             color: "#fff", lineHeight: 0.94, marginBottom: "1.5rem",
           }}>
-            Every bag type.<br />
-            <span style={{ color: "var(--brand-teal)" }}>One machine.</span>
+            {t("hero2.titleLine1")}<br />
+            <span style={{ color: "var(--brand-teal)" }}>{t("hero2.titleLine2")}</span>
           </h2>
 
           <p style={{
@@ -599,16 +481,15 @@ export default function ScrollHome() {
             color: "rgba(255,255,255,0.75)", maxWidth: "42ch", lineHeight: 1.75,
             letterSpacing: "0.01em", marginBottom: "2rem",
           }}>
-            Heat-seal flat bags, bottom-seal bags and roll bags — all from the
-            same platform. Up to 6 lanes, 600 pieces per minute.
+            {t("hero2.desc")}
           </p>
 
           {/* Inline spec list — no hero-metric grid */}
           <div style={{ display: "flex", flexDirection: "column", gap: "0", marginBottom: "2rem" }}>
             {[
-              { label: "Output",    value: "600 pcs / min" },
-              { label: "Film width", value: "750 – 1150 mm" },
-              { label: "Lanes",     value: "Up to 6"        },
+              { label: t("hero2.specs.output"),    value: t("hero2.specs.outputVal") },
+              { label: t("hero2.specs.filmWidth"), value: t("hero2.specs.filmWidthVal") },
+              { label: t("hero2.specs.lanes"),     value: t("hero2.specs.lanesVal") },
             ].map((s) => (
               <div key={s.label} style={{
                 display: "flex", justifyContent: "space-between", alignItems: "baseline",
@@ -628,7 +509,7 @@ export default function ScrollHome() {
           </div>
 
           <AetherBtn><TransitionLink href="/products/bag-making">
-            Full spec table →
+            {t("hero2.cta")}
           </TransitionLink></AetherBtn>
         </div>
       </section>
@@ -674,7 +555,7 @@ export default function ScrollHome() {
             padding: "0.5rem 1rem",
             borderBottom: "1px solid rgba(255,255,255,0.06)",
           }}>
-            <button onClick={mobilePrev} aria-label="Previous machine" style={{
+            <button onClick={mobilePrev} aria-label={t("hot.prevAria")} style={{
               width: 36, height: 36, background: "rgba(255,255,255,0.05)",
               border: "1px solid rgba(255,255,255,0.14)", color: "#fff",
               display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
@@ -684,7 +565,7 @@ export default function ScrollHome() {
             <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.62rem", letterSpacing: "0.16em", color: "rgba(255,255,255,0.6)", textTransform: "uppercase" }}>
               {String(mobileIdx + 1).padStart(2,"0")} / {String(CARDS.length).padStart(2,"0")}
             </span>
-            <button onClick={mobileNext} aria-label="Next machine" style={{
+            <button onClick={mobileNext} aria-label={t("hot.nextAria")} style={{
               width: 36, height: 36, background: "rgba(255,255,255,0.05)",
               border: "1px solid rgba(255,255,255,0.14)", color: "#fff",
               display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
@@ -744,7 +625,7 @@ export default function ScrollHome() {
               fontFamily: "var(--ff-mono)", fontSize: "0.64rem",
               letterSpacing: "0.2em", textTransform: "uppercase",
               color: "var(--brand-teal)", marginBottom: "0.3rem",
-            }}>Hot Machine</div>
+            }}>{t("hot.hotMachine")}</div>
             <div style={{
               fontFamily: "var(--ff-display)", fontSize: "clamp(1.5rem, 6vw, 2rem)",
               color: "#fff", lineHeight: 1.1, marginBottom: "1.25rem",
@@ -794,8 +675,8 @@ export default function ScrollHome() {
           overflow: "hidden",
           width: "100%",
         }}>
-          <span data-hot-word style={{ display: "inline-block" }}>Hot</span>{" "}
-          <span data-hot-word style={{ display: "inline-block", color: "var(--brand-red)" }}>Machines</span>
+          <span data-hot-word style={{ display: "inline-block" }}>{t("hot.wordHot")}</span>{" "}
+          <span data-hot-word style={{ display: "inline-block", color: "var(--brand-red)" }}>{t("hot.wordMachines")}</span>
         </h1>
 
         {/* top content row */}
@@ -809,7 +690,7 @@ export default function ScrollHome() {
               fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
               letterSpacing: "0.16em", textTransform: "uppercase",
               color: "var(--brand-teal)", marginBottom: "1.75rem",
-            }}>Specifications</p>
+            }}>{t("hot.specifications")}</p>
 
             {(PRODUCT_DATA[selectedProduct]?.specs ?? []).map((row) => (
               <div key={row.label} style={{
@@ -839,7 +720,7 @@ export default function ScrollHome() {
               fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
               letterSpacing: "0.16em", textTransform: "uppercase",
               color: "var(--brand-teal)", marginBottom: "1.75rem",
-            }}>Key features</p>
+            }}>{t("hot.keyFeatures")}</p>
 
             {(PRODUCT_DATA[selectedProduct]?.features ?? []).map((f) => (
               <div key={f.head} style={{
@@ -862,7 +743,7 @@ export default function ScrollHome() {
 
             <div style={{ marginTop: "2rem" }}>
               <AetherBtn><TransitionLink href="/products/bag-making">
-                Full spec table →
+                {t("hot.cta")}
               </TransitionLink></AetherBtn>
             </div>
           </div>
@@ -876,10 +757,10 @@ export default function ScrollHome() {
           background: "var(--bg-base)",
           padding: "2rem clamp(1.25rem, 3vw, 2.5rem) 2.5rem",
         }}>
-          <button aria-label="Scroll machines left" onClick={() => slideCards(-1)} className="sh-slide-arrow sh-slide-arrow--left">
+          <button aria-label={t("hot.scrollLeftAria")} onClick={() => slideCards(-1)} className="sh-slide-arrow sh-slide-arrow--left">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           </button>
-          <button aria-label="Scroll machines right" onClick={() => slideCards(1)} className="sh-slide-arrow sh-slide-arrow--right">
+          <button aria-label={t("hot.scrollRightAria")} onClick={() => slideCards(1)} className="sh-slide-arrow sh-slide-arrow--right">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
           </button>
 

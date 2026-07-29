@@ -1,8 +1,10 @@
 "use client";
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { openAshaChat } from "@/components/ChatWidget";
 
 export default function AiAgentBanner() {
+  const t = useTranslations("homeAgent");
   const sectionRef = useRef<HTMLElement>(null);
   const eyebrowRef = useRef<HTMLDivElement>(null);
   const titleRef   = useRef<HTMLHeadingElement>(null);
@@ -196,23 +198,23 @@ export default function AiAgentBanner() {
 
         <div className="aib__content">
           <div className="aib__text">
-            <div ref={eyebrowRef} className="aib__eyebrow">AI Machine Assistant</div>
+            <div ref={eyebrowRef} className="aib__eyebrow">{t("eyebrow")}</div>
             <h2 ref={titleRef} className="aib__title">
-              Ask <em>ASHA</em> — get the right machine, instantly.
+              {t("titlePrefix")} <em>{t("titleName")}</em> {t("titleSuffix")}
             </h2>
             <p ref={descRef} className="aib__desc">
-              Our AI agent knows every machine in this catalogue. Ask a spec question, compare models side by side, or get routed straight to the page you need — available around the clock.
+              {t("desc")}
             </p>
           </div>
 
           <div className="aib__actions">
             <button ref={ctaRef} className="aib__cta" onClick={() => openAshaChat()}>
-              Talk to ASHA
+              {t("cta")}
               <span className="aib__cta-icon" aria-hidden="true">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v11H8l-4 4V4z" stroke="#080e0d" strokeWidth="2" strokeLinejoin="round" /></svg>
               </span>
             </button>
-            <div ref={hintRef} className="aib__hint">&#10094; No forms. Just ask. <span>&#10095;</span></div>
+            <div ref={hintRef} className="aib__hint">&#10094; {t("hint")} <span>&#10095;</span></div>
           </div>
         </div>
       </section>

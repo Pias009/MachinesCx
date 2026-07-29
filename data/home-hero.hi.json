@@ -1,0 +1,17 @@
+{
+  "eyebrow": "गतिशील मशीनरी",
+  "headline1": "फ़ैक्टरी फ़्लोर के लिए बनी।",
+  "headline2": "दुनिया भर में सिद्ध।",
+  "description": "औद्योगिक प्लास्टिक-प्रोसेसिंग लाइनें — वेनज़ो में डिज़ाइन की गईं, 80+ देशों में काम कर रही हैं। इन्हें काम करते देखें।",
+  "primaryLabel": "मशीनें देखें",
+  "primaryHref": "/products",
+  "secondaryLabel": "कोटेशन प्राप्त करें",
+  "secondaryHref": "/contact",
+  "featured": [
+    { "slug": "abcde-2200" },
+    { "slug": "abc-multilayer-small" },
+    { "slug": "abc-multilayer-large" },
+    { "slug": "abc-cx-series" },
+    { "slug": "aba-1000-1500" }
+  ]
+}

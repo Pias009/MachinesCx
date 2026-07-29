@@ -1,5 +1,6 @@
 "use client";
 import React, { useRef, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -124,16 +125,6 @@ function NebulaBackground() {
 }
 
 // ─────────────────────────────────────────────
-// DATA
-// ─────────────────────────────────────────────
-const STATS = [
-  { value:"25+",  label:"Years Manufacturing", sub:"Est. since the early 2000s" },
-  { value:"80+",  label:"Countries Served",    sub:"Active global export network" },
-  { value:"4",    label:"Machine Categories",  sub:"Film · Bag · Recycling · Print" },
-  { value:"500+", label:"Machines Installed",  sub:"Across four continents" },
-];
-
-// ─────────────────────────────────────────────
 // COUNT-UP
 // ─────────────────────────────────────────────
 function useCountUp(target: string, duration = 1600) {
@@ -174,16 +165,7 @@ function StatItem({value,label,sub}:{value:string;label:string;sub:string}) {
 // ROLLING WORDS — fixed lead-in text + one word/phrase that rolls
 // vertically in place, cycling through what the brand actually does.
 // ─────────────────────────────────────────────
-const ROLL_WORDS = [
-  "Film Blowing.",
-  "Bag Making.",
-  "Recycling Lines.",
-  "Flexographic Printing.",
-  "80+ Countries.",
-  "Lifetime Support.",
-];
-
-function RollingWords() {
+function RollingWords({ words: ROLL_WORDS }: { words: string[] }) {
   const [i, setI] = useState(0);
   const [prev, setPrev] = useState<number | null>(null);
 
@@ -228,24 +210,24 @@ function RollingWords() {
 // Reads like a spec sheet: a proof-line with rolling word, then the
 // concrete reasons a manufacturer picks this vendor.
 // ─────────────────────────────────────────────
-const DOSSIER = [
-  { tag: "01", title: "Engineering", copy: "In-house R&D team designs and stress-tests every line before it ships." },
-  { tag: "02", title: "Export",      copy: "Direct factory pricing with full documentation for customs in 80+ countries." },
-  { tag: "03", title: "Aftercare",   copy: "Spare parts and technical support for the life of the machine, not just the warranty." },
-];
-
-function CapabilityDossier() {
+function CapabilityDossier({
+  descPrefix, rollWords, dossier,
+}: {
+  descPrefix: string;
+  rollWords: string[];
+  dossier: { title: string; copy: string }[];
+}) {
   return (
     <div className="ts-dossier">
       <p className="ts-desc">
-        Wenzhou Asal Innomach Technology, trusted in
-        <br/><RollingWords />
+        {descPrefix}
+        <br/><RollingWords words={rollWords} />
       </p>
 
       <ul className="ts-dossier__list">
-        {DOSSIER.map((d) => (
-          <li className="ts-dossier__item" key={d.tag}>
-            <span className="ts-dossier__tag">{d.tag}</span>
+        {dossier.map((d, i) => (
+          <li className="ts-dossier__item" key={d.title}>
+            <span className="ts-dossier__tag">{String(i + 1).padStart(2, "0")}</span>
             <span className="ts-dossier__body">
               <span className="ts-dossier__title">{d.title}</span>
               <span className="ts-dossier__copy">{d.copy}</span>
@@ -261,6 +243,11 @@ function CapabilityDossier() {
 // MAIN
 // ─────────────────────────────────────────────
 export default function TrustSection() {
+  const t = useTranslations("trustSection");
+  const STATS = t.raw("stats") as { value: string; label: string; sub: string }[];
+  const ROLL_WORDS = t.raw("rollWords") as string[];
+  const DOSSIER = t.raw("dossier") as { title: string; copy: string }[];
+
   const sectionRef  = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const dossierRef  = useRef<HTMLDivElement>(null);
@@ -615,7 +602,7 @@ export default function TrustSection() {
         [data-theme="light"] .ts-dossier__copy  { color: rgba(13,34,32,0.6); }
       `}</style>
 
-      <section className="trust-section" aria-label="Why trust CX Machinery" ref={sectionRef}>
+      <section className="trust-section" aria-label={t("sectionAria")} ref={sectionRef}>
 
         <div className="ts__blob ts__blob--1" aria-hidden="true" />
         <div className="ts__blob ts__blob--2" aria-hidden="true" />
@@ -629,15 +616,15 @@ export default function TrustSection() {
           {/* Header */}
           <div className="ts-header" data-no-anim>
             <div>
-              <div className="ts-kicker">Why manufacturers choose us</div>
+              <div className="ts-kicker">{t("kicker")}</div>
               <h2 className="ts-headline" ref={headlineRef}>
-                Engineered.<br/>
-                <em>Proven.</em><br/>
-                Supported.
+                {t("headlineLine1")}<br/>
+                <em>{t("headlineEm")}</em><br/>
+                {t("headlineLine3")}
               </h2>
             </div>
             <div ref={dossierRef}>
-              <CapabilityDossier />
+              <CapabilityDossier descPrefix={t("descPrefix")} rollWords={ROLL_WORDS} dossier={DOSSIER} />
             </div>
           </div>
 

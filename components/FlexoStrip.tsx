@@ -1,36 +1,31 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
 import { useCms } from "@/lib/useCms";
 import type { ProductFamily } from "@/lib/products";
 
-const SPECS = [
-  { label:"Substrates",  value:"PE · PP · PET · BOPP · Paper · Non-woven" },
-  { label:"Plate types", value:"1.14 / 1.7 / 2.84 mm" },
-  { label:"Anilox",      value:"Ceramic, 200–600 LPI" },
-  { label:"Power",       value:"380V 3PH 50/60Hz" },
-];
-
-const localFamilies: ProductFamily[] = [
-  { slug:"flexo-2c", category:"printing", series:"AI-2C · 2-colour", name:"AI-2C", tagline:"Entry CI Press", models:["AI-2C-500"], materials:"PE, PP, PET, BOPP, Paper", images:["/machines/flexo-1.png"], specs:[
+// model tagline ("tag") text comes from the flexoStrip.models translation
+// namespace, keyed by slug — everything else here is fixed catalogue data
+const FAMILY_BASE: Omit<ProductFamily, "tagline">[] = [
+  { slug:"flexo-2c", category:"printing", series:"AI-2C · 2-colour", name:"AI-2C", models:["AI-2C-500"], materials:"PE, PP, PET, BOPP, Paper", images:["/machines/flexo-1.png"], specs:[
     { label:"Printing Colours",      values:["2"] },
     { label:"Max Mechanical Speed",  values:["120m/min"] },
     { label:"Registration Accuracy", values:["±0.2mm"] },
   ], installation:[], deliveryGuide:[], gallery:[], videos:[], reviews:[], deliveryStagePhotos:{}, customSections:[], parts:[] },
-  { slug:"flexo-4c", category:"printing", series:"AI-4C · 4-colour", name:"AI-4C", tagline:"Mid-range · Hot Model", models:["AI-4C-800"], materials:"PE, PP, PET, BOPP, Paper", images:["/machines/flexo-2.png"], specs:[
+  { slug:"flexo-4c", category:"printing", series:"AI-4C · 4-colour", name:"AI-4C", models:["AI-4C-800"], materials:"PE, PP, PET, BOPP, Paper", images:["/machines/flexo-2.png"], specs:[
     { label:"Printing Colours",      values:["4"] },
     { label:"Max Mechanical Speed",  values:["200m/min"] },
     { label:"Registration Accuracy", values:["±0.15mm"] },
   ], installation:[], deliveryGuide:[], gallery:[], videos:[], reviews:[], deliveryStagePhotos:{}, customSections:[], parts:[] },
-  { slug:"flexo-6c", category:"printing", series:"AI-6C · 6-colour", name:"AI-6C", tagline:"High-speed CI Press", models:["AI-6C-1200"], materials:"PE, PP, PET, BOPP, Paper", images:["/machines/flexo-6c-nobg.png"], specs:[
+  { slug:"flexo-6c", category:"printing", series:"AI-6C · 6-colour", name:"AI-6C", models:["AI-6C-1200"], materials:"PE, PP, PET, BOPP, Paper", images:["/machines/flexo-6c-nobg.png"], specs:[
     { label:"Printing Colours",      values:["6"] },
     { label:"Max Mechanical Speed",  values:["260m/min"] },
     { label:"Registration Accuracy", values:["±0.1mm"] },
   ], installation:[], deliveryGuide:[], gallery:[], videos:[], reviews:[], deliveryStagePhotos:{}, customSections:[], parts:[] },
-  { slug:"flexo-8c", category:"printing", series:"AI-8C · 8-colour", name:"AI-8C", tagline:"Flagship · Max Output", models:["AI-8C-1600"], materials:"PE, PP, PET, BOPP, Paper", images:["/machines/flexo-4.png"], specs:[
+  { slug:"flexo-8c", category:"printing", series:"AI-8C · 8-colour", name:"AI-8C", models:["AI-8C-1600"], materials:"PE, PP, PET, BOPP, Paper", images:["/machines/flexo-4.png"], specs:[
     { label:"Printing Colours",      values:["8"] },
     { label:"Max Mechanical Speed",  values:["350m/min"] },
     { label:"Registration Accuracy", values:["±0.1mm"] },
@@ -67,9 +62,13 @@ function buildModels(list: ProductFamily[]): FlexoModel[] {
   }));
 }
 
-const DEFAULT_MODELS: FlexoModel[] = buildModels(localFamilies);
-
 export default function FlexoStrip() {
+  const t = useTranslations("flexoStrip");
+  const modelTags = t.raw("models") as Record<string, { tag: string }>;
+  const localFamilies: ProductFamily[] = FAMILY_BASE.map((f) => ({ ...f, tagline: modelTags[f.slug]?.tag ?? "" }));
+  const DEFAULT_MODELS: FlexoModel[] = buildModels(localFamilies);
+  const SPECS = t.raw("specs") as { label: string; value: string }[];
+
   const cms = useCms<{ items?: FlexoModel[] }>("flexo-strip", { items: DEFAULT_MODELS });
   const MODELS = cms.items && cms.items.length ? cms.items : DEFAULT_MODELS;
 
@@ -215,7 +214,7 @@ export default function FlexoStrip() {
 
         .fls-badge { position:absolute; top:.75rem; left:.75rem; z-index:2; font-family:var(--ff-mono); font-size:0.6rem; letter-spacing:.16em; text-transform:uppercase; padding:.25rem .55rem; }
         .fls-badge--hot      { background:var(--brand-red); color:#fff; }
-        .fls-badge--flagship { background:#fff; color:var(--bg-base); }
+        .fls-badge--flagship { background:#fff; color:#0d1018; }
 
         .fls-card__head { padding: 1.1rem 1.25rem; display: flex; align-items: center; gap: .6rem; }
         .fls-card__head-text { flex: 1; min-width: 0; }
@@ -290,7 +289,7 @@ export default function FlexoStrip() {
             opacity:0,
           }}>
             <span style={{ width:"2rem", height:"1px", background:"var(--brand-red)", display:"inline-block", flexShrink:0 }} />
-            New — Flexographic Printing
+            {t("eyebrow")}
           </span>
 
           <div className="fls-title-clip">
@@ -301,7 +300,7 @@ export default function FlexoStrip() {
               letterSpacing:".01em", margin:0,
               perspective:"600px",
             }}>
-              AI Series Flexo Press.
+              {t("title")}
             </h2>
           </div>
 
@@ -316,7 +315,7 @@ export default function FlexoStrip() {
             fontSize:"clamp(1.1rem,2vw,1.65rem)",
             color:"var(--ink-60)", display:"block",
           }}>
-            2 to 8 colours, 500–2000 mm.
+            {t("subtitle")}
           </span>
         </div>
 
@@ -334,13 +333,13 @@ export default function FlexoStrip() {
                   aria-expanded={isOpen}
                 >
                   <div className="fls-card__media">
-                    {model.hot      && <span className="fls-badge fls-badge--hot">Hot</span>}
-                    {model.flagship && <span className="fls-badge fls-badge--flagship">Flagship</span>}
+                    {model.hot      && <span className="fls-badge fls-badge--hot">{t("hotBadge")}</span>}
+                    {model.flagship && <span className="fls-badge fls-badge--flagship">{t("flagshipBadge")}</span>}
                     <img src={model.img} alt={model.label} />
                   </div>
                   <div className="fls-card__head">
                     <div className="fls-card__head-text">
-                      <span className="fls-card__series">AI · {model.colours}-colour</span>
+                      <span className="fls-card__series">AI · {model.colours}-{t("colourLabel")}</span>
                       <span className="fls-card__name">{model.label}</span>
                     </div>
                     <svg className="fls-card__chev" width="12" height="12" viewBox="0 0 10 6" fill="none" strokeWidth="1.5">
@@ -352,11 +351,11 @@ export default function FlexoStrip() {
                 <div className="fls-card__more">
                   <span className="fls-card__tag">{model.tag}</span>
                   <div className="fls-card__specs">
-                    <div className="fls-card__spec-row"><span>Speed</span><span>{model.speed} m/min</span></div>
-                    <div className="fls-card__spec-row"><span>Registration</span><span>{model.reg}</span></div>
+                    <div className="fls-card__spec-row"><span>{t("speedLabel")}</span><span>{model.speed} m/min</span></div>
+                    <div className="fls-card__spec-row"><span>{t("registrationLabel")}</span><span>{model.reg}</span></div>
                   </div>
                   <TransitionLink href={`/products/printing#${model.slug}`} className="fls-card__cta">
-                    View full spec →
+                    {t("viewFullSpec")}
                   </TransitionLink>
                 </div>
               </div>
@@ -381,7 +380,7 @@ export default function FlexoStrip() {
               </div>
             ))}
           </div>
-          <AetherBtn><Link href="/inquiries">Request spec sheet →</Link></AetherBtn>
+          <AetherBtn><TransitionLink href="/inquiries">{t("requestSpecSheet")}</TransitionLink></AetherBtn>
         </div>
       </div>
     </section>

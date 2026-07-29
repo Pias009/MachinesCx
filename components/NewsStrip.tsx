@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
+import TransitionLink from "@/components/TransitionLink";
 import { latestArticles, type NewsArticle } from "@/lib/news";
 
 function fmt(iso: string) {
@@ -12,6 +13,7 @@ function fmt(iso: string) {
 }
 
 export default function NewsStrip() {
+  const t = useTranslations("newsStrip");
   const [news, setNews] = useState<NewsArticle[]>([]);
   const sectionRef  = useRef<HTMLElement>(null);
   const trackRef    = useRef<HTMLDivElement>(null);
@@ -369,7 +371,7 @@ export default function NewsStrip() {
               display: "inline-flex", alignItems: "center", gap: "0.75rem",
               opacity: 0,
             }}>
-              Latest news
+              {t("eyebrow")}
             </span>
             <div ref={headRef} style={{ opacity: 0 }}>
               <h2 style={{
@@ -378,8 +380,8 @@ export default function NewsStrip() {
                 lineHeight: 0.92, color: "var(--ink)",
                 letterSpacing: "0.01em", margin: 0,
               }}>
-                From the factory<br />
-                <span style={{ color: "var(--brand-red)" }}>floor.</span>
+                {t("titleLine1")}<br />
+                <span style={{ color: "var(--brand-red)" }}>{t("titleEm")}</span>
               </h2>
             </div>
           </div>
@@ -397,9 +399,9 @@ export default function NewsStrip() {
                 fontFamily: "var(--ff-mono)", fontSize: "0.64rem",
                 letterSpacing: "0.16em", textTransform: "uppercase",
                 color: "var(--ink-60)",
-              }}>Auto-scrolling</span>
+              }}>{t("autoScrolling")}</span>
             </div>
-            <Link href="/news" style={{
+            <TransitionLink href="/news" style={{
               display: "inline-flex", alignItems: "center", gap: "0.5rem",
               fontFamily: "var(--ff-mono)", fontSize: "0.72rem", letterSpacing: "0.08em",
               textTransform: "uppercase", padding: "0.75rem 1.4rem",
@@ -407,8 +409,8 @@ export default function NewsStrip() {
               textDecoration: "none", transition: "border-color 0.2s, color 0.2s",
               flexShrink: 0,
             }}>
-              All news →
-            </Link>
+              {t("allNews")}
+            </TransitionLink>
           </div>
         </div>
 
@@ -434,7 +436,7 @@ export default function NewsStrip() {
           }}
         >
           {doubled.map((a, i) => (
-            <Link
+            <TransitionLink
               key={`${a.slug}-${i}`}
               href={`/news/${a.slug}`}
               className="ns2-card"
@@ -453,9 +455,9 @@ export default function NewsStrip() {
                 </div>
                 <h3 className="ns2-title">{a.title}</h3>
                 <p className="ns2-excerpt">{a.excerpt}</p>
-                <span className="ns2-cta">Read article →</span>
+                <span className="ns2-cta">{t("readArticle")}</span>
               </div>
-            </Link>
+            </TransitionLink>
           ))}
         </div>
       </div>

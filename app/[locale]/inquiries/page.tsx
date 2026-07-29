@@ -1,7 +1,9 @@
 "use client";
+import { useTranslations } from "next-intl";
 import TransitionLink from "@/components/TransitionLink";
 
 export default function InquiriesPage() {
+  const t = useTranslations("inquiriesHub");
   return (
     <>
       <style suppressHydrationWarning>{`
@@ -166,12 +168,12 @@ export default function InquiriesPage() {
       <div className="inq-page">
         <div className="inq-wrap">
           <div className="inq-header">
-            <div className="inq-eyebrow">Inquiries</div>
+            <div className="inq-eyebrow">{t("eyebrow")}</div>
             <h1 className="inq-h1">
-              How can we <em>help?</em>
+              {t("titlePrefix")} <em>{t("titleEm")}</em>
             </h1>
             <p className="inq-sub">
-              Pick the option that matches what you need. Every inquiry is reviewed by our engineering team and answered within 24 hours.
+              {t("sub")}
             </p>
           </div>
 
@@ -187,10 +189,10 @@ export default function InquiriesPage() {
                 </svg>
               </div>
               <div className="inq-lead__body">
-                <div className="inq-lead__badge">Recommended</div>
-                <h2 className="inq-lead__title">Talk to Our Engineer</h2>
+                <div className="inq-lead__badge">{t("lead.badge")}</div>
+                <h2 className="inq-lead__title">{t("lead.title")}</h2>
                 <p className="inq-lead__desc">
-                  Select machines, customize specs, add parts — we build a detailed configuration sheet and our engineers review it personally.
+                  {t("lead.desc")}
                 </p>
               </div>
               <div className="inq-lead__cta">
@@ -201,7 +203,7 @@ export default function InquiriesPage() {
             </div>
           </TransitionLink>
 
-          <div className="inq-quick-label">Or, if you already know exactly what you need</div>
+          <div className="inq-quick-label">{t("quickLabel")}</div>
 
           <div className="inq-quick-grid">
             <TransitionLink href="/inquiries/direct">
@@ -213,8 +215,8 @@ export default function InquiriesPage() {
                   </svg>
                 </div>
                 <div className="inq-card__body">
-                  <h2 className="inq-card__title">Direct Inquiry</h2>
-                  <p className="inq-card__desc">Quick inquiry about any machine, with optional notes.</p>
+                  <h2 className="inq-card__title">{t("direct.title")}</h2>
+                  <p className="inq-card__desc">{t("direct.desc")}</p>
                 </div>
                 <span className="inq-card__arrow">
                   <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M3 7h8m0 0L8 4m3 3L8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -232,8 +234,8 @@ export default function InquiriesPage() {
                   </svg>
                 </div>
                 <div className="inq-card__body">
-                  <h2 className="inq-card__title">Part Inquiry</h2>
-                  <p className="inq-card__desc">Spare parts or replacement components, with photos.</p>
+                  <h2 className="inq-card__title">{t("parts.title")}</h2>
+                  <p className="inq-card__desc">{t("parts.desc")}</p>
                 </div>
                 <span className="inq-card__arrow">
                   <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M3 7h8m0 0L8 4m3 3L8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>

@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useEffect, useState } from "react";
 import NextImage from "next/image";
+import { useTranslations } from "next-intl";
 import { useCms } from "@/lib/useCms";
 
 const ACCENTS = [
@@ -25,42 +26,14 @@ interface Step {
   quality: [string, string][];
 }
 
-const DEFAULT_STEPS: Step[] = [
-  {
-    slug: "abcde-2200", img: "/machines/abcde-2200.png", cat: "film-blowing",
-    stage: "Film Extrusion",
-    name: "ABCDE-2200 Five-Layer",
-    role: "The line starts here — resin is melted and blown into a 5-layer co-extruded film, 2100 mm wide.",
-    quality: [["Thickness tolerance", "±2%"], ["Output", "400 kg/h"], ["Layers", "5"]],
-  },
-  {
-    slug: "flexo-6c", img: "/machines/flexo-6c-nobg.png", cat: "printing",
-    stage: "Flexo Printing",
-    name: "AI-6C CI Flexo Press",
-    role: "The blown film is printed in up to 6 colours on the central-impression drum at 260 m/min.",
-    quality: [["Registration", "±0.1 mm"], ["Print speed", "260 m/min"], ["Colours", "6"]],
-  },
-  {
-    slug: "t-pro-heatseal", img: "/machines/t-pro-heatseal.png", cat: "bag-making",
-    stage: "Bag Converting",
-    name: "T-PRO Heat-Seal Machine",
-    role: "Printed film is sealed and cut into finished bags across multiple lanes at production speed.",
-    quality: [["Seal speed", "300 pcs/min"], ["Lanes", "2–3"], ["Bag width", "500–600 mm"]],
-  },
-  {
-    slug: "rgb-rollbag", img: "/machines/rgb-rollbag.png", cat: "bag-making",
-    stage: "Roll Winding",
-    name: "CX-RGB Roll Bag Machine",
-    role: "Bags are perforated and wound onto rolls with automatic core cutting for retail-ready packs.",
-    quality: [["Roll width", "1000–1200 mm"], ["Perforation", "Inline"], ["Core", "Auto-cut"]],
-  },
-  {
-    slug: "cx-pelletizing", img: "/machines/cx-pelletizing.png", cat: "recycling",
-    stage: "Closed-Loop Recycling",
-    name: "CX Pelletizing Line",
-    role: "Edge trim and scrap from every stage return here — recovered into resin and fed back to step 01.",
-    quality: [["Resin recovery", "99%"], ["Output", "100–120 kg/h"], ["Screen", "Auto-changer"]],
-  },
+// step order + image/category — copy (stage/name/role/quality) comes from
+// the particlePortfolio.steps translation namespace, keyed by slug
+const STEP_ORDER: { slug: string; img: string; cat: string }[] = [
+  { slug: "abcde-2200", img: "/machines/abcde-2200.png", cat: "film-blowing" },
+  { slug: "flexo-6c", img: "/machines/flexo-6c-nobg.png", cat: "printing" },
+  { slug: "t-pro-heatseal", img: "/machines/t-pro-heatseal.png", cat: "bag-making" },
+  { slug: "rgb-rollbag", img: "/machines/rgb-rollbag.png", cat: "bag-making" },
+  { slug: "cx-pelletizing", img: "/machines/cx-pelletizing.png", cat: "recycling" },
 ];
 
 function rgbFromHex(hex: string, a = 1) {
@@ -69,6 +42,10 @@ function rgbFromHex(hex: string, a = 1) {
 }
 
 export default function ParticlePortfolio(){
+  const t = useTranslations("particlePortfolio");
+  const stepsCopy = t.raw("steps") as Record<string, { stage: string; name: string; role: string; quality: [string, string][] }>;
+  const DEFAULT_STEPS: Step[] = STEP_ORDER.map((s) => ({ ...s, ...stepsCopy[s.slug] }));
+
   const sectionRef = useRef<HTMLDivElement>(null!);
   const [active, setActive] = useState(0);
   const [mobileOpen, setMobileOpen] = useState<number | null>(null);
@@ -359,15 +336,15 @@ export default function ParticlePortfolio(){
             textTransform:"uppercase",marginBottom:"0.75rem",
             background:"linear-gradient(135deg, var(--brand-teal), var(--brand-amber))",
             WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>
-            One floor · One line · Setup 01–{String(N).padStart(2,"0")}
+            {t("mobileKicker", { count: String(N).padStart(2,"0") })}
           </div>
           <h2 className="pp-mobile-headline" style={{fontFamily:"var(--ff-display)",fontSize:"clamp(2.6rem,9vw,3.6rem)",
             color:"#fff",lineHeight:0.88,letterSpacing:"-0.02em",margin:"0 0 0.85rem"}}>
-            Built for<br/><span style={{background:"linear-gradient(135deg,var(--brand-teal),var(--brand-amber))",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>the floor.</span>
+            {t("mobileHeadlineLine1")}<br/><span style={{background:"linear-gradient(135deg,var(--brand-teal),var(--brand-amber))",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>{t("mobileHeadlineEm")}</span>
           </h2>
           <p className="pp-mobile-sub" style={{fontFamily:"var(--ff-body)",fontSize:"0.9rem",
             color:"rgba(255,255,255,0.65)",lineHeight:1.7,maxWidth:"40ch",margin:0}}>
-            Five machines, one connected production line — from raw resin to finished bags, with the scrap looped straight back in.
+            {t("mobileSub")}
           </p>
         </div>
 
@@ -451,17 +428,17 @@ export default function ParticlePortfolio(){
           </div>
           <h2 className="pp-headline" style={{fontFamily:"var(--ff-display)",fontSize:"clamp(2.6rem,5.5vw,5rem)",
             lineHeight:0.9,letterSpacing:"-0.02em",color:"#fff",margin:0,textTransform:"uppercase"}}>
-            Built for <span style={{background:"linear-gradient(135deg,var(--brand-teal),var(--brand-amber))",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>the floor.</span>
+            {t("desktopHeadlinePrefix")} <span style={{background:"linear-gradient(135deg,var(--brand-teal),var(--brand-amber))",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>{t("desktopHeadlineEm")}</span>
           </h2>
           <p className="pp-sub" style={{fontFamily:"var(--ff-body)",fontSize:"clamp(0.9rem,1.1vw,1.05rem)",
             color:"rgba(255,255,255,0.65)",lineHeight:1.7,maxWidth:"46ch",margin:"1.25rem auto 0",letterSpacing:"0.01em"}}>
-            Five machines set up in order, from raw resin to the finished product at the centre.
+            {t("desktopSub")}
           </p>
         </div>
 
         <div className="pp-ring-title">
-          <span>The complete setup — in order</span>
-          <h3>End-to-end production line</h3>
+          <span>{t("ringEyebrow")}</span>
+          <h3>{t("ringTitle")}</h3>
         </div>
 
         <div className="pp-diagram">
@@ -486,9 +463,9 @@ export default function ParticlePortfolio(){
 
           <div className="pp-core" style={{zIndex:8, left:`${PROD.x}%`, top:`${PROD.y}%`, "--accent": curAccent.hex} as React.CSSProperties}>
             <div className="pp-core__disc">
-              <NextImage src="/machines/bag-samples.png" alt="Finished bag products" fill sizes="150px" />
+              <NextImage src="/machines/bag-samples.png" alt={t("finishedProductAlt")} fill sizes="150px" />
             </div>
-            <div className="pp-core__label">Finished product</div>
+            <div className="pp-core__label">{t("finishedProduct")}</div>
           </div>
 
           {STEPS.map((s, i) => {
@@ -502,7 +479,7 @@ export default function ParticlePortfolio(){
                 key={s.slug}
                 className="pp-node"
                 onClick={()=>{ setActive(i); restartTimer(); }}
-                aria-label={`Step ${i+1}: ${s.stage}`}
+                aria-label={t("stepAriaLabel", { num: i+1, stage: s.stage })}
                 style={{
                   left:`${p.x}%`, top:`${p.y}%`,
                   zIndex: isOn ? 16 : 10,
@@ -534,7 +511,7 @@ export default function ParticlePortfolio(){
 
         <div className="pp-panel" style={{"--accent": curAccent.hex} as React.CSSProperties}>
           <div className="pp-panel__id">
-            <div className="pp-panel__step">Setup {String(active+1).padStart(2,"0")} / {String(N).padStart(2,"0")}</div>
+            <div className="pp-panel__step">{t("setupLabel", { num: String(active+1).padStart(2,"0"), total: String(N).padStart(2,"0") })}</div>
             <h4 className="pp-panel__stage">{step.stage}</h4>
             <div className="pp-panel__name">{step.name}</div>
           </div>
@@ -548,7 +525,7 @@ export default function ParticlePortfolio(){
             ))}
           </div>
           <a className="pp-panel__cta" href={`/products/${step.cat}/${step.slug}`}>
-            View machine
+            {t("viewMachine")}
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
               <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

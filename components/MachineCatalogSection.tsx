@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import TransitionLink from "@/components/TransitionLink";
 import { useCms } from "@/lib/useCms";
 import type { ProductFamily } from "@/lib/products";
 import localData from "@/data/products.json";
@@ -12,13 +13,6 @@ function familyImage(f: Pick<ProductFamily, "slug" | "image" | "images">): strin
   if (f.image) return f.image;
   return `/machines/${f.slug}.png`;
 }
-
-const CAT_LABELS: Record<string, string> = {
-  "film-blowing": "Film Blowing",
-  "bag-making":   "Bag Making",
-  "recycling":    "Recycling",
-  "printing":     "Flexo Printing",
-};
 
 const CAT_COLORS: Record<string, { accent: string; bg: string }> = {
   "film-blowing": { accent: "#2bbfb3", bg: "rgba(43,191,179,0.08)" },
@@ -34,40 +28,6 @@ const CAT_ICONS: Record<string, string> = {
   "printing":     "▦",
 };
 
-/* quick key specs pulled from family data */
-const DEFAULT_KEY_SPECS: Record<string, { stat: string; label: string }> = {
-  "abcde-2200":         { stat: "400 kg/h",   label: "Max output"     },
-  "abc-multilayer-small":{ stat: "3-layer",   label: "Co-extrusion"   },
-  "abc-multilayer-large":{ stat: "5-layer",   label: "Co-extrusion"   },
-  "abc-cx-series":      { stat: "3-layer",    label: "Multi-layer"    },
-  "aba-1000-1500":      { stat: "3-layer",    label: "ABA"            },
-  "aba-800-1200":       { stat: "4-screw",    label: "ABA"            },
-  "aba-cx-series":      { stat: "3-layer",    label: "CX Series"      },
-  "s-mini-double":      { stat: "×2 heads",   label: "Double-head"    },
-  "s-wide":             { stat: "2100 mm",    label: "Roller width"   },
-  "s-standard":         { stat: "1000 mm",    label: "Max width"      },
-  "sb-printing-line":   { stat: "6-colour",   label: "Blow + print"   },
-  "cx-25-lab":          { stat: "25 mm",      label: "Benchtop"       },
-  "t-pro-heatseal":     { stat: "300 pcs/min",label: "Throughput"     },
-  "tg-pro":             { stat: "500 mm",     label: "Bag width"      },
-  "tb-320":             { stat: "×6 lanes",   label: "Multi-lane"     },
-  "f-pro-bottomseal":   { stat: "1600 mm",    label: "Max width"      },
-  "heatseal-750-1150":  { stat: "1150 mm",    label: "Max width"      },
-  "heatseal-750-1150-hd":{ stat: "Heavy",     label: "Duty grade"     },
-  "heatseal-narrow":    { stat: "450 mm",     label: "Max width"      },
-  "rb-vegetable":       { stat: "×2 lanes",   label: "Vest & veg"     },
-  "rgb-rollbag":        { stat: "1200 mm",    label: "Roll bag"       },
-  "rollbag-continuous": { stat: "Continuous", label: "Roll bag"       },
-  "sb-pe-pbat":         { stat: "PE/PBAT",    label: "Material"       },
-  "cx-260":             { stat: "260 mm",     label: "Width"          },
-  "gb-garbage":         { stat: "1200 mm",    label: "Roll bag"       },
-  "cx-pelletizing":     { stat: "99%",        label: "Resin recovery" },
-  "flexo-2c":           { stat: "2-colour",   label: "CI flexo"       },
-  "flexo-4c":           { stat: "4-colour",   label: "CI flexo"       },
-  "flexo-6c":           { stat: "260 m/min",  label: "Print speed"    },
-  "flexo-8c":           { stat: "8-colour",   label: "CI flexo"       },
-};
-
 interface CatalogCms {
   headline1: string;
   headline2: string;
@@ -75,9 +35,13 @@ interface CatalogCms {
 }
 
 export default function MachineCatalogSection() {
+  const t = useTranslations("machineCatalog");
+  const CAT_LABELS = t.raw("categories") as Record<string, string>;
+  const DEFAULT_KEY_SPECS = t.raw("specs") as Record<string, { stat: string; label: string }>;
+
   const cms = useCms<CatalogCms>("machine-catalog", {
-    headline1: "Every machine.",
-    headline2: "Find your perfect fit.",
+    headline1: t("headline1"),
+    headline2: t("headline2"),
     items: [],
   });
   const productsCms = useCms<{ families?: ProductFamily[] }>("products", {});
@@ -548,7 +512,7 @@ export default function MachineCatalogSection() {
         [data-theme="light"] .mcs-card__stat-label { color: rgba(13,34,32,0.7); }
       `}</style>
 
-      <section ref={sectionRef} className="mcs" data-no-anim aria-label="Machine catalogue">
+      <section ref={sectionRef} className="mcs" data-no-anim aria-label={t("sectionAria")}>
         <div className="mcs__blob mcs__blob--t" aria-hidden="true" />
         <div className="mcs__blob mcs__blob--b" aria-hidden="true" />
         <div className="mcs__wrap">
@@ -556,32 +520,32 @@ export default function MachineCatalogSection() {
           {/* ── Header ── */}
           <div className="mcs__header">
             <div>
-              <div ref={badgeRef} className="mcs__badge">Machine Catalogue</div>
+              <div ref={badgeRef} className="mcs__badge">{t("badge")}</div>
               <h2 ref={titleRef} className="mcs__title">
                 {cms.headline1}<br />
                 <em>{cms.headline2}</em>
               </h2>
               <p ref={subRef} className="mcs__sub">
-                {totalFamilies} product families · {totalModels}+ models · shipped to 80+ countries
+                {totalFamilies} {t("subFamilies")} · {totalModels}+ {t("subModels")} · {t("subShipped")}
               </p>
             </div>
-            <Link href="/products" className="mcs__cta">
-              Full catalogue
+            <TransitionLink href="/products" className="mcs__cta">
+              {t("fullCatalogue")}
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </Link>
+            </TransitionLink>
           </div>
 
           {/* ── Category tabs ── */}
-          <div ref={tabsRef} className="mcs__tabs" role="tablist" aria-label="Filter by category">
+          <div ref={tabsRef} className="mcs__tabs" role="tablist" aria-label={t("filterAria")}>
             <button
               role="tab"
               aria-selected={activeTab === "all"}
               className={`mcs__tab${activeTab === "all" ? " mcs__tab--active" : ""}`}
               onClick={() => { isFirstTabRef.current = false; setActiveTab("all"); }}
             >
-              All machines
+              {t("allMachines")}
               <span className="mcs__tab-count">{tabCounts.all}</span>
             </button>
             {tabSlugs.map(slug => {
@@ -609,7 +573,7 @@ export default function MachineCatalogSection() {
               const spec = KEY_SPECS[fam.slug];
               const col = CAT_COLORS[fam.category];
               return (
-                <Link
+                <TransitionLink
                   key={fam.slug}
                   href={`/products/${fam.category}/${fam.slug}`}
                   className={`mcs-card mcs-card--${fam.category}${isFirstTabRef.current ? " mcs-card--gsap-entrance" : ""}`}
@@ -644,7 +608,7 @@ export default function MachineCatalogSection() {
                       </svg>
                     </div>
                   </div>
-                </Link>
+                </TransitionLink>
               );
             })}
           </div>
@@ -653,14 +617,14 @@ export default function MachineCatalogSection() {
           <div className="mcs__footer">
             <p className="mcs__footer-count">
               <strong>{filtered.length}</strong>
-              {filtered.length === 1 ? "product family" : "product families"} shown
+              {filtered.length === 1 ? t("footerFamily") : t("footerFamilies")} {t("footerShown")}
             </p>
-            <Link href="/products" className="mcs__footer-link">
-              View all specs &amp; datasheets
+            <TransitionLink href="/products" className="mcs__footer-link">
+              {t("viewAllSpecs")}
               <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
                 <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </Link>
+            </TransitionLink>
           </div>
 
         </div>

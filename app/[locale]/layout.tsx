@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
+import { notFound } from "next/navigation";
+import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { getMessages } from "next-intl/server";
 import { Bebas_Neue, Inter, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import SiteNav from "@/components/SiteNav";
 import PageNav from "@/components/PageNav";
 import SiteFooter from "@/components/SiteFooter";
@@ -9,7 +12,9 @@ import PageTransitionOverlay from "@/components/PageTransitionOverlay";
 import PageMountTrigger from "@/components/PageMountTrigger";
 import LoadingScreen from "@/components/LoadingScreen";
 import SectionAnimator from "@/components/SectionAnimator";
+import AppToaster from "@/components/AppToaster";
 import { BRAND } from "@/lib/products";
+import { routing, rtlLocales, type Locale } from "@/i18n/routing";
 
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 
@@ -36,10 +41,27 @@ export const metadata: Metadata = {
   description: "Multi-layer blown-film lines, bag-making converters and recycling lines. From benchtop trials to 5-layer co-extrusion at 400 kg/h.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+export default async function LocaleLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
+
+  const messages = await getMessages();
+  const dir = rtlLocales.includes(locale as Locale) ? "rtl" : "ltr";
+
   return (
     <html
-      lang="en"
+      lang={locale}
+      dir={dir}
       data-theme="light"
       suppressHydrationWarning
       className={`${bebas.variable} ${inter.variable} ${jetbrains.variable}`}
@@ -94,15 +116,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         ` }} />
       </head>
       <body>
-        <LoadingScreen />
-        <SectionAnimator />
-        <PageTransitionOverlay />
-        <PageMountTrigger />
-        <SiteNav />
-        <PageNav />
-        <main>{children}</main>
-        <SiteFooter />
-        <ChatWidget />
+        <NextIntlClientProvider messages={messages}>
+          <LoadingScreen />
+          <SectionAnimator />
+          <PageTransitionOverlay />
+          <PageMountTrigger />
+          <SiteNav />
+          <PageNav />
+          <main>{children}</main>
+          <SiteFooter />
+          <ChatWidget />
+          <AppToaster />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

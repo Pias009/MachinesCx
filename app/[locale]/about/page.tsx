@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef, type CSSProperties } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import TransitionLink from "@/components/TransitionLink";
 import Image from "next/image";
 
 const HQ_BUILDING_PHOTO = "/about-photos/hq-building-generated.png";
@@ -9,47 +10,24 @@ const WAREHOUSE_1 = "/about-photos/warehouse-building-1.jpeg";
 const WAREHOUSE_2 = "/about-photos/warehouse-building-2.jpeg";
 
 // ─────────────────────────────────────────────
-// DATA — real-shaped figures the charts render
+// DATA — real-shaped figures the charts render.
+// Copy (labels/captions/timeline text) comes from the `about` translation
+// namespace; only the numeric shape of the charts is fixed here.
 // ─────────────────────────────────────────────
-const EXPORT_GROWTH = [
-  { year: "2020", value: 32 },
-  { year: "2021", value: 41 },
-  { year: "2022", value: 47 },
-  { year: "2023", value: 55 },
-  { year: "2024", value: 60 },
-  { year: "2025", value: 60 },
+const EXPORT_GROWTH_VALUES = [32, 41, 47, 55, 60, 60];
+const EXPORT_GROWTH_YEARS = ["2020", "2021", "2022", "2023", "2024", "2025"];
+
+const FAMILY_MIX_VALUES = [38, 29, 18, 15];
+const FAMILY_MIX_COLORS = ["var(--brand-teal)", "var(--brand-amber)", "var(--brand-rose)", "#7c9cff"];
+
+const OUTPUT_CAPACITY_VALUES = [
+  { label: "S-Series", value: 120, subKey: "sSeries" },
+  { label: "ABA", value: 220, subKey: "aba" },
+  { label: "ABC", value: 300, subKey: "abc" },
+  { label: "ABCDE-2200", value: 400, subKey: "abcde" },
 ];
 
-const FAMILY_MIX = [
-  { name: "Blown Film", value: 38, color: "var(--brand-teal)" },
-  { name: "Bag Making", value: 29, color: "var(--brand-amber)" },
-  { name: "Recycling", value: 18, color: "var(--brand-rose)" },
-  { name: "Printing", value: 15, color: "#7c9cff" },
-];
-
-const OUTPUT_CAPACITY = [
-  { label: "S-Series", value: 120, sub: "single-layer" },
-  { label: "ABA", value: 220, sub: "3-layer co-ex" },
-  { label: "ABC", value: 300, sub: "5-layer co-ex" },
-  { label: "ABCDE-2200", value: 400, sub: "flagship line" },
-];
-
-const TIMELINE = [
-  { y: "2008", e: "Company founded in Wenzhou. First single-layer blown-film line." },
-  { y: "2011", e: "ABA three-layer co-extrusion line. First export to Southeast Asia." },
-  { y: "2014", e: "Bag-making division launched with the F-PRO bottom-seal converter." },
-  { y: "2017", e: "CE certification. ABC multi-layer line certified for PBAT+PLA." },
-  { y: "2019", e: "CX recycling line released. Factory expanded to 12,000 m²." },
-  { y: "2022", e: "ABCDE-2200 enters development. Offices in Germany & Vietnam." },
-  { y: "2025", e: "ABCDE-2200 ships. RGB roll-bag machine updated." },
-];
-
-const STATS = [
-  { v: 2008, suffix: "", l: "Founded" },
-  { v: 60, suffix: "+", l: "Countries" },
-  { v: 400, suffix: "", l: "kg/h Max Output" },
-  { v: 18, suffix: "+", l: "Machine Families" },
-];
+const STAT_VALUES = [2008, 60, 400, 18];
 
 // ─────────────────────────────────────────────
 // Count-up hook — triggers once on intersection
@@ -90,27 +68,28 @@ function useInView<T extends HTMLElement>(threshold = 0.25) {
 // CHART: Export growth — animated bar chart
 // ─────────────────────────────────────────────
 function ExportGrowthChart() {
+  const t = useTranslations("about.charts");
   const { ref, inView } = useInView<HTMLDivElement>();
-  const max = Math.max(...EXPORT_GROWTH.map((d) => d.value));
+  const max = Math.max(...EXPORT_GROWTH_VALUES);
   return (
     <div className="ab-chart" ref={ref}>
       <div className="ab-chart__head">
-        <span className="ab-chart__title">Countries Exported To</span>
-        <span className="ab-chart__unit">by year, cumulative</span>
+        <span className="ab-chart__title">{t("exportTitle")}</span>
+        <span className="ab-chart__unit">{t("exportUnit")}</span>
       </div>
-      <div className="ab-chart__bars" role="img" aria-label="Bar chart of countries exported to, growing from 32 in 2020 to 60 in 2025">
-        {EXPORT_GROWTH.map((d, i) => {
+      <div className="ab-chart__bars" role="img" aria-label={t("exportAria")}>
+        {EXPORT_GROWTH_VALUES.map((value, i) => {
           const fillStyle = {
-            "--fill": inView ? d.value / max : 0,
+            "--fill": inView ? value / max : 0,
             transitionDelay: `${i * 90}ms`,
           } as CSSProperties;
           return (
-            <div className="ab-bar" key={d.year}>
+            <div className="ab-bar" key={EXPORT_GROWTH_YEARS[i]}>
               <div className="ab-bar__track">
                 <div className="ab-bar__fill" style={fillStyle} />
-                <span className="ab-bar__val" style={fillStyle}>{d.value}</span>
+                <span className="ab-bar__val" style={fillStyle}>{value}</span>
               </div>
-              <span className="ab-bar__label">{d.year}</span>
+              <span className="ab-bar__label">{EXPORT_GROWTH_YEARS[i]}</span>
             </div>
           );
         })}
@@ -123,6 +102,8 @@ function ExportGrowthChart() {
 // CHART: Machine family mix — donut chart (SVG)
 // ─────────────────────────────────────────────
 function FamilyDonutChart({ isDark }: { isDark: boolean }) {
+  const t = useTranslations("about.charts");
+  const familyNameKeys = ["blownFilm", "bagMaking", "recycling", "printing"] as const;
   const { ref, inView } = useInView<HTMLDivElement>();
   const R = 60;
   const CIRC = 2 * Math.PI * R;
@@ -132,22 +113,22 @@ function FamilyDonutChart({ isDark }: { isDark: boolean }) {
   return (
     <div className="ab-chart" ref={ref}>
       <div className="ab-chart__head">
-        <span className="ab-chart__title">Machine Family Distribution</span>
-        <span className="ab-chart__unit">share of catalogue, %</span>
+        <span className="ab-chart__title">{t("familyTitle")}</span>
+        <span className="ab-chart__unit">{t("familyUnit")}</span>
       </div>
       <div className="ab-donut">
-        <svg viewBox="0 0 160 160" className="ab-donut__svg" role="img" aria-label="Donut chart: Blown Film 38%, Bag Making 29%, Recycling 18%, Printing 15%">
+        <svg viewBox="0 0 160 160" className="ab-donut__svg" role="img" aria-label={t("familyAria")}>
           <circle cx="80" cy="80" r={R} fill="none" stroke={trackColor} strokeWidth="20" />
-          {FAMILY_MIX.map((seg, i) => {
-            const len = (seg.value / 100) * CIRC;
+          {FAMILY_MIX_VALUES.map((value, i) => {
+            const len = (value / 100) * CIRC;
             const dash = `${inView ? len : 0} ${CIRC}`;
             const offset = -cursor;
             cursor += len;
             return (
               <circle
-                key={seg.name}
+                key={familyNameKeys[i]}
                 cx="80" cy="80" r={R} fill="none"
-                stroke={seg.color}
+                stroke={FAMILY_MIX_COLORS[i]}
                 strokeWidth="20"
                 strokeDasharray={dash}
                 strokeDashoffset={offset}
@@ -158,14 +139,14 @@ function FamilyDonutChart({ isDark }: { isDark: boolean }) {
             );
           })}
           <text x="80" y="76" textAnchor="middle" className="ab-donut__num">18+</text>
-          <text x="80" y="94" textAnchor="middle" className="ab-donut__sub">FAMILIES</text>
+          <text x="80" y="94" textAnchor="middle" className="ab-donut__sub">{t("familiesLabel")}</text>
         </svg>
         <ul className="ab-donut__legend">
-          {FAMILY_MIX.map((seg) => (
-            <li key={seg.name} className="ab-donut__legend-item">
-              <span className="ab-donut__swatch" style={{ background: seg.color }} />
-              <span className="ab-donut__legend-name">{seg.name}</span>
-              <span className="ab-donut__legend-val">{seg.value}%</span>
+          {FAMILY_MIX_VALUES.map((value, i) => (
+            <li key={familyNameKeys[i]} className="ab-donut__legend-item">
+              <span className="ab-donut__swatch" style={{ background: FAMILY_MIX_COLORS[i] }} />
+              <span className="ab-donut__legend-name">{t(`familyNames.${familyNameKeys[i]}`)}</span>
+              <span className="ab-donut__legend-val">{value}%</span>
             </li>
           ))}
         </ul>
@@ -178,20 +159,21 @@ function FamilyDonutChart({ isDark }: { isDark: boolean }) {
 // CHART: Output capacity — horizontal bar comparison
 // ─────────────────────────────────────────────
 function CapacityChart() {
+  const t = useTranslations("about.charts");
   const { ref, inView } = useInView<HTMLDivElement>();
-  const max = Math.max(...OUTPUT_CAPACITY.map((d) => d.value));
+  const max = Math.max(...OUTPUT_CAPACITY_VALUES.map((d) => d.value));
   return (
     <div className="ab-chart" ref={ref}>
       <div className="ab-chart__head">
-        <span className="ab-chart__title">Output Capacity by Line</span>
-        <span className="ab-chart__unit">max throughput, kg/h</span>
+        <span className="ab-chart__title">{t("capacityTitle")}</span>
+        <span className="ab-chart__unit">{t("capacityUnit")}</span>
       </div>
-      <div className="ab-hbars" role="img" aria-label="Horizontal bar chart comparing max output: S-Series 120, ABA 220, ABC 300, ABCDE-2200 400 kilograms per hour">
-        {OUTPUT_CAPACITY.map((d, i) => (
+      <div className="ab-hbars" role="img" aria-label={t("capacityAria")}>
+        {OUTPUT_CAPACITY_VALUES.map((d, i) => (
           <div className="ab-hbar" key={d.label}>
             <div className="ab-hbar__meta">
               <span className="ab-hbar__label">{d.label}</span>
-              <span className="ab-hbar__sub">{d.sub}</span>
+              <span className="ab-hbar__sub">{t(`capacitySubs.${d.subKey}`)}</span>
             </div>
             <div className="ab-hbar__track">
               <div
@@ -222,10 +204,11 @@ function StatItem({ v, suffix, l }: { v: number; suffix: string; l: string }) {
 }
 
 export default function AboutPage() {
+  const t = useTranslations("about");
   const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
-    document.title = "About — Wenzhou Ashal Innomach Technology";
+    document.title = t("pageTitle");
     const checkTheme = () => {
       const theme = document.documentElement.getAttribute("data-theme");
       setIsDark(theme !== "light");
@@ -234,7 +217,7 @@ export default function AboutPage() {
     const observer = new MutationObserver(checkTheme);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     return () => { observer.disconnect(); };
-  }, []);
+  }, [t]);
 
   const darkBg = "#0a0e1a";
   const lightBg = "#f8fafc";
@@ -354,7 +337,7 @@ export default function AboutPage() {
             <Image
               className="about-hero__img"
               src={HQ_BUILDING_PHOTO}
-              alt="Ashal Innomech Technology headquarters building"
+              alt={t("hero.imgAlt")}
               fill
               priority
               sizes="100vw"
@@ -364,9 +347,9 @@ export default function AboutPage() {
 
             <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", alignItems: "flex-end", justifyContent: "flex-start", padding: "clamp(1.5rem,4vw,3rem)" }}>
               <div style={{ textAlign: "left", maxWidth: "42ch", marginBottom: "clamp(1.5rem,5vw,3rem)" }}>
-                <span className="about-hero__eyebrow" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "#fff", display: "block", marginBottom: "1.25rem", textShadow: "0 2px 10px rgba(0,0,0,0.6)" }}>Company Profile</span>
+                <span className="about-hero__eyebrow" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "#fff", display: "block", marginBottom: "1.25rem", textShadow: "0 2px 10px rgba(0,0,0,0.6)" }}>{t("hero.eyebrow")}</span>
                 <h1 className="about-hero__title" style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2.3rem,5.5vw,4.5rem)", color: "#fff", lineHeight: 0.95, textShadow: "0 4px 24px rgba(0,0,0,0.65)" }}>
-                  Wenzhou Ashal<br /><span style={{ color: "var(--brand-red)" }}>Innomach Technology</span>
+                  {t("hero.titleLine1")}<br /><span style={{ color: "var(--brand-red)" }}>{t("hero.titleLine2")}</span>
                 </h1>
               </div>
             </div>
@@ -376,16 +359,19 @@ export default function AboutPage() {
         {/* Company profile copy */}
         <section className="about-section" style={{ padding: "clamp(4rem,8vw,8rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%" }}>
-            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1.5rem" }}>Who We Are</span>
-            <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: textBody, lineHeight: 1.8, maxWidth: "60ch", marginBottom: "1.5rem" }}>Designs and manufactures blown-film lines, bag-making converters, and recycling systems for polymer film processors across six continents. Founded in 2008, we have grown from a single machine type to a full portfolio of 18+ machine families — every product designed in-house, fabricated in our 12,000 m² Wenzhou facility, and tested before it ships.</p>
-            <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: textBodyAlt, lineHeight: 1.8, maxWidth: "60ch" }}>Our customers range from single-line converters running one shift a day to multi-site groups running 24/7 on four continents. The machine has to work the same way for both.</p>
+            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1.5rem" }}>{t("whoWeAre.kicker")}</span>
+            <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: textBody, lineHeight: 1.8, maxWidth: "60ch", marginBottom: "1.5rem" }}>{t("whoWeAre.p1")}</p>
+            <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: textBodyAlt, lineHeight: 1.8, maxWidth: "60ch" }}>{t("whoWeAre.p2")}</p>
           </div>
         </section>
 
         {/* Stats */}
         <section style={{ background: "var(--brand-red)", padding: "clamp(2rem,4vw,3rem) clamp(1.5rem,4vw,3rem)", position: "relative", zIndex: 5 }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "1px" }} className="about-stats">
-            {STATS.map((s) => <StatItem key={s.l} {...s} />)}
+            {STAT_VALUES.map((v, i) => {
+              const s = (t.raw("stats") as { suffix: string; label: string }[])[i];
+              return <StatItem key={s.label} v={v} suffix={s.suffix} l={s.label} />;
+            })}
           </div>
         </section>
 
@@ -393,16 +379,16 @@ export default function AboutPage() {
         <section style={{ padding: 0 }}>
           <div className="ab-photo-strip">
             <div className="ab-photo-strip__figure ab-photo-strip__figure--tall">
-              <Image src={HQ_BUILDING_PHOTO} alt="Wenzhou headquarters and manufacturing facility exterior" fill sizes="(max-width: 768px) 100vw, 58vw" style={{ objectFit: "cover" }} />
-              <span className="ab-photo-strip__cap">Wenzhou HQ &amp; Manufacturing Facility</span>
+              <Image src={HQ_BUILDING_PHOTO} alt={t("photoStrip.hqAlt")} fill sizes="(max-width: 768px) 100vw, 58vw" style={{ objectFit: "cover" }} />
+              <span className="ab-photo-strip__cap">{t("photoStrip.hqCaption")}</span>
             </div>
             <div className="ab-photo-strip__figure ab-photo-tile">
-              <Image src={WAREHOUSE_1} alt="Production warehouse floor" fill sizes="(max-width: 768px) 100vw, 42vw" style={{ objectFit: "cover" }} />
-              <span className="ab-photo-strip__cap">Production Floor — Bay A</span>
+              <Image src={WAREHOUSE_1} alt={t("photoStrip.floorAlt")} fill sizes="(max-width: 768px) 100vw, 42vw" style={{ objectFit: "cover" }} />
+              <span className="ab-photo-strip__cap">{t("photoStrip.floorCaption")}</span>
             </div>
             <div className="ab-photo-strip__figure ab-photo-tile">
-              <Image src={WAREHOUSE_2} alt="Machine assembly warehouse" fill sizes="(max-width: 768px) 100vw, 42vw" style={{ objectFit: "cover" }} />
-              <span className="ab-photo-strip__cap">Assembly &amp; Testing — Bay B</span>
+              <Image src={WAREHOUSE_2} alt={t("photoStrip.assemblyAlt")} fill sizes="(max-width: 768px) 100vw, 42vw" style={{ objectFit: "cover" }} />
+              <span className="ab-photo-strip__cap">{t("photoStrip.assemblyCaption")}</span>
             </div>
           </div>
         </section>
@@ -410,8 +396,8 @@ export default function AboutPage() {
         {/* Charts — Data & Performance */}
         <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>By The Numbers</span>
-            <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2.5rem,5vw,4rem)" }}>Growth, Output &amp; Reach</h3>
+            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("charts.kicker")}</span>
+            <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2.5rem,5vw,4rem)" }}>{t("charts.title")}</h3>
             <div className="about-charts" style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: "clamp(3rem,6vw,5rem)", marginBottom: "clamp(3rem,6vw,5rem)" }}>
               <ExportGrowthChart />
               <FamilyDonutChart isDark={isDark} />
@@ -426,19 +412,19 @@ export default function AboutPage() {
         <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,6rem)" }} className="about-story">
             <div>
-              <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>Our Story</span>
-              <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(1.8rem,3.5vw,2.8rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "1.5rem" }}>From one line to a full machinery portfolio</h3>
-              <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.95rem", color: textBodyAlt, lineHeight: 1.8, marginBottom: "1rem" }}>Ashal Innomach started with a single-layer blown-film line and a small team of mechanical engineers who had spent the previous decade on the shop floors of Wenzhou&apos;s established machinery makers. The founding premise was simple: build fewer machine types, but build them better.</p>
-              <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.95rem", color: textBodyAlt, lineHeight: 1.8 }}>Today we produce eighteen machine families across blown film, bag making, and recycling. Every product is designed in-house, fabricated in our 12,000 m² Wenzhou facility, and tested before it ships.</p>
+              <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("story.kicker")}</span>
+              <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(1.8rem,3.5vw,2.8rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "1.5rem" }}>{t("story.title")}</h3>
+              <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.95rem", color: textBodyAlt, lineHeight: 1.8, marginBottom: "1rem" }}>{t("story.p1")}</p>
+              <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.95rem", color: textBodyAlt, lineHeight: 1.8 }}>{t("story.p2")}</p>
             </div>
             <div>
-              <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1.5rem" }}>Timeline</span>
+              <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1.5rem" }}>{t("timeline.kicker")}</span>
               <div style={{ position: "relative", paddingLeft: "1.5rem", borderLeft: "1px solid " + (isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)") }}>
-                {TIMELINE.map((t, i) => (
-                  <div key={t.y} style={{ paddingBottom: i < 6 ? "1.5rem" : 0, position: "relative" }}>
+                {(t.raw("timeline.items") as { y: string; e: string }[]).map((item, i) => (
+                  <div key={item.y} style={{ paddingBottom: i < 6 ? "1.5rem" : 0, position: "relative" }}>
                     <div style={{ position: "absolute", left: "-1.75rem", top: "0.3rem", width: 8, height: 8, borderRadius: "50%", background: i === 6 ? "var(--brand-red)" : isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)", border: "2px solid " + bg }} />
-                    <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.7rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "0.25rem" }}>{t.y}</span>
-                    <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: textMuted, lineHeight: 1.6, margin: 0 }}>{t.e}</p>
+                    <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.7rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "0.25rem" }}>{item.y}</span>
+                    <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: textMuted, lineHeight: 1.6, margin: 0 }}>{item.e}</p>
                   </div>
                 ))}
               </div>
@@ -449,14 +435,14 @@ export default function AboutPage() {
         {/* Machine Categories */}
         <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>Product Portfolio</span>
-            <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2rem,4vw,3rem)" }}>Machine Families</h3>
+            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("categories.kicker")}</span>
+            <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2rem,4vw,3rem)" }}>{t("categories.title")}</h3>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "1px", background: gridBg }} className="about-categories">
               {[
-                { name: "Blown Film", img: "/machines/abc-multilayer-large.png", desc: "1–5 layer co-extrusion lines" },
-                { name: "Bag Making", img: "/machines/f-pro-bottomseal.png", desc: "Bottom-seal, side-seal, roll-bag" },
-                { name: "Recycling", img: "/machines/rgb-rollbag.png", desc: "Pelletizing & recovery lines" },
-                { name: "Printing", img: "/machines/flexo-4.png", desc: "1–6 color flexographic" },
+                { name: t("categories.items.0.name"), img: "/machines/abc-multilayer-large.png", desc: t("categories.items.0.desc") },
+                { name: t("categories.items.1.name"), img: "/machines/f-pro-bottomseal.png", desc: t("categories.items.1.desc") },
+                { name: t("categories.items.2.name"), img: "/machines/rgb-rollbag.png", desc: t("categories.items.2.desc") },
+                { name: t("categories.items.3.name"), img: "/machines/flexo-4.png", desc: t("categories.items.3.desc") },
               ].map((c) => (
                 <div key={c.name} style={{ background: cardBg, padding: "2rem 1.5rem", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
                   <div style={{ position: "relative", width: "100%", height: 140, marginBottom: "1.5rem", filter: "drop-shadow(0 4px 20px rgba(0,0,0,0.4))" }}>
@@ -473,15 +459,10 @@ export default function AboutPage() {
         {/* Values */}
         <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>How We Work</span>
-            <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2rem,4vw,3rem)" }}>Four things we never compromise on</h3>
+            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("values.kicker")}</span>
+            <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2rem,4vw,3rem)" }}>{t("values.title")}</h3>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: gridBg }} className="about-values">
-              {[
-                { h: "Engineering First", b: "Every machine starts on the drawing board, not the sales brochure. We over-engineer where it matters — drive trains, die heads, frame rigidity — and simplify everything else." },
-                { h: "Long-Term Support", b: "We supply spare parts and provide remote process support for every machine we have ever built. A ten-year-old line deserves the same attention as a new one." },
-                { h: "Material Agnostic", b: "Our lines run LDPE, LLDPE, HDPE, PP, PBAT+PLA and blends. We do not design for one resin family and leave the rest as an afterthought." },
-                { h: "Factory Transparency", b: "Buyers are welcome on the production floor at any stage of a build. We encourage factory acceptance tests and third-party inspection." },
-              ].map((v) => (
+              {(t.raw("values.items") as { h: string; b: string }[]).map((v) => (
                 <div key={v.h} style={{ background: cardBg, padding: "2rem 1.75rem" }}>
                   <div style={{ width: "2rem", height: 2, background: "var(--brand-red)", marginBottom: "1.25rem" }} />
                   <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.2rem", color: textPrimary, letterSpacing: "0.02em", marginBottom: "0.75rem" }}>{v.h}</h4>
@@ -495,14 +476,10 @@ export default function AboutPage() {
         {/* Materials */}
         <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>Material Compatibility</span>
-            <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2rem,4vw,3rem)" }}>Resins & Materials We Process</h3>
+            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("materials.kicker")}</span>
+            <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2rem,4vw,3rem)" }}>{t("materials.title")}</h3>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1px", background: gridBg }} className="about-materials">
-              {[
-                { n: "LDPE", f: "Low-Density Polyethylene" }, { n: "LLDPE", f: "Linear Low-Density PE" }, { n: "HDPE", f: "High-Density Polyethylene" },
-                { n: "PP", f: "Polypropylene" }, { n: "PA", f: "Polyamide / Nylon" }, { n: "EVOH", f: "Ethylene Vinyl Alcohol" },
-                { n: "PBAT", f: "Biodegradable Copolyester" }, { n: "PLA", f: "Polylactic Acid" }, { n: "Blends", f: "Custom Formulations" },
-              ].map((m) => (
+              {(t.raw("materials.items") as { n: string; f: string }[]).map((m) => (
                 <div key={m.n} style={{ background: cardBg, padding: "1.25rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ fontFamily: "var(--ff-display)", fontSize: "1.1rem", color: textPrimary, letterSpacing: "0.02em" }}>{m.n}</span>
                   <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase", color: textDim }}>{m.f}</span>
@@ -515,13 +492,10 @@ export default function AboutPage() {
         {/* Specs */}
         <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,6rem)" }} className="about-specs">
-            {[
-              { label: "Blown Film", specs: [["Layers", "1 to 5"], ["Film Width", "150–2,200 mm"], ["Output", "Up to 400 kg/h"], ["Die Diameters", "50–600 mm"], ["Extruders", "20–90 mm L/D 30:1"]] },
-              { label: "Bag Making", specs: [["Bag Types", "Bottom, side, t-shirt, die-cut, roll"], ["Seal Width", "Up to 1,200 mm"], ["Speed", "Up to 200 bags/min"], ["Film Thickness", "0.008–0.30 mm"], ["Recycling", "100–500 kg/h"]] },
-            ].map((s) => (
+            {(t.raw("specs.groups") as { label: string; specs: [string, string][] }[]).map((s) => (
               <div key={s.label}>
                 <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{s.label}</span>
-                <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.8rem", color: textPrimary, marginBottom: "1.5rem" }}>Key Specifications</h4>
+                <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.8rem", color: textPrimary, marginBottom: "1.5rem" }}>{t("specs.keySpecs")}</h4>
                 {s.specs.map(([l, v]) => (
                   <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "0.75rem 0", borderBottom: "1px solid " + border }}>
                     <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: textMuted }}>{l}</span>
@@ -536,16 +510,16 @@ export default function AboutPage() {
         {/* Global */}
         <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>Global Reach</span>
-            <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "2rem" }}>60+ Countries Across Six Continents</h3>
+            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("global.kicker")}</span>
+            <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "2rem" }}>{t("global.title")}</h3>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: gridBg }} className="about-global">
               <div style={{ background: cardBg, padding: "2rem" }}>
-                <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.2rem", color: textPrimary, marginBottom: "1rem" }}>Key Markets</h4>
-                <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: textMuted, lineHeight: 1.7, margin: 0 }}>Vietnam, Indonesia, Thailand, Philippines, India, Bangladesh, Pakistan, Turkey, Egypt, Nigeria, Kenya, Colombia, Peru, Germany, and 45+ more countries.</p>
+                <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.2rem", color: textPrimary, marginBottom: "1rem" }}>{t("global.marketsTitle")}</h4>
+                <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: textMuted, lineHeight: 1.7, margin: 0 }}>{t("global.markets")}</p>
               </div>
               <div style={{ background: cardBg, padding: "2rem" }}>
-                <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.2rem", color: textPrimary, marginBottom: "1rem" }}>Regional Offices</h4>
-                <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: textMuted, lineHeight: 1.7, margin: 0 }}><strong style={{ color: textPrimary }}>Germany:</strong> European sales & support<br /><strong style={{ color: textPrimary }}>Vietnam:</strong> SEA operations & training<br /><strong style={{ color: textPrimary }}>Wenzhou HQ:</strong> Manufacturing & R&D</p>
+                <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.2rem", color: textPrimary, marginBottom: "1rem" }}>{t("global.officesTitle")}</h4>
+                <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: textMuted, lineHeight: 1.7, margin: 0 }}><strong style={{ color: textPrimary }}>{t("global.officeGermany")}</strong> {t("global.officeGermanyDesc")}<br /><strong style={{ color: textPrimary }}>{t("global.officeVietnam")}</strong> {t("global.officeVietnamDesc")}<br /><strong style={{ color: textPrimary }}>{t("global.officeHQ")}</strong> {t("global.officeHQDesc")}</p>
               </div>
             </div>
           </div>
@@ -555,14 +529,14 @@ export default function AboutPage() {
         <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,6rem)" }} className="about-support">
             <div>
-              <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>After-Sales</span>
-              <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "1.5rem" }}>Lifetime Support</h3>
-              <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.95rem", color: textBodyAlt, lineHeight: 1.8 }}>We supply spare parts and provide remote process support for every machine we have ever built. A ten-year-old line deserves the same attention as a new one.</p>
+              <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("support.kicker")}</span>
+              <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "1.5rem" }}>{t("support.title")}</h3>
+              <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.95rem", color: textBodyAlt, lineHeight: 1.8 }}>{t("support.desc")}</p>
             </div>
             <div>
-              <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>Delivery</span>
-              <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "1.5rem" }}>From Factory to Floor</h3>
-              {[["Production", "25–45 days"], ["Packing", "Export-standard wooden crate"], ["Shipping", "FOB Wenzhou / CIF destination"], ["Commissioning", "On-site install & training"], ["Warranty", "12 months from commissioning"]].map(([l, v]) => (
+              <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("support.deliveryKicker")}</span>
+              <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "1.5rem" }}>{t("support.deliveryTitle")}</h3>
+              {(t.raw("support.deliveryItems") as [string, string][]).map(([l, v]) => (
                 <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "0.75rem 0", borderBottom: "1px solid " + border }}>
                   <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: textMuted }}>{l}</span>
                   <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: textPrimary, fontWeight: 500 }}>{v}</span>
@@ -576,9 +550,9 @@ export default function AboutPage() {
         <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)" }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,6rem)" }} className="about-contact">
             <div>
-              <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>Contact</span>
-              <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "2rem" }}>Get in Touch</h3>
-              {[["Company", "Wenzhou Ashal Innomach Technology"], ["Location", "Wenzhou, Zhejiang, China"], ["Factory", "12,000 m² manufacturing facility"], ["Website", "www.cxmachinery.com"], ["Response", "Within 24 business hours"], ["Languages", "English, Chinese, Vietnamese, German"]].map(([l, v]) => (
+              <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("contact.kicker")}</span>
+              <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "2rem" }}>{t("contact.title")}</h3>
+              {(t.raw("contact.items") as [string, string][]).map(([l, v]) => (
                 <div key={l} style={{ marginBottom: "1.25rem" }}>
                   <div style={{ fontFamily: "var(--ff-mono)", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: textDim, marginBottom: "0.25rem" }}>{l}</div>
                   <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.95rem", color: textPrimary, fontWeight: 500 }}>{v}</div>
@@ -586,11 +560,11 @@ export default function AboutPage() {
               ))}
             </div>
             <div style={{ background: cardBg, border: "1px solid " + border, padding: "2.5rem", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.5rem", color: textPrimary, marginBottom: "1rem" }}>Ready to talk about your next line?</h4>
-              <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.9rem", color: textMuted, lineHeight: 1.7, marginBottom: "2rem" }}>Request a quote or talk to an engineer about your specific requirements.</p>
+              <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.5rem", color: textPrimary, marginBottom: "1rem" }}>{t("contact.cardTitle")}</h4>
+              <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.9rem", color: textMuted, lineHeight: 1.7, marginBottom: "2rem" }}>{t("contact.cardDesc")}</p>
               <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-                <Link href="/inquiries" style={{ fontFamily: "var(--ff-display)", fontSize: "0.9rem", letterSpacing: "0.06em", textTransform: "uppercase", color: "#080e0d", background: "var(--brand-red)", padding: "0.85rem 2rem", textDecoration: "none", fontWeight: 700, border: "1px solid var(--brand-red)" }}>Request a Quote →</Link>
-                <Link href="/products" style={{ fontFamily: "var(--ff-display)", fontSize: "0.9rem", letterSpacing: "0.06em", textTransform: "uppercase", color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)", background: "transparent", padding: "0.85rem 2rem", textDecoration: "none", border: "1px solid " + (isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)") }}>Browse Machines</Link>
+                <TransitionLink href="/inquiries" style={{ fontFamily: "var(--ff-display)", fontSize: "0.9rem", letterSpacing: "0.06em", textTransform: "uppercase", color: "#080e0d", background: "var(--brand-red)", padding: "0.85rem 2rem", textDecoration: "none", fontWeight: 700, border: "1px solid var(--brand-red)" }}>{t("contact.requestQuote")}</TransitionLink>
+                <TransitionLink href="/products" style={{ fontFamily: "var(--ff-display)", fontSize: "0.9rem", letterSpacing: "0.06em", textTransform: "uppercase", color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)", background: "transparent", padding: "0.85rem 2rem", textDecoration: "none", border: "1px solid " + (isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)") }}>{t("contact.browseMachines")}</TransitionLink>
               </div>
             </div>
           </div>

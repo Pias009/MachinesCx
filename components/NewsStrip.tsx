@@ -5,6 +5,11 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import TransitionLink from "@/components/TransitionLink";
 import { latestArticles, type NewsArticle } from "@/lib/news";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { SECTION_ELEMENT_DELAY } from "@/components/SectionReveal";
+
+gsap.registerPlugin(useGSAP);
 
 function fmt(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", {
@@ -47,7 +52,6 @@ export default function NewsStrip() {
     let raf: number;
 
     const SPEED   = 0.5;           // auto-scroll px/frame
-    const EASE    = 0.08;          // drag release momentum ease
 
     function halfW() {
       return (track?.scrollWidth ?? 0) / 2;
@@ -158,45 +162,7 @@ export default function NewsStrip() {
     window.addEventListener("mousemove",  onMouseMove);
     window.addEventListener("mouseup",    onMouseUp);
 
-    /* ── Scroll-triggered entrance ── */
-    let newsAnimCancelled = false;
-    const revealNewsAnim = () => {
-      [eyebrowRef.current, headRef.current, track].filter(Boolean).forEach(el => {
-        const e = el as HTMLElement;
-        e.style.opacity = "1"; e.style.transform = "none";
-      });
-    };
-    (async () => {
-      try {
-        const { gsap }          = await import("gsap");
-        const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-        if (newsAnimCancelled) return;
-        gsap.registerPlugin(ScrollTrigger);
-
-        gsap.fromTo(eyebrowRef.current,
-          { opacity: 0, x: -24 },
-          { opacity: 1, x: 0, duration: 0.9, ease: "expo.out",
-            scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
-        );
-        gsap.fromTo(headRef.current,
-          { opacity: 0, y: 32 },
-          { opacity: 1, y: 0, duration: 1, ease: "expo.out", delay: 0.1,
-            scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
-        );
-        gsap.fromTo(track,
-          { opacity: 0, y: 40 },
-          { opacity: 1, y: 0, duration: 1, ease: "expo.out", delay: 0.22,
-            scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
-        );
-      } catch {
-        if (!newsAnimCancelled) revealNewsAnim();
-      }
-    })();
-    const newsAnimFallback = setTimeout(() => { if (!newsAnimCancelled) revealNewsAnim(); }, 4000);
-
     return () => {
-      newsAnimCancelled = true;
-      clearTimeout(newsAnimFallback);
       cancelAnimationFrame(raf);
       if (resumeTimer) clearTimeout(resumeTimer);
       el.removeEventListener("mouseenter",  onEnter);
@@ -209,6 +175,73 @@ export default function NewsStrip() {
       window.removeEventListener("mouseup",    onMouseUp);
     };
   }, [news]);
+
+  const revealNewsAnim = () => {
+    [eyebrowRef.current, headRef.current].filter(Boolean).forEach(el => {
+      const e = el as HTMLElement;
+      e.style.opacity = "1"; e.style.transform = "none";
+    });
+    // track's transform is owned by the rAF auto-scroll loop above —
+    // only reset opacity here, never touch transform
+    const track = trackRef.current;
+    if (track) track.style.opacity = "1";
+    const fallbackCards = track ? Array.from(track.querySelectorAll<HTMLElement>(".ns2-card")) : [];
+    fallbackCards.forEach(c => { c.style.opacity = "1"; c.style.transform = "none"; });
+  };
+
+  // ScrollTrigger is a separate plugin bundle — load it lazily since this
+  // section is below the fold, then hand off to useGSAP once it's ready.
+  const [pluginReady, setPluginReady] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
+      if (cancelled) return;
+      gsap.registerPlugin(ScrollTrigger);
+      setPluginReady(true);
+    }).catch(() => { if (!cancelled) revealNewsAnim(); });
+    const fallback = setTimeout(() => { if (!cancelled) revealNewsAnim(); }, 4000);
+    return () => { cancelled = true; clearTimeout(fallback); };
+  }, []);
+
+  /* ── Scroll-triggered entrance ── */
+  useGSAP(() => {
+    if (!pluginReady || news.length === 0) return;
+    const track = trackRef.current;
+
+    const revTrigger = { trigger: sectionRef.current, start: "top 85%", end: "bottom top", toggleActions: "play reverse play reverse" };
+
+    // One timeline, one ScrollTrigger for the whole entrance — was 4
+    // separate instances all watching sectionRef.
+    const tl = gsap.timeline({ scrollTrigger: revTrigger, delay: SECTION_ELEMENT_DELAY });
+
+    tl.fromTo(eyebrowRef.current,
+      { opacity: 0, x: -24 },
+      { opacity: 1, x: 0, duration: 0.9, ease: "expo.out" },
+      0
+    );
+    tl.fromTo(headRef.current,
+      { opacity: 0, y: 32 },
+      { opacity: 1, y: 0, duration: 1, ease: "expo.out" },
+      0.1
+    );
+    // opacity only — track's own transform is owned every frame by the
+    // rAF auto-scroll loop, so animating transform here would fight it.
+    // Depth comes from the cards themselves instead.
+    tl.fromTo(track,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.8, ease: "power2.out" },
+      0.22
+    );
+    const cards = track ? Array.from(track.querySelectorAll<HTMLElement>(".ns2-card")) : [];
+    if (cards.length) {
+      gsap.set(cards, { transformPerspective: 800, transformOrigin: "50% 100%" });
+      tl.fromTo(cards,
+        { opacity: 0, y: 30, rotateX: -16, scale: 0.95 },
+        { opacity: 1, y: 0, rotateX: 0, scale: 1, duration: 0.6, ease: "power2.out", stagger: 0.05 },
+        0.3
+      );
+    }
+  }, { scope: sectionRef, dependencies: [pluginReady, news] });
 
   /* Duplicate cards for seamless loop */
   const doubled = [...news, ...news];

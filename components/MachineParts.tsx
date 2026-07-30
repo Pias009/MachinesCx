@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { SectionHead } from "@/components/EditorialKit";
 import type { MachinePart } from "@/lib/products";
 
 /* ── real, admin-added machine parts — separate from the older
@@ -11,6 +13,7 @@ import type { MachinePart } from "@/lib/products";
    guide inside a part's card only when that part actually has steps. */
 
 function PartPhotos({ images, name }: { images: string[]; name: string }) {
+  const t = useTranslations("machineParts");
   const [active, setActive] = useState(0);
   const photos = images.filter(Boolean);
   if (photos.length === 0) {
@@ -20,13 +23,13 @@ function PartPhotos({ images, name }: { images: string[]; name: string }) {
     <div className="pdv2-mp-card__media">
       <Image src={photos[Math.min(active, photos.length - 1)]} alt={name} fill sizes="(max-width: 700px) 90vw, 380px" />
       {photos.length > 1 && (
-        <div className="pdv2-mp-thumbs" role="tablist" aria-label={`${name} photos`}>
+        <div className="pdv2-mp-thumbs" role="tablist" aria-label={t("photosAria", { name })}>
           {photos.map((p, i) => (
             <button
               key={i}
               role="tab"
               aria-selected={active === i}
-              aria-label={`Photo ${i + 1} of ${photos.length}`}
+              aria-label={t("photoOfAria", { num: i + 1, total: photos.length })}
               className={`pdv2-mp-thumb${active === i ? " pdv2-mp-thumb--on" : ""}`}
               onClick={() => setActive(i)}
             >
@@ -40,6 +43,7 @@ function PartPhotos({ images, name }: { images: string[]; name: string }) {
 }
 
 function PartCard({ part }: { part: MachinePart }) {
+  const t = useTranslations("machineParts");
   const steps = (part.installation ?? []).filter(s => s.title?.trim() || s.detail?.trim());
   return (
     <div className="pdv2-mp-card" data-reveal="scale">
@@ -50,7 +54,7 @@ function PartCard({ part }: { part: MachinePart }) {
 
         {steps.length > 0 && (
           <div className="pdv2-mp-steps">
-            <span className="pdv2-mp-steps__label">Installation steps</span>
+            <span className="pdv2-mp-steps__label">{t("installationSteps")}</span>
             <ol className="pdv2-mp-steps__list">
               {steps.map((s, i) => (
                 <li key={i} className="pdv2-mp-step">
@@ -77,16 +81,17 @@ function PartCard({ part }: { part: MachinePart }) {
 }
 
 export default function MachineParts({ parts }: { parts?: MachinePart[] }) {
+  const t = useTranslations("machineParts");
   const valid = (parts ?? []).filter(p => p.name?.trim());
   if (valid.length === 0) return null;
 
   return (
-    <section className="pdv2-mp" aria-label="Machine parts">
+    <section className="pdv2-mp" aria-label={t("sectionAria")}>
       <div className="pdv2-wrap">
-        <div className="pdv2-section-head" data-reveal>
-          <span className="pdv2-section-head__line" />
-          <h2>Machine <em>Parts</em></h2>
-        </div>
+        <SectionHead
+          eyebrow={t("sectionAria")}
+          title={<>{t("titlePrefix")} <em className="text-[var(--brand-teal)] not-italic">{t("titleEm")}</em></>}
+        />
         <div className="pdv2-mp-grid" data-reveal>
           {valid.map((part, i) => <PartCard key={i} part={part} />)}
         </div>

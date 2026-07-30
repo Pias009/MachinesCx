@@ -8,6 +8,11 @@ import TransitionLink from "@/components/TransitionLink";
 import { useCms } from "@/lib/useCms";
 import { families as localFamilies } from "@/lib/products";
 import type { ProductFamily } from "@/lib/products";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { SECTION_ELEMENT_DELAY } from "@/components/SectionReveal";
+
+gsap.registerPlugin(useGSAP);
 
 const ACCENTS = ["#e11d48", "#f59e0b", "#2bbfb3", "#e11d48"];
 
@@ -66,6 +71,13 @@ export default function PrintingShowcase() {
   const carouselWrapRef = useRef<HTMLDivElement>(null);
   const infoBlockRef   = useRef<HTMLDivElement>(null);
   const ctaBlockRef    = useRef<HTMLDivElement>(null);
+  // Book page-turn: the just-outgoing center machine flips away like a
+  // page (hinged on its leading edge) to reveal the incoming one underneath,
+  // rather than the plain cross-fade the CSS role-transitions still handle
+  // for the side/back items. dirRef tracks which way to hinge.
+  const pageRef  = useRef<HTMLDivElement>(null);
+  const dirRef   = useRef<"next" | "prev">("next");
+  const prevActiveRef = useRef(0);
 
   // ── "Press Warm-Up" scroll-in — GSAP + ScrollTrigger, fires once ──
   // Animates a dedicated wrapper div per carousel item (never the role()-
@@ -74,85 +86,97 @@ export default function PrintingShowcase() {
   // can never fight the carousel's own repositioning or the 3s auto-advance
   // interval. Never touches .ps-ghost-wrap or its children — that stays
   // fully owned by the existing CSS rise-in/drop-out keyframes.
+  const revealAll = () => {
+    const itemWraps = carouselWrapRef.current
+      ? Array.from(carouselWrapRef.current.querySelectorAll<HTMLElement>("[data-ps-carousel-item]"))
+      : [];
+    [brandLabelRef.current, counterRef.current, infoBlockRef.current, ctaBlockRef.current, ...itemWraps]
+      .filter(Boolean)
+      .forEach(el => {
+        const e = el as HTMLElement;
+        e.style.opacity = "1"; e.style.transform = "none"; e.style.filter = "none";
+      });
+  };
+
+  // ScrollTrigger is a separate plugin bundle — load it lazily since this
+  // section is below the fold, then hand off to useGSAP once it's ready.
+  const [pluginReady, setPluginReady] = useState(false);
   useEffect(() => {
     if (!mounted) return;
-    let ctx: { revert?: () => void } = {};
     let cancelled = false;
-
-    const revealAll = () => {
-      const itemWraps = carouselWrapRef.current
-        ? Array.from(carouselWrapRef.current.querySelectorAll<HTMLElement>("[data-ps-carousel-item]"))
-        : [];
-      [brandLabelRef.current, counterRef.current, infoBlockRef.current, ctaBlockRef.current, ...itemWraps]
-        .filter(Boolean)
-        .forEach(el => {
-          const e = el as HTMLElement;
-          e.style.opacity = "1"; e.style.transform = "none"; e.style.filter = "none";
-        });
-    };
-
-    (async () => {
-      try {
-        const { gsap }          = await import("gsap");
-        const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-        if (cancelled) return;
-        gsap.registerPlugin(ScrollTrigger);
-
-        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-        ctx = gsap.context(() => {
-          const itemWraps = carouselWrapRef.current
-            ? Array.from(carouselWrapRef.current.querySelectorAll<HTMLElement>("[data-ps-carousel-item]"))
-            : [];
-
-          const els = [brandLabelRef.current, counterRef.current, infoBlockRef.current, ctaBlockRef.current, ...itemWraps];
-          if (reduced) {
-            gsap.set(els, { opacity: 1, clearProps: "all" });
-            return;
-          }
-
-          const trigger = { trigger: sectionElRef.current, start: "top 70%", end: "bottom 20%", toggleActions: "play reverse play reverse" };
-
-          // Brand label — masked rise (parent has overflow:hidden)
-          gsap.fromTo(brandLabelRef.current, { y: "100%" }, { y: "0%", duration: 0.7, ease: "expo.out", scrollTrigger: trigger });
-          gsap.fromTo(counterRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", delay: 0.15, scrollTrigger: trigger });
-
-          // Carousel — back-to-front settle: back role first, sides next, center last with overshoot
-          itemWraps.forEach(wrap => {
-            const roleAttr = wrap.getAttribute("data-ps-carousel-item");
-            const isCenter = roleAttr === "center";
-            const isBack = roleAttr === "back";
-            const delay = isBack ? 0 : (isCenter ? 0.36 : 0.18);
-            gsap.fromTo(wrap,
-              { opacity: 0, scale: 0.85, filter: "blur(6px)" },
-              {
-                opacity: 1, scale: 1, filter: "blur(0px)",
-                duration: isCenter ? 0.6 : 0.5,
-                ease: isCenter ? "back.out(1.2)" : "power2.out",
-                delay,
-                scrollTrigger: trigger,
-              }
-            );
-          });
-
-          // Bottom info block + CTA — rise in after the carousel settles
-          gsap.fromTo(infoBlockRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", delay: 0.55, scrollTrigger: trigger });
-          gsap.fromTo(ctaBlockRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", delay: 0.65, scrollTrigger: trigger });
-        }, sectionElRef);
-      } catch {
-        if (!cancelled) revealAll();
-      }
-    })();
-
+    import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
+      if (cancelled) return;
+      gsap.registerPlugin(ScrollTrigger);
+      setPluginReady(true);
+    }).catch(() => { if (!cancelled) revealAll(); });
     const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
+    return () => { cancelled = true; clearTimeout(fallback); };
+  }, [mounted]);
 
-    return () => { cancelled = true; clearTimeout(fallback); ctx.revert?.(); };
+  // ── "Press Warm-Up" scroll-in — GSAP + ScrollTrigger, fires once ──
+  // Animates a dedicated wrapper div per carousel item (never the role()-
+  // positioned item div itself, which the existing carousel/auto-advance
+  // logic owns exclusively via inline transform/filter) so this entrance
+  // can never fight the carousel's own repositioning or the 3s auto-advance
+  // interval. Never touches .ps-ghost-wrap or its children — that stays
+  // fully owned by the existing CSS rise-in/drop-out keyframes.
+  useGSAP(() => {
+    if (!mounted || !pluginReady) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const itemWraps = carouselWrapRef.current
+      ? Array.from(carouselWrapRef.current.querySelectorAll<HTMLElement>("[data-ps-carousel-item]"))
+      : [];
+
+    const els = [brandLabelRef.current, counterRef.current, infoBlockRef.current, ctaBlockRef.current, ...itemWraps];
+    if (reduced) {
+      gsap.set(els, { opacity: 1, clearProps: "all" });
+      return;
+    }
+
+    const trigger = { trigger: sectionElRef.current, start: "top 70%", end: "bottom 20%", toggleActions: "play reverse play reverse" };
+
+    // One timeline, one ScrollTrigger for the whole entrance — was 5
+    // separate ScrollTrigger instances all watching the same trigger.
+    const tl = gsap.timeline({ scrollTrigger: trigger });
+
+    // Brand label — masked rise (parent has overflow:hidden)
+    tl.fromTo(brandLabelRef.current, { y: "100%" }, { y: "0%", duration: 0.7, ease: "expo.out" }, SECTION_ELEMENT_DELAY);
+    tl.fromTo(counterRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, SECTION_ELEMENT_DELAY + 0.15);
+
+    // Carousel — back-to-front settle: back role first, sides next, center
+    // last with overshoot. Side items swing in with rotateY (left side from
+    // its own left, right side from its own right) so the settle reads as
+    // panels rotating into a real 3D carousel, not a flat scale/blur pop.
+    itemWraps.forEach(wrap => {
+      const roleAttr = wrap.getAttribute("data-ps-carousel-item");
+      const isCenter = roleAttr === "center";
+      const isBack = roleAttr === "back";
+      const isLeft = roleAttr === "left";
+      const delay = isBack ? 0 : (isCenter ? 0.36 : 0.18);
+      const fromRotateY = isCenter || isBack ? 0 : (isLeft ? 35 : -35);
+      gsap.set(wrap, { transformPerspective: 1000 });
+      tl.fromTo(wrap,
+        { opacity: 0, scale: 0.85, filter: "blur(6px)", rotateY: fromRotateY, willChange: "filter, transform, opacity" },
+        {
+          opacity: 1, scale: 1, filter: "blur(0px)", rotateY: 0,
+          duration: isCenter ? 0.6 : 0.55,
+          ease: isCenter ? "back.out(1.2)" : "power2.out",
+          clearProps: "willChange",
+        },
+        SECTION_ELEMENT_DELAY + delay
+      );
+    });
+
+    // Bottom info block + CTA — rise in after the carousel settles
+    tl.fromTo(infoBlockRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, SECTION_ELEMENT_DELAY + 0.55);
+    tl.fromTo(ctaBlockRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, SECTION_ELEMENT_DELAY + 0.65);
     // Depends on `mounted`: this component renders `null` until mounted
     // becomes true (see the `if (!mounted) return null` below), so refs
     // aren't attached to real DOM nodes until that first true render —
-    // running this effect only on `mounted` (not on initial `[]` mount)
-    // ensures gsap.context() actually has real elements to work with.
-  }, [mounted]);
+    // running this effect only once mounted+pluginReady ensures GSAP
+    // actually has real elements to work with.
+  }, { scope: sectionElRef, dependencies: [mounted, pluginReady] });
 
   useEffect(() => {
     setMounted(true);
@@ -174,6 +198,7 @@ export default function PrintingShowcase() {
       : (active + N - 1) % N;
 
     pendingRef.current = next;
+    dirRef.current = dir;
 
     // 1. Trigger carousel + accent changes immediately
     setActive(next);
@@ -190,6 +215,30 @@ export default function PrintingShowcase() {
     // 4. Release animating lock after full cycle
     setTimeout(() => setAnimating(false), DURATION);
   }, [animating, active]);
+
+  // ── Book page-turn: whenever the center machine changes, the new page
+  // swings in from edge-on (hinged on its leading edge — left for "next",
+  // as if the previous page turned away left-to-right; right for "prev",
+  // reversed) down to flat, like a page landing into place. Runs on top of
+  // the existing role-based CSS positioning, which still handles the
+  // side/back items' cross-fade. ──
+  useGSAP(() => {
+    if (prevActiveRef.current === active) return; // skip initial mount
+    prevActiveRef.current = active;
+    const page = pageRef.current;
+    if (!page) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const isNext = dirRef.current === "next";
+    gsap.set(page, {
+      transformPerspective: 1600,
+      transformOrigin: isNext ? "left center" : "right center",
+    });
+    gsap.fromTo(page,
+      { rotateY: isNext ? 100 : -100 },
+      { rotateY: 0, duration: DURATION / 1000, ease: "power2.out" }
+    );
+  }, { dependencies: [active] });
 
   // ── auto-advance every 3s, only when section is visible ──
   useEffect(() => {
@@ -483,14 +532,20 @@ export default function PrintingShowcase() {
 
         {/* ── Carousel ── */}
         <div ref={carouselWrapRef} style={{ position: "absolute", inset: 0, zIndex: 3 }}>
-          {MACHINES.map((machine, i) => (
+          {MACHINES.map((machine, i) => {
+            const isCenter = role(i) === "center";
+            return (
             <div key={machine.model} style={itemStyle(role(i))}>
               {/* Entrance-only wrapper — GSAP exclusively owns this element's
                   scale/opacity/filter for the one-time "Press Warm-Up" reveal.
                   The parent div above keeps its own role-based positioning
                   transform untouched, so the entrance can never fight the
                   carousel's auto-advance repositioning. */}
-              <div data-ps-carousel-item={role(i)} style={{ width: "100%", height: "100%", position: "relative" }}>
+              <div
+                data-ps-carousel-item={role(i)}
+                ref={isCenter ? pageRef : undefined}
+                style={{ width: "100%", height: "100%", position: "relative", transformStyle: "preserve-3d" }}
+              >
                 <NextImage
                   src={machine.src}
                   alt={machine.model}
@@ -512,7 +567,8 @@ export default function PrintingShowcase() {
                 />
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* ── Bottom-left info + nav ── */}

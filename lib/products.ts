@@ -148,9 +148,28 @@ export const parseYouTubeId = (input: string): string | null => {
 // never pulls the server-only mongoose/mongodb chain into the browser bundle.
 // ---------------------------------------------------------------------------
 import productsData from "@/data/products.json";
+import productsDataAr from "@/data/products.ar.json";
+import productsDataHi from "@/data/products.hi.json";
 
 export const categories = productsData.categories as Category[];
 export const families = productsData.families as ProductFamily[];
+
+// Locale-shaped catalogue snapshots — same structure as productsData, with
+// translatable strings (names, taglines, spec labels, installation/delivery
+// text, gallery captions) localized. Slugs, model codes, units-as-symbols,
+// image URLs and category/series keys stay untranslated across all locales.
+// Mirrors the HERO_BY_LOCALE pattern in components/HeroSplash.tsx.
+const PRODUCTS_BY_LOCALE: Record<string, typeof productsData> = {
+  en: productsData,
+  ar: productsDataAr,
+  hi: productsDataHi,
+};
+
+export const getCategoriesForLocale = (locale: string): Category[] =>
+  (PRODUCTS_BY_LOCALE[locale] ?? productsData).categories as Category[];
+
+export const getFamiliesForLocale = (locale: string): ProductFamily[] =>
+  (PRODUCTS_BY_LOCALE[locale] ?? productsData).families as ProductFamily[];
 
 export interface Catalogue {
   categories: Category[];

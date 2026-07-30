@@ -4,6 +4,17 @@
    60/40 rule: 60% dark charcoal base · 40% teal accent
    ========================================================================= */
 
+/* Tailwind v3 — used by new components only (e.g. AudienceSection.tsx,
+   FeatureCardsSection.tsx, SignupSection.tsx). Existing components use
+   inline styles + the custom rules below and don't reference Tailwind
+   utility classes, so this is purely additive. v3 (not v4) deliberately —
+   v4's @tailwindcss/postcss module hook was corrupting Node's require
+   cache during `next build`, causing intermittent "cannot find module"
+   failures unrelated to this file. v3's plugin has no such hook. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   /* ── brand palette ── */
   --brand-teal:    #2bbfb3;           /* exact logo teal */
@@ -241,16 +252,7 @@
 [data-theme="light"] .sh-section [style*="color: rgba(255"] { color: #0d2220 !important; }
 
 /* ClientJourney */
-[data-theme="light"] .cj__grid { background: #ffffff !important; }
 [data-theme="light"] .cj__title { color: #0d2220 !important; }
-[data-theme="light"] .cj__sub   { color: rgba(13,34,32,0.7) !important; }
-[data-theme="light"] .cj__card  { background: rgba(13,34,32,0.03) !important; border-color: rgba(43,191,179,0.2) !important; }
-[data-theme="light"] .cj__card-h { color: #0d2220 !important; }
-[data-theme="light"] .cj__card-body { color: rgba(13,34,32,0.72) !important; }
-[data-theme="light"] .cj__pill  { color: rgba(13,34,32,0.72) !important; border-color: rgba(13,34,32,0.12) !important; background: rgba(13,34,32,0.03) !important; }
-[data-theme="light"] .cj__pill:hover { color: #0d2220 !important; }
-[data-theme="light"] .cj__bullet { color: rgba(13,34,32,0.65) !important; }
-[data-theme="light"] .cj__nav-counter { color: rgba(13,34,32,0.65) !important; }
 [data-theme="light"] .cj__nav-counter strong { color: #0d2220 !important; }
 [data-theme="light"] .cj__nav-btn { color: rgba(13,34,32,0.7) !important; border-color: rgba(13,34,32,0.15) !important; background: rgba(13,34,32,0.03) !important; }
 [data-theme="light"] .cj__step-row { background: rgba(13,34,32,0.03) !important; border-color: rgba(13,34,32,0.08) !important; }
@@ -450,8 +452,15 @@
 /* ── ThemeToggle stays legible ── */
 [data-theme="light"] .theme-toggle     { color: #0d2220 !important; }
 
-/* ── reset ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── reset ──
+   Wrapped in @layer base (not left unlayered) so Tailwind's utility
+   classes — which live in @layer utilities — can still win the cascade.
+   Unlayered CSS always beats layered CSS regardless of specificity, so an
+   unlayered universal reset here would silently zero out every padding
+   and margin Tailwind utility across the whole site. */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+}
 html {
   scroll-behavior: auto;
   /* no overflow-x:hidden on html — kills iOS scroll */
@@ -1864,107 +1873,12 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   .fc-page-label { display: none; }
 }
 
-/* =======================  SECTION REVEAL — factory-door wipe  ======================= */
-.sr-wrap {
-  position: relative;
-  overflow: hidden;
-}
-.sr-content {
-  position: relative;
-  z-index: 2;
-  opacity: 0;
-  transform: scale(0.97) translateY(14px);
-  filter: blur(6px);
-}
-.sr-content--in {
-  animation: sr-content-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: 0.35s;
-}
-@keyframes sr-content-in {
-  0%   { opacity: 0; transform: scale(0.97) translateY(14px); filter: blur(6px); }
-  100% { opacity: 1; transform: scale(1) translateY(0);       filter: blur(0); }
-}
-.sr-wiper {
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  background: var(--canvas-bg);
-  transform: translateY(0);
-  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-  pointer-events: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-.sr-wiper__scan {
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 3px,
-      rgba(15, 23, 42, 0.025) 3px,
-      rgba(15, 23, 42, 0.025) 4px
-    );
-  pointer-events: none;
-}
-.sr-wiper__sweep {
-  position: absolute;
-  inset: -20% -40%;
-  background: linear-gradient(100deg, transparent 40%, rgba(43,191,179,0.16) 48%, rgba(225,29,72,0.14) 52%, transparent 60%);
-  opacity: 0;
-  pointer-events: none;
-}
-.sr-wiper--sweep .sr-wiper__sweep {
-  animation: sr-sweep-pass 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@keyframes sr-sweep-pass {
-  0%   { opacity: 0; transform: translateX(-30%); }
-  15%  { opacity: 1; }
-  85%  { opacity: 1; }
-  100% { opacity: 0; transform: translateX(30%); }
-}
-.sr-wiper__corner {
-  position: absolute;
-  width: 100%; height: 2px;
-  background: var(--brand-red);
-  transform: scaleX(0);
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.sr-wiper__corner--tl { top: 0; left: 0; transform-origin: left; }
-.sr-wiper__corner--br { bottom: 0; right: 0; transform-origin: right; }
-.sr-wiper--sweep .sr-wiper__corner { transform: scaleX(1); }
-.sr-wiper__label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  opacity: 0.5;
-  animation: sr-pulse 2.2s ease-in-out infinite;
-}
-.sr-wiper__text {
-  font-family: var(--ff-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.28em;
-  color: var(--slate-60);
-  text-transform: uppercase;
-}
-.sr-wiper__arrow {
-  font-family: var(--ff-mono);
-  font-size: 1.1rem;
-  color: var(--brand-red);
-  line-height: 1;
-}
-@keyframes sr-pulse {
-  0%, 100% { opacity: 0.35; transform: translateY(0); }
-  50%      { opacity: 0.7;  transform: translateY(4px); }
-}
+/* =======================  SECTION REVEAL — whole-section push  =======================
+   .sr-push itself carries the entrance tween (GSAP, see SectionReveal.tsx).
+   No base opacity/transform here — GSAP sets the from-state on mount so
+   there's no flash-of-hidden-content before JS attaches on slow devices. */
 @media (prefers-reduced-motion: reduce) {
-  .sr-content { opacity: 1 !important; transform: none !important; filter: none !important; }
-  .sr-wiper__sweep { animation: none !important; }
-  .sr-wiper__label { animation: none !important; }
+  .sr-push { opacity: 1 !important; transform: none !important; filter: none !important; }
 }
 
 /* =======================  NAV CTA SHINE  =======================
@@ -3077,7 +2991,9 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   max-height: 620px;
   background: var(--bg-surface);
   border: 1px solid var(--bg-line);
+  border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 24px 48px -28px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.03) inset;
 }
 .pdv2-breakdown-frame__img {
   position: absolute; inset: 0;
@@ -3167,19 +3083,36 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   color: var(--ink); line-height: 1;
 }
 
-/* Part N breakdown rows */
-.pdv2-part { display: flex; flex-direction: column; gap: 0.85rem; }
+/* Part N breakdown rows — a single cohesive card: rounded frame, real
+   elevation, and the title/index integrated as a caption over the photo
+   instead of a separate flat color bar stacked on top of it */
+.pdv2-part {
+  display: flex; flex-direction: column; gap: 0.85rem;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-line);
+  box-shadow: 0 20px 40px -26px rgba(0,0,0,0.45);
+}
 .pdv2-part__head {
-  background: var(--brand-teal); color: #04211e;
-  font-family: var(--ff-mono); font-size: 0.72rem; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  padding: 0.65rem 1rem;
+  position: relative; z-index: 1;
+  display: flex; align-items: baseline; gap: 0.6rem;
+  color: var(--ink);
+  font-family: var(--ff-display); font-size: 1.05rem;
+  letter-spacing: 0.01em;
+  padding: 1.1rem 1.25rem 0;
+}
+.pdv2-part__head::before {
+  content: ""; width: 1.5rem; height: 2px; flex-shrink: 0;
+  background: var(--brand-teal); align-self: center;
 }
 .pdv2-part__shot {
   position: relative;
   aspect-ratio: 16/9;
   overflow: hidden;
   background: var(--bg-base);
+  margin: 0 1.25rem;
+  border-radius: 10px;
   border: 1px solid var(--bg-line);
 }
 .pdv2-part__shot img {
@@ -3200,6 +3133,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   font-family: var(--ff-body); font-size: 0.86rem;
   color: var(--ink-60); line-height: 1.65; max-width: 72ch;
   overflow-wrap: anywhere;
+  padding: 0 1.25rem 1.25rem;
 }
 
 /* Output Sample tab */
@@ -3213,8 +3147,10 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   position: relative;
   aspect-ratio: 4/3;
   background: var(--bg-base); border: 1px solid var(--bg-line);
+  border-radius: 16px;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
+  box-shadow: 0 20px 40px -26px rgba(0,0,0,0.45);
 }
 .pdv2-sample__img img {
   width: 82%; height: 82%; object-fit: contain;
@@ -3434,6 +3370,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-guide-card {
   background: var(--bg-base);
   border: 1px solid var(--bg-line);
+  border-radius: 16px;
   overflow: hidden;
   display: flex; flex-direction: column;
   box-shadow: 0 20px 40px -24px rgba(0,0,0,0.45);
@@ -3736,10 +3673,14 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   .pdv2-delivery-card:not(:nth-child(3n)) .pdv2-delivery-card__connector { display: block; }
 }
 
-/* ── proof sections: packing / freight / install, each its own full-width
-   stacked banner — title above (contained to page width), full-bleed
-   photo below (edge-to-edge, no max-width). Falls back to a hard-edged
-   technical icon tile until a real photo is uploaded per stage. ── */
+/* ── proof sections: packing / freight / install, each its own banner —
+   title above, photo below. Both share the page's .pdv2-wrap side padding
+   (not full-bleed) so the photo never runs edge-to-edge, and the image
+   uses object-fit: contain so an upload whose aspect ratio doesn't match
+   the banner is never aggressively cropped — the whole photo always
+   shows, letterboxed on a neutral surface instead of zoomed into. Falls
+   back to a hard-edged technical icon tile until a real photo is
+   uploaded per stage. ── */
 .pdv2-dv-box {
   border-top: 1px solid var(--bg-line);
   padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
@@ -3761,16 +3702,16 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   width: 100%;
   aspect-ratio: 21 / 9;
   background: var(--bg-surface);
-  border-top: 1px solid var(--bg-line);
-  border-bottom: 1px solid var(--bg-line);
+  border: 1px solid var(--bg-line);
+  border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
 .pdv2-dv-box__media img {
-  width: 100%; height: 100%; object-fit: cover;
+  width: 100%; height: 100%; object-fit: contain;
   transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
 }
-.pdv2-dv-box:hover .pdv2-dv-box__media img { transform: scale(1.04); }
+.pdv2-dv-box:hover .pdv2-dv-box__media img { transform: scale(1.02); }
 .pdv2-dv-box__icon {
   position: relative;
   width: 88px; height: 88px;

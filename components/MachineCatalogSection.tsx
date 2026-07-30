@@ -4,6 +4,11 @@ import { useTranslations } from "next-intl";
 import TransitionLink from "@/components/TransitionLink";
 import { useCms } from "@/lib/useCms";
 import type { ProductFamily } from "@/lib/products";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { SECTION_ELEMENT_DELAY } from "@/components/SectionReveal";
+
+gsap.registerPlugin(useGSAP);
 import localData from "@/data/products.json";
 const localFamilies = (localData as { families: ProductFamily[] }).families;
 
@@ -67,6 +72,34 @@ export default function MachineCatalogSection() {
   const subRef     = useRef<HTMLParagraphElement>(null);
   const tabsRef    = useRef<HTMLDivElement>(null);
   const gridRef    = useRef<HTMLDivElement>(null);
+  const shutterRef = useRef<HTMLDivElement>(null);
+  const shutterMarkRef = useRef<HTMLDivElement>(null);
+
+  const revealAll = () => {
+    [badgeRef.current, titleRef.current, subRef.current, tabsRef.current].filter(Boolean).forEach(el => {
+      const e = el as HTMLElement;
+      e.style.opacity = "1"; e.style.transform = "none";
+    });
+    if (gridRef.current) {
+      gridRef.current.setAttribute("data-mcs-batch-done", "");
+      gridRef.current.querySelectorAll<HTMLElement>(".mcs-card").forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; });
+    }
+    if (shutterRef.current) shutterRef.current.style.display = "none";
+  };
+
+  // ScrollTrigger is a separate plugin bundle — load it lazily since this
+  // section is below the fold, then hand off to useGSAP once it's ready.
+  const [pluginReady, setPluginReady] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
+      if (cancelled) return;
+      gsap.registerPlugin(ScrollTrigger);
+      setPluginReady(true);
+    }).catch(() => { if (!cancelled) revealAll(); });
+    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
+    return () => { cancelled = true; clearTimeout(fallback); };
+  }, []);
 
   // ── "Batch Load" scroll-in — GSAP + ScrollTrigger, fires once ever ──
   // Deliberately NOT dependent on activeTab: individual .mcs-card nodes
@@ -74,83 +107,78 @@ export default function MachineCatalogSection() {
   // `filtered` array), so this entrance binds only to the stable grid
   // container and plays exactly once. Subsequent tab-driven re-renders
   // are handled entirely by the existing CSS `mcs-fade-in` keyframe.
-  useEffect(() => {
-    let ctx: { revert?: () => void } = {};
-    let cancelled = false;
+  useGSAP(() => {
+    if (!pluginReady) return;
+    if (gridRef.current?.hasAttribute("data-mcs-batch-done")) return;
 
-    const revealAll = () => {
-      [badgeRef.current, titleRef.current, subRef.current, tabsRef.current].filter(Boolean).forEach(el => {
-        const e = el as HTMLElement;
-        e.style.opacity = "1"; e.style.transform = "none";
-      });
-      if (gridRef.current) {
-        gridRef.current.setAttribute("data-mcs-batch-done", "");
-        gridRef.current.querySelectorAll<HTMLElement>(".mcs-card").forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; });
-      }
-    };
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const els = [badgeRef.current, titleRef.current, subRef.current, tabsRef.current];
+    if (reduced) {
+      gsap.set(els, { opacity: 1, clearProps: "all" });
+      if (gridRef.current) gsap.set(gridRef.current.querySelectorAll(".mcs-card"), { opacity: 1, clearProps: "all" });
+      gridRef.current?.setAttribute("data-mcs-batch-done", "");
+      return;
+    }
 
-    (async () => {
-      try {
-        const { gsap }          = await import("gsap");
-        const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-        if (cancelled) return;
-        gsap.registerPlugin(ScrollTrigger);
+    // reversible: plays on the way down, reverses on the way back up
+    const headTrigger = { trigger: sectionRef.current, start: "top 85%", end: "bottom top", toggleActions: "play reverse play reverse" };
+    const trigger = { trigger: gridRef.current, start: "top 88%", end: "bottom top", toggleActions: "play reverse play reverse" };
 
-        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Press-plate shutter: a bordered panel with the company mark centered
+    // covers the whole section, then scales down and clears before the
+    // header/grid content underneath starts its own reveal. Everything
+    // else below is offset by SHUTTER_CLEAR so it only starts moving once
+    // the shutter has finished wiping away.
+    const SHUTTER_CLEAR = 0.95;
 
-        ctx = gsap.context(() => {
-          if (gridRef.current?.hasAttribute("data-mcs-batch-done")) return;
+    // One timeline per unique trigger element instead of one ScrollTrigger
+    // per tween (was 6 separate instances all watching sectionRef) — same
+    // relative timing, fewer ScrollTrigger instances to track on scroll.
+    const headTl = gsap.timeline({ scrollTrigger: headTrigger, delay: SECTION_ELEMENT_DELAY });
 
-          const els = [badgeRef.current, titleRef.current, subRef.current, tabsRef.current];
-          if (reduced) {
-            gsap.set(els, { opacity: 1, clearProps: "all" });
-            if (gridRef.current) gsap.set(gridRef.current.querySelectorAll(".mcs-card"), { opacity: 1, clearProps: "all" });
-            gridRef.current?.setAttribute("data-mcs-batch-done", "");
-            return;
-          }
+    if (shutterRef.current) {
+      headTl
+        .to(shutterMarkRef.current, { scale: 1, opacity: 1, duration: 0.35, ease: "power2.out" }, 0)
+        .to(shutterRef.current, { scaleY: 0, duration: 0.55, ease: "power3.inOut", transformOrigin: "top center" }, 0.4)
+        .set(shutterRef.current, { display: "none" }, ">");
+    }
 
-          const trigger = { trigger: gridRef.current, start: "top 88%", toggleActions: "play none none none" };
+    headTl
+      .fromTo(badgeRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out" }, SHUTTER_CLEAR)
+      .fromTo(titleRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power3.out" }, SHUTTER_CLEAR + 0.08)
+      .fromTo(subRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out" }, SHUTTER_CLEAR + 0.18);
 
-          gsap.fromTo(badgeRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out", scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
-          gsap.fromTo(titleRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power3.out", delay: 0.08, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
-          gsap.fromTo(subRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out", delay: 0.18, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
+    // Tabs — border draws in, then each tab lifts with a fast stagger
+    if (tabsRef.current) {
+      headTl.fromTo(tabsRef.current, { scaleX: 0 }, { scaleX: 1, transformOrigin: "left center", duration: 0.5, ease: "power2.out" }, SHUTTER_CLEAR + 0.25);
+      const tabs = Array.from(tabsRef.current.querySelectorAll<HTMLElement>(".mcs__tab"));
+      headTl.fromTo(tabs, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power2.out", stagger: 0.04 }, SHUTTER_CLEAR + 0.35);
+    }
 
-          // Tabs — border draws in, then each tab lifts with a fast stagger
-          if (tabsRef.current) {
-            gsap.fromTo(tabsRef.current, { scaleX: 0 }, { scaleX: 1, transformOrigin: "left center", duration: 0.5, ease: "power2.out", delay: 0.25, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
-            const tabs = Array.from(tabsRef.current.querySelectorAll<HTMLElement>(".mcs__tab"));
-            gsap.fromTo(tabs, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power2.out", stagger: 0.04, delay: 0.35, scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } });
-          }
+    // Grid — column-major "batch load" stagger, auto-detects columns from layout,
+    // cards tilt up out of real depth (steeper rotateX + perspective than
+    // before for a more physically 3D feel, not just a flat lift). Mark the
+    // grid done immediately (not just on tween start) so the CSS mount-fade
+    // is suppressed for the same frame GSAP takes over — otherwise the
+    // still-running CSS animation's computed opacity can briefly outrank
+    // GSAP's inline opacity:0 before the tween begins. Kept as its own
+    // timeline since it watches gridRef, a different trigger element.
+    if (gridRef.current) {
+      gridRef.current.setAttribute("data-mcs-batch-done", "");
+      const cards = Array.from(gridRef.current.querySelectorAll<HTMLElement>(".mcs-card"));
+      gsap.set(cards, { transformPerspective: 1200, transformOrigin: "50% 100%" });
+      gsap.fromTo(cards,
+        { opacity: 0, y: 34, scale: 0.92, rotateX: -32 },
+        {
+          opacity: 1, y: 0, scale: 1, rotateX: 0, duration: 0.6, ease: "power2.out",
+          stagger: { each: 0.05, grid: "auto", from: "start", axis: "x" },
+          delay: SECTION_ELEMENT_DELAY + SHUTTER_CLEAR,
+          scrollTrigger: trigger,
+        }
+      );
+    }
 
-          // Grid — column-major "batch load" stagger, auto-detects columns from layout.
-          // Mark the grid done immediately (not just on tween start) so the CSS
-          // mount-fade is suppressed for the same frame GSAP takes over — otherwise
-          // the still-running CSS animation's computed opacity can briefly outrank
-          // GSAP's inline opacity:0 before the tween begins.
-          if (gridRef.current) {
-            gridRef.current.setAttribute("data-mcs-batch-done", "");
-            const cards = Array.from(gridRef.current.querySelectorAll<HTMLElement>(".mcs-card"));
-            gsap.fromTo(cards,
-              { opacity: 0, y: 18, scale: 0.97 },
-              {
-                opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power2.out",
-                stagger: { each: 0.05, grid: "auto", from: "start", axis: "x" },
-                scrollTrigger: trigger,
-              }
-            );
-          }
-
-          ScrollTrigger.refresh();
-        }, sectionRef);
-      } catch {
-        if (!cancelled) revealAll();
-      }
-    })();
-
-    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
-
-    return () => { cancelled = true; clearTimeout(fallback); ctx.revert?.(); };
-  }, []);
+  }, { scope: sectionRef, dependencies: [pluginReady] });
 
   const totalFamilies = allFamilies.length;
   const totalModels   = allFamilies.reduce((n, f) => n + f.models.length, 0);
@@ -510,9 +538,64 @@ export default function MachineCatalogSection() {
         [data-theme="light"] .mcs-card__name { color: #0d2220; }
         [data-theme="light"] .mcs-card__stat { color: #0d2220; }
         [data-theme="light"] .mcs-card__stat-label { color: rgba(13,34,32,0.7); }
+
+        /* ── Press-plate shutter — blue/red bordered frame with the
+           company mark centered, covers the section on scroll-in and
+           wipes away from the bottom up before the grid reveals ── */
+        .mcs__shutter {
+          position: absolute; inset: 0; z-index: 30;
+          background: var(--bg-base);
+          border: 3px solid transparent;
+          border-image: linear-gradient(135deg, var(--brand-teal), var(--brand-red)) 1;
+          display: flex; align-items: center; justify-content: center;
+          transform-origin: top center;
+          pointer-events: none;
+        }
+        .mcs__shutter-mark {
+          width: clamp(64px, 8vw, 96px); height: clamp(64px, 8vw, 96px);
+          border-radius: 50%;
+          border: 2px solid var(--brand-teal);
+          display: flex; align-items: center; justify-content: center;
+          overflow: hidden;
+          transform: scale(0.5);
+          opacity: 0;
+          box-shadow: 0 0 40px rgba(43,191,179,0.25);
+        }
+        .mcs__shutter-mark img { width: 70%; height: 70%; object-fit: contain; }
+        @media (prefers-reduced-motion: reduce) {
+          .mcs__shutter { display: none; }
+        }
+
+        /* ── 3D card feel: real perspective tilt on hover, not just a
+           flat lift, plus a light sheen that sweeps to sell depth ── */
+        .mcs__grid { perspective: 1400px; }
+        .mcs-card {
+          transform-style: preserve-3d;
+          transition: background .18s, transform .35s cubic-bezier(0.16,1,0.3,1), box-shadow .35s;
+        }
+        .mcs-card:hover {
+          transform: translateY(-6px) rotateX(6deg) rotateY(-4deg) scale(1.015);
+          box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
+        }
+        .mcs-card__top, .mcs-card__bottom { transform: translateZ(24px); }
+        .mcs-card::before {
+          content: "";
+          position: absolute; inset: 0;
+          background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.06) 50%, transparent 60%);
+          transform: translateX(-100%);
+          transition: transform .6s ease;
+          pointer-events: none;
+          z-index: 2;
+        }
+        .mcs-card:hover::before { transform: translateX(100%); }
       `}</style>
 
       <section ref={sectionRef} className="mcs" data-no-anim aria-label={t("sectionAria")}>
+        <div ref={shutterRef} className="mcs__shutter" aria-hidden="true">
+          <div ref={shutterMarkRef} className="mcs__shutter-mark">
+            <img src="/logo.jpeg" alt="" />
+          </div>
+        </div>
         <div className="mcs__blob mcs__blob--t" aria-hidden="true" />
         <div className="mcs__blob mcs__blob--b" aria-hidden="true" />
         <div className="mcs__wrap">

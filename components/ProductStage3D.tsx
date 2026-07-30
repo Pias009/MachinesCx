@@ -17,6 +17,10 @@ interface Props {
    * regardless of viewport position. For grids where every tile should be
    * ready the instant the page loads, not popcorn in as you scroll. */
   eager?: boolean;
+  /** Strip every backing surface (grid, ring, pedestal, corner brackets) —
+   * just the photo itself with its tilt/glow/sheen interaction, floating
+   * on whatever the page background already is. */
+  bare?: boolean;
 }
 
 /**
@@ -26,7 +30,7 @@ interface Props {
  * Pointer-driven only; falls back to a static resting tilt on touch
  * devices and under reduced-motion.
  */
-export default function ProductStage3D({ src, alt, badge, photoKey, priority, variant = "hero", sizes, eager }: Props) {
+export default function ProductStage3D({ src, alt, badge, photoKey, priority, variant = "hero", sizes, eager, bare }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef(0);
   const target = useRef({ rx: 0, ry: 0, mx: 50, my: 50 });
@@ -40,10 +44,11 @@ export default function ProductStage3D({ src, alt, badge, photoKey, priority, va
   useEffect(() => { setLoaded(false); }, [photoKey]);
 
   useEffect(() => {
+    if (bare) { setInteractive(false); return; }
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const coarse = window.matchMedia("(pointer: coarse)").matches;
     setInteractive(!reduced && !coarse);
-  }, []);
+  }, [bare]);
 
   const applyStyle = useCallback(() => {
     const el = frameRef.current;
@@ -98,10 +103,10 @@ export default function ProductStage3D({ src, alt, badge, photoKey, priority, va
       onPointerMove={onMove}
       onPointerLeave={onLeave}
     >
-      <div className="pstage__grid" aria-hidden="true" />
-      <div className="pstage__glow" aria-hidden="true" />
-      {!isCard && <div className="pstage__ring" aria-hidden="true" />}
-      <div className="pstage__pedestal" aria-hidden="true" />
+      {!bare && <div className="pstage__grid" aria-hidden="true" />}
+      {!bare && <div className="pstage__glow" aria-hidden="true" />}
+      {!isCard && !bare && <div className="pstage__ring" aria-hidden="true" />}
+      {!bare && <div className="pstage__pedestal" aria-hidden="true" />}
 
       <div className="pstage__tilt">
         <div className={`pstage__img${loaded ? "" : " pstage__img--loading"}`}>
@@ -117,11 +122,11 @@ export default function ProductStage3D({ src, alt, badge, photoKey, priority, va
             onError={() => setLoaded(true)}
           />
         </div>
-        <div className="pstage__sheen" aria-hidden="true" />
+        {!bare && <div className="pstage__sheen" aria-hidden="true" />}
       </div>
 
       {badge && <span className="pstage__badge">{badge}</span>}
-      {!isCard && (
+      {!isCard && !bare && (
         <>
           <div className="pstage__corner pstage__corner--tl" aria-hidden="true" />
           <div className="pstage__corner pstage__corner--br" aria-hidden="true" />

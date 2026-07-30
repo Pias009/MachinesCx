@@ -2,515 +2,351 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import TransitionLink from "@/components/TransitionLink";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import {
+  MessageSquare, FileText, ShoppingCart, Factory,
+  Truck, Wrench, GraduationCap, Headphones,
+  type LucideIcon,
+} from "lucide-react";
 
-gsap.registerPlugin(ScrollTrigger);
+// ─── Step order — copy comes from the clientJourney.steps translation
+// namespace, keyed by id. Each step gets its own real icon instead of the
+// company logo repeated eight times. ─────────────────────────────
+const STEP_IDS = [
+  "inquiry",
+  "quotation",
+  "order",
+  "manufacturing",
+  "delivery",
+  "commissioning",
+  "training",
+  "aftersales",
+] as const;
 
-// ─── Step order + icons — copy comes from the clientJourney.steps
-// translation namespace, keyed by id ─────────────────────────────
-const STEP_META = [
-  {
-    id: "inquiry",
-    num: "01",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="7" width="26" height="18" rx="1.5" fill="currentColor" fillOpacity=".14" stroke="none"/>
-        <rect x="3" y="7" width="26" height="18" rx="1.5"/>
-        <path d="M3 9.5l13 9 13-9" fill="currentColor" fillOpacity=".2"/>
-        <path d="M22 20l4 4M10 20l-4 4" opacity=".55"/>
-      </svg>
-    ),
-  },
-  {
-    id: "quotation",
-    num: "02",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="6" y="3" width="20" height="26" rx="1.5" fill="currentColor" fillOpacity=".14" stroke="none"/>
-        <rect x="6" y="3" width="20" height="26" rx="1.5"/>
-        <path d="M11 10h10M11 15h10M11 20h6" opacity=".85"/>
-        <circle cx="23" cy="22" r="5" fill="currentColor" fillOpacity=".25" stroke="none"/>
-        <path d="M20.5 22l1.7 1.7 3.3-3.4" opacity=".9"/>
-      </svg>
-    ),
-  },
-  {
-    id: "order",
-    num: "03",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 4h14l6 6v18H6z" fill="currentColor" fillOpacity=".14" stroke="none"/>
-        <path d="M6 4h14l6 6v18H6z"/>
-        <path d="M20 4v6h6" opacity=".7"/>
-        <path d="M11 16l3 3 7-7" fill="none"/>
-      </svg>
-    ),
-  },
-  {
-    id: "manufacturing",
-    num: "04",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 26V14l7-5v5l7-5v5l7-5v17" fill="currentColor" fillOpacity=".1" stroke="none"/>
-        <path d="M3 26V14l7-5v5l7-5v5l7-5v17"/>
-        <path d="M3 26h26" opacity=".85"/>
-        <rect x="12" y="19" width="8" height="7" fill="currentColor" fillOpacity=".22" stroke="none"/>
-        <rect x="12" y="19" width="8" height="7"/>
-        <path d="M7 19h3v4H7z" opacity=".5"/>
-        <path d="M22 19h3v4h-3z" opacity=".5"/>
-      </svg>
-    ),
-  },
-  {
-    id: "delivery",
-    num: "05",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="1" y="11" width="18" height="14" rx="1.5" fill="currentColor" fillOpacity=".14" stroke="none"/>
-        <rect x="1" y="11" width="18" height="14" rx="1.5"/>
-        <path d="M19 15h7l4 6v4h-11" fill="currentColor" fillOpacity=".1" stroke="currentColor"/>
-        <circle cx="7" cy="26" r="2.5" fill="currentColor" fillOpacity=".3"/>
-        <circle cx="24" cy="26" r="2.5" fill="currentColor" fillOpacity=".3"/>
-        <path d="M10 11V7l6-4" opacity=".5"/>
-      </svg>
-    ),
-  },
-  {
-    id: "commissioning",
-    num: "06",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="16" cy="16" r="5" fill="currentColor" fillOpacity=".22"/>
-        <path d="M16 3v4M16 25v4M3 16h4M25 16h4"/>
-        <path d="M7.5 7.5l2.8 2.8M21.7 21.7l2.8 2.8M7.5 24.5l2.8-2.8M21.7 10.3l2.8-2.8" opacity=".5"/>
-      </svg>
-    ),
-  },
-  {
-    id: "training",
-    num: "07",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="8" r="4" fill="currentColor" fillOpacity=".22"/>
-        <path d="M4 28v-3a8 8 0 0116 0v3" fill="currentColor" fillOpacity=".1"/>
-        <circle cx="25" cy="8" r="3" opacity=".5"/>
-        <path d="M22 14l2 2 4-4" opacity=".9"/>
-      </svg>
-    ),
-  },
-  {
-    id: "aftersales",
-    num: "08",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 10a10 10 0 0120 0c0 8-10 18-10 18S6 18 6 10z" fill="currentColor" fillOpacity=".16" stroke="currentColor"/>
-        <circle cx="16" cy="10" r="3" fill="currentColor" fillOpacity=".3"/>
-        <path d="M10 28h12" opacity=".4"/>
-      </svg>
-    ),
-  },
-];
+const STEP_ICONS: Record<(typeof STEP_IDS)[number], LucideIcon> = {
+  inquiry: MessageSquare,
+  quotation: FileText,
+  order: ShoppingCart,
+  manufacturing: Factory,
+  delivery: Truck,
+  commissioning: Wrench,
+  training: GraduationCap,
+  aftersales: Headphones,
+};
+
+const STEP_COLORS = ["var(--brand-teal)", "var(--brand-amber)", "var(--brand-rose)"];
 
 type StepCopy = { label: string; tagline: string; desc: string; metric1v: string; metric1l: string; metric2v: string; metric2l: string };
 
 export default function ClientJourney() {
   const t = useTranslations("clientJourney");
   const stepsCopy = t.raw("steps") as Record<string, StepCopy>;
-  const STEPS = STEP_META.map((m) => {
-    const c = stepsCopy[m.id];
+  const STEPS = STEP_IDS.map((id, i) => {
+    const c = stepsCopy[id];
     return {
-      ...m,
+      id,
+      num: String(i + 1).padStart(2, "0"),
       label: c.label,
       tagline: c.tagline,
       desc: c.desc,
       metrics: [{ v: c.metric1v, l: c.metric1l }, { v: c.metric2v, l: c.metric2l }],
+      color: STEP_COLORS[i % STEP_COLORS.length],
+      Icon: STEP_ICONS[id],
     };
   });
 
-  const [active, setActive] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
-  const headRef    = useRef<HTMLDivElement>(null);
-  const panelRef   = useRef<HTMLDivElement>(null);
-  const rowRefs    = useRef<Array<HTMLButtonElement | null>>([]);
+  const headRef = useRef<HTMLDivElement>(null);
+  const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
 
+  // which step's detail is open in the centered overlay — null when closed
+  const [activeStep, setActiveStep] = useState<number | null>(null);
+
+  // Esc closes the open overlay, same as clicking outside it
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(headRef.current, { y: 40, opacity: 0 }, {
-        y: 0, opacity: 1, duration: 1, ease: "expo.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 80%", toggleActions: "play none none none" },
-      });
-      gsap.fromTo(panelRef.current, { y: 30, opacity: 0 }, {
-        y: 0, opacity: 1, duration: 0.9, delay: 0.15, ease: "expo.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 75%", toggleActions: "play none none none" },
-      });
-    }, sectionRef);
-    return () => ctx.revert();
-  }, []);
+    if (activeStep === null) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setActiveStep(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [activeStep]);
 
-  // detail-panel content swap: quick fade/rise whenever the selected
-  // step changes, keyed to `active` so it replays every switch
-  const detailRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!detailRef.current) return;
-    gsap.fromTo(detailRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" });
-  }, [active]);
-
-  const step = STEPS[active];
-  const STEP_COLORS = ["var(--brand-teal)", "var(--brand-amber)", "var(--brand-rose)"];
-  const stepColor = STEP_COLORS[active % STEP_COLORS.length];
+  const active = activeStep !== null ? STEPS[activeStep] : null;
 
   return (
     <>
       <style suppressHydrationWarning>{`
         .cj {
           position: relative;
-          background: #070f0e;
-          padding: clamp(4rem,7vw,6rem) 0;
-          overflow: hidden;
+          background: #fafafa;
+          padding: clamp(8rem,14vw,13rem) 0;
         }
-        .cj::after {
-          content: "";
-          position: absolute; top: 0; left: 0; right: 0;
-          height: 4px; background: linear-gradient(90deg, var(--brand-teal), var(--brand-amber), var(--brand-rose), var(--brand-teal));
-          background-size: 200% 100%;
-          animation: cj-flow 6s linear infinite;
-          z-index: 1;
-        }
-        @keyframes cj-flow {
-          0% { background-position: 0% 0; }
-          100% { background-position: 200% 0; }
-        }
-        .cj::before {
-          content: "";
-          position: absolute; inset: 0;
-          background:
-            radial-gradient(circle at 12% 20%, rgba(43,191,179,0.16), transparent 45%),
-            radial-gradient(circle at 88% 15%, rgba(245,158,11,0.14), transparent 40%),
-            radial-gradient(circle at 50% 100%, rgba(225,29,72,0.12), transparent 45%);
-          pointer-events: none;
-          z-index: 0;
-        }
-
         .cj__wrap {
-          position: relative; z-index: 2;
-          max-width: 1280px; margin: 0 auto;
-          padding-inline: clamp(1.25rem,4vw,3.5rem);
+          max-width: none; margin: 0 auto;
+          padding-inline: clamp(1.5rem,7vw,7rem);
         }
-
         .cj__head {
-          display: grid; grid-template-columns: 1fr auto;
-          gap: 2rem; align-items: flex-end;
-          margin-bottom: clamp(2rem,4vw,3rem);
+          margin-bottom: clamp(2.5rem,5vw,4rem);
+          text-align: center;
         }
         .cj__label {
-          font-family: var(--ff-mono); font-weight: 700; font-size: .72rem;
+          font-family: var(--ff-mono); font-weight: 600; font-size: .72rem;
           letter-spacing: .2em; text-transform: uppercase;
-          color: var(--brand-amber); margin-bottom: .75rem;
-          display: flex; align-items: center; gap: .7rem;
-        }
-        .cj__label::before {
-          content: ""; display: inline-block;
-          width: 1.75rem; height: 3px; border-radius: 2px;
-          background: linear-gradient(90deg, var(--brand-teal), var(--brand-amber));
+          color: #71717a; margin-bottom: .75rem;
+          display: inline-flex; align-items: center; gap: .6rem;
         }
         .cj__title {
           font-family: var(--ff-display); font-weight: 800;
-          font-size: clamp(2.4rem,4.4vw,4.2rem);
-          line-height: .9; letter-spacing: -.02em;
-          color: #fff; margin: 0;
+          font-size: clamp(2rem,3.6vw,3.2rem);
+          line-height: 1; letter-spacing: -.02em;
+          color: #18181b; margin: 0;
         }
         .cj__title em {
           font-style: normal;
-          background: linear-gradient(135deg, var(--brand-teal), var(--brand-amber) 55%, var(--brand-rose));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-        .cj__count {
-          font-family: var(--ff-mono); font-weight: 700; font-size: .78rem;
-          letter-spacing: .14em; text-transform: uppercase;
-          color: #fff;
-          border: 1px solid transparent;
-          background:
-            linear-gradient(#0d1716, #0d1716) padding-box,
-            linear-gradient(135deg, var(--brand-teal), var(--brand-amber), var(--brand-rose)) border-box;
-          padding: .5rem .9rem;
-          white-space: nowrap;
-        }
-        .cj__count b { color: var(--brand-amber); font-weight: 800; }
-
-        /* ── single fixed-height panel: index left, detail right ── */
-        .cj__panel {
-          display: grid;
-          grid-template-columns: 320px 1fr;
-          border: 1px solid rgba(255,255,255,0.12);
-          background: rgba(255,255,255,0.015);
-          box-shadow: 0 30px 60px -30px rgba(0,0,0,0.6);
+          color: var(--brand-teal);
         }
 
-        .cj__index {
-          border-right: 1px solid rgba(255,255,255,0.1);
-          max-height: 460px;
-          overflow-y: auto;
+        /* ── all 8 steps sit on one continuous line so the zigzag reads as
+           a single clean wave, never broken by a row-wrap ── */
+        .cj__row-wrap {
+          position: relative;
         }
-        .cj__index-row {
-          width: 100%;
-          display: grid;
-          grid-template-columns: 40px 1fr;
-          align-items: center;
-          gap: .85rem;
-          padding: .8rem 1.1rem;
-          border-bottom: 1px solid rgba(255,255,255,0.06);
-          background: transparent;
-          border-left: 2px solid transparent;
-          cursor: pointer;
-          text-align: left;
-          transition: background .2s, border-color .2s;
+        .cj__timeline {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: clamp(0.75rem, 2vw, 1.75rem);
+          /* room for the zigzag swing below — odd cards ride up, even
+             cards drop down, both need slack or they clip against the
+             section edge */
+          padding-block: clamp(7.5rem, 12vw, 10.5rem);
         }
-        .cj__index-row:last-child { border-bottom: none; }
-        .cj__index-row:hover { background: rgba(255,255,255,0.03); }
-        .cj__index-row--active {
-          background: color-mix(in srgb, var(--step-color, var(--brand-teal)) 12%, transparent);
-          border-left-color: var(--step-color, var(--brand-teal));
-        }
-        .cj__index-num {
-          font-family: var(--ff-mono); font-weight: 700; font-size: .74rem;
-          color: rgba(255,255,255,0.65);
-          border: 1px solid rgba(255,255,255,0.22);
-          border-radius: 50%;
-          width: 30px; height: 30px;
-          display: flex; align-items: center; justify-content: center;
-          transition: color .2s, border-color .2s, background .2s;
-        }
-        .cj__index-row--active .cj__index-num {
-          color: #0d1716;
-          border-color: var(--step-color, var(--brand-teal));
-          background: var(--step-color, var(--brand-teal));
-        }
-        .cj__index-text { min-width: 0; }
-        .cj__index-label {
-          font-family: var(--ff-display); font-weight: 800; font-size: .95rem;
-          letter-spacing: .01em; text-transform: uppercase;
-          color: rgba(255,255,255,0.82);
-          display: block; line-height: 1.2;
-          transition: color .2s;
-        }
-        .cj__index-row--active .cj__index-label { color: #fff; }
-        .cj__index-tagline {
-          font-family: var(--ff-body); font-weight: 500; font-size: .76rem;
-          color: rgba(255,255,255,0.48);
-          display: block; margin-top: .15rem;
-          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-          transition: color .2s;
-        }
-        .cj__index-row--active .cj__index-tagline { color: rgba(255,255,255,0.7); }
 
-        .cj__detail {
-          padding: clamp(1.75rem,3vw,2.75rem);
-          min-height: 460px;
+        .cj__row {
+          position: relative;
+          flex: 1 1 0;
+          min-width: 0;
+          max-width: 140px;
           display: flex; flex-direction: column;
+          align-items: center;
+          text-align: center;
+          gap: 1.1rem;
+          cursor: pointer;
         }
-        .cj__detail-top {
-          display: flex; align-items: flex-start; gap: 1.5rem;
-          margin-bottom: 1.5rem;
+        /* full up/down zigzag — odd cards ride high above the baseline,
+           even cards drop well below it, one continuous wave across the
+           whole row */
+        .cj__row:nth-child(odd)  { transform: translateY(clamp(-6rem, -10vw, -8rem)); }
+        .cj__row:nth-child(even) { transform: translateY(clamp(6rem, 10vw, 8rem)); }
+
+        @media (max-width: 900px) {
+          .cj__timeline {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            justify-content: flex-start;
+            scrollbar-width: none;
+          }
+          .cj__timeline::-webkit-scrollbar { display: none; }
+          .cj__row { flex: 0 0 auto; width: 110px; max-width: none; }
         }
-        .cj__detail-icon {
-          width: 60px; height: 60px; flex-shrink: 0;
+
+        .cj__badge {
+          position: relative;
+          width: clamp(64px, 7vw, 84px);
+          height: clamp(64px, 7vw, 84px);
+          border-radius: 18px;
+          background: var(--step-color, var(--brand-teal));
+          transform: rotate(45deg);
           display: flex; align-items: center; justify-content: center;
-          border-radius: 14px;
-          border: 1px solid color-mix(in srgb, var(--step-color, var(--brand-teal)) 45%, transparent);
-          background: color-mix(in srgb, var(--step-color, var(--brand-teal)) 16%, transparent);
-          color: var(--step-color, var(--brand-teal));
-          box-shadow: 0 0 24px -6px color-mix(in srgb, var(--step-color, var(--brand-teal)) 55%, transparent);
+          box-shadow:
+            0 16px 28px -12px color-mix(in srgb, var(--step-color, var(--brand-teal)) 55%, transparent),
+            inset 0 1px 0 rgba(255,255,255,0.25);
+          transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease;
         }
-        .cj__detail-eyebrow {
-          font-family: var(--ff-mono); font-weight: 700; font-size: .68rem;
-          letter-spacing: .16em; text-transform: uppercase;
-          color: var(--step-color, var(--brand-teal)); margin-bottom: .4rem; display: block;
+        .cj__row:hover .cj__badge {
+          transform: rotate(45deg) scale(1.06);
+          box-shadow:
+            0 20px 34px -12px color-mix(in srgb, var(--step-color, var(--brand-teal)) 65%, transparent),
+            inset 0 1px 0 rgba(255,255,255,0.25);
         }
-        .cj__detail-heading {
-          font-family: var(--ff-display); font-weight: 800;
-          font-size: clamp(1.75rem,2.8vw,2.5rem);
-          line-height: .95; letter-spacing: -.01em; color: #fff;
-          margin: 0 0 .35rem;
+        .cj__row:active .cj__badge { transform: rotate(45deg) scale(0.95); }
+        .cj__badge-inner {
+          transform: rotate(-45deg);
+          display: flex; align-items: center; justify-content: center;
         }
-        .cj__detail-tagline {
-          font-family: var(--ff-body); font-size: .95rem;
-          color: rgba(255,255,255,0.55); margin: 0;
-        }
-        .cj__detail-desc {
-          font-family: var(--ff-body); font-size: .95rem;
-          line-height: 1.7; color: rgba(255,255,255,0.65);
-          max-width: 52ch; margin: 0 0 auto;
-        }
-        .cj__detail-metrics {
-          display: flex; gap: 0; margin-top: 2rem; padding-top: 1.5rem;
-          border-top: 1px solid rgba(255,255,255,0.08);
-        }
-        .cj__metric {
-          padding: 0 1.75rem 0 0;
-          border-right: 1px solid rgba(255,255,255,0.08);
-          margin-right: 1.75rem;
-        }
-        .cj__metric:last-child { border-right: none; margin-right: 0; }
-        .cj__metric-val {
-          font-family: var(--ff-display); font-weight: 800;
-          font-size: 1.75rem; line-height: 1; letter-spacing: -.01em;
+        .cj__badge-inner svg {
+          width: 72%; height: 72%;
           color: #fff;
         }
-        .cj__metric-label {
-          font-family: var(--ff-mono); font-weight: 700; font-size: .62rem;
-          letter-spacing: .1em; text-transform: uppercase;
-          color: var(--step-color, var(--brand-teal)); display: block; margin-top: .35rem;
-        }
 
-        .cj__footer {
-          margin-top: clamp(2rem,3.5vw,3rem);
-          display: flex; align-items: center; justify-content: space-between;
-          gap: 1.5rem; flex-wrap: wrap;
-        }
-        .cj__footer-text {
-          font-family: var(--ff-mono); font-size: .72rem;
-          letter-spacing: .1em; text-transform: uppercase;
-          color: rgba(255,255,255,0.7);
-        }
-        .cj__footer-text strong {
-          background: linear-gradient(135deg, var(--brand-teal), var(--brand-amber), var(--brand-rose));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          font-weight: 800;
-          font-size: .78rem;
-        }
-        .cj__cta {
-          display: inline-flex; align-items: center; gap: .65rem;
-          padding: .85rem 1.9rem;
-          border: none; border-radius: 999px;
-          background: linear-gradient(135deg, var(--brand-teal), var(--brand-amber));
-          color: #0d1716;
+        .cj__text { min-width: 0; }
+        .cj__num {
           font-family: var(--ff-mono); font-weight: 700; font-size: .68rem;
-          letter-spacing: .14em; text-transform: uppercase;
-          text-decoration: none;
-          box-shadow: 0 8px 24px -8px color-mix(in srgb, var(--brand-amber) 60%, transparent);
-          transition: transform .18s, box-shadow .18s, background .3s;
+          letter-spacing: .12em; color: var(--step-color, var(--brand-teal));
+          display: block; margin-bottom: .3rem;
         }
-        .cj__cta:hover {
-          background: linear-gradient(135deg, var(--brand-amber), var(--brand-rose));
-          transform: translateY(-2px);
-          box-shadow: 0 12px 30px -8px color-mix(in srgb, var(--brand-rose) 55%, transparent);
+        .cj__row-label {
+          font-family: var(--ff-display); font-weight: 700; font-size: 0.82rem;
+          letter-spacing: -.005em; color: #18181b;
+          margin: 0; text-transform: uppercase;
         }
 
-        @media (max-width: 860px) {
-          .cj__panel { grid-template-columns: 1fr; }
-          .cj__index {
-            border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1);
-            max-height: none;
-            display: grid; grid-template-columns: repeat(4, 1fr);
-          }
-          .cj__index-row {
-            grid-template-columns: 1fr; justify-items: center; text-align: center;
-            border-bottom: none; border-left: none;
-            border-right: 1px solid rgba(255,255,255,0.06);
-            padding: .75rem .5rem;
-          }
-          .cj__index-row:nth-child(4n) { border-right: none; }
-          .cj__index-tagline { display: none; }
-          .cj__detail { min-height: 0; }
-          .cj__detail-top { flex-direction: column; }
+        /* ── centered overlay — click a diamond, its icon + readable text
+           fade in as a real modal-style card in the middle of the screen,
+           with a dimmed backdrop. Click the backdrop, the close button,
+           or the same diamond again (or press Esc) to fade it back out. ── */
+        .cj__overlay {
+          position: fixed; inset: 0; z-index: 200;
+          display: flex; align-items: center; justify-content: center;
+          padding: 1.5rem;
+        }
+        .cj__overlay-backdrop {
+          position: absolute; inset: 0;
+          background: rgba(15,15,17,0.55);
+          backdrop-filter: blur(6px);
+          opacity: 0;
+          animation: cj-fade-in 0.3s ease forwards;
+        }
+        .cj__overlay-card {
+          position: relative;
+          width: min(26rem, 100%);
+          padding: 2.25rem 2rem 2rem;
+          border-radius: 24px;
+          background: var(--step-color, var(--brand-teal));
+          box-shadow: 0 40px 80px -24px rgba(0,0,0,0.5);
+          text-align: center;
+          opacity: 0;
+          transform: scale(0.92) translateY(10px);
+          animation: cj-pop-in 0.4s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        @keyframes cj-fade-in { to { opacity: 1; } }
+        @keyframes cj-pop-in { to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        .cj__overlay-close {
+          position: absolute; top: 1rem; right: 1rem;
+          width: 32px; height: 32px;
+          display: flex; align-items: center; justify-content: center;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.18);
+          color: #fff;
+          border: none; cursor: pointer;
+          transition: background 0.15s ease;
+        }
+        .cj__overlay-close:hover { background: rgba(255,255,255,0.3); }
+
+        .cj__overlay-icon {
+          width: 72px; height: 72px;
+          margin: 0 auto 1.25rem;
+          border-radius: 20px;
+          background: rgba(255,255,255,0.16);
+          display: flex; align-items: center; justify-content: center;
+        }
+        .cj__overlay-icon svg { width: 40px; height: 40px; color: #fff; }
+        .cj__overlay-num {
+          font-family: var(--ff-mono); font-size: 0.7rem;
+          letter-spacing: 0.14em; text-transform: uppercase;
+          color: rgba(255,255,255,0.75);
+          display: block; margin-bottom: 0.4rem;
+        }
+        .cj__overlay-label {
+          font-family: var(--ff-display); font-weight: 700; font-size: 1.4rem;
+          letter-spacing: -0.01em; color: #fff;
+          margin: 0 0 0.9rem; text-transform: uppercase;
+        }
+        .cj__overlay-desc {
+          margin: 0;
+          font-family: var(--ff-body); font-size: 0.98rem;
+          line-height: 1.65; color: rgba(255,255,255,0.95);
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .cj__index-row { transition: none; }
+          .cj__overlay-backdrop, .cj__overlay-card { animation-duration: 0.15s; }
         }
 
-        [data-theme="light"] .cj { background: #f2f9f8; background-image: linear-gradient(rgba(13,34,32,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(13,34,32,0.05) 1px, transparent 1px); }
-        [data-theme="light"] .cj__title { color: #0d2220; }
-        [data-theme="light"] .cj__count { color: rgba(13,34,32,0.5); border-color: rgba(13,34,32,0.14); }
-        [data-theme="light"] .cj__panel { background: #fff; border-color: rgba(13,34,32,0.1); }
-        [data-theme="light"] .cj__index { border-color: rgba(13,34,32,0.1); }
-        [data-theme="light"] .cj__index-row { border-color: rgba(13,34,32,0.06); }
-        [data-theme="light"] .cj__index-num { color: rgba(13,34,32,0.55); border-color: rgba(13,34,32,0.2); }
-        [data-theme="light"] .cj__index-label { color: rgba(13,34,32,0.72); }
-        [data-theme="light"] .cj__index-row--active .cj__index-label { color: #0d2220; }
-        [data-theme="light"] .cj__index-tagline { color: rgba(13,34,32,0.5); }
-        [data-theme="light"] .cj__index-row--active .cj__index-tagline { color: rgba(13,34,32,0.75); }
-        [data-theme="light"] .cj__detail-heading { color: #0d2220; }
-        [data-theme="light"] .cj__detail-tagline { color: rgba(13,34,32,0.6); }
-        [data-theme="light"] .cj__detail-desc { color: rgba(13,34,32,0.68); }
-        [data-theme="light"] .cj__detail-metrics { border-color: rgba(13,34,32,0.1); }
-        [data-theme="light"] .cj__metric { border-color: rgba(13,34,32,0.1); }
-        [data-theme="light"] .cj__metric-val { color: #0d2220; }
-        [data-theme="light"] .cj__footer-text { color: rgba(13,34,32,0.6); }
-        [data-theme="light"] .cj__count { background: linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg, var(--brand-teal), var(--brand-amber), var(--brand-rose)) border-box; color: #0d2220; }
-        [data-theme="light"] .cj__cta { color: #0d1716; }
+        .cj__row:focus-visible {
+          outline: 2px solid var(--step-color, var(--brand-teal));
+          outline-offset: 6px;
+          border-radius: 12px;
+        }
+
+        .cj__footer {
+          margin-top: clamp(2.5rem,4vw,3.5rem);
+          display: flex; align-items: center; justify-content: center;
+          gap: 1.25rem; flex-wrap: wrap;
+          text-align: center;
+        }
+        .cj__footer-text {
+          font-family: var(--ff-body); font-size: .85rem;
+          color: #71717a;
+        }
+        .cj__footer-text strong { color: #18181b; font-weight: 600; }
+        .cj__cta {
+          display: inline-flex; align-items: center; gap: .5rem;
+          padding: .7rem 1.5rem;
+          border-radius: 999px;
+          background: #18181b;
+          color: #fff;
+          font-family: var(--ff-body); font-weight: 500; font-size: .85rem;
+          text-decoration: none;
+          transition: background 0.15s ease, transform 0.15s cubic-bezier(0.16,1,0.3,1);
+        }
+        .cj__cta:hover { background: #3f3f46; }
+        .cj__cta:active { transform: scale(0.98); }
+
+        [data-theme="dark"] .cj { background: #09090b; }
+        [data-theme="dark"] .cj__label { color: #a1a1aa; }
+        [data-theme="dark"] .cj__title { color: #fafafa; }
+        [data-theme="dark"] .cj__row-label { color: #fafafa; }
+        [data-theme="dark"] .cj__footer-text { color: #a1a1aa; }
+        [data-theme="dark"] .cj__footer-text strong { color: #fafafa; }
+        [data-theme="dark"] .cj__cta { background: #fafafa; color: #18181b; }
+        [data-theme="dark"] .cj__cta:hover { background: #e4e4e7; }
       `}</style>
 
       <section className="cj" ref={sectionRef} aria-label={t("sectionAria")}>
         <div className="cj__wrap">
           <div className="cj__head" ref={headRef} data-no-anim>
-            <div>
-              <div className="cj__label">{t("eyebrow")}</div>
-              <h2 className="cj__title">
-                {t("titleLine1")}<br />{t("titleLine2")} <em>{t("titleEm")}</em>
-              </h2>
-            </div>
-            <div className="cj__count" aria-hidden>
-              {t("stagePrefix")} <b>{String(active + 1).padStart(2, "0")}</b> / {STEPS.length}
-            </div>
+            <div className="cj__label">{t("eyebrow")}</div>
+            <h2 className="cj__title">
+              {t("titleLine1")} {t("titleLine2")} <em>{t("titleEm")}</em>
+            </h2>
           </div>
 
-          <div className="cj__panel" ref={panelRef} data-no-anim style={{ ["--step-color" as string]: stepColor }}>
-            <div className="cj__index" role="tablist" aria-label={t("stepsAria")}>
-              {STEPS.map((s, i) => {
-                const isActive = active === i;
-                return (
-                  <button
-                    key={s.id}
-                    ref={el => { rowRefs.current[i] = el; }}
-                    className={`cj__index-row${isActive ? " cj__index-row--active" : ""}`}
-                    onClick={() => setActive(i)}
-                    role="tab"
-                    aria-selected={isActive}
-                    style={isActive ? { ["--step-color" as string]: STEP_COLORS[i % STEP_COLORS.length] } : undefined}
-                  >
-                    <span className="cj__index-num">{s.num}</span>
-                    <span className="cj__index-text">
-                      <span className="cj__index-label">{s.label}</span>
-                      <span className="cj__index-tagline">{s.tagline}</span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="cj__detail" ref={detailRef} role="tabpanel">
-              <div className="cj__detail-top">
-                <div className="cj__detail-icon" aria-hidden>{step.icon}</div>
-                <div>
-                  <span className="cj__detail-eyebrow">{t("stepOfLabel", { num: step.num, total: STEPS.length })}</span>
-                  <h3 className="cj__detail-heading">{step.label}</h3>
-                  <p className="cj__detail-tagline">{step.tagline}</p>
-                </div>
-              </div>
-
-              <p className="cj__detail-desc">{step.desc}</p>
-
-              <div className="cj__detail-metrics">
-                {step.metrics.map(m => (
-                  <div key={m.l} className="cj__metric">
-                    <div className="cj__metric-val">{m.v}</div>
-                    <span className="cj__metric-label">{m.l}</span>
+          <div className="cj__row-wrap">
+            <div className="cj__timeline" role="list" aria-label={t("stepsAria")}>
+              {STEPS.map((s, i) => (
+                <div
+                  className="cj__row"
+                  key={s.id}
+                  role="listitem"
+                  tabIndex={0}
+                  ref={el => { rowRefs.current[i] = el; }}
+                  data-no-anim
+                  onClick={() => setActiveStep(cur => (cur === i ? null : i))}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setActiveStep(cur => (cur === i ? null : i));
+                    }
+                  }}
+                  aria-haspopup="dialog"
+                  aria-expanded={activeStep === i}
+                >
+                  <div className="cj__badge" style={{ ["--step-color" as string]: s.color }}>
+                    <div className="cj__badge-inner">
+                      <s.Icon strokeWidth={1.75} aria-hidden="true" />
+                    </div>
                   </div>
-                ))}
-              </div>
+                  <div className="cj__text">
+                    <span className="cj__num">{s.num}</span>
+                    <h3 className="cj__row-label">{s.label}</h3>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="cj__footer">
             <p className="cj__footer-text">
-              {t("footerText")}&nbsp;
-              <strong>{t("footerStrong")}</strong>
+              {t("footerText")}&nbsp;<strong>{t("footerStrong")}</strong>
             </p>
             <TransitionLink href="/inquiries" className="cj__cta">
               {t("cta")}
@@ -521,6 +357,37 @@ export default function ClientJourney() {
           </div>
         </div>
       </section>
+
+      {/* centered click-to-open overlay — icon + readable full description,
+          detached from the diamond's position, dimmed backdrop behind it */}
+      {active && (
+        <div
+          className="cj__overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label={active.label}
+        >
+          <div className="cj__overlay-backdrop" onClick={() => setActiveStep(null)} />
+          <div className="cj__overlay-card" style={{ ["--step-color" as string]: active.color }}>
+            <button
+              type="button"
+              className="cj__overlay-close"
+              onClick={() => setActiveStep(null)}
+              aria-label={t("closeAria")}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            </button>
+            <div className="cj__overlay-icon">
+              <active.Icon strokeWidth={1.75} aria-hidden="true" />
+            </div>
+            <span className="cj__overlay-num">{active.num}</span>
+            <h3 className="cj__overlay-label">{active.label}</h3>
+            <p className="cj__overlay-desc">{active.desc}</p>
+          </div>
+        </div>
+      )}
     </>
   );
 }

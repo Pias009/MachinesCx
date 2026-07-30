@@ -12,6 +12,7 @@ const MachineCatalogSection = dynamic(() => import("@/components/MachineCatalogS
 const ConfiguratorCTA    = dynamic(() => import("@/components/ConfiguratorCTA"),    { ssr: false });
 const NewsStrip          = dynamic(() => import("@/components/NewsStrip"),          { ssr: true  });
 const SectionReveal      = dynamic(() => import("@/components/SectionReveal"),      { ssr: false });
+const AudienceSection    = dynamic(() => import("@/components/AudienceSection"),    { ssr: false });
 
 export default function Home() {
   return (
@@ -25,6 +26,9 @@ export default function Home() {
       {/* Original hero */}
       <ScrollHome />
       <ClientJourney />
+
+      {/* Light periwinkle card block — extends the ClientJourney light theme */}
+      <SectionReveal delay={80}><AudienceSection /></SectionReveal>
 
       {/* Below the fold — all deferred */}
       <SectionReveal delay={80}><TrustSection /></SectionReveal>

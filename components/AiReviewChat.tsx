@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { familyBySlug } from "@/lib/products";
 
 interface OrderMachine { slug: string; name: string; series: string; model: string; qty: number; notes: string }
@@ -22,15 +23,15 @@ interface ChatMsg {
   appliedKeys?: Set<number>; // indices into `suggestions` already applied
 }
 
-function suggestionLabel(s: Suggestion): string {
+function suggestionLabel(s: Suggestion, t: ReturnType<typeof useTranslations>): string {
   if (s.type === "add_machine") {
     const fam = familyBySlug(s.slug ?? "");
-    return `+ Add ${fam?.name ?? s.slug}`;
+    return t("suggestions.addMachine", { name: fam?.name ?? s.slug ?? "" });
   }
-  if (s.type === "edit_machine_qty") return `Set quantity to ${s.qty}`;
-  if (s.type === "edit_machine_notes") return `Update notes: "${s.notes}"`;
-  if (s.type === "add_part") return `+ Add part: ${s.name}`;
-  return "Apply";
+  if (s.type === "edit_machine_qty") return t("suggestions.setQty", { qty: s.qty ?? 0 });
+  if (s.type === "edit_machine_notes") return t("suggestions.updateNotes", { notes: s.notes ?? "" });
+  if (s.type === "add_part") return t("suggestions.addPart", { name: s.name ?? "" });
+  return t("suggestions.apply");
 }
 
 export default function AiReviewChat({
@@ -44,6 +45,7 @@ export default function AiReviewChat({
   onAddPart: (name: string) => void;
   onContinue: () => void;
 }) {
+  const t = useTranslations("aiReviewChat");
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -72,7 +74,7 @@ export default function AiReviewChat({
       setMessages(prev => [...prev, { role: "assistant", content: j.text || "…", suggestions: j.suggestions ?? [] }]);
     } catch {
       setUnavailable(true);
-      setMessages(prev => [...prev, { role: "assistant", content: "I couldn't reach the review assistant. You can skip this step and continue whenever you're ready." }]);
+      setMessages(prev => [...prev, { role: "assistant", content: t("errors.unreachable") }]);
     } finally {
       setLoading(false);
     }
@@ -117,17 +119,17 @@ export default function AiReviewChat({
           </svg>
         </div>
         <div className="ci-aichat__intro-body">
-          <h3 className="ci-aichat__intro-title">Want a second opinion before you send this?</h3>
+          <h3 className="ci-aichat__intro-title">{t("intro.title")}</h3>
           <p className="ci-aichat__intro-sub">
-            Our AI can review your machines and parts, ask a couple of quick questions, and suggest anything you might be missing — accessories, related machines, or spec notes. Totally optional.
+            {t("intro.sub")}
           </p>
         </div>
         <div className="ci-aichat__intro-actions">
           <button type="button" className="ci-aichat__start-btn" onClick={startReview}>
-            Review with AI →
+            {t("intro.reviewCta")}
           </button>
           <button type="button" className="ci-aichat__skip-btn" onClick={onContinue}>
-            Skip this step
+            {t("intro.skipCta")}
           </button>
         </div>
       </div>
@@ -153,7 +155,7 @@ export default function AiReviewChat({
                       onClick={() => applySuggestion(mi, si, s)}
                       title={s.reason}
                     >
-                      {applied ? "✓ Added" : suggestionLabel(s)}
+                      {applied ? t("suggestions.added") : suggestionLabel(s, t)}
                     </button>
                   );
                 })}
@@ -173,20 +175,20 @@ export default function AiReviewChat({
       <div className="ci-aichat__composer">
         <input
           type="text"
-          placeholder={unavailable ? "Review assistant unavailable — you can still skip ahead" : "Ask a question or share more detail…"}
+          placeholder={unavailable ? t("composer.unavailablePlaceholder") : t("composer.placeholder")}
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter") send(); }}
           disabled={loading}
         />
-        <button type="button" className="ci-aichat__send" onClick={send} disabled={loading || !input.trim()} aria-label="Send">
+        <button type="button" className="ci-aichat__send" onClick={send} disabled={loading || !input.trim()} aria-label={t("composer.sendAria")}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12m0 0L9 3m5 5l-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
       </div>
 
       <div className="ci-aichat__footer">
         <button type="button" className="ci-aichat__continue-btn" onClick={onContinue}>
-          Continue to your details →
+          {t("footer.continueCta")}
         </button>
       </div>
     </div>

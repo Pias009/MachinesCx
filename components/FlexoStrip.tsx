@@ -1,11 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
+import { useRouter } from "@/i18n/navigation";
 import { useCms } from "@/lib/useCms";
 import type { ProductFamily } from "@/lib/products";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { SECTION_ELEMENT_DELAY } from "@/components/SectionReveal";
+
+gsap.registerPlugin(useGSAP);
 
 // model tagline ("tag") text comes from the flexoStrip.models translation
 // namespace, keyed by slug — everything else here is fixed catalogue data
@@ -62,6 +68,33 @@ function buildModels(list: ProductFamily[]): FlexoModel[] {
   }));
 }
 
+// count-up for the numeric half of a spec value (e.g. "260" in "260m/min")
+// — plays whenever the active model changes, giving each switch a live,
+// machine-reading-out feel instead of the number just appearing.
+function useCountTo(target: number, active: boolean, duration = 700) {
+  const [display, setDisplay] = useState(target);
+  const raf = useRef<number>();
+  useEffect(() => {
+    if (!active) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setDisplay(target);
+      return;
+    }
+    const start = performance.now();
+    const from = display;
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplay(Math.round(from + (target - from) * eased));
+      if (p < 1) raf.current = requestAnimationFrame(tick);
+    };
+    raf.current = requestAnimationFrame(tick);
+    return () => { if (raf.current) cancelAnimationFrame(raf.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target, active]);
+  return display;
+}
+
 export default function FlexoStrip() {
   const t = useTranslations("flexoStrip");
   const modelTags = t.raw("models") as Record<string, { tag: string }>;
@@ -71,312 +104,418 @@ export default function FlexoStrip() {
 
   const cms = useCms<{ items?: FlexoModel[] }>("flexo-strip", { items: DEFAULT_MODELS });
   const MODELS = cms.items && cms.items.length ? cms.items : DEFAULT_MODELS;
+  const router = useRouter();
 
-  // mobile-only: cards start collapsed (image + name), tap to expand in
-  // place for specs + the "view full spec" link. Desktop always shows
-  // everything regardless of this state (see .fls-card__more CSS below).
-  const [openMobile, setOpenMobile] = useState<string | null>(null);
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const SLIDE_MS = 4200;
+  const model = MODELS[active];
+  const speedNum = useCountTo(parseInt(model.speed) || 0, true);
 
-  const sectionRef  = useRef<HTMLElement>(null);
-  const gridRef     = useRef<HTMLDivElement>(null);
-  const stripRef    = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (paused) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = setInterval(() => setActive(n => (n + 1) % MODELS.length), SLIDE_MS);
+    return () => clearInterval(id);
+  }, [paused, MODELS.length]);
+
+  const goTo = useCallback((i: number) => setActive(i), []);
+
+  const sectionRef = useRef<HTMLElement>(null);
   const eyebrowRef  = useRef<HTMLSpanElement>(null);
   const lineRef     = useRef<HTMLDivElement>(null);
   const titleRef    = useRef<HTMLHeadingElement>(null);
+  const stageRef    = useRef<HTMLDivElement>(null);
+  const stripRef    = useRef<HTMLDivElement>(null);
 
+  const revealAll = () => {
+    [eyebrowRef, lineRef, stageRef, stripRef].forEach(r => {
+      if (r.current) { r.current.style.opacity = "1"; r.current.style.transform = "none"; }
+    });
+    if (titleRef.current) titleRef.current.style.opacity = "1";
+  };
+
+  const [pluginReady, setPluginReady] = useState(false);
+  const SplitTextRef = useRef<typeof import("gsap/SplitText").SplitText | null>(null);
   useEffect(() => {
-    let ctx: { revert?: () => void } = {};
     let cancelled = false;
-
-    const revealAll = () => {
-      if (eyebrowRef.current) { eyebrowRef.current.style.opacity = "1"; eyebrowRef.current.style.transform = "none"; }
-      if (lineRef.current) { lineRef.current.style.opacity = "1"; lineRef.current.style.transform = "none"; }
-      if (titleRef.current) { titleRef.current.style.opacity = "1"; }
-      if (gridRef.current) gridRef.current.querySelectorAll<HTMLElement>(".fls-card").forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; });
-      if (stripRef.current) { stripRef.current.style.opacity = "1"; stripRef.current.style.transform = "none"; }
-    };
-
-    (async () => {
-      try {
-        const { gsap }          = await import("gsap");
-        const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-        const { SplitText }     = await import("gsap/SplitText");
+    Promise.all([import("gsap/ScrollTrigger"), import("gsap/SplitText")])
+      .then(([{ ScrollTrigger }, { SplitText }]) => {
         if (cancelled) return;
         gsap.registerPlugin(ScrollTrigger, SplitText);
-
-        ctx = gsap.context(() => {
-          const easeExp = "expo.out";
-
-          /* ── Eyebrow draw ── */
-          gsap.fromTo(eyebrowRef.current,
-            { opacity: 0, x: -24 },
-            { opacity: 1, x: 0, duration: 1, ease: easeExp,
-              scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
-          );
-
-          /* ── Ink line ── */
-          gsap.fromTo(lineRef.current,
-            { scaleX: 0, transformOrigin: "left center", opacity: 0 },
-            { scaleX: 1, opacity: 1, duration: 1.4, ease: easeExp, delay: 0.2,
-              scrollTrigger: { trigger: sectionRef.current, start: "top 85%", toggleActions: "play none none none" } }
-          );
-
-          /* ── Title split ── */
-          if (titleRef.current) {
-            const split = new SplitText(titleRef.current, { type: "chars" });
-            gsap.fromTo(split.chars,
-              { y: "110%", opacity: 0, rotateX: -50, transformOrigin: "0% 50% -20px" },
-              { y: "0%", opacity: 1, rotateX: 0, duration: 0.9, ease: easeExp,
-                stagger: 0.022, delay: 0.1,
-                scrollTrigger: { trigger: sectionRef.current, start: "top 82%", toggleActions: "play none none none" } }
-            );
-          }
-
-          /* ── Cards fade/lift in, staggered ── */
-          const cards = gridRef.current
-            ? Array.from(gridRef.current.querySelectorAll<HTMLElement>(".fls-card"))
-            : [];
-          gsap.fromTo(cards,
-            { y: 32, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.8, ease: easeExp, stagger: 0.08, delay: 0.2,
-              scrollTrigger: { trigger: gridRef.current, start: "top 85%", toggleActions: "play none none none" } }
-          );
-
-          /* ── Bottom strip slides up ── */
-          gsap.fromTo(stripRef.current,
-            { y: 36, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.9, ease: easeExp,
-              scrollTrigger: { trigger: stripRef.current, start: "top 90%", toggleActions: "play none none none" } }
-          );
-
-        }, sectionRef);
-      } catch {
-        if (!cancelled) revealAll();
-      }
-    })();
-
+        SplitTextRef.current = SplitText;
+        setPluginReady(true);
+      })
+      .catch(() => { if (!cancelled) revealAll(); });
     const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
-
-    return () => { cancelled = true; clearTimeout(fallback); ctx.revert?.(); };
+    return () => { cancelled = true; clearTimeout(fallback); };
   }, []);
+
+  useGSAP(() => {
+    if (!pluginReady) return;
+    const easeExp = "expo.out";
+    const revTrigger = (target: Element | null, start: string) =>
+      ({ trigger: target, start, end: "bottom top", toggleActions: "play reverse play reverse" });
+
+    const headerTl = gsap.timeline({ scrollTrigger: revTrigger(sectionRef.current, "top 85%") });
+    headerTl.fromTo(eyebrowRef.current, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 1, ease: easeExp }, SECTION_ELEMENT_DELAY);
+    headerTl.fromTo(lineRef.current, { scaleX: 0, transformOrigin: "left center", opacity: 0 }, { scaleX: 1, opacity: 1, duration: 1.4, ease: easeExp }, SECTION_ELEMENT_DELAY + 0.2);
+
+    if (titleRef.current && SplitTextRef.current) {
+      const split = new SplitTextRef.current(titleRef.current, { type: "chars" });
+      headerTl.fromTo(split.chars,
+        { y: "110%", opacity: 0, rotateX: -50, transformOrigin: "0% 50% -20px" },
+        { y: "0%", opacity: 1, rotateX: 0, duration: 0.9, ease: easeExp, stagger: 0.022 },
+        SECTION_ELEMENT_DELAY + 0.1
+      );
+    }
+
+    gsap.fromTo(stageRef.current, { y: 32, opacity: 0 }, {
+      y: 0, opacity: 1, duration: 0.8, ease: easeExp, delay: SECTION_ELEMENT_DELAY + 0.15,
+      scrollTrigger: revTrigger(stageRef.current, "top 85%"),
+    });
+    gsap.fromTo(stripRef.current, { y: 36, opacity: 0 }, {
+      y: 0, opacity: 1, duration: 0.9, ease: easeExp, delay: SECTION_ELEMENT_DELAY,
+      scrollTrigger: revTrigger(stripRef.current, "top 90%"),
+    });
+  }, { scope: sectionRef, dependencies: [pluginReady] });
+
+  // ── per-switch reveal: the new photo wipes in on a diagonal clip-path,
+  // and the spec readout underneath prints in top-to-bottom — a single
+  // authored moment replayed every time `active` changes, not a generic
+  // fade/slide. GSAP owns this one timeline; everything else on the page
+  // stays inert while it plays. ──
+  const photoRef = useRef<HTMLDivElement>(null);
+  const specWrapRef = useRef<HTMLDivElement>(null);
+  useGSAP(() => {
+    if (!photoRef.current) return;
+    // kill any in-flight tween on the photo before starting a new one —
+    // switching quickly (fast auto-advance, or rapid clicks on the index)
+    // could otherwise leave the clip-path/scale stuck mid-tween from a
+    // timeline that got superseded before it finished.
+    gsap.killTweensOf(photoRef.current);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      gsap.set(photoRef.current, { clipPath: "polygon(0 0, 100% 0, 100% 100%, 0% 100%)", scale: 1 });
+      return;
+    }
+    const tl = gsap.timeline();
+    tl.fromTo(photoRef.current,
+      { clipPath: "polygon(0 0, 0 0, 0 100%, 0% 100%)" },
+      { clipPath: "polygon(0 0, 100% 0, 100% 100%, 0% 100%)", duration: 0.85, ease: "power4.inOut" },
+      0
+    );
+    tl.fromTo(photoRef.current, { scale: 1.12 }, { scale: 1, duration: 1.1, ease: "power3.out" }, 0);
+    const rows = specWrapRef.current
+      ? Array.from(specWrapRef.current.querySelectorAll<HTMLElement>(".fls-readout__row"))
+      : [];
+    tl.fromTo(rows, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out", stagger: 0.06 }, 0.3);
+  }, { dependencies: [active] });
 
   return (
     <section ref={sectionRef} className="fls-section" style={{
       background: "var(--bg-base)",
-      borderTop: "1px solid rgba(255,255,255,0.06)",
-      padding: "clamp(5rem,9vw,9rem) 0 clamp(4rem,7vw,7rem)",
+      borderTop: "1px solid var(--line)",
+      padding: "clamp(6rem,11vw,11rem) 0 clamp(5rem,9vw,9rem)",
       overflow: "hidden",
       position: "relative",
     }}>
-
       <style suppressHydrationWarning>{`
-        /* Title overflow clip for SplitText */
         .fls-title-clip { overflow: hidden; }
 
-        /* ── Plain 4-up card grid — every model visible at once, no
-           active-state switching, no full-bleed, no overlay text on
-           images. Simple, boxed, hard to get visually wrong. ── */
-        .fls-grid {
+        /* ── stage: name-index on the left acts as both label and nav;
+           the photo fills the right at near-full presentation size ── */
+        .fls-stage {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 1.5rem;
+          grid-template-columns: minmax(220px, 30%) 1fr;
+          align-items: center;
+          gap: clamp(2rem, 5vw, 5rem);
         }
-        .fls-card {
-          position: relative;
-          background: #0d1018;
-          border: 1px solid rgba(255,255,255,0.08);
-          transition: border-color .25s, transform .25s;
+        .fls-stage--wide-outer {
+          width: 100vw;
+          max-width: 1560px;
+          margin-left: 50%;
+          transform: translateX(-50%);
         }
-        .fls-card:hover {
-          border-color: rgba(225,29,72,0.4);
-          transform: translateY(-4px);
+
+        /* ── model index: oversized type list doubles as the navigation.
+           No dots, no card chrome — the names themselves are the UI. ── */
+        .fls-index { display: flex; flex-direction: column; gap: 0; }
+        .fls-index__btn {
+          all: unset;
+          cursor: pointer;
+          display: flex;
+          align-items: baseline;
+          gap: 0.9rem;
+          padding: 0.5rem 0;
+          font-family: var(--ff-display);
+          font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+          line-height: 1.05;
+          letter-spacing: -0.01em;
+          color: var(--ink-35);
+          transition: color .35s ease;
         }
-        .fls-card__toggle {
-          display: block; width: 100%;
-          background: none; border: none; padding: 0; margin: 0;
-          cursor: default; text-align: left; font: inherit; color: inherit;
+        .fls-index__btn:hover { color: var(--ink-60); }
+        .fls-index__num {
+          font-family: var(--ff-mono);
+          font-size: 0.62rem;
+          font-weight: 700;
+          color: var(--brand-red);
+          opacity: 0;
+          transform: translateX(-6px);
+          transition: opacity .35s ease, transform .35s ease;
+          flex-shrink: 0;
         }
-        .fls-card__media {
-          position: relative;
-          width: 100%;
-          aspect-ratio: 4 / 3;
-          background: #0d1614;
-          border-bottom: 1px solid rgba(255,255,255,0.08);
-          display: flex; align-items: center; justify-content: center;
+        .fls-index__btn--active {
+          color: var(--ink);
+          font-weight: 700;
+        }
+        .fls-index__btn--active .fls-index__num {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        /* grid-rows collapse instead of max-height: the row track itself
+           (not height/max-height) is what's animated, so this stays off
+           the layout-thrash path while still clipping cleanly without
+           having to know the tag's rendered height up front. */
+        .fls-index__tag {
+          display: grid;
+          grid-template-rows: 0fr;
+          opacity: 0;
+          transition: grid-template-rows .4s cubic-bezier(0.16,1,0.3,1), opacity .3s ease;
+        }
+        .fls-index__tag-inner {
           overflow: hidden;
+          min-height: 0;
+          font-family: var(--ff-body);
+          font-size: 0.85rem;
+          font-weight: 400;
+          letter-spacing: 0;
+          color: var(--ink-60);
         }
-        .fls-card__media img {
-          width: 82%; height: 82%; object-fit: contain;
-          filter: drop-shadow(0 10px 24px rgba(0,0,0,0.5));
-          transition: transform .4s cubic-bezier(0.16,1,0.3,1);
+        .fls-index__btn--active .fls-index__tag {
+          grid-template-rows: 1fr;
+          opacity: 1;
+          margin-top: 0.15rem;
         }
-        .fls-card:hover .fls-card__media img { transform: scale(1.05); }
+        .fls-index__row { display: flex; flex-direction: column; border-bottom: 1px solid var(--line); }
+        .fls-index__row:last-child { border-bottom: none; }
 
-        .fls-badge { position:absolute; top:.75rem; left:.75rem; z-index:2; font-family:var(--ff-mono); font-size:0.6rem; letter-spacing:.16em; text-transform:uppercase; padding:.25rem .55rem; }
-        .fls-badge--hot      { background:var(--brand-red); color:#fff; }
-        .fls-badge--flagship { background:#fff; color:#0d1018; }
-
-        .fls-card__head { padding: 1.1rem 1.25rem; display: flex; align-items: center; gap: .6rem; }
-        .fls-card__head-text { flex: 1; min-width: 0; }
-        .fls-card__series { font-family: var(--ff-mono); font-size: 0.62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--brand-red); display: block; }
-        .fls-card__name   { font-family: var(--ff-display); font-size: 1.6rem; color: #fff; line-height: 1; display: block; margin-top: .3rem; }
-        .fls-card__chev  { display: none; flex-shrink: 0; stroke: var(--brand-red); transition: transform .2s ease; }
-        .fls-card--open .fls-card__chev { transform: rotate(180deg); }
-
-        .fls-card__more { padding: 0 1.25rem 1.3rem; display: flex; flex-direction: column; gap: .4rem; }
-        .fls-card__tag    { font-size: 0.82rem; color: rgba(255,255,255,0.6); line-height: 1.4; }
-
-        .fls-card__specs { margin-top: .5rem; display: flex; flex-direction: column; gap: .1rem; }
-        .fls-card__spec-row { display: flex; justify-content: space-between; font-family: var(--ff-mono); font-size: 0.68rem; padding: .3rem 0; border-top: 1px solid rgba(255,255,255,0.06); }
-        .fls-card__spec-row span:first-child { color: rgba(255,255,255,0.5); letter-spacing: .06em; text-transform: uppercase; }
-        .fls-card__spec-row span:last-child  { color: rgba(255,255,255,0.85); font-weight: 600; }
-
-        .fls-card__cta {
-          margin-top: .75rem;
-          display: inline-flex; align-items: center; gap: .4rem;
-          background: none; border: none; padding: 0;
-          font-family: var(--ff-mono); font-size: 0.76rem; font-weight: 700; letter-spacing: .1em;
+        .fls-index__cta {
+          margin-top: 1.75rem;
+          display: inline-flex; align-items: center; gap: .5rem;
+          font-family: var(--ff-mono); font-size: 0.8rem; font-weight: 700; letter-spacing: .1em;
           text-transform: uppercase; color: var(--brand-red);
           text-decoration: none;
+          transition: gap .15s ease;
+        }
+        .fls-index__cta:hover { gap: .7rem; }
+
+        /* ── photo stage ── */
+        .fls-photo {
+          position: relative;
+          width: 100%;
+          height: clamp(360px, 32vw, 520px);
+          border-radius: 16px;
+          overflow: hidden;
+          background: #fafafa;
+          cursor: pointer;
+        }
+        .fls-photo img {
+          width: 100%; height: 100%; object-fit: cover;
+          transition: transform .6s cubic-bezier(0.16,1,0.3,1);
+        }
+        .fls-photo:hover img { transform: scale(1.04); }
+        .fls-photo__badge {
+          position: absolute; top: 1rem; left: 1rem; z-index: 2;
+          font-family: var(--ff-mono); font-size: 0.62rem; letter-spacing: .16em;
+          text-transform: uppercase; padding: .3rem .6rem; border-radius: 4px;
+        }
+        .fls-photo__badge--hot { background: var(--brand-red); color: #fff; }
+        .fls-photo__badge--flagship { background: var(--slate, #111); color: #fff; }
+
+        /* progress rail across the bottom of the photo — a single bar that
+           fills over SLIDE_MS, then resets; a live "how long until next"
+           indicator instead of static dots */
+        .fls-photo__progress {
+          position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+          background: rgba(255,255,255,0.35); z-index: 2;
+        }
+        .fls-photo__progress-bar {
+          height: 100%; width: 0%;
+          background: var(--brand-red);
+          transform-origin: left center;
         }
 
-        /* ── Light mode: keep cards dark with white text ── */
-        [data-theme="light"] .fls-card { background: #0d1018 !important; border-color: rgba(255,255,255,0.08) !important; }
-        [data-theme="light"] .fls-card:hover { border-color: rgba(225,29,72,0.4) !important; }
-        [data-theme="light"] .fls-card__media { background: #0d1614 !important; }
-        [data-theme="light"] .fls-card [style*="color: #fff"],
-        [data-theme="light"] .fls-card [style*="color:#fff"],
-        [data-theme="light"] .fls-card [style*="color: white"],
-        [data-theme="light"] .fls-card [style*="color:white"] { color: #fff !important; }
-        [data-theme="light"] .fls-card [style*="color: rgba(255"] { color: rgba(255,255,255,0.7) !important; }
-        [data-theme="light"] .fls-card [style*="color: rgba(255,255,255,0.85"],
-        [data-theme="light"] .fls-card [style*="color: rgba(255,255,255,.85"] { color: rgba(255,255,255,0.85) !important; }
-        [data-theme="light"] .fls-card [style*="color: rgba(255,255,255,0.6"],
-        [data-theme="light"] .fls-card [style*="color: rgba(255,255,255,.6"] { color: rgba(255,255,255,0.6) !important; }
-        [data-theme="light"] .fls-card [style*="color: rgba(255,255,255,0.5"],
-        [data-theme="light"] .fls-card [style*="color: rgba(255,255,255,.5"] { color: rgba(255,255,255,0.5) !important; }
+        /* ── spec readout beneath the photo ── */
+        .fls-readout {
+          margin-top: 1.5rem;
+          display: flex; flex-wrap: wrap; gap: clamp(1.75rem, 4vw, 3.5rem);
+        }
+        .fls-readout__row { display: flex; flex-direction: column; gap: .2rem; }
+        .fls-readout__label {
+          font-family: var(--ff-mono); font-size: 0.64rem; letter-spacing: .18em;
+          text-transform: uppercase; color: var(--ink-35);
+        }
+        .fls-readout__value {
+          font-family: var(--ff-display); font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+          color: var(--ink); line-height: 1;
+        }
+        .fls-readout__unit { font-family: var(--ff-body); font-size: .95rem; color: var(--ink-60); margin-left: .3rem; }
 
+        @media (max-width: 860px) {
+          .fls-stage { grid-template-columns: 1fr; }
+          .fls-index__btn { font-size: clamp(1.3rem, 6vw, 1.8rem); }
+        }
         @media (max-width: 640px) {
           .fls-section { padding: clamp(2.5rem,7vw,3.5rem) 0 clamp(2rem,5vw,3rem) !important; }
           .fls-header { margin-bottom: clamp(1.5rem,4vw,2.25rem) !important; }
           .fls-title-clip h2 { font-size: clamp(2rem, 9vw, 3.2rem) !important; }
-
-          /* 2-up grid, collapsed by default — tap a card to reveal specs */
-          .fls-grid { grid-template-columns: 1fr 1fr; gap: .75rem; }
-          .fls-card:hover { transform: none; }
-          .fls-card__toggle { cursor: pointer; }
-          .fls-card__head { padding: .7rem .8rem; gap: .35rem; }
-          .fls-card__series { font-size: 0.56rem; }
-          .fls-card__name   { font-size: 1.05rem; margin-top: .2rem; }
-          .fls-card__chev   { display: block; width: 10px; height: 10px; margin-top: .3rem; }
-          .fls-badge { top: .5rem; left: .5rem; font-size: 0.52rem; padding: .2rem .45rem; }
-
-          .fls-card__more { display: none; padding: 0 .8rem .9rem; }
-          .fls-card--open .fls-card__more { display: flex; }
-          .fls-card__tag { font-size: .74rem; }
-          .fls-card__spec-row { font-size: .62rem; }
+          .fls-photo { height: 260px; }
+          .fls-readout { gap: 1.25rem; margin-top: 1.1rem; }
+          .fls-readout__value { font-size: 1.4rem; }
         }
       `}</style>
 
-      <div className="wrap" style={{ position:"relative", zIndex:1 }}>
+      <div className="wrap" style={{ position: "relative", zIndex: 1 }}>
         {/* ── Header ── */}
-        <div className="fls-header" style={{ marginBottom:"clamp(2.5rem,5vw,4rem)" }}>
+        <div className="fls-header" style={{ marginBottom: "clamp(2.5rem,5vw,4rem)" }}>
           <span ref={eyebrowRef} style={{
-            display:"inline-flex", alignItems:"center", gap:".75rem",
-            fontFamily:"var(--ff-mono)", fontSize:"0.7rem",
-            letterSpacing:".22em", textTransform:"uppercase",
-            color:"var(--brand-red)", marginBottom:".75rem",
-            opacity:0,
+            display: "inline-flex", alignItems: "center", gap: ".75rem",
+            fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
+            letterSpacing: ".22em", textTransform: "uppercase",
+            color: "var(--brand-red)", marginBottom: ".75rem",
+            opacity: 0,
           }}>
-            <span style={{ width:"2rem", height:"1px", background:"var(--brand-red)", display:"inline-block", flexShrink:0 }} />
+            <span style={{ width: "2rem", height: "1px", background: "var(--brand-red)", display: "inline-block", flexShrink: 0 }} />
             {t("eyebrow")}
           </span>
 
           <div className="fls-title-clip">
             <h2 ref={titleRef} data-no-anim style={{
-              fontFamily:"var(--ff-display)",
-              fontSize:"clamp(3rem,6vw,6rem)",
-              color:"var(--ink)", lineHeight:.88,
-              letterSpacing:".01em", margin:0,
-              perspective:"600px",
+              fontFamily: "var(--ff-display)",
+              fontSize: "clamp(3rem,6vw,6rem)",
+              color: "var(--ink)", lineHeight: .88,
+              letterSpacing: ".01em", margin: 0,
+              perspective: "600px",
             }}>
               {t("title")}
             </h2>
           </div>
 
           <div ref={lineRef} style={{
-            height:"2px", width:"clamp(200px,40%,480px)",
-            background:"linear-gradient(to right, var(--brand-red), rgba(225,29,72,0.15), transparent)",
-            margin:".7rem 0 .9rem", opacity:0,
+            height: "2px", width: "clamp(200px,40%,480px)",
+            background: "linear-gradient(to right, var(--brand-red), rgba(225,29,72,0.15), transparent)",
+            margin: ".7rem 0 .9rem", opacity: 0,
           }} />
 
           <span style={{
-            fontFamily:"var(--ff-display)",
-            fontSize:"clamp(1.1rem,2vw,1.65rem)",
-            color:"var(--ink-60)", display:"block",
+            fontFamily: "var(--ff-display)",
+            fontSize: "clamp(1.1rem,2vw,1.65rem)",
+            color: "var(--ink-60)", display: "block",
           }}>
             {t("subtitle")}
           </span>
         </div>
 
-        {/* ── 4-up card grid (2-up on mobile) — desktop always shows full
-            detail; mobile starts collapsed and expands in place on tap ── */}
-        <div ref={gridRef} className="fls-grid">
-          {MODELS.map(model => {
-            const isOpen = openMobile === model.slug;
-            return (
-              <div key={model.slug} className={`fls-card${isOpen ? " fls-card--open" : ""}`}>
-                <button
-                  type="button"
-                  className="fls-card__toggle"
-                  onClick={() => setOpenMobile(isOpen ? null : model.slug)}
-                  aria-expanded={isOpen}
-                >
-                  <div className="fls-card__media">
-                    {model.hot      && <span className="fls-badge fls-badge--hot">{t("hotBadge")}</span>}
-                    {model.flagship && <span className="fls-badge fls-badge--flagship">{t("flagshipBadge")}</span>}
-                    <img src={model.img} alt={model.label} />
+        {/* ── Stage: name index (nav) + photo + live spec readout ── */}
+        <div className="fls-stage--wide-outer">
+          <div
+            ref={stageRef}
+            className="fls-stage"
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+          >
+            <nav className="fls-index" aria-label={t("title")}>
+              {MODELS.map((m, i) => {
+                const isActive = active === i;
+                return (
+                  <div className="fls-index__row" key={m.slug}>
+                    <button
+                      type="button"
+                      className={`fls-index__btn${isActive ? " fls-index__btn--active" : ""}`}
+                      onClick={() => goTo(i)}
+                      aria-current={isActive}
+                    >
+                      <span className="fls-index__num">{String(i + 1).padStart(2, "0")}</span>
+                      <span>
+                        {m.label}
+                        <span className="fls-index__tag">
+                          <span className="fls-index__tag-inner">{m.tag}</span>
+                        </span>
+                      </span>
+                    </button>
                   </div>
-                  <div className="fls-card__head">
-                    <div className="fls-card__head-text">
-                      <span className="fls-card__series">AI · {model.colours}-{t("colourLabel")}</span>
-                      <span className="fls-card__name">{model.label}</span>
-                    </div>
-                    <svg className="fls-card__chev" width="12" height="12" viewBox="0 0 10 6" fill="none" strokeWidth="1.5">
-                      <path d="M1 1l4 4 4-4" />
-                    </svg>
-                  </div>
-                </button>
+                );
+              })}
+              <TransitionLink href={`/products/printing/${model.slug}`} className="fls-index__cta">
+                {t("viewFullSpec")}
+              </TransitionLink>
+            </nav>
 
-                <div className="fls-card__more">
-                  <span className="fls-card__tag">{model.tag}</span>
-                  <div className="fls-card__specs">
-                    <div className="fls-card__spec-row"><span>{t("speedLabel")}</span><span>{model.speed} m/min</span></div>
-                    <div className="fls-card__spec-row"><span>{t("registrationLabel")}</span><span>{model.reg}</span></div>
-                  </div>
-                  <TransitionLink href={`/products/printing#${model.slug}`} className="fls-card__cta">
-                    {t("viewFullSpec")}
-                  </TransitionLink>
+            <div>
+              <div
+                className="fls-photo"
+                ref={photoRef}
+                role="link"
+                tabIndex={0}
+                aria-label={model.label}
+                onClick={() => router.push(`/products/printing/${model.slug}`)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") router.push(`/products/printing/${model.slug}`); }}
+              >
+                {model.hot && <span className="fls-photo__badge fls-photo__badge--hot">{t("hotBadge")}</span>}
+                {model.flagship && <span className="fls-photo__badge fls-photo__badge--flagship">{t("flagshipBadge")}</span>}
+                <img src={model.img} alt={model.label} />
+                <div className="fls-photo__progress">
+                  <div
+                    className="fls-photo__progress-bar"
+                    key={active}
+                    style={{
+                      animation: paused ? "none" : `fls-progress ${SLIDE_MS}ms linear forwards`,
+                    }}
+                  />
                 </div>
               </div>
-            );
-          })}
+
+              <div className="fls-readout" ref={specWrapRef}>
+                <div className="fls-readout__row">
+                  <span className="fls-readout__label">{t("speedLabel")}</span>
+                  <span className="fls-readout__value">{speedNum}<span className="fls-readout__unit">m/min</span></span>
+                </div>
+                <div className="fls-readout__row">
+                  <span className="fls-readout__label">{t("registrationLabel")}</span>
+                  <span className="fls-readout__value">{model.reg}</span>
+                </div>
+                <div className="fls-readout__row">
+                  <span className="fls-readout__label">AI · {t("colourLabel")}</span>
+                  <span className="fls-readout__value">{model.colours}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <style suppressHydrationWarning>{`
+          @keyframes fls-progress { from { width: 0%; } to { width: 100%; } }
+          @media (prefers-reduced-motion: reduce) {
+            .fls-photo__progress-bar { animation: none !important; width: 0 !important; }
+          }
+        `}</style>
 
         {/* ── Bottom spec strip ── */}
         <div ref={stripRef} style={{
-          marginTop:"clamp(2.5rem,5vw,4rem)", padding:"1.25rem 1.5rem",
-          border:"1px solid rgba(255,255,255,.07)",
-          borderTop:"2px solid var(--brand-red)",
-          display:"flex", alignItems:"center",
-          justifyContent:"space-between", flexWrap:"wrap", gap:"1.5rem",
-          opacity:0,
+          marginTop: "clamp(2.5rem,5vw,4rem)", padding: "1.25rem 1.5rem",
+          border: "1px solid var(--line)",
+          borderTop: "2px solid var(--brand-red)",
+          borderRadius: "10px",
+          display: "flex", alignItems: "center",
+          justifyContent: "space-between", flexWrap: "wrap", gap: "1.5rem",
+          opacity: 0,
         }}>
-          <div style={{ display:"flex", gap:"clamp(1.5rem,3vw,3rem)", flexWrap:"wrap" }}>
+          <div style={{ display: "flex", gap: "clamp(1.5rem,3vw,3rem)", flexWrap: "wrap" }}>
             {SPECS.map(kv => (
-              <div key={kv.label} style={{ display:"flex", flexDirection:"column", gap:".2rem" }}>
-                <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.64rem", letterSpacing:".18em", textTransform:"uppercase", color:"rgba(255,255,255,0.55)" }}>{kv.label}</span>
-                <span style={{ fontFamily:"var(--ff-mono)", fontSize:".65rem", letterSpacing:".06em", color:"rgba(255,255,255,0.75)" }}>{kv.value}</span>
+              <div key={kv.label} style={{ display: "flex", flexDirection: "column", gap: ".2rem" }}>
+                <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.64rem", letterSpacing: ".18em", textTransform: "uppercase", color: "var(--ink-35)" }}>{kv.label}</span>
+                <span style={{ fontFamily: "var(--ff-mono)", fontSize: ".65rem", letterSpacing: ".06em", color: "var(--ink-60)" }}>{kv.value}</span>
               </div>
             ))}
           </div>

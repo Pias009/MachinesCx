@@ -1,0 +1,12 @@
+import { chromium } from "playwright";
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+await page.goto("http://localhost:3334/products/film-blowing/abcde-2200", { waitUntil: "networkidle" });
+await page.waitForTimeout(1500);
+const crumb = await page.locator('nav[aria-label]').first();
+console.log("crumb count:", await page.locator('nav').count());
+const box = await page.locator('nav').first().boundingBox();
+console.log("first nav box:", box);
+const pgnav = await page.locator('.pgnav').boundingBox().catch(() => null);
+console.log("pgnav box:", pgnav);
+await browser.close();

@@ -2,6 +2,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import type { ProductFamily, CategorySlug } from "@/lib/products";
 import { categories, familiesByCategory, familyImage, familyBySlug } from "@/lib/products";
 
@@ -60,7 +61,7 @@ export function Section({ title, subtitle, children, actions }: {
 /** Category + machine + model picker — three plain selects, the standard
  *  form pattern for choosing from a bounded catalogue. */
 export function MachinePicker({
-  category, onCategory, family, onFamily, modelIdx, onModel, allowNone, noneLabel = "Not sure / skip",
+  category, onCategory, family, onFamily, modelIdx, onModel, allowNone, noneLabel,
 }: {
   category: CategorySlug;
   onCategory: (c: CategorySlug) => void;
@@ -71,12 +72,14 @@ export function MachinePicker({
   allowNone?: boolean;
   noneLabel?: string;
 }) {
+  const t = useTranslations("chatInquiryShared");
   const options = familiesByCategory(category);
+  const resolvedNoneLabel = noneLabel ?? t("notSureSkip");
 
   return (
     <div className="ci-picker">
       <div className="ci-picker__row">
-        <Field label="Machine category">
+        <Field label={t("machineCategory")}>
           <select
             value={category}
             onChange={e => { onCategory(e.target.value as CategorySlug); onFamily(null); }}
@@ -84,7 +87,7 @@ export function MachinePicker({
             {categories.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
           </select>
         </Field>
-        <Field label="Machine">
+        <Field label={t("machine")}>
           <select
             value={family?.slug ?? ""}
             onChange={e => {
@@ -93,14 +96,14 @@ export function MachinePicker({
               onModel(0);
             }}
           >
-            <option value="">{allowNone ? noneLabel : "Select a machine…"}</option>
+            <option value="">{allowNone ? resolvedNoneLabel : t("selectAMachine")}</option>
             {options.map(f => <option key={f.slug} value={f.slug}>{f.name}</option>)}
           </select>
         </Field>
       </div>
 
       {family && family.models.length > 1 && (
-        <Field label="Model">
+        <Field label={t("model")}>
           <select value={modelIdx} onChange={e => onModel(parseInt(e.target.value, 10))}>
             {family.models.map((m, i) => <option key={m} value={i}>{m}</option>)}
           </select>
@@ -124,6 +127,7 @@ export function MachineGrid({
   modelIdx: number;
   onModel: (i: number) => void;
 }) {
+  const t = useTranslations("chatInquiryShared");
   const options = familiesByCategory(category);
 
   return (
@@ -164,7 +168,7 @@ export function MachineGrid({
       </div>
 
       {family && family.models.length > 1 && (
-        <Field label="Model">
+        <Field label={t("model")}>
           <select value={modelIdx} onChange={e => onModel(parseInt(e.target.value, 10))}>
             {family.models.map((m, i) => <option key={m} value={i}>{m}</option>)}
           </select>
@@ -178,13 +182,14 @@ export function MachineGrid({
  *  compact summary row with a remove control, above the picker for the
  *  next one. */
 export function EntryRow({ title, meta, onRemove }: { title: ReactNode; meta?: ReactNode; onRemove: () => void }) {
+  const t = useTranslations("chatInquiryShared");
   return (
     <div className="ci-entry">
       <div className="ci-entry__body">
         <div className="ci-entry__title">{title}</div>
         {meta && <div className="ci-entry__meta">{meta}</div>}
       </div>
-      <button type="button" className="ci-entry__remove" onClick={onRemove} aria-label="Remove">
+      <button type="button" className="ci-entry__remove" onClick={onRemove} aria-label={t("remove")}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8m0-8l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
       </button>
     </div>
@@ -221,6 +226,7 @@ export interface ReviewRow {
 }
 
 function ReviewField({ row }: { row: ReviewRow }) {
+  const t = useTranslations("chatInquiryShared");
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(row.value);
 
@@ -264,7 +270,7 @@ function ReviewField({ row }: { row: ReviewRow }) {
   return (
     <button type="button" className="ci-review-row" onClick={() => setEditing(true)}>
       <span className="ci-review-row__label">{row.label}</span>
-      <span className="ci-review-row__value">{row.value || <em>Not set — click to add</em>}</span>
+      <span className="ci-review-row__value">{row.value || <em>{t("notSetClickToAdd")}</em>}</span>
       <svg className="ci-review-row__edit" width="13" height="13" viewBox="0 0 13 13" fill="none">
         <path d="M8.5 1.5l3 3-7 7-3.5 1 1-3.5 6.5-6.5z" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round" />
       </svg>
@@ -282,12 +288,13 @@ export function ImageGallery({
   onAdd: () => void;
   uploading?: boolean;
 }) {
+  const t = useTranslations("chatInquiryShared");
   return (
     <div className="ci-gallery">
       {images.map((src, i) => (
         <div key={i} className="ci-gallery__item">
           <Image src={src} alt="" fill sizes="56px" />
-          <button type="button" className="ci-gallery__remove" onClick={() => onRemove(i)} aria-label="Remove photo">
+          <button type="button" className="ci-gallery__remove" onClick={() => onRemove(i)} aria-label={t("removePhoto")}>
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6m0-6l-6 6" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" /></svg>
           </button>
         </div>
@@ -313,6 +320,7 @@ export function ReviewCard({
   onSend: () => void;
   sending?: boolean;
 }) {
+  const t = useTranslations("chatInquiryShared");
   return (
     <div className="ci-review-card">
       <div className="ci-review-card__title">{title}</div>
@@ -321,12 +329,12 @@ export function ReviewCard({
       </div>
       {(images !== undefined && onRemoveImage && onAddImage) && (
         <div className="ci-review-card__images">
-          <span className="ci-review-row__label">Photos</span>
+          <span className="ci-review-row__label">{t("photos")}</span>
           <ImageGallery images={images} onRemove={onRemoveImage} onAdd={onAddImage} uploading={uploading} />
         </div>
       )}
       <button type="button" className="ci-review-card__send" onClick={onSend} disabled={sending}>
-        {sending ? "Sending…" : "Send inquiry →"}
+        {sending ? t("sending") : t("sendInquiry")}
       </button>
     </div>
   );
@@ -343,6 +351,7 @@ export function InsightPanel({
   tip?: Tip;
   related?: ProductFamily[];
 }) {
+  const t = useTranslations("chatInquiryShared");
   const [expanded, setExpanded] = useState(false);
 
   if (!family) {
@@ -354,7 +363,7 @@ export function InsightPanel({
             <circle cx="18" cy="18" r="14" stroke="currentColor" strokeWidth="1.4" />
             <path d="M18 12v7l5 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <p>Pick a machine in the form and its spec sheet will appear here.</p>
+          <p>{t("emptyInsight")}</p>
         </div>
       </aside>
     );
@@ -370,7 +379,7 @@ export function InsightPanel({
     <aside className="ci-insight">
       <div className="ci-insight__img-wrap">
         <Image src={familyImage(family)} alt={family.name} fill sizes="320px" className="ci-insight__img" />
-        <span className="ci-insight__live"><span className="ci-insight__live-dot" />Spec sheet</span>
+        <span className="ci-insight__live"><span className="ci-insight__live-dot" />{t("specSheet")}</span>
       </div>
       <div className="ci-insight__series">{family.series}</div>
       <div className="ci-insight__name">{family.name}</div>
@@ -394,7 +403,7 @@ export function InsightPanel({
           </div>
           {allSpecs.length > 6 && (
             <button type="button" className="ci-insight__more" onClick={() => setExpanded(v => !v)}>
-              {expanded ? "Show fewer specs" : `Show all ${allSpecs.length} specs`}
+              {expanded ? t("showFewerSpecs") : t("showAllSpecs", { count: allSpecs.length })}
             </button>
           )}
         </>
@@ -412,7 +421,7 @@ export function InsightPanel({
 
       {related.length > 0 && (
         <div className="ci-related">
-          <span className="ci-related__label">Related machines</span>
+          <span className="ci-related__label">{t("relatedMachines")}</span>
           {related.slice(0, 3).map(r => (
             <Link key={r.slug} href={`/products/${r.category}/${r.slug}`} className="ci-related__row" target="_blank" rel="noopener noreferrer">
               <Image src={familyImage(r)} alt="" width={40} height={40} className="ci-related__img" />

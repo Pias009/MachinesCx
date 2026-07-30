@@ -15,6 +15,17 @@ const nextConfig = {
     ],
   },
   generateBuildId: async () => `build-${Date.now()}`,
+  // Webpack's persistent filesystem cache has been intermittently
+  // corrupting `next build` in this environment (manifests/chunks read
+  // back as truncated/missing right after being written — "Cannot find
+  // module './NNNN.js'", "Unexpected end of JSON input" reading a
+  // manifest, etc.), unrelated to any application code. Disabling it for
+  // production builds trades a slightly slower cold build for reliability;
+  // dev mode is unaffected and keeps its own separate cache.
+  webpack: (config, { dev }) => {
+    if (!dev) config.cache = false;
+    return config;
+  },
   async headers() {
     return [
       {

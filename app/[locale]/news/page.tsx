@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { getLiveNews } from "@/lib/liveNews";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +18,7 @@ function fmt(iso: string) {
 }
 
 export default async function NewsIndexPage() {
+  const t = await getTranslations("newsListPage");
   const { articles } = await getLiveNews();
   const sorted = [...articles].sort((a, b) => b.date.localeCompare(a.date));
   const [featured, ...rest] = sorted;
@@ -27,7 +29,7 @@ export default async function NewsIndexPage() {
         minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center",
         fontFamily: "var(--ff-body)", color: "var(--ink-35)", paddingTop: "6rem",
       }}>
-        No articles published yet.
+        {t("empty")}
       </div>
     );
   }
@@ -45,13 +47,13 @@ export default async function NewsIndexPage() {
         backgroundSize: "80px 80px",
       }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(1.25rem,4vw,3rem)" }}>
-          <span className="eyebrow" style={{ marginBottom: "1.25rem" }}>News & updates</span>
+          <span className="eyebrow" style={{ marginBottom: "1.25rem" }}>{t("eyebrow")}</span>
           <h1 style={{
             fontFamily: "var(--ff-display)",
             fontSize: "clamp(3rem,8vw,7rem)",
             lineHeight: 0.92, color: "var(--ink)",
           }}>
-            From the factory floor.
+            {t("heading")}
           </h1>
         </div>
       </div>
@@ -91,7 +93,7 @@ export default async function NewsIndexPage() {
               fontFamily: "var(--ff-mono)", fontSize: "0.68rem",
               letterSpacing: "0.1em", textTransform: "uppercase",
               color: "var(--brand-red)",
-            }}>Read article →</span>
+            }}>{t("readArticle")}</span>
           </div>
         </Link>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -60,6 +61,7 @@ function parseNumeric(v: string): number | null {
 
 /** Machine suggestion cards — larger image left, data right, polished card UI with Explore + Inquire buttons. */
 function MachineCards({ slugs, onInquire, onExplore }: { slugs: string[]; onInquire: (slug: string, name: string) => void; onExplore: (slug: string) => void }) {
+  const t = useTranslations("chatWidget");
   const [machines, setMachines] = useState<MachineSummary[] | null>(null);
 
   useEffect(() => {
@@ -71,7 +73,7 @@ function MachineCards({ slugs, onInquire, onExplore }: { slugs: string[]; onInqu
     return () => { cancelled = true; };
   }, [slugs]);
 
-  if (!machines) return <div className="asha-cards-loading">Loading machines…</div>;
+  if (!machines) return <div className="asha-cards-loading">{t("loading.machines")}</div>;
   if (machines.length === 0) return null;
 
   return (
@@ -88,10 +90,10 @@ function MachineCards({ slugs, onInquire, onExplore }: { slugs: string[]; onInqu
             {m.tagline && <div className="asha-card-tagline">{m.tagline}</div>}
             <div className="asha-card-actions">
               <button className="asha-card-explore" onClick={() => onExplore(m.slug)}>
-                Explore
+                {t("actions.explore")}
               </button>
               <button className="asha-card-inquire" onClick={() => onInquire(m.slug, m.name)}>
-                Inquire
+                {t("actions.inquire")}
               </button>
             </div>
           </div>
@@ -116,6 +118,7 @@ function QuickReplies({ options, onPick }: { options: string[]; onPick: (option:
 
 /** Spec comparison bars for a "compare" action — one grouped bar chart per spec row. */
 function CompareChart({ slugs, specLabels }: { slugs: string[]; specLabels: string[] }) {
+  const t = useTranslations("chatWidget");
   const [machines, setMachines] = useState<MachineSummary[] | null>(null);
 
   useEffect(() => {
@@ -127,7 +130,7 @@ function CompareChart({ slugs, specLabels }: { slugs: string[]; specLabels: stri
     return () => { cancelled = true; };
   }, [slugs]);
 
-  if (!machines) return <div className="asha-cards-loading">Loading comparison…</div>;
+  if (!machines) return <div className="asha-cards-loading">{t("loading.comparison")}</div>;
   if (machines.length < 2) return null;
 
   return (
@@ -166,7 +169,7 @@ function CompareChart({ slugs, specLabels }: { slugs: string[]; specLabels: stri
       })}
       <div className="asha-compare-table-wrap">
         <table className="asha-compare-table">
-          <thead><tr><th>Spec</th>{machines.map(m => <th key={m.slug}>{m.series || m.name}</th>)}</tr></thead>
+          <thead><tr><th>{t("compare.specColumn")}</th>{machines.map(m => <th key={m.slug}>{m.series || m.name}</th>)}</tr></thead>
           <tbody>
             {specLabels.map(label => (
               <tr key={label}>
@@ -186,6 +189,7 @@ function CompareChart({ slugs, specLabels }: { slugs: string[]; specLabels: stri
 
 /** Resolves a bare slug to its full /products/<category>/<slug> URL and navigates there. */
 function NavigateAction({ slug }: { slug: string }) {
+  const t = useTranslations("chatWidget");
   const router = useRouter();
 
   useEffect(() => {
@@ -201,11 +205,12 @@ function NavigateAction({ slug }: { slug: string }) {
     return () => { cancelled = true; };
   }, [slug, router]);
 
-  return <div className="asha-nav-hint">Opening that machine's page…</div>;
+  return <div className="asha-nav-hint">{t("navHint")}</div>;
 }
 
 /** Full machine detail view shown when "Explore" is clicked — hero image, spec bars, and inquiry CTA. */
 function MachineDetailView({ slug, onInquire }: { slug: string; onInquire: (slug: string, name: string) => void }) {
+  const t = useTranslations("chatWidget");
   const [machine, setMachine] = useState<MachineSummary | null>(null);
 
   useEffect(() => {
@@ -217,7 +222,7 @@ function MachineDetailView({ slug, onInquire }: { slug: string; onInquire: (slug
     return () => { cancelled = true; };
   }, [slug]);
 
-  if (!machine) return <div className="asha-cards-loading">Loading details…</div>;
+  if (!machine) return <div className="asha-cards-loading">{t("loading.details")}</div>;
 
   const maxNum = (values: string[]) => Math.max(...values.map(v => parseNumeric(v) ?? 0), 1);
 
@@ -235,14 +240,14 @@ function MachineDetailView({ slug, onInquire }: { slug: string; onInquire: (slug
       {machine.tagline && <p className="asha-detail-tagline">{machine.tagline}</p>}
 
       <div className="asha-detail-models">
-        <span className="asha-detail-models-label">Models</span>
+        <span className="asha-detail-models-label">{t("detail.modelsLabel")}</span>
         <div className="asha-detail-model-chips">
           {machine.models.map(m => <span key={m} className="asha-detail-model-chip">{m}</span>)}
         </div>
       </div>
 
       <div className="asha-detail-specs">
-        <div className="asha-detail-specs-title">Technical Specifications</div>
+        <div className="asha-detail-specs-title">{t("detail.specsTitle")}</div>
         {machine.specs.map(spec => {
           const barMax = maxNum(spec.values);
           return (
@@ -271,7 +276,7 @@ function MachineDetailView({ slug, onInquire }: { slug: string; onInquire: (slug
 
       <div className="asha-detail-cta">
         <button className="asha-detail-inquire-btn" onClick={() => onInquire(machine.slug, machine.name)}>
-          Inquire About This Machine
+          {t("detail.inquireCta")}
         </button>
       </div>
     </div>
@@ -295,6 +300,7 @@ function ActionRenderer({ action, onInquire, onQuickReply, onExplore }: ActionRe
 }
 
 export default function ChatWidget() {
+  const t = useTranslations("chatWidget");
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -364,14 +370,14 @@ export default function ChatWidget() {
       } else {
         setMessages([{
           role: "assistant",
-          content: `Hi, I'm ${AGENT_NAME}, your AI assistant. I can help you explore our full range of machines — specs, comparisons, pricing, technical details, and more. Just ask me about any machine or category to get started!`,
-          actions: [{ type: "quick_replies", options: ["Film Blowing Machines", "Bag Making Machines", "Recycling & Lab Lines", "Flexographic Printing Machines"] }],
+          content: t("greeting.full", { name: AGENT_NAME }),
+          actions: [{ type: "quick_replies", options: t.raw("greeting.quickReplies") as string[] }],
         }]);
       }
     } catch {
-      setMessages([{ role: "assistant", content: `Hi, I'm ${AGENT_NAME}, your AI assistant. Ask me about any machine — I'll pull up specs, details, and help you find the right fit.` }]);
+      setMessages([{ role: "assistant", content: t("greeting.short", { name: AGENT_NAME }) }]);
     }
-  }, [hydrated]);
+  }, [hydrated, t]);
 
   const handleOpen = useCallback((prefillMessage?: string) => {
     setOpen(true);
@@ -444,7 +450,7 @@ export default function ChatWidget() {
     } catch {
       setMessages(prev => {
         const next = [...prev];
-        next[next.length - 1] = { role: "assistant", content: "Sorry, I couldn't reach the server. Please try again in a moment." };
+        next[next.length - 1] = { role: "assistant", content: t("errors.sendFailed") };
         return next;
       });
     } finally {
@@ -460,7 +466,7 @@ export default function ChatWidget() {
   };
 
   const onInquire = (slug: string, name: string) => {
-    send(`I'd like to inquire about the ${name} (${slug}).`);
+    send(t("inquireTemplate", { name, slug }));
   };
 
   const onQuickReply = (option: string) => {
@@ -474,7 +480,7 @@ export default function ChatWidget() {
   return (
     <>
       <button
-        aria-label={open ? `Close ${AGENT_NAME} chat` : `Open ${AGENT_NAME} chat`}
+        aria-label={open ? t("launcher.closeAria", { name: AGENT_NAME }) : t("launcher.openAria", { name: AGENT_NAME })}
         onClick={() => {
           if (open) {
             setOpen(false);
@@ -500,7 +506,9 @@ export default function ChatWidget() {
 
       {showTooltip && (
         <div className="asha-tooltip" onClick={() => { setShowTooltip(false); localStorage.setItem("asha_tooltip_dismissed", "1"); handleOpen(); }}>
-          <div className="asha-tooltip-text">Ask <strong>ASHA</strong> — specs, comparisons &amp; pricing</div>
+          <div className="asha-tooltip-text">
+            {t.rich("tooltip.text", { name: AGENT_NAME, strong: (chunks) => <strong>{chunks}</strong> })}
+          </div>
           <div className="asha-tooltip-arrow" />
         </div>
       )}
@@ -517,10 +525,10 @@ export default function ChatWidget() {
               </svg>
             </div>
             <div className="asha-reply-popup__header-text">
-              <div className="asha-reply-popup__title">New Reply from Engineer</div>
+              <div className="asha-reply-popup__title">{t("replyPopup.title")}</div>
               <div className="asha-reply-popup__type">
-                {latestReply.inquiryType === "talk-to-engineer" ? "Talk to Engineer" :
-                 latestReply.inquiryType === "parts" ? "Part Inquiry" : "Direct Inquiry"}
+                {latestReply.inquiryType === "talk-to-engineer" ? t("replyPopup.type.talkToEngineer") :
+                 latestReply.inquiryType === "parts" ? t("replyPopup.type.parts") : t("replyPopup.type.direct")}
                 {latestReply.machineNames.length > 0 && ` — ${latestReply.machineNames.join(", ")}`}
                 {latestReply.partNames.length > 0 && ` — ${latestReply.partNames.join(", ")}`}
               </div>
@@ -539,13 +547,13 @@ export default function ChatWidget() {
               localStorage.setItem("cx_inquiry_lastSeen", new Date().toISOString());
               window.location.href = `/inquiries#${latestReply.inquiryId}`;
             }}>
-              View Full Reply
+              {t("replyPopup.viewFull")}
             </button>
             <button className="asha-reply-popup__btn" onClick={() => {
               setShowReplyPopup(false);
               handleOpen();
             }}>
-              Chat with ASHA
+              {t("replyPopup.chatWith", { name: AGENT_NAME })}
             </button>
           </div>
         </div>
@@ -557,11 +565,11 @@ export default function ChatWidget() {
             <div className={`asha-avatar ${sending ? "asha-avatar--thinking" : ""}`}>A</div>
             <div className="asha-header-text">
               <div className="asha-title">{AGENT_NAME}</div>
-              <div className="asha-subtitle">Machine assistant · online</div>
+              <div className="asha-subtitle">{t("header.subtitle")}</div>
             </div>
             <button
               className="asha-expand-btn"
-              aria-label={expanded ? "Shrink chat" : "Expand chat"}
+              aria-label={expanded ? t("header.shrinkAria") : t("header.expandAria")}
               onClick={() => setExpanded(v => !v)}
             >
               {expanded ? (
@@ -588,11 +596,11 @@ export default function ChatWidget() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={onKeyDown}
-              placeholder="Ask about a machine, compare models, or request a page…"
+              placeholder={t("input.placeholder")}
               rows={1}
               disabled={sending}
             />
-            <button onClick={() => send()} disabled={sending || !input.trim()} aria-label="Send message">
+            <button onClick={() => send()} disabled={sending || !input.trim()} aria-label={t("input.sendAria")}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12L20 4L13 20L11 13L4 12Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" /></svg>
             </button>
           </div>

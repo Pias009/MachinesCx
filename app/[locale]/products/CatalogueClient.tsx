@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { familyImage } from "@/lib/products";
 import type { Category, ProductFamily } from "@/lib/products";
 import ProductStage3D from "@/components/ProductStage3D";
@@ -38,6 +39,7 @@ export default function CatalogueClient({
   categories: Category[];
   families: ProductFamily[];
 }) {
+  const t = useTranslations("catalogueClient");
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | "all">("all");
   const [heroIdx, setHeroIdx] = useState(0);
@@ -86,13 +88,13 @@ export default function CatalogueClient({
         <div className="wrap cat2-hero__inner">
           <div className="cat2-hero__col">
             <p className="cat2-crumb">
-              <Link href="/">Home</Link>
+              <Link href="/">{t("breadcrumbHome")}</Link>
               <span>/</span>
-              <span className="cat2-crumb__cur">Catalogue</span>
+              <span className="cat2-crumb__cur">{t("breadcrumbCatalogue")}</span>
             </p>
-            <h1 className="cat2-hero__h1">The full line-up.</h1>
+            <h1 className="cat2-hero__h1">{t("heroTitle")}</h1>
             <p className="cat2-hero__sub">
-              {families.length} machine families across {categories.length} process lines, each with full bilingual specification tables.
+              {t("heroSub", { familyCount: families.length, categoryCount: categories.length })}
             </p>
 
             <div className="cat2-toolbar">
@@ -102,24 +104,24 @@ export default function CatalogueClient({
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search machines, models, keywords"
-                  aria-label="Search catalogue"
+                  placeholder={t("searchPlaceholder")}
+                  aria-label={t("searchAria")}
                   className="cat2-search__input"
                 />
                 {query && (
-                  <button type="button" className="cat2-search__clear" onClick={() => setQuery("")} aria-label="Clear search">
+                  <button type="button" className="cat2-search__clear" onClick={() => setQuery("")} aria-label={t("clearSearchAria")}>
                     <ClearIcon />
                   </button>
                 )}
               </div>
 
-              <nav className="cat2-filter" aria-label="Filter by category">
+              <nav className="cat2-filter" aria-label={t("filterAria")}>
                 <button
                   type="button"
                   className={`cat2-filter__pill ${activeCategory === "all" ? "cat2-filter__pill--active" : ""}`}
                   onClick={() => setActiveCategory("all")}
                 >
-                  All <span className="cat2-filter__count">{countFor("all")}</span>
+                  {t("allPill")} <span className="cat2-filter__count">{countFor("all")}</span>
                 </button>
                 {categories.map((c) => (
                   <button
@@ -147,7 +149,7 @@ export default function CatalogueClient({
                 sizes="(max-width: 900px) 90vw, 42vw"
               />
               {heroMachines.length > 1 && (
-                <div className="cat2-hero__dots" role="tablist" aria-label="Featured machine">
+                <div className="cat2-hero__dots" role="tablist" aria-label={t("featuredMachineAria")}>
                   {heroMachines.map((f, i) => (
                     <button
                       key={f.slug}
@@ -169,20 +171,20 @@ export default function CatalogueClient({
         <div className="wrap">
           <div className="cat2-results-head">
             <span className="cat2-results-count">
-              {filtered.length} machine{filtered.length !== 1 ? "s" : ""}
-              {query && <> matching "{query}"</>}
+              {filtered.length === 1 ? t("resultsCountSingular", { count: filtered.length }) : t("resultsCountPlural", { count: filtered.length })}
+              {query && <> {t("resultsMatching", { query })}</>}
             </span>
           </div>
 
           {filtered.length === 0 && (
             <div className="cat2-empty">
-              <p>No machines match your search.</p>
+              <p>{t("emptyMessage")}</p>
               <button
                 type="button"
                 className="btn btn--ghost"
                 onClick={() => { setQuery(""); setActiveCategory("all"); }}
               >
-                Reset filters
+                {t("resetFilters")}
               </button>
             </div>
           )}
@@ -194,7 +196,7 @@ export default function CatalogueClient({
                     <h2 className="cat2-group__title">{category.name}</h2>
                     <p className="cat2-group__tag">{category.tagline}</p>
                     <Link href={`/products/${category.slug}`} className="cat2-group__link">
-                      View line <ArrowIcon />
+                      {t("viewLine")} <ArrowIcon />
                     </Link>
                   </div>
                   <FamilyGrid items={items} />

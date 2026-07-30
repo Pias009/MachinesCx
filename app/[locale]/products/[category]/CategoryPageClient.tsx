@@ -3,42 +3,45 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
 import type { Category, ProductFamily } from "@/lib/products";
 import { familyImage } from "@/lib/products";
 
-/* ── per-category feature badges ─────────────────────────────────── */
-const CATEGORY_FEATURES: Record<string, { icon: string; label: string }[]> = {
+/* ── per-category feature badges — icon + ordering only; the display
+   label text is translated and pulled from the categoryPage.features.*
+   namespace at render time, keyed by category slug + index ── */
+const CATEGORY_FEATURES: Record<string, { icon: string }[]> = {
   "film-blowing": [
-    { icon: "layers",    label: "Up to 5 Layers"       },
-    { icon: "gauge",     label: "400 kg/h Output"       },
-    { icon: "width",     label: "2,300 mm Web Width"    },
-    { icon: "servo",     label: "Servo Drive"           },
-    { icon: "corona",    label: "Corona Option"         },
-    { icon: "scope",     label: "Oscillating Tower"     },
+    { icon: "layers" },
+    { icon: "gauge" },
+    { icon: "width" },
+    { icon: "servo" },
+    { icon: "corona" },
+    { icon: "scope" },
   ],
   "bag-making": [
-    { icon: "speed",     label: "300 pcs/min"           },
-    { icon: "multilane", label: "Multi-lane"            },
-    { icon: "bio",       label: "PBAT / Biodegradable"  },
-    { icon: "seal",      label: "Heat & Bottom Seal"    },
-    { icon: "roll",      label: "Roll-bag Ready"        },
-    { icon: "vest",      label: "Vest Bag Option"       },
+    { icon: "speed" },
+    { icon: "multilane" },
+    { icon: "bio" },
+    { icon: "seal" },
+    { icon: "roll" },
+    { icon: "vest" },
   ],
   "recycling": [
-    { icon: "recycle",   label: "Edge-trim Recovery"    },
-    { icon: "output",    label: "150 kg/h Output"       },
-    { icon: "lab",       label: "Benchtop Lab Line"     },
-    { icon: "hdpe",      label: "HDPE / LDPE / LLDPE"  },
+    { icon: "recycle" },
+    { icon: "output" },
+    { icon: "lab" },
+    { icon: "hdpe" },
   ],
   "printing": [
-    { icon: "colours",   label: "2–8 Colour CI Flexo"  },
-    { icon: "speed",     label: "350 m/min"             },
-    { icon: "register",  label: "±0.1 mm Registration" },
-    { icon: "servo",     label: "Full Servo Gearless"   },
-    { icon: "width",     label: "500–2000 mm Web"       },
-    { icon: "substrates",label: "PE, PP, PET, BOPP…"   },
+    { icon: "colours" },
+    { icon: "speed" },
+    { icon: "register" },
+    { icon: "servo" },
+    { icon: "width" },
+    { icon: "substrates" },
   ],
 };
 
@@ -124,8 +127,10 @@ interface Props {
 }
 
 export default function CategoryPageClient({ category, families, allCategories }: Props) {
+  const t = useTranslations("categoryPage");
   const heroImgs  = HERO_IMAGES[category.slug] ?? [];
-  const features  = CATEGORY_FEATURES[category.slug] ?? [];
+  const featureLabels = (t.raw("features") as Record<string, string[]>)[category.slug] ?? [];
+  const features  = (CATEGORY_FEATURES[category.slug] ?? []).map((f, i) => ({ ...f, label: featureLabels[i] ?? "" }));
   const statKeys  = CARD_STATS[category.slug] ?? [];
   const cardsRef  = useRef<HTMLDivElement>(null);
   // mobile-only: category tabs collapse into a tap-to-expand dropdown
@@ -179,10 +184,10 @@ export default function CategoryPageClient({ category, families, allCategories }
 
         <div className="ccp-hero__content">
           {/* breadcrumb */}
-          <nav className="ccp-crumb" aria-label="Breadcrumb">
-            <Link href="/">Home</Link>
+          <nav className="ccp-crumb" aria-label={t("breadcrumbAria")}>
+            <Link href="/">{t("breadcrumbHome")}</Link>
             <span className="ccp-crumb__sep" aria-hidden="true">›</span>
-            <Link href="/products">Catalogue</Link>
+            <Link href="/products">{t("breadcrumbCatalogue")}</Link>
             <span className="ccp-crumb__sep" aria-hidden="true">›</span>
             <span className="ccp-crumb__cur">{category.name}</span>
           </nav>
@@ -206,7 +211,7 @@ export default function CategoryPageClient({ category, families, allCategories }
                 <path d="M1 1l4 4 4-4" />
               </svg>
             </button>
-            <nav className="ccp-tabs" aria-label="Product categories">
+            <nav className="ccp-tabs" aria-label={t("categoriesAria")}>
               {allCategories.map((c) => (
                 <Link
                   key={c.slug}
@@ -244,11 +249,15 @@ export default function CategoryPageClient({ category, families, allCategories }
       )}
 
       {/* ── PRODUCT GRID ── */}
-      <section className="ccp-grid-section" aria-label="Product catalogue">
+      <section className="ccp-grid-section" aria-label={t("productCatalogueAria")}>
         <div className="ccp-grid-section__wrap">
           <div className="ccp-grid-header">
-            <h2>{families.length} <em>Machine{families.length !== 1 ? "s" : ""}</em> in this range</h2>
-            <span className="ccp-count">{families.reduce((n, f) => n + f.models.length, 0)} total models</span>
+            <h2>
+              {families.length !== 1
+                ? t.rich("machinesInRange", { count: families.length, em: (chunks) => <em>{chunks}</em> })
+                : t.rich("machineInRangeSingular", { count: families.length, em: (chunks) => <em>{chunks}</em> })}
+            </h2>
+            <span className="ccp-count">{t("totalModels", { count: families.reduce((n, f) => n + f.models.length, 0) })}</span>
           </div>
 
           <div className="ccp-grid" ref={cardsRef}>
@@ -314,7 +323,7 @@ export default function CategoryPageClient({ category, families, allCategories }
                       <span />
                     )}
                     <span className="ccp-card__cta">
-                      View Details
+                      {t("viewDetails")}
                       <span className="ccp-card__cta-arrow" aria-hidden="true">→</span>
                     </span>
                   </div>
@@ -326,14 +335,14 @@ export default function CategoryPageClient({ category, families, allCategories }
       </section>
 
       {/* ── CTA BAND ── */}
-      <section className="ccp-cta" aria-label="Contact">
+      <section className="ccp-cta" aria-label={t("contactAria")}>
         <div className="ccp-cta__inner">
           <div>
-            <h2 className="ccp-cta__h2">Need help <em>choosing</em> a model?</h2>
-            <p className="ccp-cta__p">Talk to our engineers — we match every line to your output targets, floor space, and film spec.</p>
+            <h2 className="ccp-cta__h2">{t.rich("ctaHeading", { em: (chunks) => <em>{chunks}</em> })}</h2>
+            <p className="ccp-cta__p">{t("ctaBody")}</p>
           </div>
           <AetherBtn>
-            <TransitionLink href="/inquiries">Talk to an engineer →</TransitionLink>
+            <TransitionLink href="/inquiries">{t("ctaButton")}</TransitionLink>
           </AetherBtn>
         </div>
       </section>

@@ -1,5 +1,10 @@
 "use client";
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import gsap from "gsap";
+import {
+  Globe2, DollarSign, BarChart3, Gauge, Ruler, Zap, Weight, Settings2, Layers,
+} from "lucide-react";
 import type { SpecRow, ProductFamily } from "@/lib/products";
 
 interface Props {
@@ -8,8 +13,6 @@ interface Props {
   specs: SpecRow[];
   specKeys: string[];
   modelIndex: number;
-  onModelChange?: (index: number) => void;
-  models: string[];
   family: ProductFamily;
   category?: string;
 }
@@ -19,42 +22,88 @@ function extractNum(v: string): number {
   return m ? parseFloat(m[0]) : 0;
 }
 
+function formatValue(v: number): string {
+  if (v === 0) return "0";
+  if (v < 10) return (Math.round(v * 100) / 100).toString();
+  return Math.round(v).toString();
+}
+
 function extractUnit(v: string): string {
-  const m = v.match(/[a-zA-Z/%°²³]+/);
-  return m ? m[0] : "";
+  // everything after the last number — handles both "240 KG/H" (unit
+  // legitimately contains a slash) and "65/75/65mm" (slash-separated
+  // multi-layer value, unit is just the trailing "mm")
+  const m = v.match(/[\d.]+(?!.*[\d.])/);
+  if (!m) return "";
+  return v.slice(m.index! + m[0].length).trim();
 }
 
-function SpecCounter({ value, suffix, label, decimals = 0 }: { value: number; suffix: string; label: string; decimals?: number }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const counted = useRef(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && !counted.current) {
-        counted.current = true;
-        const start = performance.now();
-        const animate = (now: number) => {
-          const t = Math.min((now - start) / 1200, 1);
-          setCount((1 - Math.pow(1 - t, 3)) * value);
-          if (t < 1) requestAnimationFrame(animate);
-        };
-        requestAnimationFrame(animate);
-      }
-    }, { threshold: 0.3 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [value]);
-
-  return (
-    <div ref={ref} className="md-metric">
-      <span className="md-metric__num">{count.toFixed(decimals)}<span className="md-metric__suffix">{suffix}</span></span>
-      <span className="md-metric__label">{label}</span>
-    </div>
-  );
+/* pick a representative icon for a spec label — purely decorative, mirrors
+   the icon-per-ring pattern in the reference gauge */
+function iconForLabel(label: string) {
+  const l = label.toLowerCase();
+  if (l.includes("power") || l.includes("motor")) return Zap;
+  if (l.includes("width")) return Ruler;
+  if (l.includes("weight")) return Weight;
+  if (l.includes("speed") || l.includes("output") || l.includes("capacity")) return Gauge;
+  if (l.includes("layer")) return Layers;
+  if (l.includes("colour") || l.includes("color")) return Globe2;
+  if (l.includes("diameter") || l.includes("screw")) return Settings2;
+  if (l.includes("length")) return BarChart3;
+  return DollarSign;
 }
+
+/* SVG path for a ring segment sweeping from startAngle to endAngle (deg,
+   0 = +x axis, clockwise) at given inner/outer radius, centered at cx/cy */
+function ringPath(cx: number, cy: number, rInner: number, rOuter: number, startDeg: number, endDeg: number) {
+  const toXY = (r: number, deg: number) => {
+    const rad = (deg * Math.PI) / 180;
+    return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
+  };
+  const [x1, y1] = toXY(rOuter, startDeg);
+  const [x2, y2] = toXY(rOuter, endDeg);
+  const [x3, y3] = toXY(rInner, endDeg);
+  const [x4, y4] = toXY(rInner, startDeg);
+  const largeArc = endDeg - startDeg > 180 ? 1 : 0;
+  return [
+    `M ${x1} ${y1}`,
+    `A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${x2} ${y2}`,
+    `L ${x3} ${y3}`,
+    `A ${rInner} ${rInner} 0 ${largeArc} 0 ${x4} ${y4}`,
+    "Z",
+  ].join(" ");
+}
+
+/* ring color per position, outermost first — echoes the reference's
+   orange/teal/graphite/blue band coloring */
+const GAUGE_COLORS = ["#f5822a", "#2bbfb3", "#516168", "#2b8ce6"];
+
+/* catalogue-wide ceilings per spec label, used to normalize each ring's
+   fill — a single-model family (or the top model of one) would otherwise
+   always read ~100%, since there's nothing bigger to compare against */
+const GAUGE_CEILINGS: Record<string, number> = {
+  "Screw Diameter": 130,
+  "Max Extrusion Output": 450,
+  "Total Power": 550,
+  "Film Width": 2300,
+  "Roller Width": 2300,
+  "Main Motor": 200,
+  "Max Bag Width": 1800,
+  "Max Web Width": 2200,
+  "Max Mechanical Speed": 400,
+  "Mechanical Speed": 400,
+  "Bag Making Speed": 280,
+  "Line Speed": 300,
+  "Film Thickness": 200,
+  "Produce Length": 1000,
+  "Max Unwind Roll Dia.": 1200,
+  "Output Capacity": 500,
+  "Pelletizer Speed": 400,
+  "Printing Colours": 10,
+  "Max Printing Width": 1400,
+  "Repeat Length Range": 900,
+  "Machine Weight": 20000,
+  "Max Unwind/Rewind Dia.": 1200,
+};
 
 const RADAR_DEFAULTS: Record<string, string[]> = {
   "film-blowing": ["Screw Diameter", "Max Extrusion Output", "Total Power", "Film Width", "Roller Width", "Main Motor", "Max Bag Width", "Max Web Width", "Max Mechanical Speed"],
@@ -63,26 +112,8 @@ const RADAR_DEFAULTS: Record<string, string[]> = {
   "printing": ["Max Web Width", "Max Mechanical Speed", "Printing Colours", "Max Printing Width", "Repeat Length Range", "Machine Weight", "Max Unwind/Rewind Dia."],
 };
 
-export default function MachineDiagram({ image, name, specs, specKeys, modelIndex, onModelChange, models, family, category }: Props) {
-  const radarRef = useRef<HTMLCanvasElement>(null);
-  const radarChart = useRef<{ destroy: () => void } | null>(null);
-  const [chartsReady, setChartsReady] = useState(false);
-
-  const centerImg = family.radarImage || image;
-
-  const metricSpecs = useMemo(() => {
-    const priority = ["Max Extrusion Output", "Film Width", "Max Bag Width", "Total Power", "Max Mechanical Speed", "Bag Making Speed", "Screw Diameter", "Max Web Width"];
-    const picked: { label: string; value: number; unit: string }[] = [];
-    for (const key of priority) {
-      if (picked.length >= 5) break;
-      const row = specs.find((s) => s.label === key);
-      if (row) {
-        const v = row.values[Math.min(modelIndex, row.values.length - 1)];
-        picked.push({ label: key, value: extractNum(v), unit: extractUnit(v) });
-      }
-    }
-    return picked;
-  }, [specs, modelIndex]);
+export default function MachineDiagram({ image, name, specs, specKeys, modelIndex, family, category }: Props) {
+  const t = useTranslations("machineDiagram");
 
   const radarSpecs = useMemo(() => {
     const defaults = RADAR_DEFAULTS[category ?? ""] ?? RADAR_DEFAULTS["film-blowing"];
@@ -100,125 +131,84 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
       .slice(0, 8);
   }, [specs, modelIndex, family.radarSpecs, category]);
 
-  useEffect(() => { setChartsReady(true); }, []);
+  /* top 4 specs, normalized against a catalogue-wide ceiling per label so
+     each ring's fill reflects the spec's real-world scale — falls back to
+     this family's own max (with headroom) for labels with no fixed ceiling */
+  const gaugeSpecs = useMemo(() => {
+    return radarSpecs.slice(0, 4).map((s) => {
+      const row = specs.find((r) => r.label === s.label);
+      const familyMax = row ? Math.max(...row.values.map(extractNum), s.value) : s.value;
+      const ceiling = GAUGE_CEILINGS[s.label] ?? familyMax * 1.35;
+      const pct = ceiling > 0 ? Math.round((s.value / ceiling) * 100) : 0;
+      return { ...s, pct: Math.min(Math.max(pct, 10), 96) };
+    });
+  }, [radarSpecs, specs]);
 
-  useEffect(() => {
-    if (!chartsReady) return;
+  /* live-animated ring fill + counter — rings sweep from 0 the first time
+     the section scrolls into view, then re-sweep from their current value
+     to the new one whenever the model chip switches (never snaps
+     instantly, and never re-plays from 0 on a switch since that would
+     read as the page resetting rather than the number updating). */
+  const [animGauge, setAnimGauge] = useState(() => gaugeSpecs.map((s) => ({ ...s, pct: 0, value: 0 })));
+  const gaugeBoxRef = useRef<HTMLDivElement>(null);
+  const hasRevealed = useRef(false);
+  const gaugeSpecsRef = useRef(gaugeSpecs);
+  gaugeSpecsRef.current = gaugeSpecs;
 
-    const initCharts = async () => {
-      const { Chart, RadarController, BarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } = await import("chart.js");
-      Chart.register(RadarController, BarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
-
-      const isLight = document.documentElement.getAttribute("data-theme") === "light";
-      const ink = isLight ? "#0d2220" : "#ffffff";
-      const ink60 = isLight ? "rgba(13,34,32,0.6)" : "rgba(255,255,255,0.6)";
-      const ink35 = isLight ? "rgba(13,34,32,0.35)" : "rgba(255,255,255,0.35)";
-      const gridColor = isLight ? "rgba(43,191,179,0.12)" : "rgba(43,191,179,0.25)";
-      const angleColor = isLight ? "rgba(13,34,32,0.07)" : "rgba(255,255,255,0.08)";
-
-      const valueLabelsPlugin = {
-        id: "valueLabels",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        afterDraw(chart: any) {
-          const ctx = chart.ctx;
-          const meta = chart.getDatasetMeta(0);
-          if (!meta || !meta.data) return;
-          ctx.save();
-          ctx.font = `bold 12px ui-monospace,SFMono-Regular,Menlo,monospace`;
-          ctx.textAlign = "center";
-          ctx.textBaseline = "bottom";
-          meta.data.forEach((element: any, i: number) => {
-            const pt = element.getCenterPoint();
-            const val = radarSpecs[i];
-            const txt = val ? `${Math.round(val.value)}${val.unit}` : "";
-            if (!txt) return;
-            ctx.fillStyle = "#2bbfb3";
-            const yOff = element.active ? -22 : -18;
-            ctx.fillText(txt, pt.x, pt.y + yOff);
-            ctx.fillStyle = isLight ? "rgba(13,34,32,0.3)" : "rgba(255,255,255,0.15)";
-            ctx.font = `10px ui-monospace,SFMono-Regular,Menlo,monospace`;
-            ctx.fillText(val.label, pt.x, pt.y + yOff + 16);
+  const animateTo = (targets: typeof gaugeSpecs) => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      setAnimGauge(targets.map((s) => ({ ...s })));
+      return;
+    }
+    // one proxy object + tween per ring, staggered slightly so the sweep
+    // reads outermost-ring-first like the legend numbering — a single
+    // gsap.to() can't target per-index properties on an array, so each
+    // ring gets its own tween instead.
+    const proxies = targets.map((s, i) => ({ ...(animGauge[i] ?? { pct: 0, value: 0 }) }));
+    targets.forEach((s, i) => {
+      gsap.to(proxies[i], {
+        pct: s.pct,
+        value: s.value,
+        duration: 1.1,
+        ease: "power3.out",
+        delay: i * 0.08,
+        onUpdate: () => {
+          setAnimGauge((prev) => {
+            const next = prev.length === targets.length ? [...prev] : targets.map((t) => ({ ...t }));
+            next[i] = { ...targets[i], pct: proxies[i].pct, value: proxies[i].value };
+            return next;
           });
-          ctx.restore();
         },
-      };
+      });
+    });
+  };
 
-      if (radarRef.current && radarSpecs.length >= 3) {
-        if (radarChart.current) radarChart.current.destroy();
-        const ctx = radarRef.current.getContext("2d");
-        if (!ctx) return;
+  // first reveal — wait until the gauge is actually scrolled into view
+  useEffect(() => {
+    const el = gaugeBoxRef.current;
+    if (!el || hasRevealed.current) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0].isIntersecting || hasRevealed.current) return;
+        hasRevealed.current = true;
+        animateTo(gaugeSpecsRef.current);
+        obs.disconnect();
+      },
+      { threshold: 0.3 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-        radarChart.current = new Chart(ctx, {
-          type: "radar",
-          data: {
-            labels: radarSpecs.map((s) => s.label),
-            datasets: [{
-              label: name,
-              data: radarSpecs.map((s) => s.value),
-              backgroundColor: "rgba(43,191,179,0.35)",
-              borderColor: "#2bbfb3",
-              borderWidth: 4,
-              pointBackgroundColor: "#2bbfb3",
-              pointBorderColor: isLight ? "#ffffff" : "#080e0d",
-              pointBorderWidth: 4,
-              pointRadius: 7,
-              pointHoverRadius: 10,
-            }],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            animation: { duration: 1200, easing: "easeOutQuart" },
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                backgroundColor: isLight ? "#fff" : "#0d1614",
-                titleColor: isLight ? "#0d2220" : "#fff",
-                bodyColor: isLight ? "rgba(13,34,32,0.72)" : "rgba(255,255,255,0.78)",
-                borderColor: "rgba(43,191,179,0.3)",
-                borderWidth: 1,
-                padding: 12,
-                displayColors: false,
-                callbacks: {
-                  label: (ctx) => ` ${Math.round(ctx.parsed.r)} ${radarSpecs[ctx.dataIndex]?.unit ?? ""}`,
-                },
-              },
-            },
-            scales: {
-              r: {
-                beginAtZero: true,
-                suggestedMin: 0,
-                ticks: {
-                  color: ink35,
-                  backdropColor: "transparent",
-                  font: { size: 11 },
-                  stepSize: 0,
-                  display: false,
-                },
-                grid: {
-                  color: gridColor,
-                  lineWidth: 1.5,
-                },
-                angleLines: {
-                  color: angleColor,
-                  lineWidth: 1.5,
-                },
-                pointLabels: {
-                  display: false,
-                },
-              },
-            },
-          },
-          plugins: [valueLabelsPlugin],
-        });
-      }
-    };
-
-    initCharts();
-    return () => {
-      if (radarChart.current) radarChart.current.destroy();
-    };
-  }, [chartsReady, radarSpecs, name]);
+  // subsequent changes (model switch) — re-sweep from the current value,
+  // only once the first reveal has already happened
+  useEffect(() => {
+    if (!hasRevealed.current) return;
+    animateTo(gaugeSpecs);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gaugeSpecs]);
 
   if (radarSpecs.length < 3) return null;
 
@@ -226,7 +216,7 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
     <div className="md-section">
       <style suppressHydrationWarning>{`
         .md-section {
-          padding: 2.5rem 0 3rem;
+          padding: 3.5rem 0 4.5rem;
           width: 100%;
         }
 
@@ -235,16 +225,16 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          margin-bottom: 2rem;
+          margin-bottom: 2.75rem;
         }
         .md-head__line {
-          flex: 0 0 28px;
+          flex: 0 0 36px;
           height: 2px;
           background: var(--brand-teal);
         }
         .md-head__title {
           font-family: var(--ff-display);
-          font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+          font-size: clamp(2rem, 4.8vw, 3.2rem);
           letter-spacing: -0.01em;
           color: var(--ink);
         }
@@ -253,130 +243,161 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
           color: var(--brand-teal);
         }
 
-        /* ═══ RADAR HERO ═══ */
-        .md-radar-wrap {
+        /* ═══ RING GAUGE HERO ═══ */
+        .md-gauge-wrap {
           display: flex;
           justify-content: center;
-          margin-bottom: 2rem;
+          margin-bottom: 2.25rem;
           position: relative;
         }
-        .md-radar-box {
+        .md-gauge-box {
           position: relative;
           width: 100%;
-          max-width: 720px;
-          aspect-ratio: 1;
+          max-width: 1600px;
+          aspect-ratio: 1.55;
           opacity: 0;
           animation: md-fade-up 0.7s ease 0.15s forwards;
         }
-        .md-radar-box::before {
-          content: "";
-          position: absolute;
-          inset: -40px;
-          background: radial-gradient(ellipse at center, rgba(43,191,179,0.06) 0%, transparent 70%);
-          pointer-events: none;
-          z-index: 0;
-          border-radius: 50%;
+        .md-gauge-svg {
+          width: 100%;
+          height: 100%;
+          overflow: visible;
         }
-        .md-radar-canvas {
-          width: 100% !important;
-          height: 100% !important;
-          position: relative;
-          z-index: 1;
+        .md-gauge-ring {
+          transition: opacity 0.3s;
         }
-        .md-radar-img {
-          position: absolute;
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: 100px;
-          height: 100px;
-          border-radius: 50%;
-          object-fit: cover;
-          border: 3px solid rgba(43,191,179,0.35);
-          pointer-events: none;
-          z-index: 3;
-          box-shadow: 0 0 40px rgba(43,191,179,0.25), 0 0 80px rgba(43,191,179,0.08);
+        .md-gauge-ring-bg {
+          fill: var(--bg-line);
+          opacity: 0.5;
         }
-
-        /* ═══ METRIC CARDS ═══ */
-        .md-metrics {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-          gap: 1rem;
-          max-width: 800px;
-          margin: 0 auto 2rem;
+        .md-gauge-ring-fill {
+          fill: var(--ring-color, var(--brand-teal));
+          filter: drop-shadow(0 2px 10px rgba(43,191,179,0.18));
         }
-        .md-metric {
-          text-align: center;
-          padding: 1.25rem 0.75rem;
-          border: 1px solid var(--bg-line);
-          opacity: 0;
-          transform: translateY(16px);
-          animation: md-fade-up 0.5s ease forwards;
-          background: rgba(43,191,179,0.03);
+        .md-gauge-center {
+          fill: var(--bg-base);
+          stroke: var(--bg-line);
+          stroke-width: 1;
         }
-        .md-metric:nth-child(1) { animation-delay: 0.25s; }
-        .md-metric:nth-child(2) { animation-delay: 0.3s; }
-        .md-metric:nth-child(3) { animation-delay: 0.35s; }
-        .md-metric:nth-child(4) { animation-delay: 0.4s; }
-        .md-metric:nth-child(5) { animation-delay: 0.45s; }
-        .md-metric__num {
-          font-family: var(--ff-display);
-          font-size: clamp(1.8rem, 3.5vw, 2.4rem);
-          line-height: 1;
-          color: var(--brand-teal);
-          display: block;
-          font-weight: 700;
-        }
-        .md-metric__suffix {
+        .md-gauge-center-label {
           font-family: var(--ff-mono);
-          font-size: 0.6rem;
+          font-size: 9px;
           letter-spacing: 0.06em;
-          color: var(--ink-35);
-          margin-left: 0.15rem;
-        }
-        .md-metric__label {
-          font-family: var(--ff-mono);
-          font-size: 0.65rem;
-          letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: var(--ink-60);
-          display: block;
-          margin-top: 0.4rem;
-          font-weight: 600;
+          fill: var(--ink-60);
+        }
+        .md-gauge-center-em {
+          font-family: var(--ff-display);
+          font-size: 15px;
+          fill: var(--brand-teal);
+          font-weight: 700;
+        }
+        .md-gauge-dot {
+          fill: var(--ring-color, var(--brand-teal));
+        }
+        .md-gauge-line {
+          stroke: var(--ring-color, var(--brand-teal));
+          stroke-width: 1;
+          opacity: 0.55;
         }
 
-        /* ═══ MODEL CHIPS ═══ */
-        .md-models {
+        .md-gauge-callout {
+          position: absolute;
           display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-          justify-content: center;
+          align-items: center;
+          gap: 1.1rem;
           opacity: 0;
-          animation: md-fade-up 0.5s ease 0.5s forwards;
+          transform: translateX(-10px);
+          animation: md-fade-side 0.5s ease forwards;
         }
-        .md-model-chip {
-          font-family: var(--ff-mono);
-          font-size: 0.7rem;
-          letter-spacing: 0.06em;
-          padding: 0.4rem 0.9rem;
+        .md-gauge-callout__icon {
+          flex: 0 0 auto;
+          width: 84px;
+          height: 84px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--bg-base);
           border: 1px solid var(--bg-line);
-          background: transparent;
-          color: var(--ink-60);
-          font-weight: 500;
-          cursor: pointer;
-          transition: border-color 0.18s, color 0.18s, background 0.18s, transform 0.18s cubic-bezier(0.16,1,0.3,1);
+          box-shadow: 0 6px 18px -8px rgba(0,0,0,0.25);
+          color: var(--ring-color, var(--brand-teal));
         }
-        .md-model-chip:hover {
-          border-color: rgba(43,191,179,0.4);
-          color: var(--ink);
-          transform: translateY(-1px);
+        .md-gauge-callout__text {
+          display: flex;
+          flex-direction: column;
+          line-height: 1.15;
         }
-        .md-model-chip:active { transform: scale(0.95); }
-        .md-model-chip--on {
-          border-color: var(--brand-teal);
-          color: var(--brand-teal);
-          background: rgba(43,191,179,0.08);
+        .md-gauge-callout__val {
+          font-family: var(--ff-display);
+          font-size: 2.4rem;
           font-weight: 700;
+          color: var(--ring-color, var(--brand-teal));
+        }
+        .md-gauge-callout__label {
+          font-family: var(--ff-mono);
+          font-size: 1rem;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+          color: var(--ink-35);
+          white-space: nowrap;
+        }
+
+        @keyframes md-fade-side {
+          from { opacity: 0; transform: translateX(-10px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ═══ LEGEND LIST ═══ */
+        .md-legend {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 0;
+          max-width: 1600px;
+          margin: 0 auto 2rem;
+          border-top: 1px solid var(--bg-line);
+        }
+        .md-legend-item {
+          padding: 2rem 2rem 2rem 0;
+          opacity: 0;
+          transform: translateY(10px);
+          animation: md-fade-up 0.5s ease forwards;
+        }
+        .md-legend-item:nth-child(1) { animation-delay: 0.25s; }
+        .md-legend-item:nth-child(2) { animation-delay: 0.32s; }
+        .md-legend-item:nth-child(3) { animation-delay: 0.39s; }
+        .md-legend-item:nth-child(4) { animation-delay: 0.46s; }
+        .md-legend-item__num {
+          font-family: var(--ff-mono);
+          font-size: 1.05rem;
+          letter-spacing: 0.08em;
+          color: var(--ring-color, var(--brand-teal));
+          font-weight: 700;
+        }
+        .md-legend-item__num::before {
+          content: "";
+          display: inline-block;
+          width: 9px;
+          height: 9px;
+          border-radius: 50%;
+          background: var(--ring-color, var(--brand-teal));
+          margin-right: 0.5rem;
+          vertical-align: middle;
+        }
+        .md-legend-item__label {
+          font-family: var(--ff-mono);
+          font-size: 1.1rem;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          color: var(--ink);
+          font-weight: 600;
+          margin-top: 0.4rem;
+        }
+        .md-legend-item__val {
+          font-family: var(--ff-body);
+          font-size: 1.25rem;
+          color: var(--ink-60);
+          margin-top: 0.3rem;
         }
 
         @keyframes md-fade-up {
@@ -385,15 +406,11 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
         }
 
         @media(max-width: 700px) {
-          .md-radar-box { max-width: 90vw; }
-          .md-radar-box::before { display: none; }
-          .md-radar-img { width: 64px; height: 64px; border-width: 2px; }
-          .md-metrics { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
-          .md-metric { padding: 0.85rem 0.5rem; }
-          .md-metric__num { font-size: 1.3rem; }
-          .md-metric__suffix { font-size: 0.5rem; }
-          .md-metric__label { font-size: 0.55rem; }
-          .md-model-chip { font-size: 0.6rem; padding: 0.3rem 0.65rem; }
+          .md-gauge-box { max-width: 92vw; aspect-ratio: 1.05; }
+          .md-gauge-callout__icon { width: 26px; height: 26px; }
+          .md-gauge-callout__val { font-size: 0.8rem; }
+          .md-gauge-callout__label { font-size: 0.5rem; }
+          .md-legend { grid-template-columns: repeat(2, 1fr); gap: 0.75rem 0; }
           .md-head__title { font-size: 1rem; }
           .md-head { margin-bottom: 1.25rem; }
         }
@@ -402,42 +419,86 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
       {/* section heading */}
       <div className="md-head">
         <span className="md-head__line" />
-        <h2 className="md-head__title">Performance &nbsp;<em>Dashboard</em></h2>
+        <h2 className="md-head__title">{t("titlePrefix")} &nbsp;<em>{t("titleEm")}</em></h2>
       </div>
 
-      {/* radar chart — massive hero */}
-      <div className="md-radar-wrap">
-        <div className="md-radar-box">
-          <canvas ref={radarRef} className="md-radar-canvas" />
-          <img src={centerImg} alt="" className="md-radar-img" />
+      {/* concentric ring gauge — top specs as nested quarter-arcs, fill
+          and value live-animated (see animGauge/animateTo above) */}
+      <div className="md-gauge-wrap">
+        <div className="md-gauge-box" ref={gaugeBoxRef}>
+          <svg viewBox="0 0 620 400" className="md-gauge-svg">
+            {animGauge.map((s, i) => {
+              const rOuter = 190 - i * 44;
+              const rInner = rOuter - 34;
+              const color = GAUGE_COLORS[i % GAUGE_COLORS.length];
+              const sweep = (s.pct / 100) * 90;
+              const tipY = 380 - rOuter;
+              return (
+                <g key={s.label} className="md-gauge-ring" style={{ "--ring-color": color } as React.CSSProperties}>
+                  <path d={ringPath(240, 380, rInner, rOuter, -90, 0)} className="md-gauge-ring-bg" />
+                  <path
+                    d={ringPath(240, 380, rInner, rOuter, -90, -90 + sweep)}
+                    className="md-gauge-ring-fill"
+                    style={{ "--ring-color": color } as React.CSSProperties}
+                  />
+                  {/* callout line from the arc's leading tip out to the left */}
+                  <line
+                    x1={240}
+                    y1={tipY}
+                    x2={70 - i * 6}
+                    y2={tipY}
+                    className="md-gauge-line"
+                    style={{ "--ring-color": color } as React.CSSProperties}
+                  />
+                  <circle cx={240} cy={tipY} r={3.5} className="md-gauge-dot" style={{ "--ring-color": color } as React.CSSProperties} />
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* icon + value callouts, positioned to match each ring's tip */}
+          {animGauge.map((s, i) => {
+            const rOuter = 190 - i * 44;
+            const topPct = ((380 - rOuter) / 400) * 100;
+            const leftPct = ((70 - i * 6) / 620) * 100;
+            const Icon = iconForLabel(s.label);
+            const color = GAUGE_COLORS[i % GAUGE_COLORS.length];
+            return (
+              <div
+                key={s.label}
+                className="md-gauge-callout"
+                style={{
+                  top: `${topPct}%`,
+                  left: `${leftPct}%`,
+                  transform: "translate(-100%, -50%)",
+                  "--ring-color": color,
+                  animationDelay: `${0.25 + i * 0.08}s`,
+                } as React.CSSProperties}
+              >
+                <span className="md-gauge-callout__icon"><Icon size={38} strokeWidth={2} /></span>
+                <span className="md-gauge-callout__text">
+                  <span className="md-gauge-callout__val">{formatValue(s.value)}{s.unit}</span>
+                  <span className="md-gauge-callout__label">{s.label}</span>
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* key metric cards */}
-      {metricSpecs.length > 0 && (
-        <div className="md-metrics">
-          {metricSpecs.map((m) => (
-            <SpecCounter key={m.label} value={m.value} suffix={m.unit} label={m.label} />
+      {/* numbered legend — one row per ring, outermost first */}
+      {animGauge.length > 0 && (
+        <div className="md-legend">
+          {animGauge.map((s, i) => (
+            <div key={s.label} className="md-legend-item" style={{ "--ring-color": GAUGE_COLORS[i % GAUGE_COLORS.length] } as React.CSSProperties}>
+              <span className="md-legend-item__num">0{i + 1}</span>
+              <span className="md-legend-item__label">{s.label}</span>
+              <span className="md-legend-item__val">{formatValue(s.value)}{s.unit}</span>
+            </div>
           ))}
         </div>
       )}
 
-      {/* model chips — switch the whole page's active model on click */}
-      {models.length > 1 && (
-        <div className="md-models" role="group" aria-label="Select model">
-          {models.map((m, i) => (
-            <button
-              key={m}
-              type="button"
-              className={`md-model-chip${i === modelIndex ? " md-model-chip--on" : ""}`}
-              onClick={() => onModelChange?.(i)}
-              aria-pressed={i === modelIndex}
-            >
-              {m}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

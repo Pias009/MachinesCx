@@ -6,6 +6,10 @@ import { useTranslations } from "next-intl";
 import TransitionLink from "@/components/TransitionLink";
 import AetherBtn from "@/components/AetherBtn";
 import { useCms } from "@/lib/useCms";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+
+gsap.registerPlugin(useGSAP);
 
 // Machine card slugs shown at the bottom of §3 — display names come from
 // the scrollHome.cards translation namespace, keyed by slug
@@ -59,19 +63,32 @@ export default function ScrollHome() {
   // Selected product for §3 content
   const [selectedProduct, setSelectedProduct] = useState<string>("t-pro-heatseal");
 
+  // ScrollTrigger is a separate plugin bundle — load it lazily since this
+  // pinned scroll choreography isn't needed until the user actually scrolls,
+  // then hand off to useGSAP once it's ready. ScrollTrigger itself is kept
+  // in a ref (not just registered) since the body below calls .create(),
+  // .refresh() and .addEventListener() on it directly by name.
+  const [pluginReady, setPluginReady] = useState(false);
+  const ScrollTriggerRef = useRef<typeof import("gsap/ScrollTrigger").ScrollTrigger | null>(null);
   useEffect(() => {
-    let ctx: { revert?: () => void } = {};
-
-    (async () => {
-      const { gsap }          = await import("gsap");
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+    let cancelled = false;
+    import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
+      if (cancelled) return;
       gsap.registerPlugin(ScrollTrigger);
+      ScrollTriggerRef.current = ScrollTrigger;
+      setPluginReady(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
-      ctx = gsap.context(() => {
-        const m  = machineRef.current;
-        const s2 = sec2Ref.current;
-        const s3 = sec3Ref.current;
-        if (!m || !s2 || !s3) return;
+  useGSAP(() => {
+    if (!pluginReady || !ScrollTriggerRef.current) return;
+    const ScrollTrigger = ScrollTriggerRef.current;
+
+    const m  = machineRef.current;
+    const s2 = sec2Ref.current;
+    const s3 = sec3Ref.current;
+    if (!m || !s2 || !s3) return;
 
         const xAt = (pct: number) => window.innerWidth  * pct - m.offsetWidth  / 2;
         const yAt = (pct: number) => window.innerHeight * pct - m.offsetHeight / 2;
@@ -106,11 +123,15 @@ export default function ScrollHome() {
         gsap.set(sec3RightRef.current, { opacity: 1, x:  0 });
 
         // ── §1 → §2 : right col → left col + flip ────────────────────────
+        // The flip lifts up in scale/z through the quarter-turn (deepest at
+        // 90°, where the machine is edge-on and would otherwise read as a
+        // flat width-collapse) then settles back down — sells the turn as
+        // a real 3D object rotating through depth, not a 2D card flip.
         const tl1 = gsap.timeline({ paused: true });
 
         tl1.to(m, { x: () => xAt(0.25), duration: 0.60, ease: "power2.inOut" }, 0);
-        tl1.to(m, { rotateY: 90,  duration: 0.18, ease: "power3.in"  }, 0.60);
-        tl1.to(m, { rotateY: 180, duration: 0.15, ease: "power3.out" }, 0.78);
+        tl1.to(m, { rotateY: 90,  scale: 1.08, z: 60,  duration: 0.18, ease: "power3.in"  }, 0.60);
+        tl1.to(m, { rotateY: 180, scale: 1,    z: 0,   duration: 0.15, ease: "power3.out" }, 0.78);
 
         ScrollTrigger.create({
           trigger: s2, start: "top bottom+=100", end: "center center",
@@ -194,30 +215,26 @@ export default function ScrollHome() {
           });
         }
 
-        // ── Hero company name: letter rise, replays every time it
-        // scrolls into view (both scrolling down into §1 and back up) ──
-        const heroLetters = heroNameRef.current
-          ? Array.from(heroNameRef.current.querySelectorAll<HTMLElement>("[data-letter]"))
-          : [];
-
-        if (heroLetters.length) {
-          gsap.set(heroLetters, { opacity: 0, y: "110%", skewY: 6 });
+        // ── Hero company name: plain fade-up on the whole line, replays
+        // every time it scrolls into view (both scrolling down into §1
+        // and back up) — previously a per-letter skewed rise ──
+        if (heroNameRef.current) {
+          const heroLine = heroNameRef.current;
+          gsap.set(heroLine, { opacity: 0, y: 24 });
 
           const playHeroName = () => {
-            gsap.to(heroLetters, {
-              opacity: 1, y: "0%", skewY: 0,
+            gsap.to(heroLine, {
+              opacity: 1, y: 0,
               duration: 0.6,
-              ease: "expo.out",
-              stagger: 0.028,
+              ease: "power2.out",
               overwrite: true,
             });
           };
           const resetHeroName = () => {
-            gsap.to(heroLetters, {
-              opacity: 0, y: "110%", skewY: 6,
+            gsap.to(heroLine, {
+              opacity: 0, y: 24,
               duration: 0.35,
               ease: "power2.in",
-              stagger: 0.012,
               overwrite: true,
             });
           };
@@ -272,25 +289,22 @@ export default function ScrollHome() {
           });
         }
 
-      });
-
-      // Scrubbed triggers above recompute self.progress from GSAP's own
-      // scroll-event sampling — a fast jump (anchor link, scrollbar
-      // drag, browser back/forward, bfcache restore) can land inside
-      // §2/§3 without enough intermediate samples, leaving the machine
-      // image's x/y stuck at whatever an earlier trigger last set until
-      // the user scrolls again. ScrollTrigger.update() replays the last
-      // *cached* progress and doesn't fix this; only refresh() re-derives
-      // progress from the real scroll position. Do that once the jump
-      // settles (ScrollTrigger's own scrollEnd event fires regardless of
-      // cause) so the machine never renders stuck mid-flight.
-      const resync = () => ScrollTrigger.refresh();
-      ScrollTrigger.addEventListener("scrollEnd", resync);
-      ctx.revert = ((orig) => () => { ScrollTrigger.removeEventListener("scrollEnd", resync); orig?.(); })(ctx.revert);
-    })();
-
-    return () => { ctx.revert?.(); };
-  }, []);
+    // Scrubbed triggers above recompute self.progress from GSAP's own
+    // scroll-event sampling — a fast jump (anchor link, scrollbar
+    // drag, browser back/forward, bfcache restore) can land inside
+    // §2/§3 without enough intermediate samples, leaving the machine
+    // image's x/y stuck at whatever an earlier trigger last set until
+    // the user scrolls again. ScrollTrigger.update() replays the last
+    // *cached* progress and doesn't fix this; only refresh() re-derives
+    // progress from the real scroll position. Do that once the jump
+    // settles (ScrollTrigger's own scrollEnd event fires regardless of
+    // cause) so the machine never renders stuck mid-flight.
+    const resync = () => ScrollTrigger.refresh();
+    ScrollTrigger.addEventListener("scrollEnd", resync);
+    // useGSAP's context only auto-reverts GSAP-tracked animations/triggers —
+    // this raw ScrollTrigger static listener needs its own explicit cleanup.
+    return () => { ScrollTrigger.removeEventListener("scrollEnd", resync); };
+  }, { dependencies: [pluginReady] });
 
   // ── Card click: update §3 content with selected product ──────────
   const handleCardClick = (slug: string) => {
@@ -777,31 +791,10 @@ export default function ScrollHome() {
                   flexShrink: 0,
                   width: "clamp(220px, 20vw, 280px)",
                   display: "flex", flexDirection: "column", gap: "0.75rem",
-                  padding: "1.25rem 1.25rem 1.5rem",
-                  background: selectedProduct === card.slug
-                    ? "rgba(225,29,72,0.08)"
-                    : "rgba(255,255,255,0.03)",
-                  border: selectedProduct === card.slug
-                    ? "1px solid var(--brand-red)"
-                    : "1px solid rgba(255,255,255,0.08)",
-                  borderTop: selectedProduct === card.slug
-                    ? "2px solid var(--brand-red)"
-                    : "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: 0,
+                  padding: 0,
+                  background: "none",
+                  border: "none",
                   cursor: "pointer",
-                  transition: "background 0.22s, border-color 0.22s",
-                }}
-                onMouseEnter={(e) => {
-                  if (selectedProduct !== card.slug) {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.16)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (selectedProduct !== card.slug) {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-                  }
                 }}
               >
                 <div style={{

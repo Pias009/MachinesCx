@@ -2,6 +2,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import TransitionLink from "@/components/TransitionLink";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { SECTION_ELEMENT_DELAY } from "@/components/SectionReveal";
+
+gsap.registerPlugin(useGSAP);
 
 export default function ConfiguratorCTA() {
   const t = useTranslations("configuratorCTA");
@@ -10,8 +15,48 @@ export default function ConfiguratorCTA() {
   const raf = useRef<number>(0);
 
   const sectionRef  = useRef<HTMLElement>(null);
+  const leftRef     = useRef<HTMLDivElement>(null);
+  const rightRef    = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setMounted(true); }, []);
+
+  // ScrollTrigger is a separate plugin bundle — load it lazily since this
+  // section is below the fold, then hand off to useGSAP once it's ready.
+  const [pluginReady, setPluginReady] = useState(false);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let cancelled = false;
+    import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
+      if (cancelled) return;
+      gsap.registerPlugin(ScrollTrigger);
+      setPluginReady(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Left copy swings in from depth (rotateY, as if turning to face the
+  // reader out of the Spline scene), the configurator panel rises after —
+  // this section has no other entrance since it opts out of the generic
+  // SectionAnimator via data-no-anim (its Spline bg makes a flat fade read
+  // as broken/late). Reverses on scroll back up via ScrollTrigger.
+  useGSAP(() => {
+    if (!pluginReady) return;
+    const trigger = { trigger: sectionRef.current, start: "top 75%", end: "bottom top", toggleActions: "play reverse play reverse" };
+    gsap.set([leftRef.current, rightRef.current], { transformPerspective: 1200 });
+    // One timeline, one ScrollTrigger — was 2 separate instances both
+    // watching sectionRef.
+    const tl = gsap.timeline({ scrollTrigger: trigger, delay: SECTION_ELEMENT_DELAY });
+    tl.fromTo(leftRef.current,
+      { opacity: 0, x: -60, rotateY: 22 },
+      { opacity: 1, x: 0, rotateY: 0, duration: 0.9, ease: "power3.out" },
+      0
+    );
+    tl.fromTo(rightRef.current,
+      { opacity: 0, y: 40, rotateY: -14, scale: 0.94 },
+      { opacity: 1, y: 0, rotateY: 0, scale: 1, duration: 0.85, ease: "power3.out" },
+      0.2
+    );
+  }, { scope: sectionRef, dependencies: [pluginReady] });
 
   useEffect(() => {
     if (!mounted) return;
@@ -238,7 +283,7 @@ export default function ConfiguratorCTA() {
         <div className="cc__vignette" aria-hidden="true" />
 
         <div className="cc__content">
-          <div className="cc__left">
+          <div className="cc__left" ref={leftRef}>
             <div className="cc__index"><b>01</b> / {t("indexLabel")}</div>
             <div className="cc__eyebrow">{t("eyebrow")}</div>
             <h2 className="cc__title">
@@ -251,7 +296,7 @@ export default function ConfiguratorCTA() {
             </div>
           </div>
 
-          <div className="cc__right">
+          <div className="cc__right" ref={rightRef}>
             <div className="cc__badge"><span className="dot" />{t("badge")}</div>
 
             <div>

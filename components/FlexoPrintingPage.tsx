@@ -2,35 +2,44 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import AetherBtn from "@/components/AetherBtn";
 import { CldImage } from "next-cloudinary";
 import { familiesByCategory, type ProductFamily } from "@/lib/products";
 import SpecTable from "@/components/SpecTable";
 
+/* ── gallery photo src list; alt text is translated and pulled from
+   flexoPrintingPage.gallery.* at render time, keyed by array index ── */
 const GALLERY = [
-  { src: "cx-machinery/printing/flexo-2", alt: "AI-4C Flexo press — studio render" },
-  { src: "cx-machinery/printing/flexo-1", alt: "AI-2C Flexo press — angled view" },
-  { src: "cx-machinery/printing/flexo-3", alt: "Flexo press in production — factory floor" },
-  { src: "cx-machinery/printing/flexo-4", alt: "AI-6C Flexo press — teal accent panels" },
+  { src: "cx-machinery/printing/flexo-2" },
+  { src: "cx-machinery/printing/flexo-1" },
+  { src: "cx-machinery/printing/flexo-3" },
+  { src: "cx-machinery/printing/flexo-4" },
 ];
 
+/* ── colour-tier selector — slug/sub(speed)/order only; label + badge text
+   come from flexoPrintingPage.colourTiers.* at render time ── */
 const COLOUR_TIERS = [
-  { slug: "flexo-2c", label: "2 Colour", sub: "84–120 m/min", badge: "Entry" },
-  { slug: "flexo-4c", label: "4 Colour", sub: "140–200 m/min", badge: "Mid" },
-  { slug: "flexo-6c", label: "6 Colour", sub: "182–260 m/min", badge: "Pro" },
-  { slug: "flexo-8c", label: "8 Colour", sub: "244–350 m/min", badge: "Flagship" },
+  { slug: "flexo-2c", sub: "84–120 m/min" },
+  { slug: "flexo-4c", sub: "140–200 m/min" },
+  { slug: "flexo-6c", sub: "182–260 m/min" },
+  { slug: "flexo-8c", sub: "244–350 m/min" },
 ];
 
 const WIDTHS = ["500mm", "800mm", "1000mm", "1200mm", "1500mm", "1800mm", "2000mm"];
 
-const KEY_SPECS: Record<string, { speed: string; reg: string; drive: string }> = {
-  "flexo-2c": { speed: "84–120 m/min", reg: "±0.2 mm",  drive: "Semi-Servo" },
-  "flexo-4c": { speed: "140–200 m/min", reg: "±0.15 mm", drive: "Full Servo Gearless" },
-  "flexo-6c": { speed: "182–260 m/min", reg: "±0.1 mm",  drive: "Full Servo Gearless" },
-  "flexo-8c": { speed: "244–350 m/min", reg: "±0.1 mm",  drive: "Full Servo Gearless" },
+/* ── key spec values per tier — speed/registration are raw measurements
+   (unit values, not translated per house style); "drive" is a display
+   label translated via flexoPrintingPage.driveSystem.* at render time ── */
+const KEY_SPECS: Record<string, { speed: string; reg: string; drive: "semiServo" | "fullServoGearless" }> = {
+  "flexo-2c": { speed: "84–120 m/min", reg: "±0.2 mm",  drive: "semiServo" },
+  "flexo-4c": { speed: "140–200 m/min", reg: "±0.15 mm", drive: "fullServoGearless" },
+  "flexo-6c": { speed: "182–260 m/min", reg: "±0.1 mm",  drive: "fullServoGearless" },
+  "flexo-8c": { speed: "244–350 m/min", reg: "±0.1 mm",  drive: "fullServoGearless" },
 };
 
 export default function FlexoPrintingPage() {
+  const t = useTranslations("flexoPrintingPage");
   const families = familiesByCategory("printing");
   const [activeImg,    setActiveImg]    = useState(0);
   const [activeTier,   setActiveTier]   = useState("flexo-4c");
@@ -50,6 +59,9 @@ export default function FlexoPrintingPage() {
   };
 
   const ks = KEY_SPECS[activeTier];
+  const galleryCopy = t.raw("gallery") as { alt: string }[];
+  const colourTierCopy = t.raw("colourTiers") as Record<string, { label: string; badge: string }>;
+  const driveSystemCopy = t.raw("driveSystem") as Record<string, string>;
 
   return (
     <>
@@ -135,9 +147,9 @@ export default function FlexoPrintingPage() {
 
           {/* breadcrumb */}
           <p style={{ fontFamily:"var(--ff-mono)", fontSize:".72rem", letterSpacing:".1em", textTransform:"uppercase", color:"rgba(255,255,255,0.65)" }}>
-            <Link href="/" style={{ color:"rgba(255,255,255,0.65)" }}>Home</Link> /&nbsp;
-            <Link href="/products" style={{ color:"rgba(255,255,255,0.65)" }}>Catalogue</Link> /&nbsp;
-            <span style={{ color:"rgba(255,255,255,0.78)" }}>Flexographic Printing</span>
+            <Link href="/" style={{ color:"rgba(255,255,255,0.65)" }}>{t("breadcrumbHome")}</Link> /&nbsp;
+            <Link href="/products" style={{ color:"rgba(255,255,255,0.65)" }}>{t("breadcrumbCatalogue")}</Link> /&nbsp;
+            <span style={{ color:"rgba(255,255,255,0.78)" }}>{t("breadcrumbCurrent")}</span>
           </p>
 
           <div className="fp-hero-grid" style={{ display:"grid", gridTemplateColumns:"1fr clamp(260px,34vw,480px)", gap:"3rem", alignItems:"end" }}>
@@ -146,7 +158,7 @@ export default function FlexoPrintingPage() {
             <div className="fp-hero-img" style={{ position:"relative", aspectRatio:"16/9", background:"#0d1614", display:"flex", alignItems:"center", justifyContent:"center" }}>
               <CldImage
                 src={GALLERY[activeImg].src}
-                alt={GALLERY[activeImg].alt}
+                alt={galleryCopy[activeImg]?.alt ?? ""}
                 width={1280} height={720}
                 style={{ width:"100%", height:"100%", objectFit:"contain", padding:"1.5rem" }}
                 sizes="60vw"
@@ -164,32 +176,32 @@ export default function FlexoPrintingPage() {
             {/* hero text */}
             <div style={{ paddingBottom:"2.5rem", display:"flex", flexDirection:"column", gap:"1.2rem" }}>
               <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--brand-red)" }}>
-                Flexographic Printing
+                {t("heroEyebrow")}
               </span>
               <h1 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(2.4rem,4.5vw,3.8rem)", color:"#fff", lineHeight:.9, letterSpacing:".01em" }}>
-                AI Series<br />Flexo Press
+                {t.rich("heroTitle", { br: () => <br /> })}
               </h1>
               <p style={{ fontFamily:"var(--ff-body)", fontSize:".95rem", lineHeight:1.7, color:"rgba(255,255,255,0.75)", maxWidth:"38ch" }}>
-                2 to 8 printing colours. Web widths 500–2000 mm. Full servo gearless drive with ±0.1 mm registration on PE, PP, PET, BOPP, paper and non-woven substrates.
+                {t("heroDescription")}
               </p>
 
               {/* key stats */}
               <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"1rem", paddingTop:".5rem", borderTop:"1px solid rgba(255,255,255,.08)" }}>
                 <div className="fp-kv">
-                  <span className="fp-kv__label">Max speed</span>
+                  <span className="fp-kv__label">{t("maxSpeed")}</span>
                   <span className="fp-kv__value" style={{ color:"#fff" }}>350 m/min</span>
                 </div>
                 <div className="fp-kv">
-                  <span className="fp-kv__label">Colours</span>
+                  <span className="fp-kv__label">{t("colours")}</span>
                   <span className="fp-kv__value" style={{ color:"#fff" }}>2 – 8</span>
                 </div>
                 <div className="fp-kv">
-                  <span className="fp-kv__label">Web width</span>
+                  <span className="fp-kv__label">{t("webWidth")}</span>
                   <span className="fp-kv__value" style={{ color:"#fff" }}>500–2000mm</span>
                 </div>
               </div>
 
-              <AetherBtn style={{ alignSelf:"flex-start", marginTop:".5rem" }}><Link href="/inquiries">Request a quote →</Link></AetherBtn>
+              <AetherBtn style={{ alignSelf:"flex-start", marginTop:".5rem" }}><Link href="/inquiries">{t("requestQuote")}</Link></AetherBtn>
             </div>
           </div>
         </div>
@@ -203,10 +215,10 @@ export default function FlexoPrintingPage() {
           <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"space-between", flexWrap:"wrap", gap:"1rem" }}>
             <div>
               <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--slate-60)", display:"block", marginBottom:".4rem" }}>
-                Select configuration
+                {t("selectConfiguration")}
               </span>
               <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.8rem,3vw,2.6rem)", color:"var(--slate)", lineHeight:.95 }}>
-                Choose your colour count &amp; web width
+                {t("chooseColourAndWidth")}
               </h2>
             </div>
           </div>
@@ -214,14 +226,14 @@ export default function FlexoPrintingPage() {
           {/* colour tier cards */}
           <div>
             <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.68rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--slate-30)", marginBottom:".8rem" }}>
-              Printing colours
+              {t("printingColours")}
             </div>
             <div className="fp-tier-grid" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:".75rem" }}>
               {COLOUR_TIERS.map(ct => (
                 <button key={ct.slug} onClick={() => setActiveTier(ct.slug)}
                   className={`fp-tier-btn${activeTier===ct.slug?" fp-tier-btn--active":""}`}>
-                  <span className="fp-tier-badge">{ct.badge}</span>
-                  <span className="fp-tier-label" style={{ marginTop:".5rem" }}>{ct.label}</span>
+                  <span className="fp-tier-badge">{colourTierCopy[ct.slug]?.badge}</span>
+                  <span className="fp-tier-label" style={{ marginTop:".5rem" }}>{colourTierCopy[ct.slug]?.label}</span>
                   <span className="fp-tier-sub">{ct.sub}</span>
                 </button>
               ))}
@@ -231,7 +243,7 @@ export default function FlexoPrintingPage() {
           {/* width selector */}
           <div>
             <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.68rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--slate-30)", marginBottom:".8rem" }}>
-              Max web width
+              {t("maxWebWidth")}
             </div>
             <div style={{ display:"flex", flexWrap:"wrap", gap:".5rem" }}>
               {WIDTHS.map((w,i) => (
@@ -250,10 +262,10 @@ export default function FlexoPrintingPage() {
             border:"1px solid var(--line)",
           }}>
             {[
-              { label:"Model",            value: singleModel.models[0] },
-              { label:"Max Speed",        value: ks.speed },
-              { label:"Registration",     value: ks.reg },
-              { label:"Drive System",     value: ks.drive },
+              { label: t("model"),        value: singleModel.models[0] },
+              { label: t("maxSpeed"),     value: ks.speed },
+              { label: t("registration"), value: ks.reg },
+              { label: t("driveSystemLabel"), value: driveSystemCopy[ks.drive] },
             ].map(kv => (
               <div key={kv.label} style={{ background:"var(--surface)", padding:"1.4rem 1.6rem" }}>
                 <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.68rem", letterSpacing:".18em", textTransform:"uppercase", color:"var(--slate-60)", marginBottom:".4rem" }}>{kv.label}</div>
@@ -265,7 +277,7 @@ export default function FlexoPrintingPage() {
           {/* full spec table for selected model */}
           <div>
             <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.68rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--slate-30)", marginBottom:"1rem" }}>
-              Full specification — {singleModel.models[0]}
+              {t("fullSpecificationFor", { model: singleModel.models[0] })}
             </div>
             <SpecTable family={singleModel} />
           </div>
@@ -277,10 +289,10 @@ export default function FlexoPrintingPage() {
       <section style={{ background:"var(--surface)", borderTop:"1px solid var(--line)", padding:"5rem 0" }}>
         <div className="wrap">
           <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--slate-60)", display:"block", marginBottom:".6rem" }}>
-            Complete range
+            {t("completeRange")}
           </span>
           <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.8rem,3vw,2.6rem)", color:"var(--slate)", lineHeight:.95, marginBottom:"3rem" }}>
-            All AI Series configurations
+            {t("allSeriesConfigurations")}
           </h2>
 
           <div style={{ display:"flex", flexDirection:"column", gap:"3rem" }}>
@@ -326,18 +338,18 @@ export default function FlexoPrintingPage() {
           <div className="fp-substrate-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4rem", alignItems:"center" }}>
             <div>
               <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--brand-red)", display:"block", marginBottom:".6rem" }}>
-                Substrate compatibility
+                {t("substrateCompatibility")}
               </span>
               <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.8rem,3vw,2.6rem)", color:"#fff", lineHeight:.95, marginBottom:"1.5rem" }}>
-                Prints on virtually<br />any flexible substrate
+                {t.rich("substrateHeading", { br: () => <br /> })}
               </h2>
               <p style={{ fontFamily:"var(--ff-body)", fontSize:".95rem", lineHeight:1.7, color:"rgba(255,255,255,0.75)", marginBottom:"2rem", maxWidth:"42ch" }}>
-                Ceramic anilox rollers at 200–600 LPI deliver consistent ink transfer across thin film, paper and woven materials. Independent IR drying per colour station prevents back-bleed.
+                {t("substrateDescription")}
               </p>
-              <AetherBtn><Link href="/inquiries">Talk to a print specialist →</Link></AetherBtn>
+              <AetherBtn><Link href="/inquiries">{t("talkToPrintSpecialist")}</Link></AetherBtn>
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"1px", background:"rgba(255,255,255,.08)" }}>
-              {["PE Film","PP Film","PET Film","NY (Nylon)","BOPP Film","CPP Film","Kraft Paper","Non-woven Fabric","Corrugated Paper","Metalised Film"].map(sub => (
+              {(t.raw("substrateList") as string[]).map(sub => (
                 <div key={sub} style={{
                   background:"#0d1614", padding:"1.1rem 1.3rem",
                   fontFamily:"var(--ff-mono)", fontSize:".72rem",
@@ -361,9 +373,9 @@ export default function FlexoPrintingPage() {
         display:"flex", justifyContent:"space-between", alignItems:"center", gap:"2rem", flexWrap:"wrap",
       }}>
         <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.75rem,4vw,2.8rem)", color:"var(--slate)", lineHeight:.98 }}>
-          Need help choosing a model?
+          {t("needHelpChoosing")}
         </h2>
-        <AetherBtn><Link href="/inquiries">Talk to an engineer →</Link></AetherBtn>
+        <AetherBtn><Link href="/inquiries">{t("talkToEngineer")}</Link></AetherBtn>
       </section>
     </>
   );

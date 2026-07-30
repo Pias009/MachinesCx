@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import AetherBtn from "@/components/AetherBtn";
 import { articleBySlug, renderNewsBody } from "@/lib/news";
 import { getLiveNews } from "@/lib/liveNews";
@@ -8,10 +9,11 @@ import { getLiveNews } from "@/lib/liveNews";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const t = await getTranslations("newsArticlePage");
   const { articles } = await getLiveNews();
   const a = articleBySlug({ articles }, params.slug);
   return {
-    title: a ? `${a.title} — Ashal Innomach` : "Article",
+    title: a ? `${a.title} — Ashal Innomach` : t("metadataFallbackTitle"),
     description: a?.excerpt,
   };
 }
@@ -23,6 +25,7 @@ function fmt(iso: string) {
 }
 
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
+  const t = await getTranslations("newsArticlePage");
   const { articles } = await getLiveNews();
   const a = articleBySlug({ articles }, params.slug);
   if (!a) notFound();
@@ -54,9 +57,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             color: "#475569", marginBottom: "2rem",
             display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap",
           }}>
-            <Link href="/" style={{ color: "#475569" }}>Home</Link>
+            <Link href="/" style={{ color: "#475569" }}>{t("breadcrumbHome")}</Link>
             <span style={{ color: "#b8c5d6" }}>›</span>
-            <Link href="/news" style={{ color: "#475569" }}>News</Link>
+            <Link href="/news" style={{ color: "#475569" }}>{t("breadcrumbNews")}</Link>
             <span style={{ color: "#b8c5d6" }}>›</span>
             <span style={{ color: "#0f172a" }}>{a.category}</span>
           </p>
@@ -170,7 +173,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
                 letterSpacing: "0.16em", textTransform: "uppercase",
                 color: "#b8c5d6", display: "block", marginBottom: "1rem",
-              }}>Related links</span>
+              }}>{t("relatedLinks")}</span>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                 {a.links.map((l) => (
                   <Link
@@ -193,7 +196,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             color: "#475569", textDecoration: "none",
             marginBottom: "1.5rem",
           }}>
-            ← All news
+            {t("allNews")}
           </Link>
 
           {/* tags */}
@@ -206,7 +209,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
               letterSpacing: "0.16em", textTransform: "uppercase",
               color: "#b8c5d6", display: "block", marginBottom: "0.75rem",
-            }}>Tags</span>
+            }}>{t("tags")}</span>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
               {a.tags.map((t) => (
                 <span key={t} style={{
@@ -230,7 +233,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           padding: "clamp(3rem,6vw,5rem) clamp(1.25rem,4vw,3rem)",
         }}>
           <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-            <span className="eyebrow" style={{ marginBottom: "0.75rem", color: "var(--brand-red)" }}>Related articles</span>
+            <span className="eyebrow" style={{ marginBottom: "0.75rem", color: "var(--brand-red)" }}>{t("relatedArticles")}</span>
             <div style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))",
@@ -249,7 +252,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                     </div>
                     <h3 className="ns-card__title">{r.title}</h3>
                     <p className="ns-card__excerpt">{r.excerpt}</p>
-                    <span className="ns-card__cta">Read article →</span>
+                    <span className="ns-card__cta">{t("readArticle")}</span>
                   </div>
                 </Link>
               ))}
@@ -275,8 +278,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           display: "flex", justifyContent: "space-between",
           alignItems: "center", flexWrap: "wrap", gap: "1.5rem",
         }}>
-          <span>Interested in this machine?</span>
-          <AetherBtn><Link href="/contact">Talk to an engineer →</Link></AetherBtn>
+          <span>{t("ctaHeading")}</span>
+          <AetherBtn><Link href="/contact">{t("ctaButton")}</Link></AetherBtn>
         </h2>
       </section>
 

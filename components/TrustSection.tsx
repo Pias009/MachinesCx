@@ -3,6 +3,11 @@ import React, { useRef, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { SECTION_ELEMENT_DELAY } from "@/components/SectionReveal";
+
+gsap.registerPlugin(useGSAP);
 
 // ─────────────────────────────────────────────
 // NEBULA BACKGROUND
@@ -252,95 +257,112 @@ export default function TrustSection() {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const dossierRef  = useRef<HTMLDivElement>(null);
   const statsRef    = useRef<HTMLDivElement>(null);
+  const wiperRef    = useRef<HTMLDivElement>(null);
+
+  const revealAll = () => {
+    const els = [headlineRef.current, dossierRef.current, statsRef.current].filter(Boolean) as HTMLElement[];
+    els.forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; el.style.filter = "none"; el.style.clipPath = "none"; });
+    const cards = statsRef.current ? Array.from(statsRef.current.querySelectorAll<HTMLElement>(".ts-stat")) : [];
+    cards.forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; });
+    const rows = dossierRef.current ? Array.from(dossierRef.current.querySelectorAll<HTMLElement>(".ts-desc, .ts-dossier__item")) : [];
+    rows.forEach(el => { el.style.opacity = "1"; el.style.clipPath = "none"; });
+    if (wiperRef.current) wiperRef.current.style.display = "none";
+  };
+
+  // ScrollTrigger is a separate plugin bundle — load it lazily since this
+  // section is below the fold, then hand off to useGSAP once it's ready.
+  const [pluginReady, setPluginReady] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
+      if (cancelled) return;
+      gsap.registerPlugin(ScrollTrigger);
+      setPluginReady(true);
+    }).catch(() => { if (!cancelled) revealAll(); });
+    // Safety net — plugin load or a trigger never firing for any reason
+    // (null ref race, layout quirk): never leave this section's content
+    // permanently invisible.
+    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
+    return () => { cancelled = true; clearTimeout(fallback); };
+  }, []);
 
   // ── "Ledger Stamp" scroll-in — distinct from every other homepage
   // section: the headline shears in on a skew (not a plain fade/slide),
   // the dossier rows wipe open left-to-right like a clip-path ledger
   // stamping down one line at a time, and the stat cards pop in with a
   // scale-overshoot instead of a rise. All three reverse on scroll-up.
-  useEffect(() => {
-    let ctx: { revert?: () => void } = {};
-    let cancelled = false;
+  useGSAP(() => {
+    if (!pluginReady) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const revealAll = () => {
-      const els = [headlineRef.current, dossierRef.current, statsRef.current].filter(Boolean) as HTMLElement[];
-      els.forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; el.style.filter = "none"; el.style.clipPath = "none"; });
-      const cards = statsRef.current ? Array.from(statsRef.current.querySelectorAll<HTMLElement>(".ts-stat")) : [];
-      cards.forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; });
-      const rows = dossierRef.current ? Array.from(dossierRef.current.querySelectorAll<HTMLElement>(".ts-desc, .ts-dossier__item")) : [];
-      rows.forEach(el => { el.style.opacity = "1"; el.style.clipPath = "none"; });
+    const trigger = {
+      trigger: sectionRef.current,
+      start: "top 78%",
+      end: "bottom 15%",
+      toggleActions: "play reverse play reverse",
     };
 
-    (async () => {
-      try {
-        const { gsap }          = await import("gsap");
-        const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-        if (cancelled) return;
-        gsap.registerPlugin(ScrollTrigger);
+    if (reduced) {
+      gsap.set([headlineRef.current, dossierRef.current, statsRef.current], { opacity: 1, clearProps: "all" });
+      if (wiperRef.current) wiperRef.current.style.display = "none";
+      return;
+    }
 
-        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Wiper: a bar drops down over the section's own top edge — as if
+    // overlapping in from above — then clears downward off the bottom
+    // before the headline/dossier/stats start their own reveal. One
+    // timeline, one ScrollTrigger for the whole sequence (was 4 separate
+    // instances all watching sectionRef).
+    const WIPER_CLEAR = 0.9;
+    const tl = gsap.timeline({ scrollTrigger: trigger, delay: SECTION_ELEMENT_DELAY });
 
-        ctx = gsap.context(() => {
-          const trigger = {
-            trigger: sectionRef.current,
-            start: "top 78%",
-            end: "bottom 15%",
-            toggleActions: "play reverse play reverse",
-          };
+    if (wiperRef.current) {
+      tl
+        .fromTo(wiperRef.current, { yPercent: -100 }, { yPercent: 0, duration: 0.4, ease: "power3.in" }, 0)
+        .to(wiperRef.current, { yPercent: 100, duration: 0.5, ease: "power3.out" }, 0.4)
+        .set(wiperRef.current, { display: "none" });
+    }
 
-          if (reduced) {
-            gsap.set([headlineRef.current, dossierRef.current, statsRef.current], { opacity: 1, clearProps: "all" });
-            return;
-          }
+    // Headline — skewed shear-in, settles flat. Waits for the wiper to
+    // clear before it starts moving.
+    if (headlineRef.current) {
+      tl.fromTo(headlineRef.current,
+        { opacity: 0, skewY: 6, y: 36 },
+        { opacity: 1, skewY: 0, y: 0, duration: 0.9, ease: "expo.out" },
+        WIPER_CLEAR
+      );
+    }
 
-          // Headline — skewed shear-in, settles flat
-          if (headlineRef.current) {
-            gsap.fromTo(headlineRef.current,
-              { opacity: 0, skewY: 6, y: 36 },
-              { opacity: 1, skewY: 0, y: 0, duration: 0.9, ease: "expo.out", scrollTrigger: trigger }
-            );
-          }
+    // Dossier rows — clip-path wipe, one line stamping down after another
+    const dossierRows = dossierRef.current
+      ? Array.from(dossierRef.current.querySelectorAll<HTMLElement>(".ts-desc, .ts-dossier__item"))
+      : [];
+    tl.fromTo(dossierRows,
+      { opacity: 0, clipPath: "inset(0 100% 0 0)" },
+      {
+        opacity: 1, clipPath: "inset(0 0% 0 0)",
+        duration: 0.55, ease: "power3.out",
+        stagger: 0.12,
+      },
+      WIPER_CLEAR + 0.15
+    );
 
-          // Dossier rows — clip-path wipe, one line stamping down after another
-          const dossierRows = dossierRef.current
-            ? Array.from(dossierRef.current.querySelectorAll<HTMLElement>(".ts-desc, .ts-dossier__item"))
-            : [];
-          gsap.fromTo(dossierRows,
-            { opacity: 0, clipPath: "inset(0 100% 0 0)" },
-            {
-              opacity: 1, clipPath: "inset(0 0% 0 0)",
-              duration: 0.55, ease: "power3.out",
-              stagger: 0.12, delay: 0.15,
-              scrollTrigger: trigger,
-            }
-          );
-
-          // Stat cards — scale-overshoot pop, staggered left to right
-          const statCards = statsRef.current
-            ? Array.from(statsRef.current.querySelectorAll<HTMLElement>(".ts-stat"))
-            : [];
-          gsap.fromTo(statCards,
-            { opacity: 0, scale: 0.82 },
-            {
-              opacity: 1, scale: 1,
-              duration: 0.55, ease: "back.out(1.7)",
-              stagger: 0.08, delay: 0.3,
-              scrollTrigger: trigger,
-            }
-          );
-        }, sectionRef);
-      } catch {
-        if (!cancelled) revealAll();
-      }
-    })();
-
-    // Safety net — GSAP/ScrollTrigger setup succeeded but a trigger never
-    // fired for any reason (null ref race, layout quirk): never leave
-    // this section's content permanently invisible.
-    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
-
-    return () => { cancelled = true; clearTimeout(fallback); ctx.revert?.(); };
-  }, []);
+    // Stat cards — tilt up out of depth then overshoot-settle flat,
+    // staggered left to right
+    const statCards = statsRef.current
+      ? Array.from(statsRef.current.querySelectorAll<HTMLElement>(".ts-stat"))
+      : [];
+    gsap.set(statCards, { transformPerspective: 800, transformOrigin: "50% 100%" });
+    tl.fromTo(statCards,
+      { opacity: 0, scale: 0.82, rotateX: -35, y: 26 },
+      {
+        opacity: 1, scale: 1, rotateX: 0, y: 0,
+        duration: 0.65, ease: "back.out(1.7)",
+        stagger: 0.08,
+      },
+      WIPER_CLEAR + 0.3
+    );
+  }, { scope: sectionRef, dependencies: [pluginReady] });
 
   return (
     <>
@@ -352,6 +374,18 @@ export default function TrustSection() {
           overflow: hidden;
           padding-top: clamp(5rem, 10vw, 9rem);
           padding-bottom: clamp(4rem, 8vw, 7rem);
+        }
+        /* Wiper — drops over the section's own top edge like an overlapping
+           panel, then clears down off the bottom before content reveals */
+        .ts__wiper {
+          position: absolute; inset: 0; z-index: 25;
+          background: #0d1614;
+          border-bottom: 2px solid var(--brand-teal);
+          transform: translateY(-100%);
+          pointer-events: none;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .ts__wiper { display: none; }
         }
         .ts__blob {
           position: absolute; border-radius: 50%; pointer-events: none;
@@ -603,6 +637,7 @@ export default function TrustSection() {
       `}</style>
 
       <section className="trust-section" aria-label={t("sectionAria")} ref={sectionRef}>
+        <div ref={wiperRef} className="ts__wiper" aria-hidden="true" />
 
         <div className="ts__blob ts__blob--1" aria-hidden="true" />
         <div className="ts__blob ts__blob--2" aria-hidden="true" />

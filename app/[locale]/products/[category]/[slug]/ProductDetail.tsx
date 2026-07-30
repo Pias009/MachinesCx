@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
 import ProcessIcon, { resolveIcon, type IconName } from "@/components/ProcessIcon";
@@ -11,6 +12,7 @@ import DeliveryStageIcon, { resolveDeliveryStage } from "@/components/DeliverySt
 import CustomSections from "@/components/CustomSections";
 import MachineParts from "@/components/MachineParts";
 import ProductStage3D from "@/components/ProductStage3D";
+import { Grain, PlusMark, MetaRow, SectionHead, SubHead } from "@/components/EditorialKit";
 import type { ProductFamily, Category } from "@/lib/products";
 import { familyImage, familyImages, parseYouTubeId, stagePhotos } from "@/lib/products";
 
@@ -22,48 +24,54 @@ interface Props {
   related: ProductFamily[];
 }
 
-/* ── fixed 3-stage delivery proof boxes — packing / freight / install ── */
-const DELIVERY_STAGES: { key: "packing" | "freight" | "install"; label: string; icon: IconName }[] = [
-  { key: "packing", label: "Export Packing", icon: "shipping" },
-  { key: "freight", label: "Ocean / Air Freight", icon: "factory" },
-  { key: "install", label: "On-Site Install", icon: "install" },
+/* ── fixed 3-stage delivery proof boxes — packing / freight / install.
+   Keys + icon order only; label text comes from productDetail.deliveryStages.*
+   at render time. ── */
+const DELIVERY_STAGES: { key: "packing" | "freight" | "install"; icon: IconName }[] = [
+  { key: "packing", icon: "shipping" },
+  { key: "freight", icon: "factory" },
+  { key: "install", icon: "install" },
 ];
 
 
 /* ── tab labels + output-sample copy per category (bag-making genuinely
    makes bags; other categories get an honest "what it produces" label
-   instead of pretending everything is a bag) ── */
-const SAMPLE_TAB: Record<string, { label: string; heading: string; blurb: string; img: string }> = {
-  "film-blowing": { label: "Film Output", heading: "What This Line Produces", blurb: "Continuous blown film rolls, ready for bag-making, lamination or printing downstream.", img: "/machines/s-wide.png" },
-  "bag-making":   { label: "Bag Sample Size", heading: "Bag Types This Machine Makes", blurb: "Finished bags straight off the line — heat-sealed, cut and stacked, ready to pack.", img: "/machines/bag-samples.png" },
-  "recycling":    { label: "Pellet Output", heading: "What This Line Produces", blurb: "Recycled resin pellets, consistent size and quality, ready to feed back into production.", img: "/machines/cx-pelletizing.png" },
-  "printing":     { label: "Print Sample", heading: "What This Press Produces", blurb: "Multi-colour printed film, registered and dried, ready for bag-making or lamination.", img: "/machines/flexo-6c-nobg.png" },
+   instead of pretending everything is a bag). Copy text comes from
+   productDetail.sampleTab.* at render time — this map only carries the
+   category → image association. ── */
+const SAMPLE_TAB_IMG: Record<string, string> = {
+  "film-blowing": "/machines/s-wide.png",
+  "bag-making":   "/machines/bag-samples.png",
+  "recycling":    "/machines/cx-pelletizing.png",
+  "printing":     "/machines/flexo-6c-nobg.png",
 };
 
 /* ── "Part N" breakdown rows — same real product photo shown in full per
    part. This mirrors the reference site's component-photo rows without
-   fabricating distinct component photography we don't actually have. ── */
-interface PartDef { title: string; detail: string; icon: IconName }
+   fabricating distinct component photography we don't actually have.
+   Icon + ordering only; title/detail copy comes from
+   productDetail.partCrops.* at render time. ── */
+interface PartDef { icon: IconName }
 const PART_CROPS: Record<string, PartDef[]> = {
   "film-blowing": [
-    { title: "Extrusion & Screw", icon: "power",       detail: "Multi-screw co-extrusion feeds molten resin into the die head at controlled temperature zones." },
-    { title: "Die Head & Bubble", icon: "calibration", detail: "The film bubble forms above the die, cooled by the air ring for consistent gauge." },
-    { title: "Haul-Off & Winding", icon: "assembly",   detail: "Collapsed film is drawn up the tower and wound into finished rolls." },
+    { icon: "power" },
+    { icon: "calibration" },
+    { icon: "assembly" },
   ],
   "bag-making": [
-    { title: "Unwind & Feeding",  icon: "power",       detail: "Photocell-tracked unwind feeds film into the machine at controlled tension." },
-    { title: "Sealing & Cutting", icon: "assembly",    detail: "Heat-seal bars and rotary cutters form and separate each bag at speed." },
-    { title: "Control Panel",     icon: "calibration", detail: "PLC touchscreen sets bag length, seal temperature and lane speed." },
+    { icon: "power" },
+    { icon: "assembly" },
+    { icon: "calibration" },
   ],
   "recycling": [
-    { title: "Crusher & Feeding", icon: "power",       detail: "Scrap film and edge trim are crushed and fed into the extruder at a controlled rate." },
-    { title: "Screen Changer",    icon: "assembly",    detail: "Auto screen-changer filters contamination without stopping the line." },
-    { title: "Pelletizing Head",  icon: "calibration", detail: "Molten resin is cut into uniform pellets and cooled for reuse." },
+    { icon: "power" },
+    { icon: "assembly" },
+    { icon: "calibration" },
   ],
   "printing": [
-    { title: "Unwind & Registration", icon: "power",       detail: "Web tension and registration marks are tracked before the film reaches the first print station." },
-    { title: "CI Print Drum",         icon: "assembly",    detail: "Each colour station transfers ink from the anilox roller onto the central impression drum." },
-    { title: "Drying & Rewind",       icon: "calibration", detail: "Inline dryers set each colour before the finished print is wound onto the rewind shaft." },
+    { icon: "power" },
+    { icon: "assembly" },
+    { icon: "calibration" },
   ],
 };
 
@@ -90,8 +98,9 @@ const CALLOUT_POS = [
 ];
 
 function StarRating({ n }: { n: number }) {
+  const t = useTranslations("productDetail");
   return (
-    <span className="pdv2-stars" aria-label={`${n} out of 5 stars`}>
+    <span className="pdv2-stars" aria-label={t("starsAria", { n })}>
       {Array.from({ length: 5 }, (_, i) => (
         <svg key={i} viewBox="0 0 16 16" width="14" height="14" fill={i < n ? "var(--brand-teal)" : "none"} stroke="var(--brand-teal)" strokeWidth="1.2">
           <path d="M8 1l1.8 3.6L14 5.4l-3 2.9.7 4.1L8 10.4l-3.7 2 .7-4.1-3-2.9 4.2-.8z" />
@@ -102,10 +111,11 @@ function StarRating({ n }: { n: number }) {
 }
 
 function InquiryButton({ slug, name }: { slug: string; name: string }) {
+  const t = useTranslations("productDetail");
   const href = `/inquiries/talk-to-engineer?machine=${encodeURIComponent(slug)}&name=${encodeURIComponent(name)}`;
   return (
     <AetherBtn>
-      <TransitionLink href={href}>Request a Quote →</TransitionLink>
+      <TransitionLink href={href}>{t("requestQuote")}</TransitionLink>
     </AetherBtn>
   );
 }
@@ -114,6 +124,7 @@ const TABS = ["details", "sample", "packing"] as const;
 type TabKey = (typeof TABS)[number];
 
 export default function ProductDetail({ family, category, related }: Props) {
+  const t = useTranslations("productDetail");
   const [activeModel,  setActiveModel]  = useState(0);
   const [activeVideo,  setActiveVideo]  = useState(0);
   const [videoPlaying, setVideoPlaying] = useState(false);
@@ -125,11 +136,15 @@ export default function ProductDetail({ family, category, related }: Props) {
   /* real videos only — an unset/invalid URL never falls back to a fake
      placeholder video, it just means the section shows "coming soon" */
   const videos = (family.videos ?? [])
-    .map(v => ({ id: parseYouTubeId(v.url), title: v.title || "Product demo" }))
+    .map(v => ({ id: parseYouTubeId(v.url), title: v.title || t("productDemoFallback") }))
     .filter((v): v is { id: string; title: string } => !!v.id);
   const specKeys = PANEL_SPEC_KEYS[family.category]  ?? PANEL_SPEC_KEYS["film-blowing"];
-  const sample    = SAMPLE_TAB[family.category] ?? SAMPLE_TAB["film-blowing"];
-  const parts     = PART_CROPS[family.category] ?? PART_CROPS["film-blowing"];
+  const sampleTabCopy = t.raw("sampleTab") as Record<string, { label: string; heading: string; blurb: string }>;
+  const sampleCategoryKey = SAMPLE_TAB_IMG[family.category] ? family.category : "film-blowing";
+  const sample = { ...sampleTabCopy[sampleCategoryKey], img: SAMPLE_TAB_IMG[sampleCategoryKey] };
+  const partCropsCopy = t.raw("partCrops") as Record<string, { title: string; detail: string }[]>;
+  const partCategoryKey = PART_CROPS[family.category] ? family.category : "film-blowing";
+  const parts = PART_CROPS[partCategoryKey].map((p, i) => ({ ...p, ...partCropsCopy[partCategoryKey][i] }));
   const materials = family.materials?.split(",").map(s => s.trim()) ?? [];
   const photos    = familyImages(family);
   const heroImg = photos[Math.min(activePhoto, photos.length - 1)];
@@ -251,67 +266,151 @@ export default function ProductDetail({ family, category, related }: Props) {
     <div className="pdv2" ref={rootRef} data-no-anim>
 
       {/* ══════════════════════════════════════════════════
-          HERO — breadcrumb + two-col (gallery | panel)
+          HERO — clean centered layout: info column on the left, the
+          interactive 3D product card as the clear focal point on the
+          right. No decorative chrome (diagonal cuts, tick rails, dot
+          pagers) competing with the machine or the copy.
       ══════════════════════════════════════════════════ */}
-      <section className="pdv2-hero">
-        {/* grid bg */}
-        <div className="pdv2-hero__grid" aria-hidden="true" />
+      <section className="relative bg-[var(--bg-base)] pb-16 pt-40 sm:pt-44 lg:pb-24 lg:pt-48">
+        <div className="mx-auto grid max-w-[1560px] grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-16 lg:px-14">
 
-        {/* facility strip — diagonal 3-panel collage of the category's machines */}
-        <div className="pdv2-collage" aria-hidden="true">
-          {collagePool.map((f, i) => (
-            <div key={`${f.slug}-${i}`} className="pdv2-collage__panel">
-              <Image
-                src={familyImage(f)}
-                alt=""
-                fill
-                sizes="33vw"
-              />
+          {/* ── LEFT: breadcrumb, title, model selector, spec panel, CTAs ── */}
+          <div className="flex flex-col gap-8">
+            {/* breadcrumb */}
+            <nav
+              className="flex flex-wrap items-center gap-2 font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--ink-35)]"
+              aria-label={t("breadcrumbAria")}
+              data-reveal
+            >
+              <Link href="/" className="transition-colors hover:text-[var(--brand-teal)]">{t("breadcrumbHome")}</Link>
+              <span className="text-[var(--ink-15)]">›</span>
+              <Link href="/products" className="transition-colors hover:text-[var(--brand-teal)]">{t("breadcrumbCatalogue")}</Link>
+              <span className="text-[var(--ink-15)]">›</span>
+              <Link href={`/products/${category.slug}`} className="transition-colors hover:text-[var(--brand-teal)]">{category.name}</Link>
+              <span className="text-[var(--ink-15)]">›</span>
+              <span className="text-[var(--ink-60)]">{family.series}</span>
+            </nav>
+
+            {/* title block */}
+            <div data-reveal="blur">
+              <p className="mb-3 flex items-center gap-3 font-mono text-[0.7rem] uppercase tracking-[0.22em] text-[var(--brand-teal)]">
+                <span className="h-px w-7 bg-[var(--brand-teal)]" />
+                {category.tagline}
+              </p>
+              <h1 className="text-[clamp(2rem,3.8vw,3.1rem)] leading-[0.98] tracking-[0.01em] text-[var(--ink)]" style={{ textWrap: "balance", fontFamily: "var(--ff-display)" }}>
+                {family.name}
+              </h1>
+              <p className="mt-4 max-w-[52ch] text-[1.05rem] leading-[1.7] text-[var(--ink-60)]">
+                {family.tagline}
+              </p>
             </div>
-          ))}
-        </div>
 
-        <div className="pdv2-wrap">
+            {/* model selector — sits directly under the title so switching
+                models is the first thing a visitor can do. Plain text
+                pills only — all models in a family share one photo, so a
+                thumbnail per pill would just repeat the same image. */}
+            {hasModels && (
+              <div className="flex flex-wrap items-start gap-3 rounded-xl border border-[var(--bg-line)] bg-[var(--bg-surface)] px-5 py-4" role="group" aria-label={t("selectModelAria")}>
+                <span className="shrink-0 pt-1 font-mono text-[0.66rem] uppercase tracking-[0.16em] text-[var(--ink-35)]">{t("model")}</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {family.models.map((m, i) => (
+                    <button
+                      key={m}
+                      className={`rounded-md border px-3 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.08em] transition-all duration-150 ${
+                        activeModel === i
+                          ? "border-[var(--brand-teal)] bg-[var(--brand-teal)] font-bold text-[#0d2220] shadow-[0_4px_14px_-4px_rgba(43,191,179,0.55)]"
+                          : "border-[var(--bg-line)] text-[var(--ink-60)] hover:-translate-y-px hover:border-[var(--brand-teal)]/40 hover:text-[var(--ink)]"
+                      }`}
+                      onClick={() => setActiveModel(i)}
+                      aria-pressed={activeModel === i}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
-          {/* breadcrumb */}
-          <nav className="pdv2-crumb" aria-label="Breadcrumb" data-reveal>
-            <Link href="/">Home</Link>
-            <span>›</span>
-            <Link href="/products">Catalogue</Link>
-            <span>›</span>
-            <Link href={`/products/${category.slug}`}>{category.name}</Link>
-            <span>›</span>
-            <span className="pdv2-crumb__cur">{family.series}</span>
-          </nav>
+            {/* metadata rows */}
+            <div className="flex flex-col gap-2 border-y border-[var(--bg-line)] py-5" data-reveal>
+              <MetaRow k={t("model")} v={hasModels ? family.models[activeModel] : family.models[0]} />
+              <MetaRow k={t("substrates")} v={materials.length > 0 ? materials.join(" / ") : "—"} />
+            </div>
 
-          {/* ── TITLE BLOCK — above columns ── */}
-          <div className="pdv2-title-block" data-reveal="blur">
-            <p className="pdv2-title-block__cat">{category.tagline}</p>
-            <h1 className="pdv2-title-block__h1">{family.name}</h1>
-            <p className="pdv2-title-block__tagline">{family.tagline}</p>
+            {/* key spec table — also the scroll target for the floating "jump to quote" button */}
+            <div className="pdv2-quote-anchor overflow-hidden rounded-xl border border-[var(--bg-line)]">
+              <div className="flex items-center justify-between bg-[var(--bg-surface)] px-4 py-3 font-mono text-[0.7rem] font-bold uppercase tracking-[0.14em] text-[var(--ink)]">
+                <span className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-[var(--brand-teal)]" />{t("specification")}</span>
+                <span className="text-[var(--brand-teal)]">{hasModels ? family.models[activeModel] : family.models[0]}</span>
+              </div>
+              {panelSpecs.length > 0 ? panelSpecs.map((s, i) => (
+                <div
+                  key={s.label}
+                  className={`flex items-center justify-between border-t border-[var(--bg-line)] px-4 py-2.5 ${i % 2 === 1 ? "bg-[var(--brand-teal-glow)]" : ""}`}
+                >
+                  <span className="min-w-0 shrink text-[0.65rem] tracking-[0.06em] text-[var(--ink-60)]" style={{ fontFamily: "var(--ff-mono)", overflowWrap: "anywhere" }}>{s.label}</span>
+                  <span className="max-w-[55%] min-w-0 text-right text-[0.74rem] font-bold tracking-[0.04em] text-[var(--ink)]" style={{ fontFamily: "var(--ff-mono)", overflowWrap: "anywhere" }}>{s.value}</span>
+                </div>
+              )) : (
+                <div className="flex justify-center border-t border-[var(--bg-line)] px-4 py-6">
+                  <span className="font-mono text-[0.65rem] italic text-[var(--ink-35)]">{t("fullSpecOnRequest")}</span>
+                </div>
+              )}
+            </div>
+
+            {/* CTAs */}
+            <div className="flex flex-wrap items-center gap-4">
+              <InquiryButton slug={family.slug} name={family.name} />
+              <Link href={`/products/${category.slug}`} className="font-mono text-[0.72rem] uppercase tracking-[0.12em] text-[var(--ink-35)] underline decoration-transparent underline-offset-4 transition-colors hover:text-[var(--brand-teal)] hover:decoration-[var(--brand-teal)]">
+                {t("backToCategory", { category: category.name })}
+              </Link>
+            </div>
+
+            {/* trust row */}
+            <div className="flex flex-wrap gap-x-6 gap-y-3 border-t border-[var(--bg-line)] pt-5 font-mono text-[0.66rem] uppercase tracking-[0.1em] text-[var(--ink-60)]">
+              <div className="flex items-center gap-2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18" className="text-[var(--brand-teal)]"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>{t("isoCertified")}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18" className="text-[var(--brand-teal)]"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>{t("shipsWorldwide")}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18" className="text-[var(--brand-teal)]"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span>{t("support24h")}</span>
+              </div>
+            </div>
           </div>
 
-          <div className="pdv2-hero__cols">
-
-            {/* ── LEFT: product photo gallery (unlimited photos) ── */}
-            <div className="pdv2-gallery" data-reveal="scale">
+          {/* ── RIGHT: the 3D product card, no panel/background at all — the
+              photo itself, floating directly on the page, is the only thing
+              drawing the eye ── */}
+          <div className="relative flex flex-col gap-6" data-reveal="scale">
+            <div className="relative px-6 py-10 sm:px-8 sm:py-12 lg:px-10 lg:py-14">
               <ProductStage3D
                 src={heroImg}
                 alt={family.name}
                 badge={family.series}
                 photoKey={activePhoto}
                 priority
+                bare
               />
+
               {photos.length > 1 && (
-                <div className="pdv2-thumbs" role="tablist" aria-label="Product photos">
+                <div className="relative z-[1] mt-6 flex flex-wrap gap-2.5" role="tablist" aria-label={t("productPhotosAria")}>
                   {photos.map((p, i) => (
                     <button
                       key={i}
                       role="tab"
                       aria-selected={activePhoto === i}
-                      className={`pdv2-thumb${activePhoto === i ? " pdv2-thumb--on" : ""}`}
+                      className={`relative h-[68px] w-[68px] shrink-0 overflow-hidden rounded-lg border-2 p-1 transition-all duration-200 ${
+                        activePhoto === i
+                          ? "border-[var(--brand-teal)] opacity-100"
+                          : "border-[var(--bg-line)] opacity-65 hover:-translate-y-0.5 hover:border-[var(--brand-teal)]/50 hover:opacity-100 hover:shadow-[0_10px_20px_-8px_rgba(0,0,0,0.4)]"
+                      }`}
                       onClick={() => setActivePhoto(i)}
-                      aria-label={`Photo ${i + 1} of ${photos.length}`}
+                      aria-label={t("photoOfLabel", { num: i + 1, total: photos.length })}
                     >
                       <Image src={p} alt="" fill loading="eager" sizes="68px" style={{ objectFit: "contain", padding: "4px" }} />
                     </button>
@@ -320,81 +419,21 @@ export default function ProductDetail({ family, category, related }: Props) {
               )}
             </div>
 
-            {/* ── RIGHT: info card ── */}
-            <div className="pdv2-info-card" data-reveal>
-
-              {/* model selector */}
-              {hasModels && (
-                <div className="pdv2-model-strip" role="group" aria-label="Select model">
-                  <span className="pdv2-model-strip__label">Model</span>
-                  <div className="pdv2-model-strip__chips">
-                    {family.models.map((m, i) => (
-                      <button
-                        key={m}
-                        className={`pdv2-mchip${activeModel === i ? " pdv2-mchip--on" : ""}`}
-                        onClick={() => setActiveModel(i)}
-                        aria-pressed={activeModel === i}
-                      >
-                        {m}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* key spec table */}
-              <div className="pdv2-spec-panel">
-                <div className="pdv2-spec-panel__head">
-                  <span>Specification</span>
-                  <span>{hasModels ? family.models[activeModel] : family.models[0]}</span>
-                </div>
-                {panelSpecs.length > 0 ? panelSpecs.map(s => (
-                  <div key={s.label} className="pdv2-spec-row">
-                    <span className="pdv2-spec-row__label">{s.label}</span>
-                    <span className="pdv2-spec-row__val">{s.value}</span>
-                  </div>
-                )) : (
-                  <div className="pdv2-spec-row pdv2-spec-row--empty">
-                    <span className="pdv2-spec-row__label">Full specification available on request</span>
-                  </div>
-                )}
+            {/* facility strip — quiet row of related-category machines below
+                the card, not clipped into it */}
+            <div className="rounded-xl border border-[var(--bg-line)] bg-[var(--bg-surface)] px-5 py-4">
+              <div className="mb-3 flex items-center justify-between font-mono text-[0.62rem] uppercase tracking-[0.14em] text-[var(--ink-35)]">
+                <span>{family.series} :&nbsp;{t("model")}</span>
+                <span>{photos.length}&nbsp;{t("productPhotosAria")}</span>
               </div>
-
-              {/* materials */}
-              {materials.length > 0 && (
-                <div className="pdv2-mats">
-                  <span className="pdv2-mats__label">Substrates</span>
-                  <div className="pdv2-mats__tags">
-                    {materials.map(m => <span key={m} className="pdv2-mat-tag">{m}</span>)}
+              <div className="flex h-16 gap-px overflow-hidden rounded-md bg-[var(--bg-line)]">
+                {collagePool.map((f, i) => (
+                  <div key={`${f.slug}-${i}`} className="relative flex-1 bg-[var(--bg-raise)]">
+                    <Image src={familyImage(f)} alt="" fill sizes="20vw" style={{ objectFit: "contain", padding: "6px", opacity: 0.85 }} />
                   </div>
-                </div>
-              )}
-
-              {/* CTAs */}
-              <div className="pdv2-panel__ctas">
-                <InquiryButton slug={family.slug} name={family.name} />
-                <Link href={`/products/${category.slug}`} className="pdv2-back-btn">
-                  ← {category.name}
-                </Link>
-              </div>
-
-              {/* trust row */}
-              <div className="pdv2-trust-row">
-                <div className="pdv2-trust-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="24" height="24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                  <span>ISO Certified</span>
-                </div>
-                <div className="pdv2-trust-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="24" height="24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  <span>Ships Worldwide</span>
-                </div>
-                <div className="pdv2-trust-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="24" height="24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                  <span>24 h Support</span>
-                </div>
+                ))}
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -402,79 +441,78 @@ export default function ProductDetail({ family, category, related }: Props) {
       {/* ══════════════════════════════════════════════════
           VIDEO — sits above the tabs, like the reference page
       ══════════════════════════════════════════════════ */}
-      <section className="pdv2-video-section" aria-label="Product videos">
-        <div className="pdv2-wrap">
-          <div className="pdv2-section-head" data-reveal>
-            <span className="pdv2-section-head__line" />
-            <h2>See it <em>in Action</em></h2>
-          </div>
+      <section className="bg-[var(--bg-base)] py-16 sm:py-20" aria-label={t("productVideosAria")}>
+        <div className="mx-auto max-w-[1280px] px-6 sm:px-10">
+          <SectionHead
+            eyebrow={t("productionDemo")}
+            title={t.rich("seeItInAction", { em: (chunks) => <em className="text-[var(--brand-teal)] not-italic">{chunks}</em> })}
+          />
 
           {videos.length === 0 ? (
             /* honest empty state — never falls back to a fake/placeholder video */
-            <div className="pdv2-video-empty" data-reveal>
-              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-[var(--bg-line)] px-6 py-16 text-center" data-reveal>
+              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--ink-35)]">
                 <rect x="2.5" y="5" width="19" height="14" rx="2" />
                 <path d="M9.5 9.5v5l5-2.5z" fill="currentColor" stroke="none" />
               </svg>
-              <p><strong>Production video coming soon.</strong><br />Ask us for a live video call demo or on-site footage from a recent install.</p>
+              <p className="text-[var(--ink-60)]"><strong className="text-[var(--ink)]">{t("videoComingSoon")}</strong><br />{t("videoComingSoonSub")}</p>
               <InquiryButton slug={family.slug} name={family.name} />
             </div>
           ) : (
-          <div className="pdv2-video-layout" data-reveal>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]" data-reveal>
             {/* main video */}
-            <div className="pdv2-video-main">
+            <div className="relative aspect-video overflow-hidden rounded-xl border border-[var(--bg-line)]" style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 3% 100%)" }}>
               {!videoPlaying ? (
                 <button
-                  className="pdv2-video-poster"
+                  className="group relative block h-full w-full"
                   onClick={() => setVideoPlaying(true)}
-                  aria-label="Play video"
+                  aria-label={t("playVideoAria")}
                 >
                   <Image
                     src={`https://img.youtube.com/vi/${videos[activeVideo].id}/maxresdefault.jpg`}
                     alt={videos[activeVideo].title}
                     fill
                     sizes="(max-width: 900px) 90vw, 56vw"
-                    className="pdv2-video-poster__img"
+                    className="object-cover"
                   />
-                  <div className="pdv2-video-poster__overlay" />
-                  <div className="pdv2-play-btn" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                  <div className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--brand-teal)] text-[#06110f] shadow-[0_8px_28px_-6px_rgba(43,191,179,0.6)] transition-transform duration-200 group-hover:scale-110">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M8 5v14l11-7z" /></svg>
                   </div>
-                  <div className="pdv2-video-poster__meta">
-                    <span className="pdv2-video-poster__tag">Production Demo</span>
-                    <span className="pdv2-video-poster__title">{videos[activeVideo].title}</span>
+                  <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-5">
+                    <span className="font-mono text-[0.66rem] uppercase tracking-[0.16em] text-[var(--brand-teal)]">{t("productionDemo")}</span>
+                    <span className="text-left text-[1.05rem] font-semibold text-white">{videos[activeVideo].title}</span>
                   </div>
                 </button>
               ) : (
-                <div className="pdv2-video-frame">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${videos[activeVideo].id}?autoplay=1&rel=0`}
-                    title={videos[activeVideo].title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
+                <iframe
+                  className="absolute inset-0 h-full w-full"
+                  src={`https://www.youtube.com/embed/${videos[activeVideo].id}?autoplay=1&rel=0`}
+                  title={videos[activeVideo].title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
               )}
             </div>
 
             {/* video list */}
             {videos.length > 1 && (
-              <div className="pdv2-video-list">
+              <div className="flex flex-row gap-3 overflow-x-auto lg:flex-col lg:overflow-visible">
                 {videos.map((v, i) => (
                   <button
                     key={i}
-                    className={`pdv2-vlist-item${activeVideo === i ? " pdv2-vlist-item--on" : ""}`}
+                    className={`flex shrink-0 items-center gap-3 rounded-lg border p-2 text-left transition-colors duration-150 lg:shrink ${
+                      activeVideo === i ? "border-[var(--brand-teal)] bg-[var(--brand-teal-glow)]" : "border-[var(--bg-line)] hover:border-[var(--brand-teal)]/40"
+                    }`}
                     onClick={() => { setActiveVideo(i); setVideoPlaying(false); }}
                   >
-                    <div className="pdv2-vlist-thumb">
+                    <div className="relative h-[52px] w-[72px] shrink-0 overflow-hidden rounded-md">
                       <Image src={`https://img.youtube.com/vi/${v.id}/mqdefault.jpg`} alt="" fill sizes="72px" style={{ objectFit: "cover" }} />
-                      <div className="pdv2-vlist-play">
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/30 text-white">
                         <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M5 3.5l8 4.5-8 4.5z"/></svg>
                       </div>
                     </div>
-                    <span className="pdv2-vlist-title">{v.title}</span>
+                    <span className="min-w-0 flex-1 truncate text-[0.82rem] text-[var(--ink-60)]">{v.title}</span>
                   </button>
                 ))}
               </div>
@@ -487,14 +525,28 @@ export default function ProductDetail({ family, category, related }: Props) {
       {/* ══════════════════════════════════════════════════
           TABS — Product Details / Output Sample / Packing & Shipping
       ══════════════════════════════════════════════════ */}
-      <section className="pdv2-tabsection" aria-label="Product information tabs">
+      <section className="pdv2-tabsection" aria-label={t("productInfoTabsAria")}>
         <div className="pdv2-wrap">
-          <div className="pdv2-tabbar" role="tablist" data-reveal>
-            <button role="tab" aria-selected={activeTab === "details"} className={`pdv2-tab${activeTab === "details" ? " pdv2-tab--on" : ""}`} onClick={() => setActiveTab("details")}>Product Details</button>
-            <button role="tab" aria-selected={activeTab === "sample"} className={`pdv2-tab${activeTab === "sample" ? " pdv2-tab--on" : ""}`} onClick={() => setActiveTab("sample")}>{sample.label}</button>
-            {uniqueGalleryPhotos.length > 1 && (
-              <button role="tab" aria-selected={activeTab === "packing"} className={`pdv2-tab${activeTab === "packing" ? " pdv2-tab--on" : ""}`} onClick={() => setActiveTab("packing")}>Packing &amp; Shipping</button>
-            )}
+          <div className="mb-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-b border-[var(--bg-line)]" role="tablist" data-reveal>
+            {[
+              { key: "details" as const, label: t("tabProductDetails") },
+              { key: "sample" as const, label: sample.label },
+              ...(uniqueGalleryPhotos.length > 1 ? [{ key: "packing" as const, label: t("tabPackingShipping") }] : []),
+            ].map(({ key, label }) => (
+              <button
+                key={key}
+                role="tab"
+                aria-selected={activeTab === key}
+                className={`relative -mb-px border-b-2 pb-3 font-mono text-[0.78rem] uppercase tracking-[0.1em] transition-colors duration-150 ${
+                  activeTab === key
+                    ? "border-[var(--brand-teal)] text-[var(--brand-teal)]"
+                    : "border-transparent text-[var(--ink-35)] hover:text-[var(--ink-60)]"
+                }`}
+                onClick={() => setActiveTab(key)}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
           {/* ── Product Details ── */}
@@ -508,8 +560,6 @@ export default function ProductDetail({ family, category, related }: Props) {
                 specs={family.specs}
                 specKeys={calloutKeys}
                 modelIndex={activeModel}
-                onModelChange={setActiveModel}
-                models={family.models}
                 family={family}
                 category={category.slug}
               />
@@ -533,7 +583,7 @@ export default function ProductDetail({ family, category, related }: Props) {
               {/* Part N breakdown — same real product photo shown in full per part, not fabricated component shots */}
               {parts.map((part, i) => (
                 <div key={part.title} className="pdv2-part" data-reveal>
-                  <div className="pdv2-part__head">Part {i + 1} — {part.title}</div>
+                  <div className="pdv2-part__head">{t("partHeading", { num: i + 1, title: part.title })}</div>
                   <div className="pdv2-part__shot">
                     <Image src={heroImg} alt={`${family.name} — ${part.title}`} fill sizes="(max-width: 900px) 90vw, 70vw" />
                     <span className="pdv2-part__icon"><ProcessIcon name={part.icon} size={26} /></span>
@@ -549,10 +599,7 @@ export default function ProductDetail({ family, category, related }: Props) {
                   whether a site photo has been uploaded for this step. */}
               {family.installation && family.installation.length > 0 && (
                 <>
-                  <div className="pdv2-section-head pdv2-section-head--tab" data-reveal>
-                    <span className="pdv2-section-head__line" />
-                    <h3>Setup &amp; Installation Guide</h3>
-                  </div>
+                  <SubHead title={t("setupInstallationGuide")} />
                   <div className="pdv2-guide-grid" data-reveal="scale">
                     {family.installation.map((step, i) => (
                       <div key={i} className="pdv2-guide-card">
@@ -576,16 +623,12 @@ export default function ProductDetail({ family, category, related }: Props) {
               )}
 
               {/* full spec table */}
-              <div className="pdv2-section-head pdv2-section-head--tab" data-reveal>
-                <span className="pdv2-section-head__line" />
-                <h3>Full Specifications</h3>
-                {hasModels && <span className="pdv2-section-head__note">Click a column to highlight</span>}
-              </div>
+              <SubHead title={t("fullSpecifications")} note={hasModels && t("clickColumnToHighlight")} />
               <div className="pdv2-table-wrap" data-reveal>
                 <table className="pdv2-table">
                   <thead>
                     <tr>
-                      <th>Specification</th>
+                      <th>{t("specification")}</th>
                       {family.models.map((m, i) => (
                         <th
                           key={m}
@@ -623,7 +666,7 @@ export default function ProductDetail({ family, category, related }: Props) {
                   <p>{sample.blurb}</p>
                   {materials.length > 0 && (
                     <div className="pdv2-mats">
-                      <span className="pdv2-mats__label">Compatible materials</span>
+                      <span className="pdv2-mats__label">{t("compatibleMaterials")}</span>
                       <div className="pdv2-mats__tags">
                         {materials.map(m => <span key={m} className="pdv2-mat-tag">{m}</span>)}
                       </div>
@@ -642,10 +685,7 @@ export default function ProductDetail({ family, category, related }: Props) {
                   section stays hidden until there are 2+ unique photos */}
               {uniqueGalleryPhotos.length > 1 && (
                 <>
-                  <div className="pdv2-section-head pdv2-section-head--tab" data-reveal>
-                    <span className="pdv2-section-head__line" />
-                    <h3>On the Factory Floor</h3>
-                  </div>
+                  <SubHead title={t("onTheFactoryFloor")} />
                   <div className="pdv2-gallery-grid" data-reveal>
                     {uniqueGalleryPhotos.map((img, i) => (
                       <div key={i} className="pdv2-gallery-cell">
@@ -669,12 +709,12 @@ export default function ProductDetail({ family, category, related }: Props) {
           capital-equipment buyer, so it stays in view by default.
       ══════════════════════════════════════════════════ */}
       {family.deliveryGuide && family.deliveryGuide.length > 0 && (
-        <section className="pdv2-delivery" aria-label="Delivery and installation timeline">
+        <section className="pdv2-delivery" aria-label={t("deliveryInstallationTimelineAria")}>
           <div className="pdv2-wrap">
-            <div className="pdv2-section-head" data-reveal>
-              <span className="pdv2-section-head__line" />
-              <h2>Delivery &amp; <em>Installation</em></h2>
-            </div>
+            <SectionHead
+              eyebrow={t("deliveryInstallationTimelineAria")}
+              title={t.rich("deliveryInstallationHeading", { em: (chunks) => <em className="text-[var(--brand-teal)] not-italic">{chunks}</em> })}
+            />
           </div>
 
           {/* proof sections — packing / freight / install, each its own
@@ -684,53 +724,61 @@ export default function ProductDetail({ family, category, related }: Props) {
               multiple photos — arrows + counter step through them, same
               banner never changes size or crop between photos. */}
           {DELIVERY_STAGES.map(stage => {
+            const stageLabel = t(`deliveryStages.${stage.key}`);
             const photos = stagePhotos(deliveryStagePhotos[stage.key]);
             const idx = Math.min(dvIdx[stage.key] ?? 0, Math.max(photos.length - 1, 0));
             const setIdx = (next: number) =>
               setDvIdx(prev => ({ ...prev, [stage.key]: (next + photos.length) % photos.length }));
             return (
-              <div key={stage.key} className="pdv2-dv-box" data-reveal="scale">
+              <div key={stage.key} className="relative border-t border-[var(--bg-line)] first:border-t-0" data-reveal="scale">
                 <div className="pdv2-wrap">
-                  <span className="pdv2-dv-box__label">{stage.label}</span>
+                  <span className="relative z-[1] mt-6 inline-flex items-center gap-3 font-mono text-[0.68rem] uppercase tracking-[0.2em] text-[var(--ink-35)]">
+                    <PlusMark className="text-[var(--brand-teal)]" />
+                    {stageLabel}
+                  </span>
                 </div>
-                <div className="pdv2-dv-box__media">
-                  {photos.length > 0 ? (
-                    <>
-                      <Image src={photos[idx]} alt={`${stage.label} — photo ${idx + 1} of ${photos.length}`} fill sizes="(max-width: 900px) 100vw, 1280px" key={idx} />
+                {photos.length > 0 ? (
+                  <div className="pdv2-wrap">
+                    <div className="pdv2-dv-box__media">
+                      <Image src={photos[idx]} alt={t("stagePhotoAlt", { stage: stageLabel, num: idx + 1, total: photos.length })} fill sizes="(max-width: 900px) 100vw, 1280px" key={idx} />
                       {photos.length > 1 && (
                         <div className="pdv2-dv-box__nav">
-                          <button type="button" className="pdv2-dv-box__nav-btn" onClick={() => setIdx(idx - 1)} aria-label="Previous photo">‹</button>
+                          <button type="button" className="pdv2-dv-box__nav-btn" onClick={() => setIdx(idx - 1)} aria-label={t("previousPhotoAria")}>‹</button>
                           <span className="pdv2-dv-box__nav-count">{idx + 1} / {photos.length}</span>
-                          <button type="button" className="pdv2-dv-box__nav-btn" onClick={() => setIdx(idx + 1)} aria-label="Next photo">›</button>
+                          <button type="button" className="pdv2-dv-box__nav-btn" onClick={() => setIdx(idx + 1)} aria-label={t("nextPhotoAria")}>›</button>
                         </div>
                       )}
-                    </>
-                  ) : (
-                    <span className="pdv2-dv-box__icon">
-                      <ProcessIcon name={stage.icon} size={44} />
+                    </div>
+                  </div>
+                ) : (
+                  /* no photo uploaded yet for this stage — a compact,
+                     designed placeholder strip instead of a tiny icon
+                     lost in the full 21:9 photo banner's empty space */
+                  <div className="relative flex h-28 items-center gap-4 overflow-hidden border-y border-[var(--bg-line)] bg-[var(--bg-surface)] px-6 sm:h-32">
+                    <Grain opacity={0.05} />
+                    <span className="relative z-[1] flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-[var(--bg-line)] bg-[var(--bg-raise)] text-[var(--brand-teal)]">
+                      <ProcessIcon name={stage.icon} size={26} />
                     </span>
-                  )}
-                </div>
+                    <span className="relative z-[1] font-mono text-[0.72rem] uppercase tracking-[0.14em] text-[var(--ink-35)]">
+                      {t("stagePhotoComingSoon")}
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })}
 
           <div className="pdv2-wrap">
-            <div className="pdv2-delivery-grid" data-reveal="scale">
-              {family.deliveryGuide.map((phase, i, arr) => (
-                <div key={i} className="pdv2-delivery-card">
-                  <span className="pdv2-delivery-card__step">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="pdv2-delivery-card__icon">
-                    <DeliveryStageIcon name={resolveDeliveryStage(phase.label)} size={44} />
-                  </span>
-                  <h3 className="pdv2-delivery-card__label">{phase.label}</h3>
-                  <p className="pdv2-delivery-card__detail">{phase.detail}</p>
-                  <span className="pdv2-delivery-card__duration">{phase.duration}</span>
-                  {i < arr.length - 1 && (
-                    <svg className="pdv2-delivery-card__connector" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="M4 12h13m0 0l-5-5m5 5l-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  )}
+            <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl bg-[var(--bg-line)] sm:grid-cols-2 lg:grid-cols-4" data-reveal="scale">
+              {family.deliveryGuide.map((phase, i) => (
+                <div key={i} className="relative flex flex-col gap-3 bg-[var(--bg-surface)] p-6">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[1.4rem] font-bold leading-none text-[var(--ink-15)]">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="text-[var(--brand-teal)]"><DeliveryStageIcon name={resolveDeliveryStage(phase.label)} size={32} /></span>
+                  </div>
+                  <h3 className="text-[1.15rem] leading-tight text-[var(--ink)]" style={{ fontFamily: "var(--ff-display)" }}>{phase.label}</h3>
+                  <p className="flex-1 text-[0.85rem] leading-relaxed text-[var(--ink-60)]">{phase.detail}</p>
+                  <span className="font-mono text-[0.66rem] uppercase tracking-[0.14em] text-[var(--brand-teal)]">{phase.duration}</span>
                 </div>
               ))}
             </div>
@@ -756,99 +804,119 @@ export default function ProductDetail({ family, category, related }: Props) {
           REVIEWS — real, admin-entered reviews only. No fabricated
           rating or testimonials; an honest empty state otherwise.
       ══════════════════════════════════════════════════ */}
-      <section className={`pdv2-reviews${reviews.length === 0 ? " pdv2-reviews--empty" : ""}`} aria-label="Customer reviews">
-        <div className="pdv2-reviews__bg" aria-hidden="true" />
-        <div className="pdv2-wrap pdv2-reviews__inner">
-
-          {reviews.length === 0 ? (
-            <div className="pdv2-reviews-empty" data-reveal>
-              <h2 className="pdv2-reviews__h2">Be the first to <em>review this machine</em></h2>
-              <p>We haven't published a review for this specific model yet. Ask us to connect you with an existing customer running this line, or check back after your installation.</p>
-              <InquiryButton slug={family.slug} name={family.name} />
-            </div>
-          ) : (
-          <>
-          {/* left — overall rating */}
-          <div className="pdv2-rating-block" data-reveal>
-            <div className="pdv2-rating-block__score">{avgRating.toFixed(1)}</div>
-            <div className="pdv2-rating-block__stars"><StarRating n={Math.round(avgRating)} /></div>
-            <p className="pdv2-rating-block__label">Overall Rating</p>
-            <p className="pdv2-rating-block__sub">Based on {reviews.length} verified buyer review{reviews.length === 1 ? "" : "s"}</p>
-            <div className="pdv2-rating-bars">
-              {[5,4,3,2,1].map((s, i) => (
-                <div key={s} className="pdv2-rating-bar">
-                  <span>{s}</span>
-                  <div className="pdv2-rating-bar__track">
-                    <div className="pdv2-rating-bar__fill" style={{ width: `${Math.round((ratingCounts[i] / reviews.length) * 100)}%` }} />
+      <section className="bg-[var(--bg-base)] py-16 sm:py-20" aria-label={t("customerReviewsAria")}>
+        {reviews.length === 0 ? (
+          <div className="pdv2-wrap flex flex-col items-center gap-4 py-8 text-center" data-reveal>
+            <h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] leading-[0.95] text-[var(--ink)]" style={{ fontFamily: "var(--ff-display)" }}>
+              {t.rich("beFirstToReview", { em: (chunks) => <em className="text-[var(--brand-teal)] not-italic">{chunks}</em> })}
+            </h2>
+            <p className="text-[var(--ink-60)]">{t("noReviewYet")}</p>
+            <InquiryButton slug={family.slug} name={family.name} />
+          </div>
+        ) : (
+          <div className="mx-auto grid max-w-[1400px] grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
+            {/* left — grain-textured rating block, echoing the hero's diagonal panel */}
+            <div
+              className="relative flex flex-col justify-center gap-6 overflow-hidden bg-[#050b0a] px-8 py-14 sm:px-12"
+              style={{ clipPath: "polygon(0 0, 100% 0, 92% 100%, 0 100%)" }}
+              data-reveal
+            >
+              <Grain opacity={0.14} />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-x-10 -inset-y-10"
+                style={{ background: "radial-gradient(ellipse 55% 45% at 75% 25%, rgba(43,191,179,0.28) 0%, transparent 62%)" }}
+              />
+              <div className="relative z-[1] font-mono text-[3.5rem] font-bold leading-none text-white">{avgRating.toFixed(1)}</div>
+              <div className="relative z-[1]"><StarRating n={Math.round(avgRating)} /></div>
+              <p className="relative z-[1] font-mono text-[0.72rem] uppercase tracking-[0.18em] text-[var(--brand-teal)]">{t("overallRating")}</p>
+              <p className="relative z-[1] text-[0.85rem] text-white/60">
+                {reviews.length === 1
+                  ? t("basedOnReviewsSingular", { count: reviews.length })
+                  : t("basedOnReviewsPlural", { count: reviews.length })}
+              </p>
+              <div className="relative z-[1] flex flex-col gap-2 border-t border-white/10 pt-6">
+                {[5,4,3,2,1].map((s, i) => (
+                  <div key={s} className="flex items-center gap-3 font-mono text-[0.7rem] text-white/70">
+                    <span className="w-3">{s}</span>
+                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
+                      <div className="h-full rounded-full bg-[var(--brand-teal)]" style={{ width: `${Math.round((ratingCounts[i] / reviews.length) * 100)}%` }} />
+                    </div>
+                    <span className="w-9 text-right">{Math.round((ratingCounts[i] / reviews.length) * 100)}%</span>
                   </div>
-                  <span className="pdv2-rating-bar__pct">{Math.round((ratingCounts[i] / reviews.length) * 100)}%</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* right — review carousel */}
-          <div className="pdv2-review-carousel" data-reveal>
-            <h2 className="pdv2-reviews__h2">What our customers<br/><em>think about us?</em></h2>
-
-            <div className="pdv2-review-card">
-              <div className="pdv2-review-card__quote">"</div>
-              <p className="pdv2-review-card__text">{reviews[reviewIdx % reviews.length].text}</p>
-              <div className="pdv2-review-card__author">
-                <div className="pdv2-review-card__avatar" aria-hidden="true">
-                  {reviews[reviewIdx % reviews.length].name.charAt(0)}
-                </div>
-                <div className="pdv2-review-card__meta">
-                  <strong className="pdv2-review-card__name">{reviews[reviewIdx % reviews.length].name}</strong>
-                  <span className="pdv2-review-card__title">{reviews[reviewIdx % reviews.length].title}</span>
-                </div>
-                <div className="pdv2-review-card__stars"><StarRating n={reviews[reviewIdx % reviews.length].rating} /></div>
+                ))}
               </div>
             </div>
 
-            {reviews.length > 1 && (
-              <div className="pdv2-review-nav">
-                <button
-                  className="pdv2-review-nav__btn"
-                  onClick={() => setReviewIdx(i => (i - 1 + reviews.length) % reviews.length)}
-                  aria-label="Previous review"
-                >←</button>
-                <span className="pdv2-review-nav__count">{(reviewIdx % reviews.length) + 1} / {reviews.length}</span>
-                <button
-                  className="pdv2-review-nav__btn pdv2-review-nav__btn--next"
-                  onClick={() => setReviewIdx(i => (i + 1) % reviews.length)}
-                  aria-label="Next review"
-                >→</button>
+            {/* right — review carousel */}
+            <div className="flex flex-col justify-center gap-8 px-6 py-14 sm:px-10 lg:px-16" data-reveal>
+              <h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] leading-[0.95] text-[var(--ink)]" style={{ fontFamily: "var(--ff-display)" }}>
+                {t.rich("whatCustomersThink", { em: (chunks) => <em className="text-[var(--brand-teal)] not-italic">{chunks}</em> })}
+              </h2>
+
+              <div className="relative rounded-xl border border-[var(--bg-line)] p-8">
+                <div className="mb-2 text-[3rem] leading-none text-[var(--brand-teal)]" style={{ fontFamily: "var(--ff-display)" }}>&ldquo;</div>
+                <p className="text-[1.05rem] leading-relaxed text-[var(--ink-60)]">{reviews[reviewIdx % reviews.length].text}</p>
+                <div className="mt-6 flex items-center gap-4 border-t border-[var(--bg-line)] pt-6">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--brand-teal-glow)] font-mono font-bold text-[var(--brand-teal)]" aria-hidden="true">
+                    {reviews[reviewIdx % reviews.length].name.charAt(0)}
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <strong className="truncate text-[var(--ink)]">{reviews[reviewIdx % reviews.length].name}</strong>
+                    <span className="truncate text-[0.8rem] text-[var(--ink-35)]">{reviews[reviewIdx % reviews.length].title}</span>
+                  </div>
+                  <StarRating n={reviews[reviewIdx % reviews.length].rating} />
+                </div>
               </div>
-            )}
+
+              {reviews.length > 1 && (
+                <div className="flex items-center gap-4">
+                  <button
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--bg-line)] text-[var(--ink-60)] transition-colors hover:border-[var(--brand-teal)] hover:text-[var(--brand-teal)]"
+                    onClick={() => setReviewIdx(i => (i - 1 + reviews.length) % reviews.length)}
+                    aria-label={t("previousReviewAria")}
+                  >←</button>
+                  <span className="font-mono text-[0.72rem] uppercase tracking-[0.12em] text-[var(--ink-35)]">{(reviewIdx % reviews.length) + 1} / {reviews.length}</span>
+                  <button
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--bg-line)] text-[var(--ink-60)] transition-colors hover:border-[var(--brand-teal)] hover:text-[var(--brand-teal)]"
+                    onClick={() => setReviewIdx(i => (i + 1) % reviews.length)}
+                    aria-label={t("nextReviewAria")}
+                  >→</button>
+                </div>
+              )}
+            </div>
           </div>
-          </>
-          )}
-        </div>
+        )}
       </section>
 
       {/* ══════════════════════════════════════════════════
           RELATED MACHINES
       ══════════════════════════════════════════════════ */}
       {related.length > 0 && (
-        <section className="pdv2-related" aria-label="Related machines">
+        <section className="pdv2-related" aria-label={t("relatedMachinesAria")}>
           <div className="pdv2-wrap">
-            <div className="pdv2-section-head" data-reveal>
-              <span className="pdv2-section-head__line" />
-              <h2>Related <em>Machines</em></h2>
-              <Link href={`/products/${category.slug}`} className="pdv2-section-head__link">
-                View all →
-              </Link>
-            </div>
+            <SectionHead
+              eyebrow={category.name}
+              title={t.rich("relatedMachines", { em: (chunks) => <em className="text-[var(--brand-teal)] not-italic">{chunks}</em> })}
+              note={
+                <Link href={`/products/${category.slug}`} className="text-[var(--brand-teal)] transition-opacity hover:opacity-70">
+                  {t("viewAll")}
+                </Link>
+              }
+            />
             <div className="pdv2-related-grid" data-reveal>
               {related.map(r => (
-                <Link key={r.slug} href={`/products/${r.category}/${r.slug}`} className="pdv2-rel-card">
-                  <div className="pdv2-rel-card__img">
-                    <Image src={familyImage(r)} alt={r.name} fill sizes="(max-width: 700px) 45vw, 22vw" />
+                <Link
+                  key={r.slug}
+                  href={`/products/${r.category}/${r.slug}`}
+                  className="group flex flex-col overflow-hidden rounded-xl border border-[var(--bg-line)] bg-[var(--bg-surface)] transition-all duration-200 hover:-translate-y-1 hover:border-[var(--brand-teal)]/40 hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.5)]"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden bg-[var(--bg-base)]">
+                    <Image src={familyImage(r)} alt={r.name} fill sizes="(max-width: 700px) 45vw, 22vw" className="object-contain p-4 transition-transform duration-300 group-hover:scale-105" />
                   </div>
-                  <div className="pdv2-rel-card__body">
-                    <span className="pdv2-rel-card__series">{r.series}</span>
-                    <span className="pdv2-rel-card__name">{r.name.length > 48 ? r.name.slice(0,48)+"…" : r.name}</span>
+                  <div className="flex flex-col gap-1.5 border-t border-[var(--bg-line)] p-4">
+                    <span className="font-mono text-[0.64rem] uppercase tracking-[0.16em] text-[var(--brand-teal)]">{r.series}</span>
+                    <span className="text-[0.9rem] leading-snug text-[var(--ink)]">{r.name.length > 48 ? r.name.slice(0,48)+"…" : r.name}</span>
                   </div>
                 </Link>
               ))}
@@ -860,26 +928,33 @@ export default function ProductDetail({ family, category, related }: Props) {
       {/* ══════════════════════════════════════════════════
           NEWSLETTER / CTA BAND
       ══════════════════════════════════════════════════ */}
-      <section className="pdv2-cta-band" aria-label="Get in touch">
-        <div className="pdv2-cta-band__img-side" aria-hidden="true">
-          <Image src="/machines/bag-samples.png" alt="" fill sizes="(max-width: 700px) 100vw, 50vw" style={{ objectFit: "cover", opacity: 0.55 }} />
-          <div className="pdv2-cta-band__img-overlay" />
-          <div className="pdv2-cta-band__img-text">
-            <p>Be up to date with the latest<br/>news about Ashal Innomach</p>
-          </div>
-        </div>
-        <div className="pdv2-cta-band__form-side">
-          <span className="pdv2-cta-band__eyebrow">Contact</span>
-          <h2 className="pdv2-cta-band__h2">
-            Need a <em>custom</em> configuration?
-          </h2>
-          <p className="pdv2-cta-band__sub">
-            Don't know how to specify your requirements?<br/>
-            Call us: <a href="tel:+8657788888888">+86 577 8888 8888</a>
+      <section className="grid grid-cols-1 lg:grid-cols-2" aria-label={t("getInTouchAria")}>
+        <div
+          className="relative flex min-h-[280px] items-end overflow-hidden bg-[#050b0a] p-8 sm:p-12 lg:min-h-[420px]"
+          style={{ clipPath: "polygon(0 0, 100% 0, 100% 92%, 0 100%)" }}
+          aria-hidden="true"
+        >
+          <Image src="/machines/bag-samples.png" alt="" fill sizes="(max-width: 700px) 100vw, 50vw" style={{ objectFit: "cover", opacity: 0.4 }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+          <Grain opacity={0.12} />
+          <p className="relative z-[1] max-w-md text-[1.4rem] font-light leading-snug text-white">
+            {t.rich("newsletterText", { br: () => <br /> })}
           </p>
-          <div className="pdv2-cta-band__actions">
+        </div>
+        <div className="flex flex-col justify-center gap-5 bg-[var(--bg-surface)] p-8 sm:p-12 lg:p-16">
+          <span className="font-mono text-[0.7rem] uppercase tracking-[0.22em] text-[var(--brand-teal)]">{t("contact")}</span>
+          <h2 className="text-[clamp(1.8rem,3.5vw,2.6rem)] leading-[0.95] text-[var(--ink)]" style={{ fontFamily: "var(--ff-display)" }}>
+            {t.rich("needCustomConfig", { em: (chunks) => <em className="text-[var(--brand-teal)] not-italic">{chunks}</em> })}
+          </h2>
+          <p className="text-[var(--ink-60)]">
+            {t("dontKnowHowToSpecify")}<br/>
+            {t("callUs")} <a href="tel:+8657788888888" className="text-[var(--brand-teal)] underline-offset-2 hover:underline">+86 577 8888 8888</a>
+          </p>
+          <div className="flex flex-wrap items-center gap-4 pt-2">
             <InquiryButton slug={family.slug} name={family.name} />
-            <Link href="/inquiries" className="pdv2-ghost-btn">See all contact options</Link>
+            <Link href="/inquiries" className="font-mono text-[0.72rem] uppercase tracking-[0.12em] text-[var(--ink-35)] underline decoration-transparent underline-offset-4 transition-colors hover:text-[var(--brand-teal)] hover:decoration-[var(--brand-teal)]">
+              {t("seeAllContactOptions")}
+            </Link>
           </div>
         </div>
       </section>
@@ -887,11 +962,11 @@ export default function ProductDetail({ family, category, related }: Props) {
       {/* ══════════════════════════════════════════════════
           FLOATING CONTACT STACK (persistent, right-anchored)
       ══════════════════════════════════════════════════ */}
-      <div className="pdv2-float" aria-label="Quick contact">
+      <div className="pdv2-float" aria-label={t("quickContactAria")}>
         <button
           className="pdv2-float__icn"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          aria-label="Back to top"
+          aria-label={t("backToTopAria")}
         >
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
         </button>
@@ -899,17 +974,17 @@ export default function ProductDetail({ family, category, related }: Props) {
           className="pdv2-float__icn pdv2-float__icn--whatsapp"
           href="https://wa.me/8657788888888"
           target="_blank" rel="noopener noreferrer"
-          aria-label="Chat on WhatsApp"
+          aria-label={t("chatOnWhatsAppAria")}
         >
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm5.8 14.06c-.24.68-1.4 1.3-1.93 1.35-.5.05-1.03.24-3.43-.72-2.9-1.16-4.76-4.13-4.9-4.32-.14-.19-1.17-1.56-1.17-2.98 0-1.42.75-2.11 1.02-2.4.27-.29.58-.36.78-.36.2 0 .39.002.56.01.18.008.42-.07.66.5.24.58.82 2 .89 2.14.07.14.12.31.02.5-.1.19-.15.31-.3.47-.15.17-.31.37-.44.5-.15.14-.3.3-.13.59.17.3.76 1.25 1.63 2.02 1.12.99 2.06 1.3 2.36 1.45.3.14.47.12.65-.07.18-.19.75-.88.95-1.18.2-.3.4-.25.66-.15.27.1 1.71.81 2 .96.29.14.48.21.55.33.07.12.07.68-.17 1.36Z"/></svg>
         </a>
-        <a className="pdv2-float__icn" href="tel:+8657788888888" aria-label="Call us">
+        <a className="pdv2-float__icn" href="tel:+8657788888888" aria-label={t("callUsAria")}>
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         </a>
         <button
           className="pdv2-float__icn pdv2-float__icn--quote"
-          onClick={() => document.querySelector(".pdv2-info-card")?.scrollIntoView({ behavior: "smooth", block: "center" })}
-          aria-label="Jump to request a quote"
+          onClick={() => document.querySelector(".pdv2-quote-anchor")?.scrollIntoView({ behavior: "smooth", block: "center" })}
+          aria-label={t("jumpToRequestQuoteAria")}
         >
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16v12H8l-4 4V4Z"/></svg>
         </button>

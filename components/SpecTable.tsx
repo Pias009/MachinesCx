@@ -1,12 +1,14 @@
+import { useTranslations } from "next-intl";
 import { ProductFamily } from "@/lib/products";
 
 export default function SpecTable({ family }: { family: ProductFamily }) {
+  const t = useTranslations("specTable");
   return (
     <div className="spec-wrap">
       <table className="spec-table">
         <thead>
           <tr>
-            <th className="spec-label">Specification</th>
+            <th className="spec-label">{t("specification")}</th>
             {family.models.map((m) => <th key={m}>{m}</th>)}
           </tr>
         </thead>

@@ -446,8 +446,8 @@
 [data-theme="light"] [style*="rgba(255,255,255,.12)"]   { color: rgba(13,34,32,0.55) !important; }
 
 [data-theme="light"] .fc-btn--view,
-[data-theme="light"] .btn--hot,
-[data-theme="light"] .sn__cta                { color: revert !important; }
+[data-theme="light"] .btn--hot               { color: #fff !important; }
+[data-theme="light"] .sn__cta                { color: #080e0d !important; }
 
 /* ── ThemeToggle stays legible ── */
 [data-theme="light"] .theme-toggle     { color: #0d2220 !important; }
@@ -2814,6 +2814,25 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pstage--card .pstage__sheen { transform: translateZ(26px); }
 .pstage--card .pstage__tilt { width: 88%; height: 88%; }
 
+/* ── cover variant — full-bleed backdrop use: the parent element owns the
+   aspect ratio (e.g. a cinematic hero frame), so the stage fills it edge to
+   edge. The photo itself still uses object-fit: contain (see ProductStage3D)
+   so the whole machine stays visible instead of being cropped by whatever
+   aspect ratio the frame happens to be — a scenic photo can afford to lose
+   its edges to a cover-crop, a product shot where "the whole machine" is
+   the point cannot. The frame's own background shows in any letterboxed
+   gap, so it reads as an intentional stage, not a broken image. ── */
+.pstage--cover {
+  aspect-ratio: auto;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  background: var(--bg-surface);
+}
+.pstage--cover .pstage__tilt { width: 100%; height: 100%; }
+.pstage--cover .pstage__img img { filter: none; }
+
 .pdv2-thumbs {
   display: flex; gap: 0.65rem; flex-wrap: wrap;
 }
@@ -2948,6 +2967,39 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   transition: border-color 0.15s, color 0.15s;
 }
 .pdv2-mat-tag:hover { border-color: rgba(43,191,179,0.4); color: var(--ink); }
+
+/* ── hero model switcher — raised, skeuomorphic pill buttons instead of a
+   flat color chip: gradient fill + top highlight + drop shadow read as a
+   physical button; the active state looks pressed in (inset shadow, no
+   lift) rather than just a different fill color. ── */
+.pdv2-model-btn {
+  position: relative;
+  font-family: var(--ff-mono); font-size: 0.7rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.45rem 1rem; border-radius: 999px; border: none;
+  color: rgba(255,255,255,0.78);
+  background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.02) 100%), rgba(255,255,255,0.06);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.12) inset,
+    0 -1px 2px rgba(0,0,0,0.35) inset,
+    0 3px 6px rgba(0,0,0,0.3);
+  transition: color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+.pdv2-model-btn:hover { color: #fff; }
+.pdv2-model-btn:active { transform: translateY(1px); }
+.pdv2-model-btn--on {
+  font-weight: 700;
+  color: #0d2220;
+  background: linear-gradient(180deg, #4fd8cc 0%, var(--brand-teal) 55%, var(--brand-teal-dk) 100%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.4) inset,
+    0 -2px 3px rgba(13,34,32,0.35) inset,
+    0 2px 5px rgba(0,0,0,0.35);
+}
+.pdv2-model-btn--on:hover { color: #0d2220; }
+@media (prefers-reduced-motion: reduce) {
+  .pdv2-model-btn { transition: none; }
+}
 
 /* CTAs */
 .pdv2-panel__ctas { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
@@ -3368,6 +3420,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   gap: 1.25rem;
 }
 .pdv2-guide-card {
+  position: relative;
   background: var(--bg-base);
   border: 1px solid var(--bg-line);
   border-radius: 16px;
@@ -3377,10 +3430,39 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s cubic-bezier(0.16,1,0.3,1), border-color 0.3s;
 }
 .pdv2-guide-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
   box-shadow: 0 28px 56px -24px rgba(0,0,0,0.55);
-  border-color: rgba(43,191,179,0.35);
+  border-color: rgba(43,191,179,0.4);
 }
+
+/* connector — a short tick that bridges consecutive cards on the same row,
+   reading as a single flowing process rather than five unrelated tiles.
+   Draws itself in on a plain CSS animation (independent of the parent
+   card's JS-driven reveal, so it still runs under reduced-motion where
+   that JS bails out) and is hidden on narrow screens where cards stack. */
+.pdv2-guide-card__connector {
+  display: none;
+  position: absolute; top: 44px; left: -0.9rem;
+  width: 0.9rem; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(43,191,179,0.55));
+  z-index: 2;
+  transform: scaleX(0);
+  transform-origin: right center;
+  animation: pdv2-guide-connector-in 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+  animation-delay: calc(var(--guide-i, 0) * 0.09s + 0.25s);
+}
+@keyframes pdv2-guide-connector-in {
+  to { transform: scaleX(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pdv2-guide-card__connector { animation: none; transform: scaleX(1); }
+}
+@media (min-width: 640px) {
+  .pdv2-guide-grid { gap: 1.5rem 0; }
+  .pdv2-guide-card:not(:first-child) { margin-left: 1.5rem; }
+  .pdv2-guide-card__connector { display: block; }
+}
+
 .pdv2-guide-card__media {
   position: relative;
   aspect-ratio: 4 / 3;
@@ -3396,11 +3478,12 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-guide-card:hover .pdv2-guide-card__media img { transform: scale(1.06); }
 
 /* icon panel — the real lucide glyph is the focal point: large, boxed,
-   bracket-cornered. Quiet radial ground instead of a busy grid texture
-   so attention stays on the icon and the title/body text below it. */
+   bracket-cornered, with a slow rotating ring behind it so the card reads
+   as "alive" even before the visitor's cursor reaches it. Quiet radial
+   ground instead of a busy grid texture so attention stays on the icon. */
 .pdv2-guide-card__media--schematic {
   background:
-    radial-gradient(circle at 50% 42%, rgba(43,191,179,0.14), transparent 68%),
+    radial-gradient(circle at 50% 42%, rgba(43,191,179,0.16), transparent 68%),
     var(--bg-surface);
 }
 .pdv2-guide-card__ghost {
@@ -3410,7 +3493,21 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   -webkit-text-stroke: 1px rgba(43,191,179,0.18);
   letter-spacing: -0.02em;
   user-select: none;
+  transition: -webkit-text-stroke-color 0.3s ease;
 }
+.pdv2-guide-card:hover .pdv2-guide-card__ghost { -webkit-text-stroke-color: rgba(43,191,179,0.32); }
+.pdv2-guide-card__ring {
+  position: absolute; top: 50%; left: 50%; width: 116px; height: 116px;
+  transform: translate(-50%, -50%);
+  border: 1px dashed rgba(43,191,179,0.22);
+  border-radius: 50%;
+  animation: pdv2-guide-ring-spin 18s linear infinite;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pdv2-guide-card__ring { animation: none; }
+}
+@keyframes pdv2-guide-ring-spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
 .pdv2-guide-card__bracket {
   position: absolute; width: 26px; height: 26px;
   border-color: rgba(43,191,179,0.4);
@@ -3429,19 +3526,20 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-guide-card:hover .pdv2-guide-card__bracket { opacity: 1; transform: translate(0, 0); }
 .pdv2-guide-card__icon {
   position: relative; z-index: 1;
-  width: 92px; height: 92px;
+  width: 96px; height: 96px;
   display: flex; align-items: center; justify-content: center;
   color: var(--brand-teal);
   background: rgba(43,191,179,0.08);
   border: 1px solid rgba(43,191,179,0.3);
-  border-radius: 1rem;
+  border-radius: 1.1rem;
   filter: drop-shadow(0 0 18px rgba(43,191,179,0.22));
-  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), background 0.3s, border-color 0.3s;
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), background 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 .pdv2-guide-card:hover .pdv2-guide-card__icon {
-  transform: scale(1.06);
-  background: rgba(43,191,179,0.14);
-  border-color: rgba(43,191,179,0.55);
+  transform: scale(1.1) rotate(-4deg);
+  background: rgba(43,191,179,0.16);
+  border-color: rgba(43,191,179,0.6);
+  box-shadow: 0 0 0 6px rgba(43,191,179,0.08);
 }
 .pdv2-guide-card__num {
   position: absolute; top: 0.75rem; left: 0.85rem;
@@ -3453,19 +3551,27 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-guide-card__num::before { content: "STEP / "; color: var(--ink-35); }
 .pdv2-guide-card__media--schematic .pdv2-guide-card__num { top: 0.85rem; left: 0.95rem; }
 .pdv2-guide-card__body {
-  padding: 1.4rem 1.5rem 1.6rem;
-  display: flex; flex-direction: column; gap: 0.6rem;
+  padding: 1.1rem 1.3rem 1.3rem;
+  display: flex; flex-direction: column; gap: 0.45rem;
 }
 .pdv2-guide-card__title {
-  font-family: var(--ff-display); font-size: 1.4rem;
+  font-family: var(--ff-display); font-size: 1.3rem;
   letter-spacing: 0.01em;
   color: var(--ink); line-height: 1.12;
   overflow-wrap: anywhere;
 }
+/* body copy stays available but visually recedes behind the icon/motion —
+   clamped to two lines instead of running the full paragraph, so the card
+   reads icon-first. Full text still exists in the DOM/CMS, just not
+   forced onto the page in full. */
 .pdv2-guide-card__detail {
-  font-family: var(--ff-body); font-size: 0.92rem;
-  color: var(--ink-60); line-height: 1.65;
+  font-family: var(--ff-body); font-size: 0.87rem;
+  color: var(--ink-60); line-height: 1.55;
   overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ════════════════════════════════════════

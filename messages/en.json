@@ -541,6 +541,7 @@
     "stagePrefix": "Stage",
     "stepsAria": "Process steps",
     "stepOfLabel": "Step {num} of {total}",
+    "closeLabel": "Close",
     "footerText": "Ready when you are —",
     "footerStrong": "engineers available 24/7",
     "cta": "Start your inquiry",
@@ -627,7 +628,13 @@
       "title": "Built for the people",
       "titleEm": "who run the line.",
       "body": "For plant managers, procurement leads, and factory owners buying film, bag-making, recycling, or printing equipment — anyone who needs a machine that runs the shift, not just the demo.",
-      "imageAlt": "ABCDE-2200 five-layer co-extrusion line on the factory floor"
+      "imageAlt": "ABCDE-2200 five-layer co-extrusion line on the factory floor",
+      "roles": {
+        "plantManagers": "Plant Managers",
+        "procurement": "Procurement Leads",
+        "factoryOwners": "Factory Owners"
+      },
+      "cta": "Browse the catalogue"
     },
     "features": {
       "sectionAria": "Why manufacturers choose Ashal Innomach",
@@ -1965,7 +1972,9 @@
   "machineDiagram": {
     "titlePrefix": "Performance",
     "titleEm": "Dashboard",
-    "selectModelAria": "Select model"
+    "selectModelAria": "Select model",
+    "compareTitle": "Model comparison",
+    "compareAria": "Specification comparison across models"
   },
   "machineParts": {
     "titlePrefix": "Machine",

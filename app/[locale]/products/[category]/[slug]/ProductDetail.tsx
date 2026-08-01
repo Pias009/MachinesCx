@@ -12,7 +12,7 @@ import DeliveryStageIcon, { resolveDeliveryStage } from "@/components/DeliverySt
 import CustomSections from "@/components/CustomSections";
 import MachineParts from "@/components/MachineParts";
 import ProductStage3D from "@/components/ProductStage3D";
-import { Grain, PlusMark, MetaRow, SectionHead, SubHead } from "@/components/EditorialKit";
+import { Grain, PlusMark, SectionHead, SubHead } from "@/components/EditorialKit";
 import type { ProductFamily, Category } from "@/lib/products";
 import { familyImage, familyImages, parseYouTubeId, stagePhotos } from "@/lib/products";
 
@@ -262,177 +262,173 @@ export default function ProductDetail({ family, category, related }: Props) {
     return () => obs.disconnect();
   }, []);
 
+  /* hero glass-panel content — model switcher, title, tagline, headline
+     specs, CTA, trust row. Rendered inside an absolute-positioned overlay
+     on the cinematic photo from sm: up, and as a plain static-flow block
+     below a shorter photo banner on mobile (an overlay would either clip
+     or, if sized to fit, force the photo down to an unusable sliver on a
+     narrow viewport — so mobile gets its own non-overlapping shell). */
+  const heroPanelContent = (
+    <>
+      <div className="min-w-0" data-reveal="blur">
+        {/* model switcher — raised, skeuomorphic pill buttons: gradient fill,
+            top highlight + drop shadow for bevel, active state looks
+            physically pressed in (inset shadow, no lift) */}
+        {hasModels && (
+          <div className="pdv2-model-rail mb-4 flex flex-wrap items-center gap-2 self-start rounded-full border border-white/15 bg-black/40 px-2 py-2 backdrop-blur-md" role="group" aria-label={t("selectModelAria")}>
+            {family.models.map((m, i) => (
+              <button
+                key={m}
+                className={`pdv2-model-btn ${activeModel === i ? "pdv2-model-btn--on" : ""}`}
+                onClick={() => setActiveModel(i)}
+                aria-pressed={activeModel === i}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+        )}
+        <p className="mb-2 flex items-center gap-3 font-mono text-[0.7rem] uppercase tracking-[0.22em] text-[var(--brand-teal)]">
+          <span className="h-px w-7 bg-[var(--brand-teal)]" />
+          {category.tagline}
+        </p>
+        <h1 className="text-[clamp(1.9rem,4.2vw,3.4rem)] leading-[0.98] tracking-[0.01em] text-white" style={{ textWrap: "balance", fontFamily: "var(--ff-display)" }}>
+          {family.name}
+        </h1>
+        <p className="mt-3 max-w-[52ch] text-[1rem] leading-[1.65] text-white/75">
+          {family.tagline}
+        </p>
+
+        {/* trust row */}
+        <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[0.64rem] uppercase tracking-[0.1em] text-white/65">
+          <div className="flex items-center gap-1.5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="15" height="15" className="text-[var(--brand-teal)]"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>{t("isoCertified")}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="15" height="15" className="text-[var(--brand-teal)]"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>{t("shipsWorldwide")}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="15" height="15" className="text-[var(--brand-teal)]"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span>{t("support24h")}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* headline specs + CTA */}
+      <div className="pdv2-quote-anchor flex shrink-0 flex-col gap-5 lg:items-end">
+        {panelSpecs.length > 0 && (
+          <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4 lg:grid-cols-2">
+            {panelSpecs.slice(0, 4).map(s => (
+              <div key={s.label} className="min-w-0">
+                <p className="truncate font-mono text-[0.6rem] uppercase tracking-[0.1em] text-white/50" style={{ overflowWrap: "anywhere" }}>{s.label}</p>
+                <p className="text-[1.05rem] font-bold tracking-[0.02em] text-white" style={{ fontFamily: "var(--ff-mono)", overflowWrap: "anywhere" }}>{s.value}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="flex flex-wrap items-center gap-4">
+          <InquiryButton slug={family.slug} name={family.name} />
+          <Link href={`/products/${category.slug}`} className="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-white/60 underline decoration-transparent underline-offset-4 transition-colors hover:text-[var(--brand-teal)] hover:decoration-[var(--brand-teal)]">
+            {t("backToCategory", { category: category.name })}
+          </Link>
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <div className="pdv2" ref={rootRef} data-no-anim>
 
       {/* ══════════════════════════════════════════════════
-          HERO — clean centered layout: info column on the left, the
-          interactive 3D product card as the clear focal point on the
-          right. No decorative chrome (diagonal cuts, tick rails, dot
-          pagers) competing with the machine or the copy.
+          HERO — cinematic photo stacked on top, own full-width block, no
+          text overlaid on it. Breadcrumb sits quietly over the photo top
+          edge. Title, headline specs, CTA and the model switcher live in a
+          separate solid dark panel directly below. Trimmed to headline
+          specs only — the exhaustive table lives in the tabs section's
+          "Full Specifications" panel further down the page.
       ══════════════════════════════════════════════════ */}
-      <section className="relative bg-[var(--bg-base)] pb-16 pt-40 sm:pt-44 lg:pb-24 lg:pt-48">
-        <div className="mx-auto grid max-w-[1560px] grid-cols-1 items-center gap-12 px-6 sm:px-10 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-16 lg:px-14">
+      <section className="relative isolate overflow-hidden bg-[var(--bg-surface)] pt-24 sm:pt-28">
+        {/* photo — its own block, full width, nothing overlaid except the
+            breadcrumb (which sits on the photo's top edge) and the photo
+            thumbnail rail */}
+        <div className="relative aspect-[4/3] w-full sm:aspect-[16/9] lg:aspect-[2/1] xl:aspect-[21/9]">
+          <ProductStage3D
+            src={heroImg}
+            alt={family.name}
+            photoKey={activePhoto}
+            priority
+            bare
+            cover
+          />
 
-          {/* ── LEFT: breadcrumb, title, model selector, spec panel, CTAs ── */}
-          <div className="flex flex-col gap-8">
-            {/* breadcrumb */}
-            <nav
-              className="flex flex-wrap items-center gap-2 font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--ink-35)]"
-              aria-label={t("breadcrumbAria")}
-              data-reveal
-            >
-              <Link href="/" className="transition-colors hover:text-[var(--brand-teal)]">{t("breadcrumbHome")}</Link>
-              <span className="text-[var(--ink-15)]">›</span>
-              <Link href="/products" className="transition-colors hover:text-[var(--brand-teal)]">{t("breadcrumbCatalogue")}</Link>
-              <span className="text-[var(--ink-15)]">›</span>
-              <Link href={`/products/${category.slug}`} className="transition-colors hover:text-[var(--brand-teal)]">{category.name}</Link>
-              <span className="text-[var(--ink-15)]">›</span>
-              <span className="text-[var(--ink-60)]">{family.series}</span>
-            </nav>
+          {/* scrim so the breadcrumb stays legible over any photo */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 22%)" }}
+          />
 
-            {/* title block */}
-            <div data-reveal="blur">
-              <p className="mb-3 flex items-center gap-3 font-mono text-[0.7rem] uppercase tracking-[0.22em] text-[var(--brand-teal)]">
-                <span className="h-px w-7 bg-[var(--brand-teal)]" />
-                {category.tagline}
-              </p>
-              <h1 className="text-[clamp(2rem,3.8vw,3.1rem)] leading-[0.98] tracking-[0.01em] text-[var(--ink)]" style={{ textWrap: "balance", fontFamily: "var(--ff-display)" }}>
-                {family.name}
-              </h1>
-              <p className="mt-4 max-w-[52ch] text-[1.05rem] leading-[1.7] text-[var(--ink-60)]">
-                {family.tagline}
-              </p>
-            </div>
+          {/* breadcrumb — floats over the top of the photo */}
+          <nav
+            className="absolute inset-x-0 top-0 z-[2] flex flex-wrap items-center gap-2 px-6 py-5 font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--ink-60)] sm:px-10 lg:px-14"
+            aria-label={t("breadcrumbAria")}
+            data-reveal
+          >
+            <Link href="/" className="transition-colors hover:text-[var(--brand-teal)]">{t("breadcrumbHome")}</Link>
+            <span className="text-white/25">›</span>
+            <Link href="/products" className="transition-colors hover:text-[var(--brand-teal)]">{t("breadcrumbCatalogue")}</Link>
+            <span className="text-white/25">›</span>
+            <Link href={`/products/${category.slug}`} className="transition-colors hover:text-[var(--brand-teal)]">{category.name}</Link>
+            <span className="text-white/25">›</span>
+            <span className="text-white/90">{family.series}</span>
+          </nav>
 
-            {/* model selector — sits directly under the title so switching
-                models is the first thing a visitor can do. Plain text
-                pills only — all models in a family share one photo, so a
-                thumbnail per pill would just repeat the same image. */}
-            {hasModels && (
-              <div className="flex flex-wrap items-start gap-3 rounded-xl border border-[var(--bg-line)] bg-[var(--bg-surface)] px-5 py-4" role="group" aria-label={t("selectModelAria")}>
-                <span className="shrink-0 pt-1 font-mono text-[0.66rem] uppercase tracking-[0.16em] text-[var(--ink-35)]">{t("model")}</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {family.models.map((m, i) => (
-                    <button
-                      key={m}
-                      className={`rounded-md border px-3 py-1.5 font-mono text-[0.7rem] uppercase tracking-[0.08em] transition-all duration-150 ${
-                        activeModel === i
-                          ? "border-[var(--brand-teal)] bg-[var(--brand-teal)] font-bold text-[#0d2220] shadow-[0_4px_14px_-4px_rgba(43,191,179,0.55)]"
-                          : "border-[var(--bg-line)] text-[var(--ink-60)] hover:-translate-y-px hover:border-[var(--brand-teal)]/40 hover:text-[var(--ink)]"
-                      }`}
-                      onClick={() => setActiveModel(i)}
-                      aria-pressed={activeModel === i}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* metadata rows */}
-            <div className="flex flex-col gap-2 border-y border-[var(--bg-line)] py-5" data-reveal>
-              <MetaRow k={t("model")} v={hasModels ? family.models[activeModel] : family.models[0]} />
-              <MetaRow k={t("substrates")} v={materials.length > 0 ? materials.join(" / ") : "—"} />
-            </div>
-
-            {/* key spec table — also the scroll target for the floating "jump to quote" button */}
-            <div className="pdv2-quote-anchor overflow-hidden rounded-xl border border-[var(--bg-line)]">
-              <div className="flex items-center justify-between bg-[var(--bg-surface)] px-4 py-3 font-mono text-[0.7rem] font-bold uppercase tracking-[0.14em] text-[var(--ink)]">
-                <span className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-[var(--brand-teal)]" />{t("specification")}</span>
-                <span className="text-[var(--brand-teal)]">{hasModels ? family.models[activeModel] : family.models[0]}</span>
-              </div>
-              {panelSpecs.length > 0 ? panelSpecs.map((s, i) => (
-                <div
-                  key={s.label}
-                  className={`flex items-center justify-between border-t border-[var(--bg-line)] px-4 py-2.5 ${i % 2 === 1 ? "bg-[var(--brand-teal-glow)]" : ""}`}
+          {/* photo thumbnail rail — top-right */}
+          {photos.length > 1 && (
+            <div className="absolute right-6 top-20 z-[2] hidden flex-col gap-2 sm:right-10 sm:flex lg:right-14" role="tablist" aria-label={t("productPhotosAria")}>
+              {photos.map((p, i) => (
+                <button
+                  key={i}
+                  role="tab"
+                  aria-selected={activePhoto === i}
+                  className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-md border-2 p-0.5 backdrop-blur-sm transition-all duration-200 ${
+                    activePhoto === i
+                      ? "border-[var(--brand-teal)] bg-black/30 opacity-100"
+                      : "border-white/20 bg-black/20 opacity-70 hover:-translate-y-0.5 hover:border-[var(--brand-teal)]/60 hover:opacity-100"
+                  }`}
+                  onClick={() => setActivePhoto(i)}
+                  aria-label={t("photoOfLabel", { num: i + 1, total: photos.length })}
                 >
-                  <span className="min-w-0 shrink text-[0.65rem] tracking-[0.06em] text-[var(--ink-60)]" style={{ fontFamily: "var(--ff-mono)", overflowWrap: "anywhere" }}>{s.label}</span>
-                  <span className="max-w-[55%] min-w-0 text-right text-[0.74rem] font-bold tracking-[0.04em] text-[var(--ink)]" style={{ fontFamily: "var(--ff-mono)", overflowWrap: "anywhere" }}>{s.value}</span>
-                </div>
-              )) : (
-                <div className="flex justify-center border-t border-[var(--bg-line)] px-4 py-6">
-                  <span className="font-mono text-[0.65rem] italic text-[var(--ink-35)]">{t("fullSpecOnRequest")}</span>
-                </div>
-              )}
+                  <Image src={p} alt="" fill loading="eager" sizes="48px" style={{ objectFit: "contain", padding: "3px" }} />
+                </button>
+              ))}
             </div>
+          )}
+        </div>
 
-            {/* CTAs */}
-            <div className="flex flex-wrap items-center gap-4">
-              <InquiryButton slug={family.slug} name={family.name} />
-              <Link href={`/products/${category.slug}`} className="font-mono text-[0.72rem] uppercase tracking-[0.12em] text-[var(--ink-35)] underline decoration-transparent underline-offset-4 transition-colors hover:text-[var(--brand-teal)] hover:decoration-[var(--brand-teal)]">
-                {t("backToCategory", { category: category.name })}
-              </Link>
-            </div>
-
-            {/* trust row */}
-            <div className="flex flex-wrap gap-x-6 gap-y-3 border-t border-[var(--bg-line)] pt-5 font-mono text-[0.66rem] uppercase tracking-[0.1em] text-[var(--ink-60)]">
-              <div className="flex items-center gap-2">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18" className="text-[var(--brand-teal)]"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                <span>{t("isoCertified")}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18" className="text-[var(--brand-teal)]"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span>{t("shipsWorldwide")}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18" className="text-[var(--brand-teal)]"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                <span>{t("support24h")}</span>
-              </div>
-            </div>
+        {/* info panel — solid dark block directly below the photo: model
+            switcher, title, tagline, headline specs, CTA, trust row */}
+        <div className="bg-[#0d1614] px-6 py-8 sm:px-10 sm:py-10 lg:px-14 lg:py-12">
+          <div className="mx-auto flex max-w-[1560px] flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
+            {heroPanelContent}
           </div>
+        </div>
 
-          {/* ── RIGHT: the 3D product card, no panel/background at all — the
-              photo itself, floating directly on the page, is the only thing
-              drawing the eye ── */}
-          <div className="relative flex flex-col gap-6" data-reveal="scale">
-            <div className="relative px-6 py-10 sm:px-8 sm:py-12 lg:px-10 lg:py-14">
-              <ProductStage3D
-                src={heroImg}
-                alt={family.name}
-                badge={family.series}
-                photoKey={activePhoto}
-                priority
-                bare
-              />
-
-              {photos.length > 1 && (
-                <div className="relative z-[1] mt-6 flex flex-wrap gap-2.5" role="tablist" aria-label={t("productPhotosAria")}>
-                  {photos.map((p, i) => (
-                    <button
-                      key={i}
-                      role="tab"
-                      aria-selected={activePhoto === i}
-                      className={`relative h-[68px] w-[68px] shrink-0 overflow-hidden rounded-lg border-2 p-1 transition-all duration-200 ${
-                        activePhoto === i
-                          ? "border-[var(--brand-teal)] opacity-100"
-                          : "border-[var(--bg-line)] opacity-65 hover:-translate-y-0.5 hover:border-[var(--brand-teal)]/50 hover:opacity-100 hover:shadow-[0_10px_20px_-8px_rgba(0,0,0,0.4)]"
-                      }`}
-                      onClick={() => setActivePhoto(i)}
-                      aria-label={t("photoOfLabel", { num: i + 1, total: photos.length })}
-                    >
-                      <Image src={p} alt="" fill loading="eager" sizes="68px" style={{ objectFit: "contain", padding: "4px" }} />
-                    </button>
-                  ))}
-                </div>
-              )}
+        {/* facility strip — quiet row of related-category machines directly below the cinematic frame */}
+        <div className="mx-auto max-w-[1560px] px-6 py-6 sm:px-10 lg:px-14">
+          <div className="rounded-xl border border-[var(--bg-line)] bg-[var(--bg-surface)] px-5 py-4">
+            <div className="mb-3 flex items-center justify-between font-mono text-[0.62rem] uppercase tracking-[0.14em] text-[var(--ink-35)]">
+              <span>{family.series} :&nbsp;{hasModels ? family.models[activeModel] : family.models[0]}</span>
+              <span>{photos.length}&nbsp;{t("productPhotosAria")}</span>
             </div>
-
-            {/* facility strip — quiet row of related-category machines below
-                the card, not clipped into it */}
-            <div className="rounded-xl border border-[var(--bg-line)] bg-[var(--bg-surface)] px-5 py-4">
-              <div className="mb-3 flex items-center justify-between font-mono text-[0.62rem] uppercase tracking-[0.14em] text-[var(--ink-35)]">
-                <span>{family.series} :&nbsp;{t("model")}</span>
-                <span>{photos.length}&nbsp;{t("productPhotosAria")}</span>
-              </div>
-              <div className="flex h-16 gap-px overflow-hidden rounded-md bg-[var(--bg-line)]">
-                {collagePool.map((f, i) => (
-                  <div key={`${f.slug}-${i}`} className="relative flex-1 bg-[var(--bg-raise)]">
-                    <Image src={familyImage(f)} alt="" fill sizes="20vw" style={{ objectFit: "contain", padding: "6px", opacity: 0.85 }} />
-                  </div>
-                ))}
-              </div>
+            <div className="flex h-16 gap-px overflow-hidden rounded-md bg-[var(--bg-line)]">
+              {collagePool.map((f, i) => (
+                <div key={`${f.slug}-${i}`} className="relative flex-1 bg-[var(--bg-raise)]">
+                  <Image src={familyImage(f)} alt="" fill sizes="20vw" style={{ objectFit: "contain", padding: "6px", opacity: 0.85 }} />
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -600,15 +596,17 @@ export default function ProductDetail({ family, category, related }: Props) {
               {family.installation && family.installation.length > 0 && (
                 <>
                   <SubHead title={t("setupInstallationGuide")} />
-                  <div className="pdv2-guide-grid" data-reveal="scale">
+                  <div className="pdv2-guide-grid">
                     {family.installation.map((step, i) => (
-                      <div key={i} className="pdv2-guide-card">
+                      <div key={i} className="pdv2-guide-card" data-reveal="scale" style={{ "--guide-i": i } as React.CSSProperties}>
+                        <span className="pdv2-guide-card__connector" aria-hidden="true" />
                         <div className="pdv2-guide-card__media pdv2-guide-card__media--schematic">
                           <span className="pdv2-guide-card__ghost" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                          <span className="pdv2-guide-card__ring" aria-hidden="true" />
                           <span className="pdv2-guide-card__bracket pdv2-guide-card__bracket--tl" aria-hidden="true" />
                           <span className="pdv2-guide-card__bracket pdv2-guide-card__bracket--br" aria-hidden="true" />
                           <span className="pdv2-guide-card__icon">
-                            <ProcessIcon name={resolveIcon(step.title)} size={48} />
+                            <ProcessIcon name={resolveIcon(step.title)} size={44} />
                           </span>
                           <span className="pdv2-guide-card__num">{String(i + 1).padStart(2, "0")}</span>
                         </div>

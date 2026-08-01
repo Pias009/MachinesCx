@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ShieldCheck, Loader2, ArrowRight } from "lucide-react";
 import { ADMIN_PATH } from "@/lib/adminAuth";
 
 export default function AdminLogin() {
@@ -44,15 +45,21 @@ export default function AdminLogin() {
   return (
     <div style={{
       minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-      background: "#000", padding: "1.5rem",
+      background: "var(--adm-bg, #05080a)",
+      backgroundImage: "radial-gradient(900px 480px at 50% -10%, rgba(43,191,179,0.12), transparent 60%)",
+      padding: "1.5rem",
     }}>
-      <form onSubmit={submit} style={{
+      <form onSubmit={submit} className="adm-panel adm-rise" style={{
         width: "100%", maxWidth: 400,
-        background: "#000", borderRadius: 20,
-        border: "1px solid rgba(255,255,255,0.08)",
         padding: "2.5rem 2.25rem",
       }}>
-        <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>🔐</div>
+        <div style={{
+          width: 52, height: 52, borderRadius: 14, marginBottom: "1.25rem",
+          background: "rgba(43,191,179,0.13)", color: "var(--brand-teal)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <ShieldCheck size={26} />
+        </div>
         <h1 style={{
           fontFamily: "var(--ff-display)", fontSize: "2rem", color: "#fff",
           margin: "0 0 0.5rem", lineHeight: 1.1,
@@ -60,7 +67,7 @@ export default function AdminLogin() {
           Admin sign in
         </h1>
         <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.95rem", color: "rgba(255,255,255,0.55)", margin: "0 0 1.75rem", lineHeight: 1.5 }}>
-          Enter your details to manage the site's content.
+          Enter your details to manage the site&apos;s content.
         </p>
 
         <label style={{ display: "block", marginBottom: "1rem" }}>
@@ -73,7 +80,7 @@ export default function AdminLogin() {
         </label>
 
         {err && (
-          <div role="alert" style={{
+          <div role="alert" className="adm-rise" style={{
             fontFamily: "var(--ff-body)", fontSize: "0.9rem", color: "#ff8a97",
             background: "rgba(255,107,125,0.1)", borderRadius: 10,
             padding: "0.75rem 1rem", marginBottom: "1.25rem",
@@ -82,13 +89,8 @@ export default function AdminLogin() {
           </div>
         )}
 
-        <button type="submit" disabled={busy} style={{
-          width: "100%", padding: "1rem", borderRadius: 10,
-          background: "var(--brand-teal)", color: "#04211e",
-          border: "none", cursor: busy ? "wait" : "pointer",
-          fontFamily: "var(--ff-body)", fontSize: "1rem", fontWeight: 700,
-          opacity: busy ? 0.7 : 1,
-        }}>
+        <button type="submit" disabled={busy} className="adm-btn" style={{ width: "100%", justifyContent: "center" }}>
+          {busy ? <Loader2 size={16} className="adm-spin-icon" /> : <ArrowRight size={16} />}
           {busy ? "Signing in…" : "Sign in"}
         </button>
       </form>

@@ -21,6 +21,11 @@ interface Props {
    * just the photo itself with its tilt/glow/sheen interaction, floating
    * on whatever the page background already is. */
   bare?: boolean;
+  /** Fill the parent edge-to-edge (no own aspect-ratio — the parent owns
+   * it) instead of the default contained box. The photo itself still uses
+   * object-fit: contain so the full machine stays visible rather than
+   * being cropped to whatever aspect ratio the parent frame happens to be. */
+  cover?: boolean;
 }
 
 /**
@@ -30,7 +35,7 @@ interface Props {
  * Pointer-driven only; falls back to a static resting tilt on touch
  * devices and under reduced-motion.
  */
-export default function ProductStage3D({ src, alt, badge, photoKey, priority, variant = "hero", sizes, eager, bare }: Props) {
+export default function ProductStage3D({ src, alt, badge, photoKey, priority, variant = "hero", sizes, eager, bare, cover }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef(0);
   const target = useRef({ rx: 0, ry: 0, mx: 50, my: 50 });
@@ -99,7 +104,7 @@ export default function ProductStage3D({ src, alt, badge, photoKey, priority, va
   return (
     <div
       ref={frameRef}
-      className={`pstage${isCard ? " pstage--card" : ""}${interactive ? " pstage--interactive" : ""}`}
+      className={`pstage${isCard ? " pstage--card" : ""}${interactive ? " pstage--interactive" : ""}${cover ? " pstage--cover" : ""}`}
       onPointerMove={onMove}
       onPointerLeave={onLeave}
     >
@@ -118,6 +123,7 @@ export default function ProductStage3D({ src, alt, badge, photoKey, priority, va
             priority={priority}
             loading={priority ? undefined : eager ? "eager" : "lazy"}
             sizes={sizes ?? "(max-width: 900px) 90vw, 56vw"}
+            style={cover ? { objectFit: "contain" } : undefined}
             onLoad={() => setLoaded(true)}
             onError={() => setLoaded(true)}
           />

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Inbox, Wrench, ClipboardList, Package, Mail, CheckCircle2, Send } from "lucide-react";
 import AdminShell from "../AdminShell";
 import { familyBySlug, familyImages } from "@/lib/products";
 import type { InquiryMachine, InquiryPart, InquiryReply, InquiryType } from "@/models/Inquiry";
@@ -22,10 +23,10 @@ interface InquiryRow {
   createdAt: string;
 }
 
-const TYPE_CONFIG: Record<InquiryType, { label: string; icon: string; color: string }> = {
-  "talk-to-engineer": { label: "Talk to Engineer", icon: "⚙", color: "#8b5cf6" },
-  direct:             { label: "Direct Inquiry",   icon: "📋", color: "#3b82f6" },
-  parts:              { label: "Part Inquiry",     icon: "🔧", color: "#f59e0b" },
+const TYPE_CONFIG: Record<InquiryType, { label: string; icon: typeof Wrench; color: string }> = {
+  "talk-to-engineer": { label: "Talk to Engineer", icon: Wrench,        color: "#8b5cf6" },
+  direct:             { label: "Direct Inquiry",   icon: ClipboardList, color: "#3b82f6" },
+  parts:              { label: "Part Inquiry",     icon: Package,       color: "#f59e0b" },
 };
 
 // Some legacy inquiries predate the inquiryType field — fall back to
@@ -137,31 +138,45 @@ export default function InquiriesPage() {
 
   return (
     <AdminShell>
-      <h1 style={{ fontFamily: "var(--ff-display)", fontSize: "2.4rem", color: "#fff", lineHeight: 1.05, margin: "0 0 0.5rem" }}>
-        Inquiries
-      </h1>
-      <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: "rgba(255,255,255,0.6)", margin: "0 0 2rem", maxWidth: "62ch", lineHeight: 1.6 }}>
-        Every inquiry submitted from the site — machine requests, parts requests, and engineering consultations. Click one to read the full request and reply.
-      </p>
+      <div className="adm-page-head adm-rise">
+        <div className="adm-page-head__eyebrow">
+          <Inbox size={13} />
+          Customer inbox
+        </div>
+        <h1 className="adm-page-head__title">Inquiries</h1>
+        <p className="adm-page-head__sub">
+          Every inquiry submitted from the site — machine requests, parts requests, and engineering consultations. Click one to read the full request and reply.
+        </p>
+      </div>
 
       {!inquiries ? (
-        <p style={{ fontFamily: "var(--ff-body)", color: "rgba(255,255,255,0.6)" }}>Loading…</p>
+        <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: "1.25rem" }}>
+          <div className="adm-skel" style={{ height: 420, borderRadius: 16 }} />
+          <div className="adm-skel" style={{ height: 420, borderRadius: 16 }} />
+        </div>
       ) : inquiries.length === 0 ? (
-        <div style={{ borderRadius: 16, background: "#111", padding: "2.5rem", textAlign: "center" }}>
-          <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>📭</div>
+        <div className="adm-panel adm-rise" style={{ padding: "3rem", textAlign: "center" }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: 16, margin: "0 auto 1rem",
+            background: "rgba(43,191,179,0.12)", color: "var(--brand-teal)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <Inbox size={26} />
+          </div>
           <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: "rgba(255,255,255,0.6)" }}>
             No inquiries yet — they&apos;ll show up here as soon as a customer submits the contact form.
           </p>
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: "1.25rem", alignItems: "start" }}>
+        <div className="adm-rise" style={{ animationDelay: "0.06s", display: "grid", gridTemplateColumns: "360px 1fr", gap: "1.25rem", alignItems: "start" }}>
           {/* ── list ── */}
-          <div style={{ borderRadius: 16, background: "#111", overflow: "hidden" }}>
+          <div className="adm-panel" style={{ overflow: "hidden" }}>
             {/* type filter tabs */}
             <div style={{ display: "flex", gap: "0.35rem", padding: "0.9rem 0.9rem 0.5rem", flexWrap: "wrap" }}>
               {typeTabs.map(tab => {
                 const active = typeFilter === tab.key;
                 const count = typeCounts[tab.key];
+                const TabIcon = tab.key !== "all" ? typeConfig(tab.key as InquiryType).icon : Inbox;
                 return (
                   <button key={tab.key} onClick={() => setTypeFilter(tab.key)} style={{
                     padding: "0.4rem 0.7rem", borderRadius: 8, border: "none", cursor: "pointer",
@@ -171,8 +186,9 @@ export default function InquiriesPage() {
                       : "rgba(255,255,255,0.06)",
                     color: active ? "#04211e" : "rgba(255,255,255,0.65)",
                     display: "flex", alignItems: "center", gap: "0.3rem",
+                    transition: "background 0.16s ease, color 0.16s ease, transform 0.12s ease",
                   }}>
-                    {tab.key !== "all" && <span>{typeConfig(tab.key as InquiryType).icon}</span>}
+                    {tab.key !== "all" && <TabIcon size={13} />}
                     {tab.label}
                     <span style={{
                       display: "inline-flex", alignItems: "center", justifyContent: "center",
@@ -195,18 +211,22 @@ export default function InquiriesPage() {
                   background: filter === f ? "var(--brand-teal)" : "rgba(255,255,255,0.04)",
                   color: filter === f ? "#04211e" : "rgba(255,255,255,0.55)",
                   textTransform: "capitalize",
+                  transition: "background 0.16s ease, color 0.16s ease",
                 }}>{f}</button>
               ))}
             </div>
 
             <div style={{ maxHeight: "68vh", overflowY: "auto" }}>
-              {filtered.map(inq => {
+              {filtered.map((inq, idx) => {
                 const inqType = typeConfig(inq.inquiryType);
+                const TypeIcon = inqType.icon;
                 return (
-                  <button key={inq._id} onClick={() => selectInquiry(inq)} style={{
+                  <button key={inq._id} onClick={() => selectInquiry(inq)} className="adm-rise" style={{
                     display: "block", width: "100%", textAlign: "left", padding: "0.9rem 1.1rem",
                     border: "none", borderBottom: "1px solid rgba(255,255,255,0.05)", cursor: "pointer",
                     background: selectedId === inq._id ? "#1a1a1a" : "transparent",
+                    transition: "background 0.15s ease",
+                    animationDelay: `${Math.min(idx, 8) * 0.03}s`,
                   }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.25rem" }}>
                       <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.95rem", fontWeight: 700, color: "#fff" }}>{inq.name}</span>
@@ -221,7 +241,7 @@ export default function InquiriesPage() {
                         background: `${inqType.color}22`, color: inqType.color,
                         fontFamily: "var(--ff-body)", fontSize: "0.7rem", fontWeight: 700,
                       }}>
-                        <span>{inqType.icon}</span> {inqType.label}
+                        <TypeIcon size={11} /> {inqType.label}
                       </span>
                     </div>
 
@@ -261,7 +281,8 @@ export default function InquiriesPage() {
           {selected ? (
             <InquiryDetail key={selected._id} inquiry={selected} onReplied={load} />
           ) : (
-            <div style={{ borderRadius: 16, background: "#111", padding: "3rem", textAlign: "center" }}>
+            <div className="adm-panel" style={{ padding: "3rem", textAlign: "center" }}>
+              <Mail size={22} color="rgba(255,255,255,0.25)" style={{ marginBottom: "0.75rem" }} />
               <p style={{ fontFamily: "var(--ff-body)", color: "rgba(255,255,255,0.45)" }}>Select an inquiry to view details.</p>
             </div>
           )}
@@ -317,8 +338,10 @@ function InquiryDetail({ inquiry, onReplied }: { inquiry: InquiryRow; onReplied:
   const keyStyle: React.CSSProperties = { fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: "rgba(255,255,255,0.5)" };
   const valStyle: React.CSSProperties = { fontFamily: "var(--ff-body)", fontSize: "0.9rem", color: "#fff", fontWeight: 600, textAlign: "right" };
 
+  const InqTypeIcon = inqTypeInfo.icon;
+
   return (
-    <div style={{ borderRadius: 16, background: "#111", padding: "1.75rem", display: "flex", flexDirection: "column", gap: "1.75rem" }}>
+    <div className="adm-panel adm-rise" style={{ padding: "1.75rem", display: "flex", flexDirection: "column", gap: "1.75rem" }}>
       {/* header with type badge */}
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.6rem" }}>
@@ -328,7 +351,7 @@ function InquiryDetail({ inquiry, onReplied }: { inquiry: InquiryRow; onReplied:
             background: `${inqTypeInfo.color}22`, color: inqTypeInfo.color,
             fontFamily: "var(--ff-body)", fontSize: "0.82rem", fontWeight: 700,
           }}>
-            <span>{inqTypeInfo.icon}</span> {inqTypeInfo.label}
+            <InqTypeIcon size={13} /> {inqTypeInfo.label}
           </span>
           <span style={{
             display: "inline-flex", alignItems: "center", gap: "0.25rem",
@@ -510,15 +533,14 @@ function InquiryDetail({ inquiry, onReplied }: { inquiry: InquiryRow; onReplied:
         )}
 
         {error && <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: "#ff8a97", marginTop: "0.75rem" }}>{error}</div>}
-        {sentOk && <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: "var(--brand-teal)", marginTop: "0.75rem" }}>✓ Reply sent to {inquiry.email}</div>}
+        {sentOk && (
+          <div className="adm-status" style={{ color: "var(--brand-teal)", marginTop: "0.75rem" }}>
+            <CheckCircle2 size={15} /> Reply sent to {inquiry.email}
+          </div>
+        )}
 
-        <button onClick={sendReply} disabled={sending || !message.trim()} style={{
-          marginTop: "1.1rem", padding: "0.85rem 1.75rem", borderRadius: 10,
-          background: "var(--brand-teal)", color: "#04211e", border: "none",
-          fontFamily: "var(--ff-body)", fontSize: "0.95rem", fontWeight: 700,
-          cursor: sending || !message.trim() ? "default" : "pointer",
-          opacity: sending || !message.trim() ? 0.5 : 1,
-        }}>
+        <button onClick={sendReply} disabled={sending || !message.trim()} className="adm-btn" style={{ marginTop: "1.1rem" }}>
+          {sending ? <span className="adm-spinner" /> : <Send size={15} />}
           {sending ? "Sending…" : "Send reply"}
         </button>
       </div>

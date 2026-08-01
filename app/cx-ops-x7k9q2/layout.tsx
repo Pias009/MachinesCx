@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bebas_Neue, Inter, JetBrains_Mono } from "next/font/google";
 import "../globals.css";
+import "./admin.css";
 
 /* Own root layout — the admin console lives outside app/[locale]/ since
    it's an internal tool, not translated content, so it needs its own

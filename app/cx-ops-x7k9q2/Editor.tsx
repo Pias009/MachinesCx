@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { Camera, Star, X, Plus, CheckCircle2, Package, Loader2 } from "lucide-react";
 import type { Field, Collection, SectionSchema } from "@/lib/cmsSchemas";
+import { CATEGORY_ICON as SHARED_CATEGORY_ICON } from "./adminIcons";
 
 type Json = Record<string, unknown>;
 type Item = Record<string, unknown>;
@@ -83,7 +85,7 @@ function ImageField({ value, onChange }: { value: string; onChange: (v: string) 
         <div style={{ flex: 1, minWidth: 200, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           <input style={inputStyle} value={value} onChange={e => onChange(e.target.value)} placeholder="/uploads/…" />
           <label style={{ ...smallBtn, cursor: busy ? "wait" : "pointer", alignSelf: "flex-start" }}>
-            📷 {busy ? "Uploading…" : "Upload a photo"}
+            {busy ? <Loader2 size={14} className="adm-spin-icon" /> : <Camera size={14} />} {busy ? "Uploading…" : "Upload a photo"}
             <input type="file" accept="image/*" style={{ display: "none" }}
               onChange={e => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ""; }} />
           </label>
@@ -155,10 +157,10 @@ function ImagesField({ value, onChange }: { value: string[]; onChange: (v: strin
             <div style={{ display: "flex", gap: "0.3rem", marginTop: "0.4rem" }}>
               {i !== 0 && (
                 <button type="button" title="Set as main photo" style={{ ...iconBtn, flex: 1, padding: "0.35rem", fontSize: "0.75rem" }}
-                  onClick={() => makePrimary(i)}>★ Set main</button>
+                  onClick={() => makePrimary(i)}><Star size={12} /> Set main</button>
               )}
               <button type="button" title="Remove photo" style={{ ...dangerBtn, padding: "0.35rem", fontSize: "0.75rem" }}
-                onClick={() => remove(i)}>✕</button>
+                onClick={() => remove(i)}><X size={13} /></button>
             </div>
           </div>
         ))}
@@ -169,7 +171,7 @@ function ImagesField({ value, onChange }: { value: string[]; onChange: (v: strin
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "0.4rem",
           color: "rgba(255,255,255,0.55)", fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 600,
         }}>
-          <span style={{ fontSize: "1.6rem" }}>＋</span>
+          <Plus size={22} />
           {busy ? "Uploading…" : "Add photos"}
           <input type="file" accept="image/*" multiple style={{ display: "none" }}
             onChange={e => { if (e.target.files?.length) uploadMany(e.target.files); e.target.value = ""; }} />
@@ -347,7 +349,7 @@ function FieldControl({ field, value, item, onChange, onItemChange }: {
                         onChange={e => setModelName(mi, e.target.value)} />
                       <button type="button" title={`Remove ${m || "column"}`} style={{ ...dangerBtn, padding: "0.5rem" }}
                         onClick={() => { if (confirm(`Remove model column "${m || `#${mi + 1}`}"? This deletes its value from every spec row.`)) removeModel(mi); }}>
-                        ✕
+                        <X size={14} />
                       </button>
                     </div>
                   </th>
@@ -371,7 +373,7 @@ function FieldControl({ field, value, item, onChange, onItemChange }: {
                     </td>
                   ))}
                   <td style={{ padding: "0.2rem 0.3rem" }}>
-                    <button type="button" style={{ ...dangerBtn, padding: "0.5rem" }} onClick={() => onChange(rows.filter((_, j) => j !== i))}>✕</button>
+                    <button type="button" style={{ ...dangerBtn, padding: "0.5rem" }} onClick={() => onChange(rows.filter((_, j) => j !== i))}><X size={14} /></button>
                   </td>
                 </tr>
               ))}
@@ -727,7 +729,7 @@ function FieldControl({ field, value, item, onChange, onItemChange }: {
                         const n = rows.map(x => ({ ...x })) as Block[];
                         (n[i] as Block & { kind: "list" }).items = (n[i] as Block & { kind: "list" }).items.filter((_, j) => j !== ii);
                         onChange(n);
-                      }}>✕</button>
+                      }}><X size={14} /></button>
                     </div>
                   ))}
                   <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }} onClick={() => {
@@ -802,29 +804,20 @@ function ItemFieldsPanel({ collection, item, onFieldChange, onFieldItemChange }:
 // products across categories don't have to be scrolled through as one
 // long list. Only used for the `families` collection (has a `category`
 // field); every other collection keeps the plain flat list. ──
-const CATEGORY_ICON: Record<string, string> = {
-  "film-blowing": "🎞️",
-  "bag-making": "🛍️",
-  "recycling": "♻️",
-  "printing": "🖨️",
-};
 function CategoryTiles({ categories, items, onSelect }: {
   categories: Item[];
   items: Item[];
   onSelect: (slug: string) => void;
 }) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1rem" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1rem" }} className="adm-stagger">
       {categories.map(cat => {
         const slug = String(cat.slug ?? "");
         const count = items.filter(f => f.category === slug).length;
+        const CatIcon = SHARED_CATEGORY_ICON[slug] ?? Package;
         return (
-          <button key={slug} type="button" onClick={() => onSelect(slug)} style={{
-            textAlign: "left", padding: "1.5rem", borderRadius: 14,
-            background: "#111", border: "1px solid rgba(255,255,255,0.07)",
-            cursor: "pointer", color: "#fff",
-          }}>
-            <div style={{ fontSize: "1.8rem", marginBottom: "0.75rem" }}>{CATEGORY_ICON[slug] ?? "📦"}</div>
+          <button key={slug} type="button" onClick={() => onSelect(slug)} className="adm-tile" style={{ textAlign: "left", cursor: "pointer", color: "#fff", padding: "1.5rem" }}>
+            <div className="adm-tile__icon" style={{ marginBottom: "0.75rem" }}><CatIcon size={20} /></div>
             <div style={{ fontFamily: "var(--ff-display)", fontSize: "1.15rem", marginBottom: "0.35rem" }}>
               {String(cat.name ?? slug)}
             </div>
@@ -881,13 +874,20 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
   }
 
   if (!data) {
-    return <div style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: "rgba(255,255,255,0.6)", padding: "2rem 0" }}>
-      {status === "error" ? errMsg : "Loading…"}
-    </div>;
+    if (status === "error") {
+      return <div style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: "#ff8a97", padding: "2rem 0" }}>{errMsg}</div>;
+    }
+    return (
+      <div style={{ maxWidth: 1200 }}>
+        <div className="adm-skel" style={{ width: "40%", height: 38, borderRadius: 8, marginBottom: "0.75rem" }} />
+        <div className="adm-skel" style={{ width: "65%", height: 16, borderRadius: 6, marginBottom: "2rem" }} />
+        <div className="adm-skel" style={{ height: 140, borderRadius: 16 }} />
+      </div>
+    );
   }
 
   return (
-    <div style={{ maxWidth: 1200 }}>
+    <div style={{ maxWidth: 1200 }} className="adm-rise">
       {/* header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1.25rem", flexWrap: "wrap", marginBottom: "2rem" }}>
         <div>
@@ -899,15 +899,11 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
           </p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexShrink: 0 }}>
-          {status === "dirty" && <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.9rem", fontWeight: 600, color: "#f5c451" }}>Unsaved changes</span>}
-          {status === "saved" && <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.9rem", fontWeight: 600, color: "var(--brand-teal)" }}>✓ Saved</span>}
-          {status === "error" && <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.9rem", fontWeight: 600, color: "#ff8a97" }}>{errMsg}</span>}
-          <button onClick={save} disabled={status === "saving"} style={{
-            padding: "0.9rem 1.9rem", borderRadius: 10,
-            background: "var(--brand-teal)", color: "#04211e",
-            border: "none", cursor: status === "saving" ? "wait" : "pointer",
-            fontFamily: "var(--ff-body)", fontSize: "1rem", fontWeight: 700,
-          }}>
+          {status === "dirty" && <span className="adm-status" style={{ color: "#f5c451" }}>Unsaved changes</span>}
+          {status === "saved" && <span className="adm-status" style={{ color: "var(--brand-teal)" }}><CheckCircle2 size={15} /> Saved</span>}
+          {status === "error" && <span className="adm-status" style={{ color: "#ff8a97" }}>{errMsg}</span>}
+          <button onClick={save} disabled={status === "saving"} className="adm-btn">
+            {status === "saving" && <Loader2 size={16} className="adm-spin-icon" />}
             {status === "saving" ? "Saving…" : "Save changes"}
           </button>
         </div>
@@ -915,7 +911,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
 
       {/* root fields */}
       {schema.rootFields && schema.rootFields.length > 0 && (
-        <div style={{ borderRadius: 16, background: "#111", padding: "1.5rem", marginBottom: "2rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem" }}>
+        <div className="adm-panel" style={{ padding: "1.5rem", marginBottom: "2rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem" }}>
           {schema.rootFields.map(f => (
             <label key={f.key}>
               <FieldLabel>{f.label}</FieldLabel>
@@ -987,7 +983,13 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
                 const title = col.titleKeys.map(k => String(item[k] ?? "")).filter(Boolean).join(" — ") || `#${listI + 1}`;
                 const isOpen = open === i;
                 return (
-                  <div key={i} style={{ borderRadius: 14, background: isOpen ? "#111" : "#0a0a0a", overflow: "hidden" }}>
+                  <div key={i} className="adm-panel" style={{
+                    borderRadius: 14,
+                    background: isOpen ? "var(--adm-surface-2)" : "var(--adm-surface)",
+                    overflow: "hidden",
+                    transition: "background 0.18s ease, border-color 0.18s ease",
+                    borderColor: isOpen ? "rgba(43,191,179,0.25)" : "var(--adm-border)",
+                  }}>
                     {/* row header */}
                     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.9rem 1.1rem" }}>
                       <button type="button"

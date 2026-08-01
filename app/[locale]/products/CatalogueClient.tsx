@@ -231,7 +231,7 @@ function FamilyGrid({ items }: { items: ProductFamily[] }) {
 
 function FeatureCard({ family: f }: { family: ProductFamily }) {
   return (
-    <Link href={`/products/${f.category}#${f.slug}`} className="cat2-feature">
+    <Link href={`/products/${f.category}/${f.slug}`} className="cat2-feature">
       <div className="cat2-feature__stage">
         <ProductStage3D
           variant="hero"
@@ -257,7 +257,7 @@ function FeatureCard({ family: f }: { family: ProductFamily }) {
 
 function FamilyCard({ family: f }: { family: ProductFamily }) {
   return (
-    <Link href={`/products/${f.category}#${f.slug}`} className="cat2-card">
+    <Link href={`/products/${f.category}/${f.slug}`} className="cat2-card">
       <ProductStage3D
         variant="card"
         src={familyImage(f)}

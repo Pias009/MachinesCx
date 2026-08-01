@@ -77,6 +77,16 @@ function ringPath(cx: number, cy: number, rInner: number, rOuter: number, startD
    orange/teal/graphite/blue band coloring */
 const GAUGE_COLORS = ["#f5822a", "#2bbfb3", "#516168", "#2b8ce6"];
 
+/* model-comparison categorical palette — fixed order, one hue per model
+   position across every panel (never re-cycled or re-assigned by value).
+   Deepened from the raw brand tokens (--brand-teal/-amber/-rose + the
+   ClientJourney blue) specifically to clear the OKLCH lightness band for
+   data marks on both the dark and light chart surfaces; validated with
+   dataviz's validate_palette.js (all 4 checks pass, one CVD pair sits in
+   the legal 6-8 floor band, which is why every bar also carries a direct
+   label — never relies on color alone). */
+const MODEL_COLORS = ["#1fa39a", "#c9760a", "#e11d48", "#2563eb"];
+
 /* catalogue-wide ceilings per spec label, used to normalize each ring's
    fill — a single-model family (or the top model of one) would otherwise
    always read ~100%, since there's nothing bigger to compare against */
@@ -143,6 +153,28 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
       return { ...s, pct: Math.min(Math.max(pct, 10), 96) };
     });
   }, [radarSpecs, specs]);
+
+  /* model-comparison small multiples — one panel per spec (up to all 8 in
+     radarSpecs, not just the ring's top 4), each a per-model bar group.
+     Only rendered when the family actually has more than one model: with a
+     single model there is nothing to compare, and a lone bar isn't a chart. */
+  const compareSpecs = useMemo(() => {
+    if (family.models.length < 2) return [];
+    return radarSpecs
+      .map((s) => {
+        const row = specs.find((r) => r.label === s.label);
+        if (!row) return null;
+        const bars = family.models.map((m, i) => ({
+          model: m,
+          value: extractNum(row.values[Math.min(i, row.values.length - 1)]),
+          unit: extractUnit(row.values[Math.min(i, row.values.length - 1)]),
+        }));
+        const max = Math.max(...bars.map((b) => b.value), 1);
+        if (max <= 0) return null;
+        return { label: s.label, bars, max };
+      })
+      .filter((x): x is { label: string; bars: { model: string; value: number; unit: string }[]; max: number } => x !== null);
+  }, [radarSpecs, specs, family.models]);
 
   /* live-animated ring fill + counter — rings sweep from 0 the first time
      the section scrolls into view, then re-sweep from their current value
@@ -216,7 +248,7 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
     <div className="md-section">
       <style suppressHydrationWarning>{`
         .md-section {
-          padding: 3.5rem 0 4.5rem;
+          padding: 0.5rem 0 4.5rem;
           width: 100%;
         }
 
@@ -253,8 +285,8 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
         .md-gauge-box {
           position: relative;
           width: 100%;
-          max-width: 1600px;
-          aspect-ratio: 1.55;
+          max-width: 1900px;
+          aspect-ratio: 1.95;
           opacity: 0;
           animation: md-fade-up 0.7s ease 0.15s forwards;
         }
@@ -405,6 +437,121 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
           to   { opacity: 1; transform: translateY(0); }
         }
 
+        /* ═══ MODEL COMPARISON — small multiples ═══ */
+        .md-compare {
+          max-width: 1600px;
+          margin: 0 auto;
+          padding-top: 2.5rem;
+          border-top: 1px solid var(--bg-line);
+        }
+        .md-compare__title {
+          font-family: var(--ff-mono);
+          font-size: 0.78rem;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: var(--ink-35);
+          margin-bottom: 1.5rem;
+        }
+        .md-compare__grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 1.25rem;
+        }
+        .md-compare__panel {
+          background: var(--bg-surface);
+          border: 1px solid var(--bg-line);
+          border-radius: 12px;
+          padding: 1.25rem 1.4rem;
+          opacity: 0;
+          transform: translateY(12px);
+          animation: md-fade-up 0.5s ease forwards;
+        }
+        .md-compare__panel-label {
+          display: block;
+          font-family: var(--ff-mono);
+          font-size: 0.7rem;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--ink-60);
+          margin-bottom: 1rem;
+        }
+        .md-compare__bars {
+          display: flex;
+          flex-direction: column;
+          gap: 0.6rem;
+        }
+        .md-compare__bar-row {
+          display: grid;
+          grid-template-columns: minmax(4.2rem, auto) 1fr auto;
+          align-items: center;
+          gap: 0.6rem;
+        }
+        .md-compare__bar-name {
+          font-family: var(--ff-mono);
+          font-size: 0.66rem;
+          letter-spacing: 0.02em;
+          color: var(--ink-60);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .md-compare__bar-track {
+          position: relative;
+          height: 10px;
+          background: var(--bg-line);
+          border-radius: 5px;
+          overflow: hidden;
+        }
+        .md-compare__bar-fill {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          border-radius: 5px;
+          background: var(--bar-color);
+          opacity: 0.62;
+          transform: scaleX(var(--bar-scale, 0));
+          transform-origin: left center;
+          transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
+        }
+        [dir="rtl"] .md-compare__bar-fill { transform-origin: right center; }
+        .md-compare__bar-fill--on { opacity: 1; }
+        .md-compare__bar-val {
+          font-family: var(--ff-mono);
+          font-weight: 700;
+          font-size: 0.72rem;
+          color: var(--ink);
+          white-space: nowrap;
+          text-align: right;
+          min-width: 3.4rem;
+        }
+        .md-compare__legend {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 1.25rem;
+          margin-top: 1.5rem;
+        }
+        .md-compare__legend-item {
+          display: flex;
+          align-items: center;
+          gap: 0.45rem;
+          font-family: var(--ff-mono);
+          font-size: 0.7rem;
+          letter-spacing: 0.04em;
+          color: var(--ink-60);
+        }
+        .md-compare__legend-dot {
+          width: 8px; height: 8px;
+          border-radius: 2px;
+          background: var(--bar-color);
+          flex-shrink: 0;
+        }
+
+        @media (max-width: 700px) {
+          .md-compare__grid { grid-template-columns: 1fr; }
+          .md-compare__bar-row { grid-template-columns: minmax(3.6rem, auto) 1fr auto; gap: 0.4rem; }
+          .md-compare__bar-name { font-size: 0.6rem; }
+        }
+
         @media(max-width: 700px) {
           .md-gauge-box { max-width: 92vw; aspect-ratio: 1.05; }
           .md-gauge-callout__icon { width: 26px; height: 26px; }
@@ -426,31 +573,31 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
           and value live-animated (see animGauge/animateTo above) */}
       <div className="md-gauge-wrap">
         <div className="md-gauge-box" ref={gaugeBoxRef}>
-          <svg viewBox="0 0 620 400" className="md-gauge-svg">
+          <svg viewBox="0 0 780 400" className="md-gauge-svg">
             {animGauge.map((s, i) => {
-              const rOuter = 190 - i * 44;
-              const rInner = rOuter - 34;
+              const rOuter = 260 - i * 56;
+              const rInner = rOuter - 46;
               const color = GAUGE_COLORS[i % GAUGE_COLORS.length];
               const sweep = (s.pct / 100) * 90;
               const tipY = 380 - rOuter;
               return (
                 <g key={s.label} className="md-gauge-ring" style={{ "--ring-color": color } as React.CSSProperties}>
-                  <path d={ringPath(240, 380, rInner, rOuter, -90, 0)} className="md-gauge-ring-bg" />
+                  <path d={ringPath(340, 380, rInner, rOuter, -90, 0)} className="md-gauge-ring-bg" />
                   <path
-                    d={ringPath(240, 380, rInner, rOuter, -90, -90 + sweep)}
+                    d={ringPath(340, 380, rInner, rOuter, -90, -90 + sweep)}
                     className="md-gauge-ring-fill"
                     style={{ "--ring-color": color } as React.CSSProperties}
                   />
                   {/* callout line from the arc's leading tip out to the left */}
                   <line
-                    x1={240}
+                    x1={340}
                     y1={tipY}
-                    x2={70 - i * 6}
+                    x2={90 - i * 8}
                     y2={tipY}
                     className="md-gauge-line"
                     style={{ "--ring-color": color } as React.CSSProperties}
                   />
-                  <circle cx={240} cy={tipY} r={3.5} className="md-gauge-dot" style={{ "--ring-color": color } as React.CSSProperties} />
+                  <circle cx={340} cy={tipY} r={4.5} className="md-gauge-dot" style={{ "--ring-color": color } as React.CSSProperties} />
                 </g>
               );
             })}
@@ -458,9 +605,9 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
 
           {/* icon + value callouts, positioned to match each ring's tip */}
           {animGauge.map((s, i) => {
-            const rOuter = 190 - i * 44;
+            const rOuter = 260 - i * 56;
             const topPct = ((380 - rOuter) / 400) * 100;
-            const leftPct = ((70 - i * 6) / 620) * 100;
+            const leftPct = ((90 - i * 8) / 780) * 100;
             const Icon = iconForLabel(s.label);
             const color = GAUGE_COLORS[i % GAUGE_COLORS.length];
             return (
@@ -496,6 +643,48 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
               <span className="md-legend-item__val">{formatValue(s.value)}{s.unit}</span>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* model comparison — small multiples: one panel per spec, each a
+          per-model bar group. Every spec keeps its own scale (mixing mm,
+          kW, m/min on one shared axis would misrepresent the data), and
+          color encodes the model consistently across every panel. */}
+      {compareSpecs.length > 0 && (
+        <div className="md-compare">
+          <h3 className="md-compare__title">{t("compareTitle")}</h3>
+          <div className="md-compare__grid" role="group" aria-label={t("compareAria")}>
+            {compareSpecs.map((s, si) => (
+              <div key={s.label} className="md-compare__panel" style={{ animationDelay: `${si * 0.06}s` } as React.CSSProperties}>
+                <span className="md-compare__panel-label">{s.label}</span>
+                <div className="md-compare__bars">
+                  {s.bars.map((b, i) => (
+                    <div className="md-compare__bar-row" key={b.model}>
+                      <span className="md-compare__bar-name">{b.model}</span>
+                      <div className="md-compare__bar-track">
+                        <div
+                          className={`md-compare__bar-fill${b.model === (family.models[modelIndex] ?? "") ? " md-compare__bar-fill--on" : ""}`}
+                          style={{
+                            "--bar-scale": Math.max(b.value / s.max, 0.04),
+                            "--bar-color": MODEL_COLORS[i % MODEL_COLORS.length],
+                          } as React.CSSProperties}
+                        />
+                      </div>
+                      <span className="md-compare__bar-val">{formatValue(b.value)}{b.unit}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="md-compare__legend">
+            {family.models.map((m, i) => (
+              <span className="md-compare__legend-item" key={m}>
+                <span className="md-compare__legend-dot" style={{ "--bar-color": MODEL_COLORS[i % MODEL_COLORS.length] } as React.CSSProperties} />
+                {m}
+              </span>
+            ))}
+          </div>
         </div>
       )}
 

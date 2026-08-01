@@ -1,0 +1,436 @@
+/* ── Admin console design layer ──────────────────────────────
+   Scoped to [data-admin] so nothing here leaks into the public site.
+   Dark dashboard aesthetic: near-black surfaces, teal accent, restrained
+   motion (150–300ms) that conveys state change, not decoration. */
+
+[data-admin] {
+  --adm-bg:        #05080a;
+  --adm-surface:   #0d1214;
+  --adm-surface-2: #10171a;
+  --adm-border:    rgba(255,255,255,0.08);
+  --adm-border-hi: rgba(255,255,255,0.14);
+  --adm-text:      #f5f7f7;
+  --adm-text-dim:  rgba(245,247,247,0.62);
+  --adm-text-faint:rgba(245,247,247,0.38);
+  --adm-danger:    #ff6b7d;
+  --adm-warn:      #f5c451;
+  --adm-ease:      cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-admin] * { box-sizing: border-box; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-admin] * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ── entrance choreography ── */
+@keyframes adm-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes adm-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes adm-scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes adm-pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(43,191,179,0.45); }
+  50%      { box-shadow: 0 0 0 6px rgba(43,191,179,0); }
+}
+@keyframes adm-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes adm-spin { to { transform: rotate(360deg); } }
+
+.adm-rise {
+  animation: adm-rise 0.5s var(--adm-ease) both;
+}
+.adm-stagger > * {
+  animation: adm-rise 0.45s var(--adm-ease) both;
+}
+.adm-stagger > *:nth-child(1)  { animation-delay: 0.02s; }
+.adm-stagger > *:nth-child(2)  { animation-delay: 0.06s; }
+.adm-stagger > *:nth-child(3)  { animation-delay: 0.10s; }
+.adm-stagger > *:nth-child(4)  { animation-delay: 0.14s; }
+.adm-stagger > *:nth-child(5)  { animation-delay: 0.18s; }
+.adm-stagger > *:nth-child(6)  { animation-delay: 0.22s; }
+.adm-stagger > *:nth-child(7)  { animation-delay: 0.26s; }
+.adm-stagger > *:nth-child(8)  { animation-delay: 0.30s; }
+.adm-stagger > *:nth-child(n+9){ animation-delay: 0.34s; }
+
+/* ── layout shell ── */
+.adm-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--adm-bg);
+  background-image:
+    radial-gradient(1100px 520px at 14% -8%, rgba(43,191,179,0.10), transparent 60%),
+    radial-gradient(900px 480px at 100% 0%, rgba(43,191,179,0.05), transparent 55%);
+  background-attachment: fixed;
+}
+
+.adm-side {
+  position: fixed; top: 0; left: 0; bottom: 0; width: 280px;
+  background: linear-gradient(180deg, #070d0e 0%, #05080a 100%);
+  border-right: 1px solid var(--adm-border);
+  display: flex; flex-direction: column;
+  z-index: 50;
+}
+
+.adm-brand {
+  padding: 1.7rem 1.5rem 1.4rem;
+  border-bottom: 1px solid var(--adm-border);
+}
+.adm-brand__eyebrow {
+  font-family: var(--ff-mono, monospace);
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--brand-teal); margin-bottom: 0.45rem;
+  display: flex; align-items: center; gap: 0.45rem;
+}
+.adm-brand__dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--brand-teal);
+  box-shadow: 0 0 0 3px rgba(43,191,179,0.16);
+  animation: adm-pulse-dot 2.4s ease-in-out infinite;
+}
+.adm-brand__title {
+  font-family: var(--ff-display); font-size: 1.6rem; color: var(--adm-text); line-height: 1;
+}
+
+.adm-nav { flex: 1; overflow-y: auto; padding: 1rem 0.75rem; display: flex; flex-direction: column; gap: 0.2rem; }
+.adm-nav::-webkit-scrollbar { width: 6px; }
+.adm-nav::-webkit-scrollbar-thumb { background: var(--adm-border-hi); border-radius: 3px; }
+
+.adm-nav__section {
+  padding: 1.3rem 0.6rem 0.6rem;
+  font-family: var(--ff-mono, monospace);
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--adm-text-faint);
+}
+
+/* groups the "Edit site content" links into one visually distinct panel —
+   a soft-bordered card instead of loose links floating on the sidebar
+   background, so the two nav tiers (primary vs. CMS sections) read as
+   structurally different at a glance, not just by a text label above them */
+.adm-nav__group {
+  display: flex; flex-direction: column; gap: 0.15rem;
+  padding: 0.4rem;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--adm-border);
+}
+
+.adm-nav__link {
+  position: relative;
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  font-family: var(--ff-body); font-size: 0.92rem; font-weight: 500;
+  color: var(--adm-text-dim); text-decoration: none;
+  transition: background 0.16s var(--adm-ease), color 0.16s var(--adm-ease), transform 0.16s var(--adm-ease);
+}
+.adm-nav__link-icon {
+  flex-shrink: 0;
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.04);
+  color: inherit;
+  transition: background 0.16s var(--adm-ease), color 0.16s var(--adm-ease);
+}
+.adm-nav__link-icon svg { opacity: 0.85; transition: opacity 0.16s; }
+.adm-nav__link:hover { background: rgba(255,255,255,0.05); color: var(--adm-text); transform: translateX(2px); }
+.adm-nav__link:hover .adm-nav__link-icon svg { opacity: 1; }
+.adm-nav__link--on {
+  background: rgba(43,191,179,0.14);
+  color: var(--brand-teal);
+  box-shadow: inset 0 0 0 1px rgba(43,191,179,0.25), 0 0 20px -8px rgba(43,191,179,0.55);
+}
+.adm-nav__link--on .adm-nav__link-icon {
+  background: rgba(43,191,179,0.2);
+  color: var(--brand-teal);
+}
+.adm-nav__link--on .adm-nav__link-icon svg { opacity: 1; }
+
+.adm-badge {
+  background: var(--adm-danger); color: #fff; border-radius: 999px;
+  font-size: 0.68rem; font-weight: 700; padding: 0.08rem 0.45rem; min-width: 19px; text-align: center;
+  line-height: 1.4;
+}
+
+.adm-signout {
+  margin: 0.75rem; padding: 0.75rem 0.9rem; border-radius: 10px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--adm-border);
+  color: var(--adm-text-dim); font-family: var(--ff-body); font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 0.6rem;
+  transition: background 0.16s, border-color 0.16s, color 0.16s;
+}
+.adm-signout:hover { background: rgba(255,107,125,0.08); border-color: rgba(255,107,125,0.25); color: var(--adm-danger); }
+
+.adm-main { flex: 1; margin-left: 272px; padding: clamp(1.75rem, 3.5vw, 3rem); min-width: 0; }
+
+.adm-topbar {
+  display: none;
+  position: sticky; top: 0; z-index: 40;
+  align-items: center; justify-content: space-between;
+  padding: 0.9rem 1.1rem;
+  background: rgba(5,8,10,0.85); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--adm-border);
+}
+
+.adm-side-close { display: none; }
+
+@media (max-width: 960px) {
+  .adm-side {
+    position: fixed; width: 280px;
+    transform: translateX(-100%);
+    transition: transform 0.28s var(--adm-ease);
+    box-shadow: 20px 0 60px rgba(0,0,0,0.5);
+  }
+  .adm-side.adm-side--open { transform: translateX(0); }
+  .adm-main { margin-left: 0; padding-top: 1.25rem; }
+  .adm-topbar { display: flex; }
+  .adm-scrim {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 45;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s var(--adm-ease);
+  }
+  .adm-scrim--on { opacity: 1; pointer-events: auto; }
+  .adm-side-close {
+    display: block; position: absolute; top: 1.4rem; right: 1.1rem;
+    background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer;
+  }
+}
+
+/* ── page header ── */
+.adm-page-head { margin-bottom: 2rem; }
+.adm-page-head__eyebrow {
+  font-family: var(--ff-mono, monospace); font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand-teal);
+  margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;
+}
+.adm-page-head__title {
+  font-family: var(--ff-display); font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+  color: var(--adm-text); line-height: 1.05; margin: 0 0 0.6rem;
+}
+.adm-page-head__sub {
+  font-family: var(--ff-body); font-size: 1rem; color: var(--adm-text-dim);
+  max-width: 62ch; line-height: 1.65; margin: 0;
+}
+
+/* ── stat cards ── */
+.adm-stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem; margin-bottom: 2rem;
+}
+.adm-stat {
+  position: relative; overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(160deg, var(--adm-surface-2), var(--adm-surface));
+  border: 1px solid var(--adm-border);
+  padding: 1.35rem 1.5rem;
+  transition: border-color 0.2s var(--adm-ease), transform 0.2s var(--adm-ease);
+}
+.adm-stat:hover { border-color: var(--adm-border-hi); transform: translateY(-2px); }
+.adm-stat__icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(43,191,179,0.13); color: var(--brand-teal);
+  margin-bottom: 0.9rem;
+}
+.adm-stat__value {
+  font-family: var(--ff-display); font-size: 2.1rem; color: var(--adm-text); line-height: 1;
+  margin-bottom: 0.35rem;
+  font-variant-numeric: tabular-nums;
+}
+.adm-stat__label {
+  font-family: var(--ff-body); font-size: 0.85rem; color: var(--adm-text-dim); font-weight: 600;
+}
+.adm-stat__trend {
+  position: absolute; top: 1.35rem; right: 1.5rem;
+  font-family: var(--ff-mono, monospace); font-size: 0.72rem; font-weight: 700;
+  padding: 0.2rem 0.5rem; border-radius: 6px;
+}
+
+/* ── generic panel ── */
+.adm-panel {
+  border-radius: 16px;
+  background: var(--adm-surface);
+  border: 1px solid var(--adm-border);
+}
+.adm-panel__head {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  padding: 1.1rem 1.35rem; border-bottom: 1px solid var(--adm-border);
+}
+.adm-panel__title {
+  font-family: var(--ff-display); font-size: 1.15rem; color: var(--adm-text); margin: 0;
+  display: flex; align-items: center; gap: 0.55rem;
+}
+
+/* ── section tiles (overview grid) ── */
+.adm-tile {
+  display: block; padding: 1.6rem; text-decoration: none;
+  background: var(--adm-surface); border-radius: 16px;
+  border: 1px solid var(--adm-border);
+  transition: transform 0.22s var(--adm-ease), border-color 0.22s var(--adm-ease), background 0.22s var(--adm-ease), box-shadow 0.22s var(--adm-ease);
+  position: relative;
+}
+.adm-tile::after {
+  content: ""; position: absolute; inset: 0; opacity: 0; pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(240px 120px at var(--mx, 50%) var(--my, 0%), rgba(43,191,179,0.12), transparent 70%);
+  transition: opacity 0.25s;
+  /* .adm-tile itself is no longer overflow:hidden (the info popover needs
+     to render outside the card's box), so this pseudo-element clips its
+     own corners to match instead of relying on the parent to clip it */
+  clip-path: inset(0 round 16px);
+}
+.adm-tile:hover {
+  transform: translateY(-3px);
+  border-color: rgba(43,191,179,0.35);
+  background: var(--adm-surface-2);
+  box-shadow: 0 14px 34px -14px rgba(0,0,0,0.55);
+}
+.adm-tile:hover::after { opacity: 1; }
+.adm-tile__icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(43,191,179,0.13); color: var(--brand-teal);
+  margin-bottom: 1rem;
+  transition: transform 0.22s var(--adm-ease);
+}
+.adm-tile:hover .adm-tile__icon { transform: scale(1.06) rotate(-3deg); }
+.adm-tile__head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem;
+}
+.adm-tile__title {
+  font-family: var(--ff-display); font-size: 1.32rem; color: var(--adm-text);
+  line-height: 1.1; margin-bottom: 1.1rem;
+}
+.adm-tile__cta {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-family: var(--ff-body); font-size: 0.87rem; font-weight: 700; color: var(--brand-teal);
+}
+.adm-tile__cta svg { transition: transform 0.2s var(--adm-ease); }
+.adm-tile:hover .adm-tile__cta svg { transform: translateX(3px); }
+
+/* description moves off the card face into a hover popover — the card
+   itself stays scannable (icon + title + edit link only); the longer
+   sentence is still reachable, just not competing for attention by
+   default */
+.adm-tile__info {
+  position: relative;
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.06); color: var(--adm-text-dim);
+  transition: background 0.18s, color 0.18s;
+}
+.adm-tile__info:hover,
+.adm-tile__info:focus-visible { background: rgba(43,191,179,0.16); color: var(--brand-teal); }
+.adm-tile__desc {
+  position: absolute; z-index: 40;
+  bottom: calc(100% + 10px); right: -8px;
+  width: min(240px, 65vw);
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  background: var(--brand-teal-glow, rgba(43,191,179,0.14));
+  border: 1px solid rgba(43,191,179,0.35);
+  box-shadow: 0 10px 28px -10px rgba(0,0,0,0.5);
+  font-family: var(--ff-body); font-size: 0.8rem; line-height: 1.5;
+  color: var(--adm-text);
+  text-align: left;
+  opacity: 0; transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+.adm-tile__info:hover .adm-tile__desc,
+.adm-tile__info:focus-visible .adm-tile__desc {
+  opacity: 1; transform: translateY(0);
+  pointer-events: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .adm-tile__desc { transition: opacity 0.16s ease; transform: none; }
+}
+
+/* ── activity feed ── */
+.adm-feed { display: flex; flex-direction: column; }
+.adm-feed__row {
+  display: flex; gap: 0.85rem; padding: 0.95rem 1.35rem;
+  border-bottom: 1px solid var(--adm-border);
+  transition: background 0.15s;
+}
+.adm-feed__row:last-child { border-bottom: none; }
+.adm-feed__row:hover { background: rgba(255,255,255,0.02); }
+.adm-feed__icon {
+  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.adm-feed__body { flex: 1; min-width: 0; }
+.adm-feed__title { font-family: var(--ff-body); font-size: 0.9rem; font-weight: 600; color: var(--adm-text); }
+.adm-feed__meta { font-family: var(--ff-body); font-size: 0.78rem; color: var(--adm-text-faint); margin-top: 0.15rem; }
+.adm-feed__empty { padding: 2.25rem 1.35rem; text-align: center; font-family: var(--ff-body); font-size: 0.88rem; color: var(--adm-text-faint); }
+
+/* ── quick actions ── */
+.adm-actions { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.9rem; }
+.adm-action-btn {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.8rem 0.9rem; border-radius: 10px;
+  background: rgba(255,255,255,0.03); border: 1px solid transparent;
+  color: var(--adm-text); text-decoration: none;
+  font-family: var(--ff-body); font-size: 0.88rem; font-weight: 600;
+  transition: background 0.16s, border-color 0.16s, transform 0.16s;
+}
+.adm-action-btn:hover { background: rgba(43,191,179,0.1); border-color: rgba(43,191,179,0.25); transform: translateX(2px); }
+.adm-action-btn svg:first-child { color: var(--brand-teal); flex-shrink: 0; }
+.adm-action-btn svg:last-child { margin-left: auto; opacity: 0.5; }
+
+/* ── loading skeleton ── */
+.adm-skel {
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.09) 37%, rgba(255,255,255,0.04) 63%);
+  background-size: 400% 100%;
+  animation: adm-shimmer 1.6s ease-in-out infinite;
+}
+
+.adm-spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.25); border-top-color: currentColor;
+  animation: adm-spin 0.7s linear infinite;
+  display: inline-block;
+}
+.adm-spin-icon { animation: adm-spin 0.9s linear infinite; }
+
+/* ── buttons ── */
+.adm-btn {
+  padding: 0.85rem 1.6rem; border-radius: 10px; border: none; cursor: pointer;
+  font-family: var(--ff-body); font-size: 0.95rem; font-weight: 700;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--brand-teal); color: #04211e;
+  transition: background 0.16s, transform 0.12s, box-shadow 0.2s;
+  box-shadow: 0 0 0 0 rgba(43,191,179,0.4);
+}
+.adm-btn:hover:not(:disabled) { background: var(--brand-teal-dk); box-shadow: 0 6px 20px -6px rgba(43,191,179,0.55); }
+.adm-btn:active:not(:disabled) { transform: scale(0.98); }
+.adm-btn:disabled { opacity: 0.55; cursor: default; }
+
+@media (max-width: 760px) {
+  .adm-overview-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ── shared input focus ring ── */
+[data-admin] input:focus,
+[data-admin] textarea:focus,
+[data-admin] select:focus {
+  border-color: var(--brand-teal) !important;
+  box-shadow: 0 0 0 3px rgba(43,191,179,0.15);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* ── status pill (unsaved / saved / error) ── */
+.adm-status {
+  font-family: var(--ff-body); font-size: 0.88rem; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  animation: adm-fade 0.2s var(--adm-ease);
+}

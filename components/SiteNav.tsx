@@ -144,10 +144,14 @@ export default function SiteNav() {
           .sn__logo-text { display: none; }
         }
 
-        /* ── Nav links — centered with equal space on both sides ── */
+        /* ── Nav links — centered with equal space on both sides. No
+           min-width:0 here on purpose: this item must never shrink below
+           its content's natural width, or its overflowing children start
+           visually overlapping .sn__actions next to it instead of the
+           layout making room / wrapping. ── */
         .sn__links {
           display: flex; align-items: center;
-          flex: 0 1 auto; min-width: 0; margin: 0 auto; gap: 0;
+          flex: 0 1 auto; margin: 0 auto; gap: 0;
         }
         /* ── Right actions ── */
         .sn__actions {
@@ -324,7 +328,7 @@ export default function SiteNav() {
           background: radial-gradient(ellipse at 50% 90%, rgba(43,191,179,0.12) 0%, transparent 65%);
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1380px) {
           .sn__link--hide { display: none; }
           .sn__divider    { display: none; }
         }
@@ -456,7 +460,12 @@ export default function SiteNav() {
         }
         .sn__mobile-cta:hover { background: #3dd6ca; }
 
-        @media (max-width: 768px) {
+        /* below this, the 4 category buttons + logo + actions no longer fit
+           on one line even with the secondary links already hidden (see the
+           1380px breakpoint above) — switch to the hamburger before that
+           point is reached, not after, or content overlaps instead of
+           collapsing into the mobile menu */
+        @media (max-width: 1024px) {
           .sn__links  { display: none; }
           .sn__cta    { display: none; }
           .sn__actions .ls { display: none; }

@@ -2,8 +2,12 @@
 import Image from "next/image";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 import { BRAND } from "@/lib/products";
+
+gsap.registerPlugin(useGSAP);
 
 const PHONE_DISPLAY = "+86 577 8888 8888";
 const PHONE_TEL = "+8657788888888";
@@ -40,6 +44,34 @@ function FooterColumn({ title, links }: { title: string; links: { label: string;
 export default function SiteFooter() {
   const pathname = usePathname();
   const t = useTranslations("footer");
+
+  const footerRef = useRef<HTMLElement>(null);
+  const [pluginReady, setPluginReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
+      if (cancelled) return;
+      gsap.registerPlugin(ScrollTrigger);
+      setPluginReady(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  useGSAP(() => {
+    if (!pluginReady || !footerRef.current) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const rows = gsap.utils.toArray<HTMLElement>(
+      footerRef.current.querySelectorAll(".footer-reveal")
+    );
+    gsap.set(rows, { opacity: 0, y: 24 });
+    gsap.to(rows, {
+      opacity: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.08,
+      scrollTrigger: { trigger: footerRef.current, start: "top 90%" },
+    });
+  }, { scope: footerRef, dependencies: [pluginReady] });
+
   if (pathname?.startsWith("/cx-ops-x7k9q2")) return null;
 
   const PRODUCT_LINKS = [
@@ -71,11 +103,13 @@ export default function SiteFooter() {
   ];
 
   return (
-    <footer className="footer">
-      <div className="wrap">
+    <footer className="footer" ref={footerRef}>
+      <div className="footer-bg-grid" aria-hidden="true" />
+      <div className="footer-bg-glow" aria-hidden="true" />
+      <div className="wrap" style={{ position: "relative", zIndex: 1 }}>
 
         {/* ── Main footer grid ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr auto", gap: "clamp(2rem,4vw,3.5rem)", paddingBottom: "2.5rem" }} className="footer-main-grid">
+        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr auto", gap: "clamp(2rem,4vw,3.5rem)", paddingBottom: "2.5rem" }} className="footer-main-grid footer-reveal">
 
           {/* Brand + QR codes */}
           <div className="footer-brand-block" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
@@ -159,8 +193,11 @@ export default function SiteFooter() {
         </div>
 
         {/* ── Certifications bar ── */}
-        <div className="footer-certs" style={{ display: "flex", alignItems: "center", gap: "2rem", paddingBlock: "1.25rem", flexWrap: "wrap" }}>
-          <span className="footer-certs__label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase" }}>{t("certifications")}</span>
+        <div className="footer-certs footer-reveal" style={{ display: "flex", alignItems: "center", gap: "2rem", paddingBlock: "1.25rem", flexWrap: "wrap" }}>
+          <span className="footer-certs__label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+            <span className="footer-live-dot" aria-hidden="true" />
+            {t("certifications")}
+          </span>
           <span className="footer-certs__badges" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
             {[t("certBadges.ce"), t("certBadges.iso"), t("certBadges.sgs")].map((cert) => (
               <span key={cert} className="footer-cert-badge" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.06em", padding: "0.25rem 0.6rem", borderRadius: "2px" }}>{cert}</span>
@@ -171,7 +208,7 @@ export default function SiteFooter() {
         </div>
 
         {/* ── Bottom bar ── */}
-        <div className="footer-bar">
+        <div className="footer-bar footer-reveal">
           <p className="footer-copyright" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem" }}>{t("copyright", { year: new Date().getFullYear(), brand: BRAND })}</p>
           <div className="footer-bar__legal" style={{ display: "flex", gap: "1.5rem" }}>
             {LEGAL_LINKS.map((l) => (

@@ -91,6 +91,7 @@ function familyImage(f: Pick<ProductFamily, "slug" | "image" | "images">): strin
 
 export default function HeroSplash() {
   const archRef   = useRef<HTMLDivElement>(null);
+  const shapesRef = useRef<HTMLDivElement>(null);
   const [isLight, setIsLight] = useState(false);
 
   useEffect(() => {
@@ -151,6 +152,105 @@ export default function HeroSplash() {
     return () => { cancelled = true; ctx?.revert(); };
   }, []);
 
+  /* mouse-tracked tilt on the arch cards — each card leans toward the
+     cursor independently (distance-weighted so only nearby cards react
+     noticeably), lerped toward its target every frame for a smooth
+     settle instead of snapping. Pointer-driven only; skipped entirely
+     on touch/coarse pointers and under reduced-motion, same guard used
+     by ProductStage3D's tilt so the two interactions stay consistent. */
+  useEffect(() => {
+    const root = archRef.current;
+    if (!root) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    if (reduced || coarse) return;
+
+    const cards = Array.from(root.querySelectorAll<HTMLElement>(".hs__node-tilt"));
+    const targets = cards.map(() => ({ rx: 0, ry: 0 }));
+    const current = cards.map(() => ({ rx: 0, ry: 0 }));
+    let raf = 0;
+
+    const apply = () => {
+      let settled = true;
+      cards.forEach((card, i) => {
+        const c = current[i];
+        const t = targets[i];
+        c.rx += (t.rx - c.rx) * 0.12;
+        c.ry += (t.ry - c.ry) * 0.12;
+        card.style.setProperty("--tilt-x", `${c.rx.toFixed(2)}deg`);
+        card.style.setProperty("--tilt-y", `${c.ry.toFixed(2)}deg`);
+        if (Math.abs(t.rx - c.rx) > 0.01 || Math.abs(t.ry - c.ry) > 0.01) settled = false;
+      });
+      if (!settled) raf = requestAnimationFrame(apply);
+    };
+
+    const onMove = (e: PointerEvent) => {
+      cards.forEach((card, i) => {
+        const rect = card.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = e.clientX - cx;
+        const dy = e.clientY - cy;
+        const dist = Math.hypot(dx, dy);
+        // falls off past ~420px so only cards near the cursor react
+        const falloff = Math.max(0, 1 - dist / 420);
+        targets[i] = {
+          rx: (-dy / rect.height) * 10 * falloff,
+          ry: (dx / rect.width) * 12 * falloff,
+        };
+      });
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(apply);
+    };
+
+    const onLeave = () => {
+      targets.forEach((t) => { t.rx = 0; t.ry = 0; });
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(apply);
+    };
+
+    root.addEventListener("pointermove", onMove);
+    root.addEventListener("pointerleave", onLeave);
+    return () => {
+      root.removeEventListener("pointermove", onMove);
+      root.removeEventListener("pointerleave", onLeave);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  /* scroll parallax — the WebGL background drifts slower than the arch
+     as the hero scrolls past, giving the section real depth instead of
+     everything moving at the same flat rate. rAF-throttled scroll
+     handler (not a scroll-linked CSS var read every event) so it can't
+     flood re-renders; writes a CSS var directly, no React state. */
+  useEffect(() => {
+    const root = archRef.current;
+    if (!root) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+
+    const section = root.closest<HTMLElement>(".hs");
+    if (!section) return;
+
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const rect = section.getBoundingClientRect();
+        // 0 at the top of viewport, growing as the section scrolls up out of view
+        const progress = Math.min(Math.max(-rect.top / Math.max(rect.height, 1), 0), 1);
+        section.style.setProperty("--hs-parallax", `${(progress * 90).toFixed(1)}px`);
+        section.style.setProperty("--hs-parallax-arch", `${(progress * 40).toFixed(1)}px`);
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
     <>
       <style suppressHydrationWarning>{`
@@ -200,7 +300,11 @@ export default function HeroSplash() {
           66%      { transform: translate(-8px, 15px) scale(0.97); }
         }
 
-        /* WebGL canvas — pointer-events none so scroll passes through */
+        /* WebGL canvas — pointer-events none so scroll passes through.
+           Drifts on --hs-parallax (set by the scroll handler below) so the
+           background reads as sitting further back than the arch/copy in
+           front of it, instead of the whole section moving as one flat
+           plane. */
         .hs__canvas {
           position: absolute;
           inset: 0;
@@ -210,6 +314,8 @@ export default function HeroSplash() {
           opacity: .45;
           mix-blend-mode: screen;
           pointer-events: none;
+          transform: translateY(calc(var(--hs-parallax, 0px) * -1));
+          will-change: transform;
         }
 
         /* dark bottom fade */
@@ -349,6 +455,44 @@ export default function HeroSplash() {
           to   { opacity: 1; transform: translateY(0); }
         }
 
+        /* live stat strip — real, sitewide-consistent claims (not counters
+           that fake precision on numbers we don't actually track live) */
+        .hs__stats {
+          display: flex; align-items: center; gap: 1.5rem;
+          margin-top: 2.5rem;
+          opacity: 1; animation: hs-rise .9s cubic-bezier(.2,.7,.2,1) .36s both;
+        }
+        .hs__stat {
+          display: flex; flex-direction: column; align-items: center; gap: .3rem;
+        }
+        .hs__stat-val {
+          font-family: var(--ff-display); font-size: clamp(1.15rem, 1.8vw, 1.5rem);
+          letter-spacing: -.01em; color: var(--ink); line-height: 1;
+        }
+        .hs__stat-label {
+          font-family: var(--ff-mono); font-size: .62rem;
+          letter-spacing: .1em; text-transform: uppercase;
+          color: var(--ink-35); white-space: nowrap;
+        }
+        .hs__stat-div {
+          width: 1px; height: 28px;
+          background: var(--ink-15);
+          flex-shrink: 0;
+        }
+        .hs--light .hs__stat-label { color: rgba(13,34,32,0.5) !important; }
+        .hs--light .hs__stat-div { background: rgba(13,34,32,0.14) !important; }
+        [data-theme="light"] .hs__stat-label { color: rgba(13,34,32,0.5) !important; }
+        [data-theme="light"] .hs__stat-div { background: rgba(13,34,32,0.14) !important; }
+
+        @media(max-width:640px){
+          .hs__stats { gap: 1rem; margin-top: 1.75rem; }
+          .hs__stat-div { height: 22px; }
+        }
+        @media(max-width:480px){
+          .hs__stats { gap: .75rem; }
+          .hs__stat-label { font-size: .56rem; }
+        }
+
         .hs__btn-primary {
           display: inline-flex; align-items: center; gap: .5rem;
           padding: .9rem 1.9rem;
@@ -385,6 +529,11 @@ export default function HeroSplash() {
           max-width: 1500px;
           margin: 0 auto;
           min-height: clamp(340px, 42vw, 560px);
+          /* rises slightly faster than the background canvas as the
+             section scrolls up, so the arch reads as sitting in front of
+             it rather than pasted on the same flat plane */
+          transform: translateY(calc(var(--hs-parallax-arch, 0px) * -1));
+          will-change: transform;
         }
 
         /* the curved guide line */
@@ -403,6 +552,21 @@ export default function HeroSplash() {
           position: absolute;
           transform: translateX(-50%);
           width: clamp(118px, 14vw, 205px);
+        }
+
+        /* mouse-tracked tilt layer — its own transform property so it
+           never fights GSAP's entrance tween (on .hs__node-inner, one
+           level up) or the hover lift/scale (on .hs__node-card, one level
+           down). --tilt-x/--tilt-y are written every frame by the RAF
+           lerp loop in the pointermove handler. */
+        .hs__node-tilt {
+          perspective: 700px;
+        }
+        .hs__node-tilt > .hs__node-card {
+          transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+        }
+        .hs__node-tilt > .hs__node-card:hover {
+          transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) translateY(-8px) scale(1.03);
         }
 
         .hs__node-card {
@@ -522,6 +686,25 @@ export default function HeroSplash() {
               {hero.secondaryLabel}
             </Link>
           </div>
+
+          {/* live stat strip — same real claims used sitewide (trust
+              section, delivery timeline, footer), not invented numbers */}
+          <div className="hs__stats" role="group" aria-label={t("statsAria")}>
+            <div className="hs__stat">
+              <span className="hs__stat-val">{t("stat1v")}</span>
+              <span className="hs__stat-label">{t("stat1l")}</span>
+            </div>
+            <span className="hs__stat-div" aria-hidden="true" />
+            <div className="hs__stat">
+              <span className="hs__stat-val">{t("stat2v")}</span>
+              <span className="hs__stat-label">{t("stat2l")}</span>
+            </div>
+            <span className="hs__stat-div" aria-hidden="true" />
+            <div className="hs__stat">
+              <span className="hs__stat-val">{t("stat3v")}</span>
+              <span className="hs__stat-label">{t("stat3l")}</span>
+            </div>
+          </div>
         </div>
 
         {/* ── ARCH of 5 video/media cards ── */}
@@ -565,6 +748,7 @@ export default function HeroSplash() {
                 } as React.CSSProperties}
               >
                 <div className="hs__node-inner">
+                  <div className="hs__node-tilt">
                   <Link
                     href={`/products/${f.category}/${f.slug}`}
                     className="hs__node-card"
@@ -582,6 +766,7 @@ export default function HeroSplash() {
                       <span className="hs__node-name">{f.name}</span>
                     </span>
                   </Link>
+                  </div>
                 </div>
               </div>
             );

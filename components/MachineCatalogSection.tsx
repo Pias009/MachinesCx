@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import TransitionLink from "@/components/TransitionLink";
 import { useCms } from "@/lib/useCms";
@@ -663,7 +664,7 @@ export default function MachineCatalogSection() {
                   style={{ animationDelay: `${Math.min(i, 15) * 28}ms` }}
                 >
                   <div className="mcs-card__bg" aria-hidden="true">
-                    <img src={familyImage(fam)} alt="" loading="lazy" />
+                    <Image src={familyImage(fam)} alt="" fill sizes="(max-width: 900px) 65vw, 320px" loading="lazy" />
                   </div>
                   <div className="mcs-card__scrim" aria-hidden="true" />
                   <div className="mcs-card__top" style={{ position: "relative", zIndex: 1 }}>

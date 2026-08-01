@@ -76,7 +76,14 @@
   },
   "heroSplash": {
     "sectionAria": "वेनज़ो आशाल इनोमैक — मुख्य पृष्ठ",
-    "archAria": "विशेष मशीनें"
+    "archAria": "विशेष मशीनें",
+    "statsAria": "कंपनी की मुख्य विशेषताएं",
+    "stat1v": "80+",
+    "stat1l": "देशों में सेवा",
+    "stat2v": "ISO 9001",
+    "stat2l": "प्रमाणित फैक्ट्री",
+    "stat3v": "24 घंटे",
+    "stat3l": "पूछताछ का जवाब"
   },
   "scrollHome": {
     "heroWords": [

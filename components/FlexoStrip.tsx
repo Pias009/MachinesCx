@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
@@ -342,7 +343,7 @@ export default function FlexoStrip() {
               <div className="fls-card__photo">
                 {m.hot && <span className="fls-card__badge fls-card__badge--hot">{t("hotBadge")}</span>}
                 {m.flagship && <span className="fls-card__badge fls-card__badge--flagship">{t("flagshipBadge")}</span>}
-                <img src={m.img} alt={m.label} loading="lazy" />
+                <Image src={m.img} alt={m.label} fill sizes="(max-width: 700px) 100vw, 33vw" loading="lazy" />
               </div>
               <div className="fls-card__body">
                 <span className="fls-card__num">{String(i + 1).padStart(2, "0")}</span>

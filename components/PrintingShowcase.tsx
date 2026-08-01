@@ -183,10 +183,16 @@ export default function PrintingShowcase() {
     const check = () => setIsMobile(window.innerWidth < 640);
     check();
     window.addEventListener("resize", check, { passive: true });
-    // Preload all images
-    MACHINES.forEach(m => { const img = new Image(); img.src = m.src; });
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  // Preload all machine images — re-runs when live CMS data swaps in over
+  // the fallback (cms.items only changes reference on that one swap, so
+  // this doesn't refire on every render like depending on MACHINES would).
+  useEffect(() => {
+    MACHINES.forEach(m => { const img = new Image(); img.src = m.src; });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cms.items]);
 
   const navigate = useCallback((dir: "next" | "prev") => {
     if (animating) return;
@@ -214,7 +220,7 @@ export default function PrintingShowcase() {
 
     // 4. Release animating lock after full cycle
     setTimeout(() => setAnimating(false), DURATION);
-  }, [animating, active]);
+  }, [animating, active, N]);
 
   // ── Book page-turn: whenever the center machine changes, the new page
   // swings in from edge-on (hinged on its leading edge — left for "next",

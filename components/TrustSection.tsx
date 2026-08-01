@@ -177,14 +177,15 @@ function RollingWords({ words: ROLL_WORDS }: { words: string[] }) {
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
+    const len = ROLL_WORDS.length;
     const id = setInterval(() => {
       setI(n => {
         setPrev(n);
-        return (n + 1) % ROLL_WORDS.length;
+        return (n + 1) % len;
       });
     }, 2400);
     return () => clearInterval(id);
-  }, []);
+  }, [ROLL_WORDS.length]);
 
   // clear the outgoing word once its exit animation has finished
   useEffect(() => {

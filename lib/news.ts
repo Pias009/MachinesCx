@@ -5,10 +5,6 @@
 // import) since components import it directly for types/formatting.
 // ---------------------------------------------------------------------------
 
-import localNewsEn from "@/data/news.json";
-import localNewsAr from "@/data/news.ar.json";
-import localNewsHi from "@/data/news.hi.json";
-
 /** One block of the article body — admins compose these in the CMS editor
  *  instead of writing raw HTML. Rendered in order on the article page. */
 export type NewsBlock =
@@ -54,25 +50,3 @@ export const articleBySlug = (data: NewsData, slug: string) =>
 
 export const latestArticles = (data: NewsData, n = 4) =>
   [...data.articles].sort((a, b) => b.date.localeCompare(a.date)).slice(0, n);
-
-/* Locale-aware bundled defaults, mirroring the HERO_BY_LOCALE pattern in
-   components/HeroSplash.tsx. The CMS/DB only stores one (English-shaped)
-   copy of "news" (see lib/cmsStore.ts + lib/liveNews.ts), so a live admin
-   edit always shows in English regardless of locale — these locale
-   fallbacks only cover the case where no DB override exists yet, i.e. the
-   bundled JSON default that readSection("news") itself falls back to. */
-const NEWS_BY_LOCALE: Record<string, NewsData> = {
-  en: localNewsEn as NewsData,
-  ar: localNewsAr as NewsData,
-  hi: localNewsHi as NewsData,
-};
-
-/** Bundled (non-CMS) article set for a given locale, falling back to English
- *  if the locale has no local translation or isn't recognized. Use this for
- *  locale-aware rendering of the static fallback data; live CMS-edited
- *  content (via getLiveNews in lib/liveNews.ts) is English-only regardless
- *  of locale until the CMS itself becomes locale-aware. */
-export function getArticlesForLocale(locale: string): NewsArticle[] {
-  const data = NEWS_BY_LOCALE[locale] ?? NEWS_BY_LOCALE.en;
-  return data.articles ?? NEWS_BY_LOCALE.en.articles;
-}

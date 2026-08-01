@@ -4,13 +4,6 @@ import Image from "next/image";
 
 const DURATION = 1200;
 
-declare global {
-  interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    particlesJS?: (id: string, config: object) => void;
-  }
-}
-
 export default function LoadingScreen() {
   const rootRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
@@ -19,39 +12,6 @@ export default function LoadingScreen() {
   const [label,   setLabel]   = useState("Wenzhou Ashal Innomach Technology Co., Ltd.");
 
   useEffect(() => { setMounted(true); }, []);
-
-
-  // Load & init particles after mount
-  useEffect(() => {
-    if (!mounted) return;
-    const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js";
-    script.async = true;
-    script.onload = () => {
-      window.particlesJS?.("ls-particles", {
-        particles: {
-          number: { value: 55, density: { enable: true, value_area: 900 } },
-          color: { value: "#ffffff" },
-          shape: { type: "circle" },
-          opacity: { value: 0.35, random: true },
-          size: { value: 2.5, random: true },
-          line_linked: { enable: true, distance: 140, color: "#ffffff", opacity: 0.25, width: 0.8 },
-          move: { enable: true, speed: 1.4, direction: "none", random: true, straight: false, out_mode: "out", bounce: false },
-        },
-        interactivity: {
-          detect_on: "canvas",
-          events: { onhover: { enable: true, mode: "repulse" }, onclick: { enable: true, mode: "push" }, resize: true },
-          modes: {
-            repulse: { distance: 180, duration: 0.6 },
-            push: { particles_nb: 3 },
-          },
-        },
-        retina_detect: true,
-      });
-    };
-    document.head.appendChild(script);
-    return () => { script.remove(); };
-  }, [mounted]);
 
   // Smooth progress — slow cubic ease
   useEffect(() => {
@@ -141,9 +101,6 @@ export default function LoadingScreen() {
           fontFamily: "var(--ff-mono, monospace)",
         }}
       >
-        {/* Particles */}
-        <div id="ls-particles" style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }} />
-
         {/* Scanlines */}
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none", zIndex: 1, opacity: 0.035,

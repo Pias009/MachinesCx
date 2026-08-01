@@ -1,9 +1,3 @@
-export function getSecret(): string {
-  const s = process.env.ADMIN_SESSION_SECRET;
-  if (!s) throw new Error("ADMIN_SESSION_SECRET not set");
-  return s;
-}
-
 export async function verifyCredentials(email: string, password: string): Promise<boolean> {
   const envEmail = process.env.ADMIN_EMAIL;
   const stored = process.env.ADMIN_PASSWORD_HASH;

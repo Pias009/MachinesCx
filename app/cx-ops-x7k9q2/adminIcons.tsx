@@ -1,5 +1,5 @@
 import {
-  Home, Inbox, Sparkles, LayoutGrid, Wrench, Printer,
+  Sparkles, LayoutGrid, Wrench, Printer,
   ShoppingBag, Newspaper, Factory, Recycle, Film, Package,
   type LucideIcon,
 } from "lucide-react";
@@ -23,8 +23,6 @@ export const CATEGORY_ICON: Record<string, LucideIcon> = {
   "recycling": Recycle,
   "printing": Printer,
 };
-
-export const NAV_ICON = { Home, Inbox } as const;
 
 export function SectionIcon({ slug, ...props }: { slug: string } & React.ComponentProps<LucideIcon>) {
   const Icon = SECTION_ICON[slug] ?? Package;

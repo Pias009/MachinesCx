@@ -913,9 +913,46 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 
 /* =======================  FOOTER  ======================= */
 .footer {
+  position: relative;
   background: var(--slate);
   border-top: 1px solid rgba(255,255,255,0.08);
   padding-top: clamp(2.5rem, 5vw, 4rem);
+  overflow: hidden;
+}
+/* ── industrial backdrop: faint blueprint grid + a soft teal glow in the
+   corner, matching the same treatment used on ClientJourney/FlexoStrip so
+   the footer reads as part of the same machine-site language rather than
+   a plain flat panel bolted on the end ── */
+.footer-bg-grid {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(43,191,179,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(43,191,179,0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 15%, #000 85%, transparent);
+          mask-image: linear-gradient(to bottom, transparent, #000 15%, #000 85%, transparent);
+}
+.footer-bg-glow {
+  position: absolute; z-index: 0; pointer-events: none;
+  top: -20%; right: -10%; width: 45%; aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(43,191,179,0.1) 0%, transparent 70%);
+  filter: blur(30px);
+}
+/* live status dot next to "Certifications" — small always-on pulse to
+   echo the "machine still running" feel used in the hero/nav elsewhere */
+.footer-live-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--brand-teal); margin-right: .5rem;
+  box-shadow: 0 0 0 0 rgba(43,191,179,0.6);
+  animation: footer-pulse 2.4s ease-out infinite;
+}
+@keyframes footer-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(43,191,179,0.55); }
+  70%  { box-shadow: 0 0 0 6px rgba(43,191,179,0); }
+  100% { box-shadow: 0 0 0 0 rgba(43,191,179,0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer-live-dot { animation: none; }
 }
 
 /* ── Shortcut icon grid ── */
@@ -1088,6 +1125,8 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 
 /* ── Light mode ── */
 [data-theme="light"] .footer            { background: #ffffff; border-top-color: rgba(43,191,179,0.18); }
+[data-theme="light"] .footer-bg-grid    { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 15%, #000 85%, transparent); opacity: 0.6; }
+[data-theme="light"] .footer-bg-glow    { background: radial-gradient(circle, rgba(43,191,179,0.14) 0%, transparent 70%); }
 [data-theme="light"] .footer-main-grid  { border-bottom-color: rgba(43,191,179,0.18); }
 [data-theme="light"] .footer-logo       { border-color: rgba(43,191,179,0.25); }
 [data-theme="light"] .footer-brand      { color: #0d2220; }

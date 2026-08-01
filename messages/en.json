@@ -76,7 +76,14 @@
   },
   "heroSplash": {
     "sectionAria": "Wenzhou Ashal Innomach — Hero",
-    "archAria": "Featured machines"
+    "archAria": "Featured machines",
+    "statsAria": "Company highlights",
+    "stat1v": "80+",
+    "stat1l": "Countries served",
+    "stat2v": "ISO 9001",
+    "stat2l": "Certified factory",
+    "stat3v": "24h",
+    "stat3l": "Inquiry response"
   },
   "scrollHome": {
     "heroWords": [

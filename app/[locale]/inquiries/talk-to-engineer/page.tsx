@@ -77,6 +77,18 @@ function TalkToEngineerInner() {
     setDraftFamily(fam);
   }, [searchParams]);
 
+  // Deep-linked context from elsewhere on the site (e.g. a process-step
+  // card) — prefills the message so the visitor doesn't retype what they
+  // already told us, but it lands in the editable textarea, never sent
+  // automatically. No machine to pick here, so this skips straight to the
+  // details step rather than the machine-builder.
+  useEffect(() => {
+    const note = searchParams?.get("note");
+    if (!note) return;
+    setForm(f => ({ ...f, message: note }));
+    setStep("details");
+  }, [searchParams]);
+
   function addMachine() {
     if (!draftFamily) return;
     setMachines(prev => [...prev, { family: draftFamily, modelIdx: draftModelIdx, qty: draftQty, notes: draftNotes.trim() }]);

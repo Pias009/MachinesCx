@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState } from "react";
 import NextImage from "next/image";
 import { useTranslations } from "next-intl";
 import { useCms } from "@/lib/useCms";
+import TransitionLink from "@/components/TransitionLink";
 
 const ACCENTS = [
   { hex: "#2bbfb3", name: "teal" },
@@ -393,7 +394,7 @@ export default function ParticlePortfolio(){
                   <div style={{padding:"0 0.8rem 0.65rem"}}>
                     <p className="pp-mstep__role" style={{fontFamily:"var(--ff-body)",fontSize:"0.74rem",
                       color:"rgba(255,255,255,0.65)",lineHeight:1.5,margin:"0 0 0.45rem"}}>{s.role}</p>
-                    <div style={{display:"flex",flexWrap:"wrap",gap:"0.3rem"}}>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:"0.3rem",marginBottom:"0.65rem"}}>
                       {s.quality.map(([l,v])=>(
                         <span key={l} className="pp-mstep__q" style={{
                           fontFamily:"var(--ff-mono)",fontSize:"0.56rem",letterSpacing:"0.05em",
@@ -403,6 +404,16 @@ export default function ParticlePortfolio(){
                         </span>
                       ))}
                     </div>
+                    <TransitionLink href="/production-line" style={{
+                      display:"inline-flex",alignItems:"center",gap:"0.4rem",
+                      fontFamily:"var(--ff-mono)",fontSize:"0.62rem",letterSpacing:"0.06em",textTransform:"uppercase",
+                      color:a.hex,textDecoration:"none",
+                    }}>
+                      {t("viewMachine")}
+                      <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </TransitionLink>
                   </div>
                 )}
               </div>
@@ -524,12 +535,12 @@ export default function ParticlePortfolio(){
               </div>
             ))}
           </div>
-          <a className="pp-panel__cta" href={`/products/${step.cat}/${step.slug}`}>
+          <TransitionLink className="pp-panel__cta" href="/production-line">
             {t("viewMachine")}
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
               <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-          </a>
+          </TransitionLink>
         </div>
       </div>
     </section>

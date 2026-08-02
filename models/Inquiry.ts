@@ -42,6 +42,10 @@ export interface IInquiry {
   status: "new" | "read" | "replied";
   replies: InquiryReply[];
   source: string;
+  /** UI-flow grouping tag for the admin panel — distinct from `source`
+   *  (real marketing attribution). E.g. "production-line:template:retail-bag-line"
+   *  or "production-line:custom". Empty for inquiries from the existing forms. */
+  flow: string;
   createdAt: Date;
 }
 
@@ -85,6 +89,7 @@ const InquirySchema = new Schema<IInquiry>({
   status:     { type: String, enum: ["new", "read", "replied"], default: "new", index: true },
   replies:    { type: [InquiryReplySchema], default: [] },
   source:     { type: String, default: "direct" },
+  flow:       { type: String, default: "" },
   createdAt:  { type: Date, default: Date.now, index: true },
 });
 

@@ -5,9 +5,11 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import TransitionLink from "@/components/TransitionLink";
+import { openAshaChat } from "@/components/ChatWidget";
 import {
   MessageSquare, FileText, ShoppingCart, Factory,
   Truck, Wrench, GraduationCap, Headphones,
+  Bot, HardHat,
   type LucideIcon,
 } from "lucide-react";
 
@@ -77,6 +79,13 @@ export default function ClientJourney() {
   // in — the other 7 cards are untouched. Closing reverses both.
   const [openId, setOpenId] = useState<string | null>(null);
   const openStep = STEPS.find((s) => s.id === openId) ?? null;
+
+  // Shared context handed to whichever agent the visitor picks — names the
+  // step so they don't have to re-explain what they're asking about. Lands
+  // in an editable field on both paths (ASHA's input box, the human-engineer
+  // form's message textarea), never sent on their behalf.
+  const stepContext = (s: typeof STEPS[number]) =>
+    t("agentContext", { step: s.label, tagline: s.tagline });
   const closingRef = useRef(false);
 
   const openCard = (id: string) => {
@@ -365,6 +374,26 @@ export default function ClientJourney() {
           border-color: var(--step-color);
           box-shadow: 0 16px 32px -16px var(--step-color);
         }
+        /* hover preview — grid-rows 0fr→1fr collapses/expands without
+           measuring content height in JS, and never affects sibling cards'
+           layout since it's contained inside this card's own flex column.
+           Delayed slightly on enter so a fast mouse pass-over doesn't
+           trigger it, immediate on leave so it doesn't linger. */
+        .cj__preview {
+          display: grid;
+          grid-template-rows: 0fr;
+          transition: grid-template-rows 0.3s cubic-bezier(0.16,1,0.3,1) 0.1s;
+        }
+        .cj__step:hover .cj__preview {
+          grid-template-rows: 1fr;
+        }
+        .cj__desc--preview {
+          overflow: hidden;
+          min-height: 0;
+        }
+        @media (hover: none) {
+          .cj__preview { display: none; }
+        }
         /* clicked card flips away (rotateY) and fades — the enlarged
            version reappears as a centered overlay, driven by GSAP, so this
            just hides the source card while that overlay is open */
@@ -431,6 +460,63 @@ export default function ClientJourney() {
         .cj__overlay-card .cj__label { font-size: 1.35rem; margin-top: .3rem; }
         .cj__overlay-card .cj__tagline { font-size: .92rem; margin-top: .4rem; }
         .cj__overlay-card .cj__desc { font-size: .92rem; }
+
+        /* ── ask-an-agent — two equal paths handed off from this step's
+           own context, so the visitor doesn't retype what stage they're
+           asking about. Text answer (AI, instant) vs. a person (engineer,
+           async) are framed as different tools for different needs, not
+           a "fast vs slow" ranking. ── */
+        .cj__ask {
+          margin-top: 1.25rem;
+          padding-top: 1.1rem;
+          border-top: 1px solid var(--bg-line);
+        }
+        .cj__ask-label {
+          display: block;
+          font-family: var(--ff-mono); font-size: .68rem; font-weight: 600;
+          letter-spacing: .12em; text-transform: uppercase;
+          color: var(--ink-35);
+          margin-bottom: .65rem;
+        }
+        .cj__ask-btns {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: .65rem;
+        }
+        .cj__ask-btn {
+          display: flex;
+          align-items: flex-start;
+          gap: .6rem;
+          padding: .75rem .85rem;
+          border-radius: 10px;
+          background: var(--bg-base);
+          border: 1px solid var(--bg-line);
+          color: var(--ink);
+          text-align: left;
+          text-decoration: none;
+          cursor: pointer;
+          transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+        }
+        .cj__ask-btn svg { flex: 0 0 auto; margin-top: .15rem; color: var(--step-color); }
+        .cj__ask-btn span {
+          display: flex; flex-direction: column; gap: .1rem;
+          font-family: var(--ff-body); font-size: .78rem; line-height: 1.35;
+          color: var(--ink-60);
+        }
+        .cj__ask-btn strong {
+          font-family: var(--ff-display); font-weight: 700; font-size: .88rem;
+          letter-spacing: -.005em; color: var(--ink);
+        }
+        .cj__ask-btn:hover {
+          border-color: var(--step-color);
+          background: var(--bg-surface);
+          transform: translateY(-2px);
+        }
+        .cj__ask-btn:focus-visible { outline: 2px solid var(--step-color); outline-offset: 2px; }
+
+        @media (max-width: 480px) {
+          .cj__ask-btns { grid-template-columns: 1fr; }
+        }
 
         @media (prefers-reduced-motion: reduce) {
           .cj__overlay, .cj__overlay-card { transition: none; }
@@ -528,7 +614,7 @@ export default function ClientJourney() {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .cj__badge, .cj__step { transition: none; }
+          .cj__badge, .cj__step, .cj__preview { transition: none; }
         }
       `}</style>
 
@@ -595,6 +681,13 @@ export default function ClientJourney() {
                         </div>
                       ))}
                     </div>
+                    {/* desktop-only hover preview — reveals the same detail
+                        text the full overlay shows, without opening it.
+                        Touch devices have no hover, so tap still goes
+                        straight to the overlay as before. */}
+                    <div className="cj__preview" aria-hidden="true">
+                      <p className="cj__desc cj__desc--preview">{s.desc}</p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -650,6 +743,33 @@ export default function ClientJourney() {
                 ))}
               </div>
               <p className="cj__desc">{openStep.desc}</p>
+
+              <div className="cj__ask">
+                <span className="cj__ask-label">{t("askLabel")}</span>
+                <div className="cj__ask-btns">
+                  <button
+                    type="button"
+                    className="cj__ask-btn"
+                    onClick={() => { openAshaChat(stepContext(openStep)); closeOverlay(); }}
+                  >
+                    <Bot size={16} strokeWidth={1.75} aria-hidden="true" />
+                    <span>
+                      <strong>{t("askAiTitle")}</strong>
+                      {t("askAiSub")}
+                    </span>
+                  </button>
+                  <TransitionLink
+                    href={`/inquiries/talk-to-engineer?note=${encodeURIComponent(stepContext(openStep))}`}
+                    className="cj__ask-btn"
+                  >
+                    <HardHat size={16} strokeWidth={1.75} aria-hidden="true" />
+                    <span>
+                      <strong>{t("askEngineerTitle")}</strong>
+                      {t("askEngineerSub")}
+                    </span>
+                  </TransitionLink>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -570,21 +570,21 @@ export default function ScrollHome() {
             borderBottom: "1px solid rgba(255,255,255,0.06)",
           }}>
             <button onClick={mobilePrev} aria-label={t("hot.prevAria")} style={{
-              width: 36, height: 36, background: "rgba(255,255,255,0.05)",
+              width: 44, height: 44, background: "rgba(255,255,255,0.05)",
               border: "1px solid rgba(255,255,255,0.14)", color: "#fff",
               display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
             }}>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
             <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.62rem", letterSpacing: "0.16em", color: "rgba(255,255,255,0.6)", textTransform: "uppercase" }}>
               {String(mobileIdx + 1).padStart(2,"0")} / {String(CARDS.length).padStart(2,"0")}
             </span>
             <button onClick={mobileNext} aria-label={t("hot.nextAria")} style={{
-              width: 36, height: 36, background: "rgba(255,255,255,0.05)",
+              width: 44, height: 44, background: "rgba(255,255,255,0.05)",
               border: "1px solid rgba(255,255,255,0.14)", color: "#fff",
               display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
             }}>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
             </button>
           </div>
 
@@ -769,7 +769,7 @@ export default function ScrollHome() {
           marginTop: "clamp(3rem, 14vh, 8rem)",
           borderTop: "1px solid rgba(255,255,255,0.07)",
           background: "var(--bg-base)",
-          padding: "2rem clamp(1.25rem, 3vw, 2.5rem) 2.5rem",
+          padding: "2rem 0 2.5rem",
         }}>
           <button aria-label={t("hot.scrollLeftAria")} onClick={() => slideCards(-1)} className="sh-slide-arrow sh-slide-arrow--left">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
@@ -778,64 +778,114 @@ export default function ScrollHome() {
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
           </button>
 
-          <div ref={cardRowRef} style={{
-            display: "flex", gap: "1.25rem",
-            overflowX: "auto", scrollbarWidth: "none", paddingBottom: "0.5rem",
-          }}>
-            {CARDS.map((card, i) => (
-              <button
-                key={card.slug}
-                data-card-index={i}
-                onClick={() => handleCardClick(card.slug)}
-                style={{
-                  flexShrink: 0,
-                  width: "clamp(220px, 20vw, 280px)",
-                  display: "flex", flexDirection: "column", gap: "0.75rem",
-                  padding: 0,
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                }}
-              >
-                <div style={{
-                  position: "relative",
-                  width: "100%", aspectRatio: "16/10",
-                  background: "rgba(255,255,255,0.04)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  overflow: "hidden",
-                }}>
-                  <Image
-                    src={`/machines/${card.slug}.png`}
-                    alt={card.name}
-                    fill
-                    sizes="(max-width: 700px) 45vw, 22vw"
-                    style={{
-                      objectFit: "contain",
-                      padding: "9%",
-                      filter: "drop-shadow(0 10px 16px rgba(0,0,0,0.55))",
-                    }}
-                  />
-                </div>
-                <span style={{
-                  fontFamily: "var(--ff-display)", fontSize: "1.05rem",
-                  letterSpacing: "0.02em",
-                  color: selectedProduct === card.slug ? "#fff" : "rgba(255,255,255,0.45)",
-                  lineHeight: 1.25, textAlign: "left",
-                  transition: "color 0.2s",
-                }}>
-                  {card.name}
-                </span>
-              </button>
-            ))}
+          {/* edge fades signal there's more to scroll past the visible cards */}
+          <div className="sh-strip-fade sh-strip-fade--left" aria-hidden="true" />
+          <div className="sh-strip-fade sh-strip-fade--right" aria-hidden="true" />
+
+          <div ref={cardRowRef} className="sh-card-row" style={{ padding: "0.5rem clamp(1.25rem, 3vw, 2.5rem) 0.75rem" }}>
+            {CARDS.map((card, i) => {
+              const active = selectedProduct === card.slug;
+              return (
+                <button
+                  key={card.slug}
+                  data-card-index={i}
+                  data-active={active || undefined}
+                  onClick={() => handleCardClick(card.slug)}
+                  className="sh-card"
+                  aria-pressed={active}
+                >
+                  <div className="sh-card__photo">
+                    <Image
+                      src={`/machines/${card.slug}.png`}
+                      alt={card.name}
+                      fill
+                      sizes="(max-width: 700px) 45vw, 22vw"
+                      className="sh-card__img"
+                    />
+                  </div>
+                  <span className="sh-card__name">{card.name}</span>
+                  <span className="sh-card__bar" aria-hidden="true" />
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
 
       <style suppressHydrationWarning>{`
         .sh-card-strip::-webkit-scrollbar { display: none; }
+
+        /* ── card row + edge fades ── */
+        .sh-card-row {
+          display: flex; gap: 1.25rem;
+          overflow-x: auto; scrollbar-width: none;
+        }
+        .sh-card-row::-webkit-scrollbar { display: none; }
+        .sh-strip-fade {
+          position: absolute; top: 0; bottom: 0; width: clamp(1.5rem, 5vw, 4rem);
+          z-index: 3; pointer-events: none;
+        }
+        .sh-strip-fade--left  { left: 0;  background: linear-gradient(90deg, var(--bg-base), transparent); }
+        .sh-strip-fade--right { right: 0; background: linear-gradient(270deg, var(--bg-base), transparent); }
+
+        /* ── machine card ── */
+        .sh-card {
+          flex-shrink: 0;
+          width: clamp(220px, 20vw, 280px);
+          display: flex; flex-direction: column; gap: 0.85rem;
+          padding: 0.85rem 0.85rem 1rem;
+          background: rgba(255,255,255,0.02);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 12px;
+          cursor: pointer;
+          text-align: left;
+          transition: border-color 0.2s, background 0.2s, transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s cubic-bezier(0.16,1,0.3,1);
+        }
+        .sh-card:hover {
+          border-color: rgba(43,191,179,0.35);
+          background: rgba(255,255,255,0.04);
+          transform: translateY(-4px);
+          box-shadow: 0 16px 32px -16px rgba(0,0,0,0.6);
+        }
+        .sh-card:focus-visible {
+          outline: 2px solid var(--brand-teal); outline-offset: 2px;
+        }
+        .sh-card[data-active] {
+          border-color: rgba(43,191,179,0.5);
+          background: rgba(43,191,179,0.05);
+        }
+        .sh-card__photo {
+          position: relative;
+          width: 100%; aspect-ratio: 16/10;
+          background: rgba(255,255,255,0.04);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .sh-card__img {
+          object-fit: contain; padding: 9%;
+          filter: drop-shadow(0 10px 16px rgba(0,0,0,0.55));
+          transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        .sh-card:hover .sh-card__img { transform: scale(1.04); }
+        .sh-card__name {
+          font-family: var(--ff-display); font-size: 1.05rem;
+          letter-spacing: 0.02em; line-height: 1.25;
+          color: rgba(255,255,255,0.5);
+          transition: color 0.2s;
+        }
+        .sh-card[data-active] .sh-card__name,
+        .sh-card:hover .sh-card__name { color: #fff; }
+        .sh-card__bar {
+          display: block; height: 2px; width: 100%;
+          background: var(--brand-teal);
+          transform: scaleX(0); transform-origin: left center;
+          transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        .sh-card[data-active] .sh-card__bar { transform: scaleX(1); }
+
         .sh-slide-arrow {
           position: absolute; top: 50%; transform: translateY(-50%);
-          width: 42px; height: 42px; border-radius: 0;
+          width: 44px; height: 44px; border-radius: 0;
           background: rgba(255,255,255,0.05);
           border: 1px solid rgba(255,255,255,0.12);
           color: rgba(255,255,255,0.78);
@@ -844,12 +894,12 @@ export default function ScrollHome() {
           transition: background 0.18s, color 0.18s, border-color 0.18s;
         }
         .sh-slide-arrow:hover {
-          background: var(--brand-red); color: #fff; border-color: var(--brand-red);
+          background: var(--brand-teal); color: #04211e; border-color: var(--brand-teal);
         }
         .sh-slide-arrow--left  { left: clamp(0.25rem, 1.5vw, 1.25rem); }
         .sh-slide-arrow--right { right: clamp(0.25rem, 1.5vw, 1.25rem); }
-        @media (max-width: 768px) {
-          .sh-slide-arrow { width: 34px; height: 34px; }
+        @media (prefers-reduced-motion: reduce) {
+          .sh-card, .sh-card__img, .sh-card__bar { transition: none; }
         }
 
         /* ── ScrollHome mobile — all sections visible ── */

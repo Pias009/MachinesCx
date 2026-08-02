@@ -553,6 +553,12 @@
     "footerStrong": "इंजीनियर चौबीसों घंटे उपलब्ध",
     "cta": "अपनी पूछताछ शुरू करें",
     "closeAria": "बंद करें",
+    "askLabel": "इस चरण के बारे में सवाल?",
+    "askAiTitle": "ASHA से पूछें",
+    "askAiSub": "हमारे AI एजेंट से तुरंत जवाब",
+    "askEngineerTitle": "इंजीनियर से बात करें",
+    "askEngineerSub": "हमारी टीम को अपना सवाल भेजें",
+    "agentContext": "मुझे {step} चरण ({tagline}) के बारे में एक सवाल है।",
     "steps": {
       "inquiry": {
         "label": "पूछताछ",
@@ -1977,8 +1983,8 @@
     "ctaButton": "इंजीनियर से बात करें →"
   },
   "machineDiagram": {
-    "titlePrefix": "परफ़ॉर्मेंस",
-    "titleEm": "डैशबोर्ड",
+    "titlePrefix": "मुख्य",
+    "titleEm": "विनिर्देश.",
     "selectModelAria": "मॉडल चुनें",
     "compareTitle": "मॉडल तुलना",
     "compareAria": "मॉडल के बीच विनिर्देश तुलना"

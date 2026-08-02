@@ -3312,6 +3312,52 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   font-family: var(--ff-mono); font-size: 0.85rem; font-weight: 500; color: var(--ink-60);
 }
 
+/* ── mobile spec cards — replaces the table below 700px so every model
+   stays readable in one column instead of scrolling sideways through a
+   table squeezed to fit a phone screen. One card per spec, one row per
+   model inside it; tapping a row highlights that model everywhere else
+   on the page, same as clicking a table column header does above. ── */
+.pdv2-speccards { display: none; }
+.pdv2-table-wrap { overflow-x: visible; }
+@media (max-width: 700px) {
+  .pdv2-table-wrap > .pdv2-table { display: none; }
+  .pdv2-table-wrap { overflow-x: hidden; }
+  .pdv2-speccards {
+    display: flex; flex-direction: column; gap: 0.6rem;
+  }
+  .pdv2-speccard {
+    border: 1px solid var(--bg-line); border-radius: 10px;
+    background: var(--bg-surface); overflow: hidden;
+  }
+  .pdv2-speccard__label {
+    display: block; padding: 0.75rem 0.9rem;
+    font-family: var(--ff-body); font-size: 0.82rem; font-weight: 600;
+    color: var(--ink-60); background: var(--bg-base);
+    border-bottom: 1px solid var(--bg-line);
+  }
+  .pdv2-speccard__rows { display: flex; flex-direction: column; }
+  .pdv2-speccard__row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 0.75rem; padding: 0.65rem 0.9rem;
+    border-bottom: 1px solid rgba(43,191,179,0.06);
+  }
+  .pdv2-speccard__row:last-child { border-bottom: none; }
+  .pdv2-speccard__row--on {
+    background: rgba(43,191,179,0.1);
+    border-left: 2px solid var(--brand-teal);
+    border-right: 2px solid var(--brand-teal);
+  }
+  .pdv2-speccard__model {
+    font-family: var(--ff-mono); font-size: 0.72rem; letter-spacing: 0.04em;
+    color: var(--ink-35); text-transform: uppercase;
+  }
+  .pdv2-speccard__row--on .pdv2-speccard__model { color: var(--brand-teal); }
+  .pdv2-speccard__val {
+    font-family: var(--ff-mono); font-size: 0.9rem; font-weight: 700;
+    color: var(--ink); letter-spacing: 0.01em; text-align: right;
+  }
+}
+
 /* ════════════════════════════════════════
    VIDEO SECTION
 ════════════════════════════════════════ */
@@ -4345,6 +4391,12 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 [data-theme=light] .pdv2-table__label   { color: rgba(13,34,32,0.78); }
 [data-theme=light] .pdv2-table td.pdv2-col--on { color: #0d2220; background: rgba(43,191,179,0.12) !important; }
 [data-theme=light] .pdv2-table td.pdv2-col--dim { color: rgba(13,34,32,0.7); }
+[data-theme=light] .pdv2-speccard         { background: #ffffff; border-color: rgba(13,34,32,0.12); }
+[data-theme=light] .pdv2-speccard__label  { background: #f7fafa; color: rgba(13,34,32,0.78); border-color: rgba(13,34,32,0.12); }
+[data-theme=light] .pdv2-speccard__row    { border-color: rgba(13,34,32,0.08); }
+[data-theme=light] .pdv2-speccard__model  { color: rgba(13,34,32,0.5); }
+[data-theme=light] .pdv2-speccard__val    { color: #0d2220; }
+[data-theme=light] .pdv2-speccard__row--on { background: rgba(43,191,179,0.12); }
 [data-theme=light] .pdv2-install        { background: #fff; border-color: rgba(13,34,32,0.12); }
 [data-theme=light] .pdv2-guide-card     { background: #ffffff; border-color: rgba(13,34,32,0.12); }
 [data-theme=light] .pdv2-guide-card__media { background: #fff; border-color: rgba(13,34,32,0.12); }

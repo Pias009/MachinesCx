@@ -553,6 +553,12 @@
     "footerStrong": "مهندسون متاحون على مدار الساعة",
     "cta": "ابدأ استفسارك",
     "closeAria": "إغلاق",
+    "askLabel": "أسئلة حول هذه المرحلة؟",
+    "askAiTitle": "اسأل ASHA",
+    "askAiSub": "إجابات فورية من مساعدنا الذكي",
+    "askEngineerTitle": "تحدث مع مهندس",
+    "askEngineerSub": "أرسل سؤالك إلى فريقنا",
+    "agentContext": "لدي سؤال حول مرحلة {step} ({tagline}).",
     "steps": {
       "inquiry": {
         "label": "الاستفسار",
@@ -1977,8 +1983,8 @@
     "ctaButton": "تحدث مع مهندس →"
   },
   "machineDiagram": {
-    "titlePrefix": "لوحة",
-    "titleEm": "الأداء",
+    "titlePrefix": "المواصفات",
+    "titleEm": "الرئيسية.",
     "selectModelAria": "اختر الموديل",
     "compareTitle": "مقارنة الموديلات",
     "compareAria": "مقارنة المواصفات بين الموديلات"

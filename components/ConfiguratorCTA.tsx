@@ -218,6 +218,15 @@ export default function ConfiguratorCTA() {
         .cc__cta:hover {
           background: var(--brand-teal-dk);
         }
+        .cc__cta--secondary {
+          background: transparent;
+          border-color: rgba(255,255,255,0.22);
+        }
+        .cc__cta--secondary:hover {
+          background: rgba(255,255,255,0.06);
+          border-color: rgba(255,255,255,0.4);
+        }
+        .cc__cta--secondary .cc__cta-arr { background: rgba(255,255,255,0.1); }
         .cc__cta-arr {
           display:flex; align-items:center; justify-content:center;
           width:30px; height:30px; border-radius:2px;
@@ -299,9 +308,17 @@ export default function ConfiguratorCTA() {
           <div className="cc__right" ref={rightRef}>
             <div className="cc__badge"><span className="dot" />{t("badge")}</div>
 
-            <div>
+            <div style={{ display: "flex", flexDirection: "column", gap: ".7rem" }}>
               <TransitionLink href="/products" className="cc__cta">
                 {t("cta")}
+                <span className="cc__cta-arr" aria-hidden="true">
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                    <path d="M2.5 6.5h8M8 3l3 3.5-3 3" stroke="#f8fafc" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
+              </TransitionLink>
+              <TransitionLink href="/production-line" className="cc__cta cc__cta--secondary">
+                {t("ctaProductionLine")}
                 <span className="cc__cta-arr" aria-hidden="true">
                   <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                     <path d="M2.5 6.5h8M8 3l3 3.5-3 3" stroke="#f8fafc" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>

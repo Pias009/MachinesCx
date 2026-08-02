@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import type { ProductFamily, CategorySlug } from "@/lib/products";
-import { categories, familiesByCategory, familyImage, familyBySlug } from "@/lib/products";
+import { categories, familiesByCategory, familyImage, familyBySlug, familyImages } from "@/lib/products";
 
 /** Extracts a numeric magnitude from a spec value string (e.g. "2,100 mm"
  *  -> 2100) so it can be drawn as a bar. Non-numeric values (e.g. bag
@@ -336,6 +336,80 @@ export function ReviewCard({
       <button type="button" className="ci-review-card__send" onClick={onSend} disabled={sending}>
         {sending ? t("sending") : t("sendInquiry")}
       </button>
+    </div>
+  );
+}
+
+/** Ordered machine + parts summary — shown before the contact-details
+ *  ReviewCard when the order is a multi-machine production LINE, where
+ *  sequence matters and ReviewCard alone (contact fields only) doesn't
+ *  surface what's actually being ordered. One card per machine with its
+ *  full spec sheet, so the visitor sees everything before sending. */
+export interface SummaryMachine {
+  slug: string;
+  name: string;
+  series: string;
+  model: string;
+  stage?: string; // production-line step label, e.g. "Film Extrusion" — omitted for ad-hoc custom picks
+  qty: number;
+  notes: string;
+}
+export interface SummaryPart {
+  name: string;
+  machine?: string;
+  quantity: number;
+  notes: string;
+}
+
+export function LineSummaryCard({ machines, parts }: { machines: SummaryMachine[]; parts?: SummaryPart[] }) {
+  const t = useTranslations("chatInquiryShared");
+  return (
+    <div className="ci-linesum">
+      <span className="ci-linesum__label">{t("productionLine")}</span>
+      <div className="ci-linesum__list">
+        {machines.map((m, i) => {
+          const fam = familyBySlug(m.slug);
+          const modelIdx = Math.max(0, fam?.models.findIndex((mm) => mm === m.model) ?? 0);
+          const specs = fam?.specs
+            .map((s) => ({ label: s.label, value: s.values[modelIdx] ?? s.values[0] }))
+            .filter((s) => s.value) ?? [];
+          return (
+            <div key={`${m.slug}-${i}`} className="ci-linesum__item">
+              <span className="ci-linesum__step">{String(i + 1).padStart(2, "0")}</span>
+              <div className="ci-linesum__img-wrap">
+                {fam && <Image src={familyImages(fam)[0]} alt={m.name} fill sizes="72px" className="ci-linesum__img" />}
+              </div>
+              <div className="ci-linesum__body">
+                {m.stage && <span className="ci-linesum__stage">{m.stage}</span>}
+                <span className="ci-linesum__name">{m.name}{m.model ? ` — ${m.model}` : ""}</span>
+                <span className="ci-linesum__meta">{t("qtyShort", { qty: m.qty })}{m.notes ? ` · ${m.notes}` : ""}</span>
+                {specs.length > 0 && (
+                  <div className="ci-linesum__specs">
+                    {specs.slice(0, 6).map((s) => (
+                      <span key={s.label} className="ci-linesum__spec">
+                        <span className="ci-linesum__spec-label">{s.label}</span>
+                        <span className="ci-linesum__spec-val">{s.value}</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {parts && parts.length > 0 && (
+        <div className="ci-linesum__parts">
+          <span className="ci-linesum__label">{t("parts")}</span>
+          {parts.map((p, i) => (
+            <div key={`${p.name}-${i}`} className="ci-linesum__part-row">
+              <span className="ci-linesum__part-name">{p.name}{p.machine ? ` · ${p.machine}` : ""}</span>
+              <span className="ci-linesum__meta">{t("qtyShort", { qty: p.quantity })}{p.notes ? ` · ${p.notes}` : ""}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -775,6 +849,50 @@ export const chatStyles = `
   }
   .ci-review-card__send:hover:not(:disabled) { background: var(--brand-teal-dk); }
   .ci-review-card__send:disabled { opacity: .5; cursor: default; }
+
+  /* production-line summary — ordered machine cards + specs, shown before
+     the contact-details ReviewCard for multi-machine line orders */
+  .ci-linesum {
+    background: var(--bg-raise); border: 1px solid var(--bg-line);
+    border-radius: 1rem; padding: 1.25rem;
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  .ci-linesum__label {
+    font-family: var(--ff-mono); font-size: .64rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink-35); display: block;
+  }
+  .ci-linesum__list { display: flex; flex-direction: column; gap: .85rem; }
+  .ci-linesum__item {
+    display: flex; gap: .85rem; align-items: flex-start;
+    background: var(--bg-surface); border: 1px solid var(--bg-line);
+    border-radius: .875rem; padding: .85rem;
+  }
+  .ci-linesum__step {
+    flex-shrink: 0; font-family: var(--ff-mono); font-size: .72rem; font-weight: 700;
+    color: var(--brand-teal); padding-top: .1rem;
+  }
+  .ci-linesum__img-wrap {
+    position: relative; flex-shrink: 0; width: 56px; height: 56px;
+    border-radius: .6rem; overflow: hidden; background: var(--bg-raise);
+  }
+  .ci-linesum__img { object-fit: contain; padding: 4px; }
+  .ci-linesum__body { display: flex; flex-direction: column; gap: .2rem; min-width: 0; flex: 1; }
+  .ci-linesum__stage {
+    font-family: var(--ff-mono); font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--brand-teal);
+  }
+  .ci-linesum__name { font-size: .88rem; font-weight: 600; color: var(--ink); line-height: 1.35; }
+  .ci-linesum__meta { font-size: .76rem; color: var(--ink-60); }
+  .ci-linesum__specs { display: flex; flex-wrap: wrap; gap: .4rem .75rem; margin-top: .4rem; }
+  .ci-linesum__spec { display: flex; align-items: baseline; gap: .3rem; font-size: .72rem; }
+  .ci-linesum__spec-label { color: var(--ink-35); }
+  .ci-linesum__spec-val { color: var(--ink); font-family: var(--ff-mono); font-weight: 600; }
+  .ci-linesum__parts {
+    display: flex; flex-direction: column; gap: .5rem;
+    padding-top: .85rem; border-top: 1px solid var(--bg-line);
+  }
+  .ci-linesum__part-row { display: flex; justify-content: space-between; gap: 1rem; font-size: .82rem; }
+  .ci-linesum__part-name { color: var(--ink); }
 
   /* AI review chat — pre-submission conversational step */
   .ci-aichat {

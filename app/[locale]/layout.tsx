@@ -17,6 +17,7 @@ import { BRAND } from "@/lib/products";
 import { routing, rtlLocales, type Locale } from "@/i18n/routing";
 
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
+const ProductionLineTeaser = dynamic(() => import("@/components/ProductionLineTeaser"), { ssr: false });
 
 const bebas = Bebas_Neue({
   subsets: ["latin"],
@@ -126,6 +127,7 @@ export default async function LocaleLayout({
           <main>{children}</main>
           <SiteFooter />
           <ChatWidget />
+          <ProductionLineTeaser />
           <AppToaster />
         </NextIntlClientProvider>
       </body>

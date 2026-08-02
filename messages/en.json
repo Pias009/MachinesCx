@@ -1,6 +1,7 @@
 {
   "nav": {
     "allProducts": "All Products",
+    "productionLine": "Production Lines",
     "news": "News",
     "about": "About",
     "contact": "Contact",
@@ -553,6 +554,12 @@
     "footerStrong": "engineers available 24/7",
     "cta": "Start your inquiry",
     "closeAria": "Close",
+    "askLabel": "Questions about this stage?",
+    "askAiTitle": "Ask ASHA",
+    "askAiSub": "Instant answers from our AI agent",
+    "askEngineerTitle": "Talk to an engineer",
+    "askEngineerSub": "Send a question to our team",
+    "agentContext": "I have a question about the {step} stage ({tagline}).",
     "steps": {
       "inquiry": {
         "label": "Inquiry",
@@ -1052,6 +1059,7 @@
     "metricConfigs": "Configs",
     "badge": "Engineers online",
     "cta": "Choose a machine",
+    "ctaProductionLine": "Build a production line",
     "stepsAria": "Steps",
     "steps": [
       "Browse machines",
@@ -1558,6 +1566,105 @@
     "tipReady": "Ready to review? Fill in your name and email above, then check everything before sending.",
     "tipDefault": "Each model trades off speed vs. footprint — check the spec panel as you pick."
   },
+  "productionLineTeaser": {
+    "title": "Build your production line",
+    "sub": "Pick a ready-made line or build your own, step by step, with AI review.",
+    "cta": "Start building →",
+    "dismissAria": "Dismiss"
+  },
+  "productionLineBuilder": {
+    "backLink": "All inquiry types",
+    "back": "Back",
+    "optional": "Optional",
+    "reviewButton": "Review inquiry →",
+    "reviewTitle": "Here's your configuration sheet — click any answer below to edit it, then send whenever you're ready.",
+    "reviewRows": {
+      "name": "Name",
+      "email": "Email",
+      "company": "Company",
+      "message": "Message"
+    },
+    "successTitle": "Thanks, {name}!",
+    "successSub": "Our engineering team will review your production line and reply to {email} within 24 hours.",
+    "hub": {
+      "eyebrow": "Production Line Builder",
+      "titlePrefix": "Build the line that makes your",
+      "titleEm": "final product.",
+      "sub": "Start from a ready-made line built around a real end product, or build your own from scratch — either way, our AI reviews it with you before it goes to an engineer.",
+      "templateCardBadge": "Ready-made line",
+      "customCardTitle": "Build a custom line",
+      "customCardDesc": "Choose your own machines step by step, get live AI feedback as you go, and send the full line to our engineering team."
+    },
+    "template": {
+      "backToHub": "All lines",
+      "backToOverview": "Back to full line",
+      "eyebrow": "Ready-made production line",
+      "stepsLabel": "The full line, in order",
+      "whyBestLabel": "Why this line",
+      "useThisLineCta": "Use this line →",
+      "exploreCta": "Explore this line, step by step →",
+      "aiHelpLineCta": "Ask AI about this line",
+      "setupLabel": "Step {num} / {total}",
+      "tabOverview": "Overview",
+      "tabInstallation": "Installation guide",
+      "tabAskAi": "Ask AI",
+      "noInstallGuide": "No installation guide available for this machine yet.",
+      "aiHelpDesc": "Have a question about the {name}? Our AI assistant knows this machine and can walk you through it.",
+      "aiHelpCta": "Ask AI about this machine →",
+      "prevStep": "Previous",
+      "nextStep": "Next"
+    },
+    "custom": {
+      "eyebrow": "Custom Production Line",
+      "titlePrefix": "Build your",
+      "titleEm": "production line.",
+      "processSection": "What are you building?",
+      "processSubtitle": "Pick each stage your line needs, in the order it should run — we'll walk you through choosing a machine for each one.",
+      "startBuildingCta": "Start building →",
+      "machineStepTitle": "Step {num} of {total} — {category}",
+      "machineStepSubtitle": "Pick a machine for this stage of your line.",
+      "model": "Model",
+      "quantity": "Quantity",
+      "customNotes": "Customization notes",
+      "customNotesHint": "Voltage, automation, certification…",
+      "addMachineToLine": "Add this machine to your line",
+      "addAndContinue": "Add & continue to next stage →",
+      "addAndFinish": "Add this machine →",
+      "aiStatusEmpty": "AI engineer — waiting for your first machine",
+      "aiStatusAnalyzing": "AI engineer — analyzing…",
+      "aiStatusOptimized": "AI engineer — line looks good",
+      "aiStatusMismatch": "AI engineer — found a possible issue",
+      "partsSection": "Parts",
+      "partsSubtitle": "Add specific parts to this line — optional.",
+      "partName": "Part name",
+      "partNameHint": "e.g. Die Head, Screw, Barrel, Heating Element",
+      "partNamePlaceholder": "Optional — leave blank if none",
+      "specsRefNumbers": "Specs / reference numbers",
+      "referencePhoto": "Reference photo",
+      "uploading": "Uploading…",
+      "addPhoto": "+ Add photo",
+      "addPartToLine": "Add this part to your line",
+      "continueButton": "Continue →",
+      "aiReviewSection": "AI review",
+      "aiReviewSubtitle": "Our AI engineer looks over the line you've built, flags anything that looks off, and can suggest fixes — you can apply them or skip and continue as-is.",
+      "yourDetails": "Your details",
+      "name": "Name",
+      "email": "Email",
+      "company": "Company",
+      "phone": "Phone",
+      "message": "Message",
+      "messageHint": "Anything else you'd like us to know?",
+      "referencePhotos": "Reference photos",
+      "tipEmpty": "Add as many machines as your line needs — nothing sends until you press send inquiry.",
+      "tipReady": "Ready to continue? Move on to review your full line before sending.",
+      "tipDefault": "Each model trades off speed vs. footprint — check the spec panel as you pick."
+    },
+    "summary": {
+      "title": "Your production line",
+      "subtitle": "Every machine and spec in your line, in order — review it, then continue to send it to our engineering team.",
+      "continueButton": "Continue →"
+    }
+  },
   "toasts": {
     "photoUploaded": "Photo added",
     "photoUploadFailed": "Couldn't upload photo",
@@ -1666,7 +1773,10 @@
     "specSheet": "Spec sheet",
     "showFewerSpecs": "Show fewer specs",
     "showAllSpecs": "Show all {count} specs",
-    "relatedMachines": "Related machines"
+    "relatedMachines": "Related machines",
+    "productionLine": "Production line",
+    "parts": "Parts",
+    "qtyShort": "×{qty}"
   },
   "catalogueClient": {
     "breadcrumbHome": "Home",
@@ -1977,8 +2087,8 @@
     "ctaButton": "Talk to an engineer →"
   },
   "machineDiagram": {
-    "titlePrefix": "Performance",
-    "titleEm": "Dashboard",
+    "titlePrefix": "Key",
+    "titleEm": "specifications.",
     "selectModelAria": "Select model",
     "compareTitle": "Model comparison",
     "compareAria": "Specification comparison across models"

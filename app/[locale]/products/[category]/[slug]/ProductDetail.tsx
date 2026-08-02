@@ -620,7 +620,13 @@ export default function ProductDetail({ family, category, related }: Props) {
                 </>
               )}
 
-              {/* full spec table */}
+              {/* full spec table — a real <table> from sm: up (where columns
+                  side-by-side genuinely help comparison), and a stacked
+                  "one spec per card, one row per model" list below that:
+                  a table forced to fit a narrow phone screen either
+                  truncates columns or scrolls sideways, and buyers
+                  comparing models by feel/thumb shouldn't have to scroll
+                  in two directions at once. */}
               <SubHead title={t("fullSpecifications")} note={hasModels && t("clickColumnToHighlight")} />
               <div className="pdv2-table-wrap" data-reveal>
                 <table className="pdv2-table">
@@ -648,6 +654,28 @@ export default function ProductDetail({ family, category, related }: Props) {
                     ))}
                   </tbody>
                 </table>
+
+                <div className="pdv2-speccards" data-reveal>
+                  {family.specs.map(row => (
+                    <div className="pdv2-speccard" key={row.label}>
+                      <span className="pdv2-speccard__label">{row.label}</span>
+                      <div className="pdv2-speccard__rows">
+                        {row.values.map((v, i) => (
+                          <div
+                            key={i}
+                            className={`pdv2-speccard__row${hasModels && i === activeModel ? " pdv2-speccard__row--on" : ""}`}
+                            onClick={() => hasModels && setActiveModel(i)}
+                            role={hasModels ? "button" : undefined}
+                            tabIndex={hasModels ? 0 : undefined}
+                          >
+                            <span className="pdv2-speccard__model">{family.models[i]}</span>
+                            <span className="pdv2-speccard__val">{v}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}

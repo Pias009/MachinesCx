@@ -52,30 +52,12 @@ function iconForLabel(label: string) {
   return DollarSign;
 }
 
-/* SVG path for a ring segment sweeping from startAngle to endAngle (deg,
-   0 = +x axis, clockwise) at given inner/outer radius, centered at cx/cy */
-function ringPath(cx: number, cy: number, rInner: number, rOuter: number, startDeg: number, endDeg: number) {
-  const toXY = (r: number, deg: number) => {
-    const rad = (deg * Math.PI) / 180;
-    return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
-  };
-  const [x1, y1] = toXY(rOuter, startDeg);
-  const [x2, y2] = toXY(rOuter, endDeg);
-  const [x3, y3] = toXY(rInner, endDeg);
-  const [x4, y4] = toXY(rInner, startDeg);
-  const largeArc = endDeg - startDeg > 180 ? 1 : 0;
-  return [
-    `M ${x1} ${y1}`,
-    `A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${x2} ${y2}`,
-    `L ${x3} ${y3}`,
-    `A ${rInner} ${rInner} 0 ${largeArc} 0 ${x4} ${y4}`,
-    "Z",
-  ].join(" ");
-}
-
-/* ring color per position, outermost first — echoes the reference's
-   orange/teal/graphite/blue band coloring */
-const GAUGE_COLORS = ["#f5822a", "#2bbfb3", "#516168", "#2b8ce6"];
+/* readout bar color per position — all four keyed off the same brand teal
+   (full → dimmed) rather than a rainbow, since these are one instrument's
+   four channels, not four unrelated categories. The lead spec (the one
+   that actually differentiates this machine) gets full brand teal; the
+   rest step down in opacity so the eye still lands on it first. */
+const GAUGE_TINTS = [1, 0.78, 0.58, 0.4];
 
 /* model-comparison categorical palette — fixed order, one hue per model
    position across every panel (never re-cycled or re-assigned by value).
@@ -276,162 +258,105 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
         }
 
         /* ═══ RING GAUGE HERO ═══ */
-        .md-gauge-wrap {
-          display: flex;
-          justify-content: center;
-          margin-bottom: 2.25rem;
-          position: relative;
-        }
-        .md-gauge-box {
-          position: relative;
-          width: 100%;
-          max-width: 1900px;
-          aspect-ratio: 1.95;
-          opacity: 0;
-          animation: md-fade-up 0.7s ease 0.15s forwards;
-        }
-        .md-gauge-svg {
-          width: 100%;
-          height: 100%;
-          overflow: visible;
-        }
-        .md-gauge-ring {
-          transition: opacity 0.3s;
-        }
-        .md-gauge-ring-bg {
-          fill: var(--bg-line);
-          opacity: 0.5;
-        }
-        .md-gauge-ring-fill {
-          fill: var(--ring-color, var(--brand-teal));
-          filter: drop-shadow(0 2px 10px rgba(43,191,179,0.18));
-        }
-        .md-gauge-center {
-          fill: var(--bg-base);
-          stroke: var(--bg-line);
-          stroke-width: 1;
-        }
-        .md-gauge-center-label {
-          font-family: var(--ff-mono);
-          font-size: 9px;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-          fill: var(--ink-60);
-        }
-        .md-gauge-center-em {
-          font-family: var(--ff-display);
-          font-size: 15px;
-          fill: var(--brand-teal);
-          font-weight: 700;
-        }
-        .md-gauge-dot {
-          fill: var(--ring-color, var(--brand-teal));
-        }
-        .md-gauge-line {
-          stroke: var(--ring-color, var(--brand-teal));
-          stroke-width: 1;
-          opacity: 0.55;
-        }
-
-        .md-gauge-callout {
-          position: absolute;
-          display: flex;
-          align-items: center;
-          gap: 1.1rem;
-          opacity: 0;
-          transform: translateX(-10px);
-          animation: md-fade-side 0.5s ease forwards;
-        }
-        .md-gauge-callout__icon {
-          flex: 0 0 auto;
-          width: 84px;
-          height: 84px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: var(--bg-base);
+        /* ═══ READOUT — instrument-panel bars, one per key spec. Modeled on
+           a machine's own gauge strip (tick scale + fill + digital numeral)
+           rather than a dashboard chart: full-width bars read left-to-right
+           at any viewport, so there's no arc geometry to break on mobile. ═══ */
+        .md-readout {
+          max-width: 1200px;
+          margin: 0 auto 2.5rem;
           border: 1px solid var(--bg-line);
-          box-shadow: 0 6px 18px -8px rgba(0,0,0,0.25);
-          color: var(--ring-color, var(--brand-teal));
+          border-radius: 14px;
+          background: var(--bg-surface);
+          overflow: hidden;
         }
-        .md-gauge-callout__text {
+        .md-readout-row {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: center;
+          gap: 0.5rem 1.5rem;
+          padding: 1.15rem 1.5rem;
+          border-bottom: 1px solid var(--bg-line);
+          opacity: 0;
+          transform: translateX(-12px);
+          animation: md-fade-side 0.55s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        .md-readout-row:last-child { border-bottom: none; }
+        .md-readout-row__head {
+          grid-column: 1 / -1;
           display: flex;
-          flex-direction: column;
-          line-height: 1.15;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 1rem;
         }
-        .md-gauge-callout__val {
-          font-family: var(--ff-display);
-          font-size: 2.4rem;
-          font-weight: 700;
-          color: var(--ring-color, var(--brand-teal));
-        }
-        .md-gauge-callout__label {
+        .md-readout-row__label {
+          display: flex;
+          align-items: center;
+          gap: 0.55rem;
           font-family: var(--ff-mono);
-          font-size: 1rem;
-          letter-spacing: 0.05em;
+          font-size: 0.76rem;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
-          color: var(--ink-35);
+          color: var(--ink-60);
+        }
+        .md-readout-row__icon {
+          display: flex;
+          color: var(--gauge-color, var(--brand-teal));
+          opacity: var(--gauge-opacity, 1);
+        }
+        .md-readout-row__val {
+          font-family: var(--ff-display);
+          font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+          letter-spacing: 0.01em;
+          color: var(--ink);
+          font-variant-numeric: tabular-nums;
           white-space: nowrap;
         }
+        .md-readout-row__val small {
+          font-family: var(--ff-mono);
+          font-size: 0.6em;
+          font-weight: 600;
+          color: var(--ink-35);
+          letter-spacing: 0.04em;
+          margin-left: 0.15em;
+        }
+        .md-readout-row__track {
+          grid-column: 1 / -1;
+          position: relative;
+          height: 10px;
+          border-radius: 5px;
+          background: var(--bg-line);
+          overflow: hidden;
+        }
+        /* tick marks every 10% — reads as a calibrated scale, not a
+           decorative progress bar */
+        .md-readout-row__track::before {
+          content: "";
+          position: absolute; inset: 0;
+          background-image: repeating-linear-gradient(
+            90deg,
+            transparent 0, transparent calc(10% - 1px),
+            var(--bg-base) calc(10% - 1px), var(--bg-base) 10%
+          );
+          opacity: 0.5;
+          pointer-events: none;
+        }
+        .md-readout-row__fill {
+          position: absolute; inset: 0;
+          width: 100%;
+          border-radius: 5px;
+          background: var(--gauge-color, var(--brand-teal));
+          opacity: var(--gauge-opacity, 1);
+          transform: scaleX(var(--gauge-scale, 0));
+          transform-origin: left center;
+          transition: transform 1s cubic-bezier(0.16,1,0.3,1);
+        }
+        [dir="rtl"] .md-readout-row__fill { transform-origin: right center; }
 
         @keyframes md-fade-side {
-          from { opacity: 0; transform: translateX(-10px); }
+          from { opacity: 0; transform: translateX(-12px); }
           to   { opacity: 1; transform: translateX(0); }
         }
-
-        /* ═══ LEGEND LIST ═══ */
-        .md-legend {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 0;
-          max-width: 1600px;
-          margin: 0 auto 2rem;
-          border-top: 1px solid var(--bg-line);
-        }
-        .md-legend-item {
-          padding: 2rem 2rem 2rem 0;
-          opacity: 0;
-          transform: translateY(10px);
-          animation: md-fade-up 0.5s ease forwards;
-        }
-        .md-legend-item:nth-child(1) { animation-delay: 0.25s; }
-        .md-legend-item:nth-child(2) { animation-delay: 0.32s; }
-        .md-legend-item:nth-child(3) { animation-delay: 0.39s; }
-        .md-legend-item:nth-child(4) { animation-delay: 0.46s; }
-        .md-legend-item__num {
-          font-family: var(--ff-mono);
-          font-size: 1.05rem;
-          letter-spacing: 0.08em;
-          color: var(--ring-color, var(--brand-teal));
-          font-weight: 700;
-        }
-        .md-legend-item__num::before {
-          content: "";
-          display: inline-block;
-          width: 9px;
-          height: 9px;
-          border-radius: 50%;
-          background: var(--ring-color, var(--brand-teal));
-          margin-right: 0.5rem;
-          vertical-align: middle;
-        }
-        .md-legend-item__label {
-          font-family: var(--ff-mono);
-          font-size: 1.1rem;
-          letter-spacing: 0.04em;
-          text-transform: uppercase;
-          color: var(--ink);
-          font-weight: 600;
-          margin-top: 0.4rem;
-        }
-        .md-legend-item__val {
-          font-family: var(--ff-body);
-          font-size: 1.25rem;
-          color: var(--ink-60);
-          margin-top: 0.3rem;
-        }
-
         @keyframes md-fade-up {
           from { opacity: 0; transform: translateY(16px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -439,56 +364,67 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
 
         /* ═══ MODEL COMPARISON — small multiples ═══ */
         .md-compare {
-          max-width: 1600px;
+          max-width: 1200px;
           margin: 0 auto;
-          padding-top: 2.5rem;
-          border-top: 1px solid var(--bg-line);
+          padding-top: 2.75rem;
         }
         .md-compare__title {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
           font-family: var(--ff-mono);
-          font-size: 0.78rem;
-          letter-spacing: 0.14em;
+          font-size: 0.76rem;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--ink-35);
           margin-bottom: 1.5rem;
         }
+        .md-compare__title::before {
+          content: "";
+          flex: 0 0 20px;
+          height: 1px;
+          background: var(--bg-line);
+        }
         .md-compare__grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 1.25rem;
+          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+          background: var(--bg-surface);
+          border: 1px solid var(--bg-line);
+          border-radius: 14px;
+          overflow: hidden;
         }
         .md-compare__panel {
           background: var(--bg-surface);
-          border: 1px solid var(--bg-line);
-          border-radius: 12px;
-          padding: 1.25rem 1.4rem;
+          border-left: 1px solid var(--bg-line);
+          border-top: 1px solid var(--bg-line);
+          padding: 1.25rem 1.4rem 1.4rem;
           opacity: 0;
-          transform: translateY(12px);
+          transform: translateY(10px);
           animation: md-fade-up 0.5s ease forwards;
         }
         .md-compare__panel-label {
           display: block;
           font-family: var(--ff-mono);
-          font-size: 0.7rem;
+          font-size: 0.68rem;
           letter-spacing: 0.08em;
           text-transform: uppercase;
           color: var(--ink-60);
-          margin-bottom: 1rem;
+          margin-bottom: 1.1rem;
         }
         .md-compare__bars {
           display: flex;
           flex-direction: column;
-          gap: 0.6rem;
+          gap: 0.75rem;
         }
         .md-compare__bar-row {
           display: grid;
-          grid-template-columns: minmax(4.2rem, auto) 1fr auto;
+          grid-template-columns: minmax(4rem, auto) 1fr auto;
           align-items: center;
-          gap: 0.6rem;
+          gap: 0.65rem;
         }
         .md-compare__bar-name {
           font-family: var(--ff-mono);
-          font-size: 0.66rem;
+          font-size: 0.64rem;
           letter-spacing: 0.02em;
           color: var(--ink-60);
           white-space: nowrap;
@@ -497,67 +433,79 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
         }
         .md-compare__bar-track {
           position: relative;
-          height: 10px;
+          height: 8px;
           background: var(--bg-line);
-          border-radius: 5px;
+          border-radius: 4px;
           overflow: hidden;
+        }
+        /* same tick-scale language as the readout bars above — one visual
+           system, not two different chart styles on the same page */
+        .md-compare__bar-track::before {
+          content: "";
+          position: absolute; inset: 0;
+          background-image: repeating-linear-gradient(
+            90deg,
+            transparent 0, transparent calc(20% - 1px),
+            var(--bg-base) calc(20% - 1px), var(--bg-base) 20%
+          );
+          opacity: 0.5;
+          pointer-events: none;
         }
         .md-compare__bar-fill {
           position: absolute;
           inset: 0;
           width: 100%;
-          border-radius: 5px;
+          border-radius: 4px;
           background: var(--bar-color);
-          opacity: 0.62;
+          opacity: 0.55;
           transform: scaleX(var(--bar-scale, 0));
           transform-origin: left center;
-          transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
+          transition: transform 0.7s cubic-bezier(0.16,1,0.3,1);
         }
         [dir="rtl"] .md-compare__bar-fill { transform-origin: right center; }
         .md-compare__bar-fill--on { opacity: 1; }
         .md-compare__bar-val {
           font-family: var(--ff-mono);
           font-weight: 700;
-          font-size: 0.72rem;
+          font-size: 0.7rem;
           color: var(--ink);
           white-space: nowrap;
           text-align: right;
           min-width: 3.4rem;
+          font-variant-numeric: tabular-nums;
         }
         .md-compare__legend {
           display: flex;
           flex-wrap: wrap;
           gap: 1.25rem;
-          margin-top: 1.5rem;
+          margin-top: 1.25rem;
         }
         .md-compare__legend-item {
           display: flex;
           align-items: center;
-          gap: 0.45rem;
+          gap: 0.5rem;
           font-family: var(--ff-mono);
           font-size: 0.7rem;
           letter-spacing: 0.04em;
           color: var(--ink-60);
         }
         .md-compare__legend-dot {
-          width: 8px; height: 8px;
-          border-radius: 2px;
+          width: 7px; height: 7px;
+          border-radius: 50%;
           background: var(--bar-color);
           flex-shrink: 0;
         }
 
         @media (max-width: 700px) {
-          .md-compare__grid { grid-template-columns: 1fr; }
+          .md-compare__grid { grid-template-columns: 1fr; border-radius: 12px; }
           .md-compare__bar-row { grid-template-columns: minmax(3.6rem, auto) 1fr auto; gap: 0.4rem; }
           .md-compare__bar-name { font-size: 0.6rem; }
         }
 
-        @media(max-width: 700px) {
-          .md-gauge-box { max-width: 92vw; aspect-ratio: 1.05; }
-          .md-gauge-callout__icon { width: 26px; height: 26px; }
-          .md-gauge-callout__val { font-size: 0.8rem; }
-          .md-gauge-callout__label { font-size: 0.5rem; }
-          .md-legend { grid-template-columns: repeat(2, 1fr); gap: 0.75rem 0; }
+        @media (max-width: 700px) {
+          .md-readout-row { padding: 1rem 1.1rem; }
+          .md-readout-row__label { font-size: 0.68rem; }
+          .md-readout-row__icon svg { width: 15px; height: 15px; }
           .md-head__title { font-size: 1rem; }
           .md-head { margin-bottom: 1.25rem; }
         }
@@ -569,82 +517,42 @@ export default function MachineDiagram({ image, name, specs, specKeys, modelInde
         <h2 className="md-head__title">{t("titlePrefix")} &nbsp;<em>{t("titleEm")}</em></h2>
       </div>
 
-      {/* concentric ring gauge — top specs as nested quarter-arcs, fill
-          and value live-animated (see animGauge/animateTo above) */}
-      <div className="md-gauge-wrap">
-        <div className="md-gauge-box" ref={gaugeBoxRef}>
-          <svg viewBox="0 0 780 400" className="md-gauge-svg">
-            {animGauge.map((s, i) => {
-              const rOuter = 260 - i * 56;
-              const rInner = rOuter - 46;
-              const color = GAUGE_COLORS[i % GAUGE_COLORS.length];
-              const sweep = (s.pct / 100) * 90;
-              const tipY = 380 - rOuter;
-              return (
-                <g key={s.label} className="md-gauge-ring" style={{ "--ring-color": color } as React.CSSProperties}>
-                  <path d={ringPath(340, 380, rInner, rOuter, -90, 0)} className="md-gauge-ring-bg" />
-                  <path
-                    d={ringPath(340, 380, rInner, rOuter, -90, -90 + sweep)}
-                    className="md-gauge-ring-fill"
-                    style={{ "--ring-color": color } as React.CSSProperties}
-                  />
-                  {/* callout line from the arc's leading tip out to the left */}
-                  <line
-                    x1={340}
-                    y1={tipY}
-                    x2={90 - i * 8}
-                    y2={tipY}
-                    className="md-gauge-line"
-                    style={{ "--ring-color": color } as React.CSSProperties}
-                  />
-                  <circle cx={340} cy={tipY} r={4.5} className="md-gauge-dot" style={{ "--ring-color": color } as React.CSSProperties} />
-                </g>
-              );
-            })}
-          </svg>
-
-          {/* icon + value callouts, positioned to match each ring's tip */}
-          {animGauge.map((s, i) => {
-            const rOuter = 260 - i * 56;
-            const topPct = ((380 - rOuter) / 400) * 100;
-            const leftPct = ((90 - i * 8) / 780) * 100;
-            const Icon = iconForLabel(s.label);
-            const color = GAUGE_COLORS[i % GAUGE_COLORS.length];
-            return (
-              <div
-                key={s.label}
-                className="md-gauge-callout"
-                style={{
-                  top: `${topPct}%`,
-                  left: `${leftPct}%`,
-                  transform: "translate(-100%, -50%)",
-                  "--ring-color": color,
-                  animationDelay: `${0.25 + i * 0.08}s`,
-                } as React.CSSProperties}
-              >
-                <span className="md-gauge-callout__icon"><Icon size={38} strokeWidth={2} /></span>
-                <span className="md-gauge-callout__text">
-                  <span className="md-gauge-callout__val">{formatValue(s.value)}{s.unit}</span>
-                  <span className="md-gauge-callout__label">{s.label}</span>
+      {/* instrument readout — one full-width bar per key spec, styled like
+          a machine's own gauge strip (tick scale + fill + digital numeral).
+          Fill and value live-animated (see animGauge/animateTo above).
+          Always one column at any width — there's no arc geometry to break
+          on a narrow screen, the bars just get shorter. */}
+      <div className="md-readout" ref={gaugeBoxRef}>
+        {animGauge.map((s, i) => {
+          const Icon = iconForLabel(s.label);
+          const opacity = GAUGE_TINTS[i % GAUGE_TINTS.length];
+          return (
+            <div
+              key={s.label}
+              className="md-readout-row"
+              style={{
+                "--gauge-color": "var(--brand-teal)",
+                "--gauge-opacity": opacity,
+                "--gauge-scale": s.pct / 100,
+                animationDelay: `${0.15 + i * 0.08}s`,
+              } as React.CSSProperties}
+            >
+              <div className="md-readout-row__head">
+                <span className="md-readout-row__label">
+                  <span className="md-readout-row__icon"><Icon size={16} strokeWidth={2} /></span>
+                  {s.label}
+                </span>
+                <span className="md-readout-row__val">
+                  {formatValue(s.value)}<small>{s.unit}</small>
                 </span>
               </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* numbered legend — one row per ring, outermost first */}
-      {animGauge.length > 0 && (
-        <div className="md-legend">
-          {animGauge.map((s, i) => (
-            <div key={s.label} className="md-legend-item" style={{ "--ring-color": GAUGE_COLORS[i % GAUGE_COLORS.length] } as React.CSSProperties}>
-              <span className="md-legend-item__num">0{i + 1}</span>
-              <span className="md-legend-item__label">{s.label}</span>
-              <span className="md-legend-item__val">{formatValue(s.value)}{s.unit}</span>
+              <div className="md-readout-row__track">
+                <div className="md-readout-row__fill" />
+              </div>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
 
       {/* model comparison — small multiples: one panel per spec, each a
           per-model bar group. Every spec keeps its own scale (mixing mm,

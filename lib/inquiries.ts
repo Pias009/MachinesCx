@@ -20,6 +20,7 @@ export interface CreateInquiryInput {
   machines?: InquiryMachine[];
   parts?: InquiryPart[];
   source?: string;
+  flow?: string;
 }
 
 function escapeHtml(s: string) {
@@ -71,6 +72,7 @@ export async function createInquiry(body: CreateInquiryInput) {
     parts: body.parts ?? [],
     status: "new",
     source: body.source ?? "direct",
+    flow: body.flow ?? "",
   });
 
   const notifyTo = process.env.INQUIRY_NOTIFY_EMAIL || process.env.ADMIN_EMAIL;

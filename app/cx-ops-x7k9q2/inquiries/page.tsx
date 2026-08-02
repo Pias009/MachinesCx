@@ -20,7 +20,21 @@ interface InquiryRow {
   status: "new" | "read" | "replied";
   replies: InquiryReply[];
   source: string;
+  flow?: string;
   createdAt: string;
+}
+
+// `flow` is a free-form UI-grouping tag (e.g. "production-line:template:retail-bag-line"
+// or "production-line:custom") — only the production-line builder sets it today.
+// Render just the readable segment after the last ":" as a small badge.
+const FLOW_LABELS: Record<string, string> = {
+  "production-line:custom": "Production Line · Custom",
+  "production-line:template:retail-bag-line": "Production Line · Retail Bag Line",
+  "production-line:template:roll-bag-line": "Production Line · Roll Bag Line",
+};
+function flowLabel(flow: string | undefined): string | null {
+  if (!flow) return null;
+  return FLOW_LABELS[flow] ?? flow;
 }
 
 const TYPE_CONFIG: Record<InquiryType, { label: string; icon: typeof Wrench; color: string }> = {
@@ -262,6 +276,15 @@ export default function InquiriesPage() {
                         <SourceIcon name={inq.source} />
                         {SOURCE_CONFIG[inq.source]?.label ?? "Unknown"}
                       </span>
+                      {flowLabel(inq.flow) && (
+                        <span style={{
+                          padding: "0.1rem 0.45rem", borderRadius: 5,
+                          background: "rgba(43,191,179,0.14)", color: "var(--brand-teal)",
+                          fontFamily: "var(--ff-body)", fontSize: "0.66rem", fontWeight: 700,
+                        }}>
+                          {flowLabel(inq.flow)}
+                        </span>
+                      )}
                     </div>
                     <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.75rem", color: "rgba(255,255,255,0.35)" }}>
                       {timeAgo(inq.createdAt)}
@@ -362,6 +385,16 @@ function InquiryDetail({ inquiry, onReplied }: { inquiry: InquiryRow; onReplied:
           }}>
             {STATUS_LABEL[inquiry.status]}
           </span>
+          {flowLabel(inquiry.flow) && (
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: "0.25rem",
+              padding: "0.2rem 0.55rem", borderRadius: 5,
+              background: "rgba(43,191,179,0.14)", color: "var(--brand-teal)",
+              fontFamily: "var(--ff-body)", fontSize: "0.75rem", fontWeight: 700,
+            }}>
+              {flowLabel(inquiry.flow)}
+            </span>
+          )}
         </div>
         <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.6rem", color: "#fff", margin: 0 }}>{inquiry.name}</h2>
       </div>

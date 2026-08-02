@@ -1,0 +1,41 @@
+{
+  "templates": [
+    {
+      "id": "retail-bag-line",
+      "name": "Printed Retail Bag Line",
+      "tagline": "Resin in, branded bags out — full-colour printing built into the line.",
+      "heroImage": "/machines/flexo-6c-nobg.png",
+      "bestFor": "Brands and retailers who need their logo, colours, or barcode printed directly on the bag.",
+      "whyBest": [
+        "6-colour flexo printing at 260 m/min keeps branding in-house instead of outsourcing to a print shop.",
+        "±0.1 mm registration means small text and fine barcodes stay sharp at full production speed.",
+        "Closed-loop pelletizing recovers edge trim and reject film back into resin, cutting material waste across the whole line.",
+        "One continuous line from film to finished bag — fewer handoffs, less work-in-progress sitting between machines."
+      ],
+      "steps": [
+        { "slug": "abcde-2200", "stage": "Film Extrusion", "role": "Resin is melted and blown into a 5-layer co-extruded film, 2,100 mm wide." },
+        { "slug": "flexo-6c", "stage": "Flexo Printing", "role": "The film is printed in up to 6 colours at 260 m/min with ±0.1 mm registration." },
+        { "slug": "t-pro-heatseal", "stage": "Bag Converting", "role": "Printed film is heat-sealed and cut into finished bags across multiple lanes." },
+        { "slug": "cx-pelletizing", "stage": "Closed-Loop Recycling", "role": "Edge trim and reject bags are pelletized back into resin and fed to step one." }
+      ]
+    },
+    {
+      "id": "roll-bag-line",
+      "name": "Roll Bag / Grocery Line",
+      "tagline": "A simpler, lower-cost line for plain retail and grocery roll bags.",
+      "heroImage": "/machines/rgb-rollbag.png",
+      "bestFor": "Grocery, produce, and retail roll bags where speed and cost matter more than printed branding.",
+      "whyBest": [
+        "No printing stage — lower equipment cost and simpler operation than a full printed line.",
+        "Inline perforation and automatic core-cutting produce retail-ready rolls with no manual finishing.",
+        "Fewer machines means a smaller footprint and faster line commissioning on-site.",
+        "The same closed-loop pelletizing recovers scrap film into resin, so the line still keeps material waste down."
+      ],
+      "steps": [
+        { "slug": "abcde-2200", "stage": "Film Extrusion", "role": "Resin is melted and blown into a 5-layer co-extruded film, 2,100 mm wide." },
+        { "slug": "rgb-rollbag", "stage": "Roll Winding", "role": "Film is perforated and wound onto rolls with automatic core-cutting for retail-ready packs." },
+        { "slug": "cx-pelletizing", "stage": "Closed-Loop Recycling", "role": "Edge trim and scrap film are pelletized back into resin and fed to step one." }
+      ]
+    }
+  ]
+}

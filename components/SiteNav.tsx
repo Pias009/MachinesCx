@@ -572,6 +572,7 @@ export default function SiteNav() {
             <span className="sn__divider" />
 
             <TransitionLink href="/products" className="sn__link sn__link--hide">{t("allProducts")}</TransitionLink>
+            <TransitionLink href="/production-line" className="sn__link sn__link--hide">{t("productionLine")}</TransitionLink>
             <TransitionLink href="/news"     className="sn__link sn__link--hide">{t("news")}</TransitionLink>
             <TransitionLink href="/about"    className="sn__link sn__link--hide">{t("about")}</TransitionLink>
           </div>
@@ -624,6 +625,7 @@ export default function SiteNav() {
             </TransitionLink>
           ))}
           <TransitionLink href="/products" className="sn__mobile-link" onClick={() => setMobileOpen(false)}>{t("allProducts")}</TransitionLink>
+          <TransitionLink href="/production-line" className="sn__mobile-link" onClick={() => setMobileOpen(false)}>{t("productionLine")}</TransitionLink>
           <TransitionLink href="/news"     className="sn__mobile-link" onClick={() => setMobileOpen(false)}>{t("news")}</TransitionLink>
           <TransitionLink href="/about"    className="sn__mobile-link" onClick={() => setMobileOpen(false)}>{t("about")}</TransitionLink>
           <TransitionLink href="/inquiries"  className="sn__mobile-link" onClick={() => setMobileOpen(false)}>{t("contact")}</TransitionLink>

@@ -899,6 +899,8 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .spec-table th, .spec-table td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid var(--bg-line); vertical-align: top; }
 .spec-table thead th { background: var(--slate); font-family: var(--ff-display); text-transform: uppercase; font-size: 1rem; color: #fff; }
 .spec-table thead th:first-child { background: #1e293b; }
+[data-theme="light"] .spec-table thead th              { background: #ffffff; color: #0d2220; border-bottom: 2px solid rgba(13,34,32,0.12); }
+[data-theme="light"] .spec-table thead th:first-child   { background: #ffffff; }
 .spec-table .spec-label b { display: block; font-weight: 600; font-size: 0.9rem; color: var(--ink); }
 .spec-table .spec-label i { font-style: normal; color: var(--ink-35); font-size: 0.8rem; }
 .spec-table td.val { font-family: var(--ff-mono); font-size: 0.85rem; color: var(--ink); }
@@ -3639,18 +3641,18 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 /* ════════════════════════════════════════
    DELIVERY ROADMAP — a horizontal row of icon-only badges (order
    confirmation → production → FAT → shipping → install) sitting on a
-   shared top rail. Only the icon shows by default — glassmorphic, layered
-   3D shadow + specular highlight. On hover (or tap on touch, via
-   .pdv2-roadmap-node--open) a vertical line drops from the badge down to
-   its text box beneath, which fades/grows in at the same time — the line
-   and box are one connected reveal, not two separate effects.
+   shared top rail, glassmorphic with a layered 3D shadow + specular
+   highlight. Every stage's text card is visible by default (lead time is
+   a top-of-mind decision factor, not something worth making a buyer dig
+   for); hover/tap still lifts the card and brightens the badge as a
+   lighter touch of interactivity.
 ════════════════════════════════════════ */
 .pdv2-roadmap {
   position: relative;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: clamp(.5rem, 2vw, 1.5rem);
-  padding: 1.5rem 0 0;
+  padding: clamp(3rem, 6vw, 4.5rem) 0 0;
 }
 @media (max-width: 720px) {
   .pdv2-roadmap { grid-template-columns: repeat(3, 1fr); row-gap: 3.5rem; }
@@ -3726,21 +3728,15 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   z-index: 3;
 }
 
-/* connecting drop-line from the badge down to its text box — scales in
-   from the top together with the box below, one continuous reveal */
+/* connecting drop-line from the badge down to its text box — always
+   shown (cards no longer hide behind hover/tap) */
 .pdv2-roadmap-node__drop {
   width: 2px; height: 1.75rem;
   background: linear-gradient(to bottom, var(--brand-teal), rgba(43,191,179,.15));
-  transform: scaleY(0); transform-origin: top center;
-  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
-}
-.pdv2-roadmap-node:hover .pdv2-roadmap-node__drop,
-.pdv2-roadmap-node--open .pdv2-roadmap-node__drop {
-  transform: scaleY(1);
 }
 
-/* the text box — hidden by default, revealed together with the drop-line
-   on hover/tap. Grows down from the line rather than just fading in. */
+/* the text box — always visible; a light lift on hover is still a nice
+   touch but the card itself no longer hides by default. */
 .pdv2-roadmap-node__body {
   width: 100%;
   display: flex; flex-direction: column; gap: .5rem;
@@ -3750,27 +3746,16 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   border: 1px solid var(--bg-line);
   border-radius: 1rem; padding: 1.1rem 1.1rem;
   box-shadow: 0 20px 44px -20px rgba(0,0,0,.55);
-  opacity: 0; visibility: hidden;
-  max-height: 0;
-  transform: translateY(-8px) scale(.97);
-  transform-origin: top center;
-  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.16,1,0.3,1), max-height 0.3s cubic-bezier(0.16,1,0.3,1), visibility 0s linear 0.25s;
+  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, border-color 0.3s ease;
 }
 .pdv2-roadmap-node:hover .pdv2-roadmap-node__body,
 .pdv2-roadmap-node--open .pdv2-roadmap-node__body {
-  opacity: 1; visibility: visible;
-  max-height: 280px;
-  transform: translateY(0) scale(1);
-  transition: opacity 0.25s ease 0.05s, transform 0.35s cubic-bezier(0.16,1,0.3,1) 0.05s, max-height 0.35s cubic-bezier(0.16,1,0.3,1) 0.05s, visibility 0s;
+  transform: translateY(-3px);
+  border-color: rgba(43,191,179,.35);
+  box-shadow: 0 24px 48px -20px rgba(0,0,0,.6);
 }
 @media (prefers-reduced-motion: reduce) {
-  .pdv2-roadmap-node__body { transition: opacity 0.15s ease; }
-}
-/* on touch/mobile, an open box needs room — let it push the grid row
-   rather than floating (grid items don't overlap by default, so this
-   just needs the max-height to have already accounted for content) */
-@media (max-width: 720px) {
-  .pdv2-roadmap-node__body { position: relative; }
+  .pdv2-roadmap-node__body { transition: none; }
 }
 
 .pdv2-roadmap-node__top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }

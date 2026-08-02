@@ -13,7 +13,7 @@ import CustomSections from "@/components/CustomSections";
 import MachineParts from "@/components/MachineParts";
 import ProductStage3D from "@/components/ProductStage3D";
 import { Grain, PlusMark, SectionHead, SubHead } from "@/components/EditorialKit";
-import type { ProductFamily, Category } from "@/lib/products";
+import type { ProductFamily, Category, DeliveryPhase, SetupStep } from "@/lib/products";
 import { familyImage, familyImages, parseYouTubeId, stagePhotos } from "@/lib/products";
 
 const MachineDiagram = dynamic(() => import("@/components/MachineDiagram"), { ssr: false });
@@ -96,6 +96,153 @@ const CALLOUT_SPECS: Record<string, string[]> = {
 const CALLOUT_POS = [
   { x: 12, y: 22 }, { x: 82, y: 18 }, { x: 16, y: 78 }, { x: 80, y: 76 },
 ];
+
+/* Sums every deliveryGuide phase's "duration" text (e.g. "1–2 days",
+   "35–45 days") into one real low–high day range for the roadmap's
+   running-total bar. Falls back gracefully (returns null) if any phase's
+   duration doesn't parse as a day range, rather than showing a wrong sum. */
+function sumDurationRange(durations: string[]): { low: number; high: number } | null {
+  let low = 0, high = 0;
+  for (const d of durations) {
+    const m = d.match(/(\d+)\s*[–-]\s*(\d+)/);
+    if (!m) return null;
+    low += parseInt(m[1], 10);
+    high += parseInt(m[2], 10);
+  }
+  return { low, high };
+}
+
+/* Horizontal row of icon-only badges on a shared rail; the stage's text
+   box is hidden until the visitor hovers it (desktop, pure CSS :hover) or
+   taps it (touch — no hover to rely on, so a real "open" click-state
+   drives the same reveal via --open class, toggled closed by tapping the
+   same node again or anywhere else). A connecting line drops from the
+   badge to the box as part of the same reveal. */
+function DeliveryRoadmap({ phases }: { phases: DeliveryPhase[] }) {
+  const t = useTranslations("productDetail");
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const total = sumDurationRange(phases.map((p) => p.duration));
+
+  // tap-to-close on touch devices — a tap outside the open node (or on the
+  // page generally) closes it, since there's no hover-out to fall back on
+  useEffect(() => {
+    if (openIdx === null) return;
+    function onPointerDown(e: PointerEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpenIdx(null);
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [openIdx]);
+
+  return (
+    <>
+      <div className="pdv2-roadmap" data-reveal="scale" ref={rootRef}>
+        {phases.map((phase, i) => (
+          <div
+            key={i}
+            className={`pdv2-roadmap-node${openIdx === i ? " pdv2-roadmap-node--open" : ""}`}
+            style={{ "--road-i": i } as React.CSSProperties}
+          >
+            <span className="pdv2-roadmap-node__feed" aria-hidden="true" />
+            <button
+              type="button"
+              className="pdv2-roadmap-node__marker"
+              aria-expanded={openIdx === i}
+              aria-label={phase.label}
+              onClick={() => setOpenIdx((cur) => (cur === i ? null : i))}
+            >
+              <DeliveryStageIcon name={resolveDeliveryStage(phase.label)} size={26} />
+              <span className="pdv2-roadmap-node__num">{i + 1}</span>
+            </button>
+            <span className="pdv2-roadmap-node__drop" aria-hidden="true" />
+            <div className="pdv2-roadmap-node__body">
+              <div className="pdv2-roadmap-node__top">
+                <span className="pdv2-roadmap-node__stage">{t("deliveryRoadmapStageLabel", { num: i + 1 })}</span>
+                <span className="pdv2-roadmap-node__duration">{phase.duration}</span>
+              </div>
+              <h3 className="pdv2-roadmap-node__title">{phase.label}</h3>
+              <p className="pdv2-roadmap-node__detail">{phase.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {total && (
+        <div className="pdv2-roadmap-total">
+          <span className="pdv2-roadmap-total__label">{t("deliveryRoadmapTotalLabel")}</span>
+          <span className="pdv2-roadmap-total__val">
+            {t("deliveryRoadmapTotalVal", { low: total.low, high: total.high })}
+          </span>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* Step-by-step installation walkthrough — one step shown at a time with
+   its real admin-uploaded photo (falls back to the schematic icon panel
+   for any step not yet photographed) and the FULL detail text, not the
+   old grid's 2-line-clamped preview. Progress dots + Prev/Next make this
+   read as an actual manual to walk through, not a set of cards to skim. */
+function InstallationWalkthrough({ steps }: { steps: SetupStep[] }) {
+  const t = useTranslations("productDetail");
+  const [idx, setIdx] = useState(0);
+  const step = steps[idx];
+
+  return (
+    <div className="pdv2-iw">
+      <div className="pdv2-iw__progress" role="tablist" aria-label={t("setupInstallationGuide")}>
+        {steps.map((s, i) => (
+          <button
+            key={i}
+            type="button"
+            role="tab"
+            aria-selected={i === idx}
+            aria-label={t("installStepAria", { num: i + 1, total: steps.length })}
+            className={`pdv2-iw__dot${i === idx ? " pdv2-iw__dot--on" : i < idx ? " pdv2-iw__dot--done" : ""}`}
+            onClick={() => setIdx(i)}
+          >
+            <span className="pdv2-iw__dot-num">{i < idx ? "✓" : i + 1}</span>
+            <span className="pdv2-iw__dot-label">{s.title}</span>
+          </button>
+        ))}
+      </div>
+
+      <div key={idx} className="pdv2-iw__stage" data-reveal="scale">
+        <div className="pdv2-iw__media">
+          {step.image ? (
+            <Image src={step.image} alt={step.title} fill sizes="(max-width: 900px) 100vw, 640px" className="pdv2-iw__photo" />
+          ) : (
+            <div className="pdv2-iw__media--schematic">
+              <span className="pdv2-iw__ghost" aria-hidden="true">{String(idx + 1).padStart(2, "0")}</span>
+              <span className="pdv2-iw__ring" aria-hidden="true" />
+              <span className="pdv2-iw__icon"><ProcessIcon name={resolveIcon(step.title)} size={52} /></span>
+            </div>
+          )}
+          <span className="pdv2-iw__badge">{t("installStepBadge", { num: idx + 1, total: steps.length })}</span>
+        </div>
+
+        <div className="pdv2-iw__body">
+          <span className="pdv2-iw__stepnum">{String(idx + 1).padStart(2, "0")}</span>
+          <h3 className="pdv2-iw__title">{step.title}</h3>
+          <p className="pdv2-iw__detail">{step.detail}</p>
+
+          <div className="pdv2-iw__nav">
+            <button type="button" className="pdv2-iw__nav-btn" disabled={idx === 0} onClick={() => setIdx((i) => i - 1)}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              {t("installPrevStep")}
+            </button>
+            <button type="button" className="pdv2-iw__nav-btn pdv2-iw__nav-btn--primary" disabled={idx === steps.length - 1} onClick={() => setIdx((i) => i + 1)}>
+              {t("installNextStep")}
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 2l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function StarRating({ n }: { n: number }) {
   const t = useTranslations("productDetail");
@@ -588,35 +735,13 @@ export default function ProductDetail({ family, category, related }: Props) {
                 </div>
               ))}
 
-              {/* installation guide — engineering-spec-sheet cards. Every
-                  card carries its step on schematic linework + index
-                  typography (real SVG icons, not a photo/logo placeholder)
-                  so the set stays consistent and premium regardless of
-                  whether a site photo has been uploaded for this step. */}
+              {/* installation guide — a real step-by-step walkthrough (photo +
+                  full instructions + progress + prev/next), not a grid of
+                  cards to skim. See InstallationWalkthrough above. */}
               {family.installation && family.installation.length > 0 && (
                 <>
                   <SubHead title={t("setupInstallationGuide")} />
-                  <div className="pdv2-guide-grid">
-                    {family.installation.map((step, i) => (
-                      <div key={i} className="pdv2-guide-card" data-reveal="scale" style={{ "--guide-i": i } as React.CSSProperties}>
-                        <span className="pdv2-guide-card__connector" aria-hidden="true" />
-                        <div className="pdv2-guide-card__media pdv2-guide-card__media--schematic">
-                          <span className="pdv2-guide-card__ghost" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
-                          <span className="pdv2-guide-card__ring" aria-hidden="true" />
-                          <span className="pdv2-guide-card__bracket pdv2-guide-card__bracket--tl" aria-hidden="true" />
-                          <span className="pdv2-guide-card__bracket pdv2-guide-card__bracket--br" aria-hidden="true" />
-                          <span className="pdv2-guide-card__icon">
-                            <ProcessIcon name={resolveIcon(step.title)} size={44} />
-                          </span>
-                          <span className="pdv2-guide-card__num">{String(i + 1).padStart(2, "0")}</span>
-                        </div>
-                        <div className="pdv2-guide-card__body">
-                          <h3 className="pdv2-guide-card__title">{step.title}</h3>
-                          <p className="pdv2-guide-card__detail">{step.detail}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <InstallationWalkthrough steps={family.installation} />
                 </>
               )}
 
@@ -795,19 +920,7 @@ export default function ProductDetail({ family, category, related }: Props) {
           })}
 
           <div className="pdv2-wrap">
-            <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl bg-[var(--bg-line)] sm:grid-cols-2 lg:grid-cols-4" data-reveal="scale">
-              {family.deliveryGuide.map((phase, i) => (
-                <div key={i} className="relative flex flex-col gap-3 bg-[var(--bg-surface)] p-6">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[1.4rem] font-bold leading-none text-[var(--ink-15)]">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="text-[var(--brand-teal)]"><DeliveryStageIcon name={resolveDeliveryStage(phase.label)} size={32} /></span>
-                  </div>
-                  <h3 className="text-[1.15rem] leading-tight text-[var(--ink)]" style={{ fontFamily: "var(--ff-display)" }}>{phase.label}</h3>
-                  <p className="flex-1 text-[0.85rem] leading-relaxed text-[var(--ink-60)]">{phase.detail}</p>
-                  <span className="font-mono text-[0.66rem] uppercase tracking-[0.14em] text-[var(--brand-teal)]">{phase.duration}</span>
-                </div>
-              ))}
-            </div>
+            <DeliveryRoadmap phases={family.deliveryGuide} />
           </div>
         </section>
       )}
@@ -877,7 +990,7 @@ export default function ProductDetail({ family, category, related }: Props) {
             {/* right — review carousel */}
             <div className="flex flex-col justify-center gap-8 px-6 py-14 sm:px-10 lg:px-16" data-reveal>
               <h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] leading-[0.95] text-[var(--ink)]" style={{ fontFamily: "var(--ff-display)" }}>
-                {t.rich("whatCustomersThink", { em: (chunks) => <em className="text-[var(--brand-teal)] not-italic">{chunks}</em> })}
+                {t.rich("whatCustomersThink", { em: (chunks) => <em className="text-[var(--brand-teal)] not-italic">{chunks}</em>, br: () => <br /> })}
               </h2>
 
               <div className="relative rounded-xl border border-[var(--bg-line)] p-8">

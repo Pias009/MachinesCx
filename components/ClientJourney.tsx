@@ -369,31 +369,7 @@ export default function ClientJourney() {
           cursor: pointer;
           transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), border-color 0.2s ease, box-shadow 0.2s ease, grid-column 0.2s ease;
         }
-        .cj__step:hover {
-          transform: translateY(-4px);
-          border-color: var(--step-color);
-          box-shadow: 0 16px 32px -16px var(--step-color);
-        }
-        /* hover preview — grid-rows 0fr→1fr collapses/expands without
-           measuring content height in JS, and never affects sibling cards'
-           layout since it's contained inside this card's own flex column.
-           Delayed slightly on enter so a fast mouse pass-over doesn't
-           trigger it, immediate on leave so it doesn't linger. */
-        .cj__preview {
-          display: grid;
-          grid-template-rows: 0fr;
-          transition: grid-template-rows 0.3s cubic-bezier(0.16,1,0.3,1) 0.1s;
-        }
-        .cj__step:hover .cj__preview {
-          grid-template-rows: 1fr;
-        }
-        .cj__desc--preview {
-          overflow: hidden;
-          min-height: 0;
-        }
-        @media (hover: none) {
-          .cj__preview { display: none; }
-        }
+        .cj__preview { display: none; }
         /* clicked card flips away (rotateY) and fades — the enlarged
            version reappears as a centered overlay, driven by GSAP, so this
            just hides the source card while that overlay is open */

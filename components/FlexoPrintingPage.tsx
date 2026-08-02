@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import AetherBtn from "@/components/AetherBtn";
 import { CldImage } from "next-cloudinary";
 import { familiesByCategory, type ProductFamily } from "@/lib/products";
 import SpecTable from "@/components/SpecTable";
+import { useScrollReveal } from "@/lib/useScrollReveal";
 
 /* ── gallery photo src list; alt text is translated and pulled from
    flexoPrintingPage.gallery.* at render time, keyed by array index ── */
@@ -63,20 +64,31 @@ export default function FlexoPrintingPage() {
   const colourTierCopy = t.raw("colourTiers") as Record<string, { label: string; badge: string }>;
   const driveSystemCopy = t.raw("driveSystem") as Record<string, string>;
 
+  // entrance animation — each section/card reveals as it scrolls into
+  // view instead of appearing all at once; see lib/useScrollReveal.ts
+  const rootRef = useRef<HTMLDivElement>(null);
+  useScrollReveal(rootRef);
+
   return (
-    <>
+    <div ref={rootRef}>
       <style suppressHydrationWarning>{`
         .fp-tier-btn {
           display:flex; flex-direction:column; align-items:flex-start;
           gap:0.2rem; padding:1rem 1.4rem;
           border:1px solid var(--line); background:var(--surface);
-          cursor:pointer; transition:border-color .18s, background .18s;
-          text-align:left;
+          cursor:pointer; text-align:left;
+          transition:border-color .2s cubic-bezier(.16,1,.3,1), background .2s cubic-bezier(.16,1,.3,1), transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s cubic-bezier(.16,1,.3,1);
         }
-        .fp-tier-btn:hover { border-color:var(--slate-60); }
+        .fp-tier-btn:hover {
+          border-color:var(--brand-teal);
+          transform:translateY(-3px);
+          box-shadow:0 12px 24px -14px rgba(43,191,179,0.35);
+        }
+        .fp-tier-btn:active { transform:translateY(-1px) scale(0.99); }
         .fp-tier-btn--active {
           border-color:var(--brand-red) !important;
-          background:rgba(225,29,72,0.04) !important;
+          background:var(--brand-teal-glow) !important;
+          box-shadow:0 12px 24px -14px rgba(43,191,179,0.4);
         }
         .fp-tier-label { font-family:var(--ff-display); font-size:1.35rem; letter-spacing:.02em; color:var(--slate); line-height:1; }
         .fp-tier-sub   { font-family:var(--ff-mono); font-size:0.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--slate-60); }
@@ -84,16 +96,19 @@ export default function FlexoPrintingPage() {
           font-family:var(--ff-mono); font-size:0.64rem; letter-spacing:.18em;
           text-transform:uppercase; padding:.15rem .4rem;
           background:var(--brand-red); color:#fff; border-radius:2px;
+          transition:transform .2s cubic-bezier(.34,1.56,.64,1);
         }
+        .fp-tier-btn:hover .fp-tier-badge { transform:scale(1.06); }
 
         .fp-width-btn {
           padding:.45rem .9rem;
           border:1px solid var(--line); background:var(--surface);
           font-family:var(--ff-mono); font-size:.7rem; letter-spacing:.1em;
           color:var(--slate-60); cursor:pointer;
-          transition:border-color .15s, color .15s;
+          transition:border-color .15s ease, color .15s ease, background .15s ease, transform .15s cubic-bezier(.16,1,.3,1);
         }
-        .fp-width-btn:hover { border-color:var(--slate); color:var(--slate); }
+        .fp-width-btn:hover { border-color:var(--brand-teal); color:var(--slate); transform:translateY(-2px); }
+        .fp-width-btn:active { transform:translateY(0) scale(0.96); }
         .fp-width-btn--active {
           border-color:var(--slate) !important;
           background:var(--slate) !important;
@@ -103,10 +118,19 @@ export default function FlexoPrintingPage() {
         .fp-gallery-thumb {
           width:72px; height:52px; object-fit:cover;
           border:2px solid transparent; cursor:pointer;
-          transition:border-color .15s, opacity .15s;
+          transition:border-color .2s ease, opacity .2s ease, transform .2s cubic-bezier(.16,1,.3,1);
           opacity:.55;
         }
-        .fp-gallery-thumb:hover { opacity:.85; }
+        .fp-gallery-thumb:hover { opacity:.85; transform:translateY(-2px); }
+
+        /* main hero photo crossfades in on gallery swap instead of popping
+           — key={activeImg} on the <CldImage> forces a fresh mount per
+           photo so this animation replays every time. */
+        @keyframes fp-photo-in { from { opacity:0; transform:scale(1.02); } to { opacity:1; transform:scale(1); } }
+        .fp-hero-photo { animation:fp-photo-in .45s cubic-bezier(.16,1,.3,1) both; }
+        @media (prefers-reduced-motion: reduce) {
+          .fp-hero-photo { animation:none; }
+        }
         .fp-gallery-thumb--active { border-color:var(--brand-red) !important; opacity:1 !important; }
 
         .fp-kv { display:flex; flex-direction:column; gap:.25rem; }
@@ -155,11 +179,13 @@ export default function FlexoPrintingPage() {
           <div className="fp-hero-grid" style={{ display:"grid", gridTemplateColumns:"1fr clamp(260px,34vw,480px)", gap:"3rem", alignItems:"end" }}>
 
             {/* main image */}
-            <div className="fp-hero-img" style={{ position:"relative", aspectRatio:"16/9", background:"#0d1614", display:"flex", alignItems:"center", justifyContent:"center" }}>
+            <div className="fp-hero-img" data-reveal="scale" style={{ position:"relative", aspectRatio:"16/9", background:"#0d1614", display:"flex", alignItems:"center", justifyContent:"center" }}>
               <CldImage
+                key={activeImg}
                 src={GALLERY[activeImg].src}
                 alt={galleryCopy[activeImg]?.alt ?? ""}
                 width={1280} height={720}
+                className="fp-hero-photo"
                 style={{ width:"100%", height:"100%", objectFit:"contain", padding:"1.5rem" }}
                 sizes="60vw"
               />
@@ -174,7 +200,7 @@ export default function FlexoPrintingPage() {
             </div>
 
             {/* hero text */}
-            <div style={{ paddingBottom:"2.5rem", display:"flex", flexDirection:"column", gap:"1.2rem" }}>
+            <div data-reveal="blur" style={{ paddingBottom:"2.5rem", display:"flex", flexDirection:"column", gap:"1.2rem" }}>
               <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--brand-red)" }}>
                 {t("heroEyebrow")}
               </span>
@@ -230,7 +256,7 @@ export default function FlexoPrintingPage() {
             </div>
             <div className="fp-tier-grid" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:".75rem" }}>
               {COLOUR_TIERS.map(ct => (
-                <button key={ct.slug} onClick={() => setActiveTier(ct.slug)}
+                <button key={ct.slug} onClick={() => setActiveTier(ct.slug)} data-reveal
                   className={`fp-tier-btn${activeTier===ct.slug?" fp-tier-btn--active":""}`}>
                   <span className="fp-tier-badge">{colourTierCopy[ct.slug]?.badge}</span>
                   <span className="fp-tier-label" style={{ marginTop:".5rem" }}>{colourTierCopy[ct.slug]?.label}</span>
@@ -256,7 +282,7 @@ export default function FlexoPrintingPage() {
           </div>
 
           {/* selected model key specs */}
-          <div className="fp-kv-grid" style={{
+          <div className="fp-kv-grid" data-reveal="scale" style={{
             display:"grid", gridTemplateColumns:"repeat(4,1fr)",
             gap:"1px", background:"var(--line)",
             border:"1px solid var(--line)",
@@ -275,7 +301,7 @@ export default function FlexoPrintingPage() {
           </div>
 
           {/* full spec table for selected model */}
-          <div>
+          <div data-reveal>
             <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.68rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--slate-30)", marginBottom:"1rem" }}>
               {t("fullSpecificationFor", { model: singleModel.models[0] })}
             </div>
@@ -297,7 +323,7 @@ export default function FlexoPrintingPage() {
 
           <div style={{ display:"flex", flexDirection:"column", gap:"3rem" }}>
             {families.map((f, fi) => (
-              <article key={f.slug} className="fp-series-row" style={{ display:"grid", gridTemplateColumns:"280px 1fr", gap:"3rem", paddingBottom:"3rem", borderBottom:"1px solid var(--line)" }}>
+              <article key={f.slug} className="fp-series-row" data-reveal style={{ display:"grid", gridTemplateColumns:"280px 1fr", gap:"3rem", paddingBottom:"3rem", borderBottom:"1px solid var(--line)" }}>
 
                 {/* left — machine image + tier info */}
                 <div style={{ display:"flex", flexDirection:"column", gap:"1.2rem" }}>
@@ -336,7 +362,7 @@ export default function FlexoPrintingPage() {
       <section className="fp-dark" style={{ background:"#0d1614", padding:"4rem 0" }}>
         <div className="wrap">
           <div className="fp-substrate-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4rem", alignItems:"center" }}>
-            <div>
+            <div data-reveal="blur">
               <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--brand-red)", display:"block", marginBottom:".6rem" }}>
                 {t("substrateCompatibility")}
               </span>
@@ -348,7 +374,7 @@ export default function FlexoPrintingPage() {
               </p>
               <AetherBtn><Link href="/inquiries">{t("talkToPrintSpecialist")}</Link></AetherBtn>
             </div>
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"1px", background:"rgba(255,255,255,.08)" }}>
+            <div data-reveal="scale" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"1px", background:"rgba(255,255,255,.08)" }}>
               {(t.raw("substrateList") as string[]).map(sub => (
                 <div key={sub} style={{
                   background:"#0d1614", padding:"1.1rem 1.3rem",
@@ -371,12 +397,12 @@ export default function FlexoPrintingPage() {
         background:"var(--surface)", borderTop:"1px solid var(--line)",
         padding:"clamp(2.5rem,5vw,4rem) clamp(1.25rem,4vw,3rem)",
         display:"flex", justifyContent:"space-between", alignItems:"center", gap:"2rem", flexWrap:"wrap",
-      }}>
+      }} data-reveal>
         <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.75rem,4vw,2.8rem)", color:"var(--slate)", lineHeight:.98 }}>
           {t("needHelpChoosing")}
         </h2>
         <AetherBtn><Link href="/inquiries">{t("talkToEngineer")}</Link></AetherBtn>
       </section>
-    </>
+    </div>
   );
 }

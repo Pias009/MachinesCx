@@ -3541,242 +3541,102 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 
 
 /* ════════════════════════════════════════
-   INSTALLATION WALKTHROUGH — one step at a time (real photo + full
-   instructions + progress + prev/next), reads as an actual manual to
-   step through rather than a grid of cards to skim at a glance.
-════════════════════════════════════════ */
-.pdv2-iw { display: flex; flex-direction: column; gap: 1.5rem; }
-
-/* progress section — its own panel, visually separated from the stage
-   card below rather than sitting directly on top of it */
-.pdv2-iw__progress-section {
-  background: var(--bg-surface);
-  border: 1px solid var(--bg-line);
-  border-radius: 1rem;
-  padding: .75rem 1rem;
-}
-
-/* progress rail — small icon-first chips, no fill/border chrome; the
-   active step's icon + label pick up teal, everything else stays quiet.
-   All steps share the row width and wrap on narrow screens instead of
-   scrolling, so every step stays visible at once. */
-.pdv2-iw__progress {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem 1rem;
-  padding: .25rem .1rem .5rem;
-}
-.pdv2-iw__dot {
-  /* visual size stays small (icon+label), but padding pads the actual
-     click/tap target out to the 44px accessibility minimum */
-  flex: 0 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .2rem;
-  background: none; border: none; cursor: pointer;
-  min-width: 44px; min-height: 44px; padding: .5rem .4rem;
-}
-.pdv2-iw__dot-icon {
-  flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--ink-35);
-  transition: color .2s ease, transform .2s ease;
-}
-.pdv2-iw__dot:hover .pdv2-iw__dot-icon { color: var(--ink-60); transform: translateY(-1px); }
-.pdv2-iw__dot--on .pdv2-iw__dot-icon { color: var(--brand-teal); }
-.pdv2-iw__dot--done .pdv2-iw__dot-icon { color: var(--brand-teal); opacity: .55; }
-.pdv2-iw__dot-label {
-  font-family: var(--ff-mono); font-size: .56rem; letter-spacing: .03em;
-  color: var(--ink-35); white-space: nowrap;
-  transition: color .2s ease;
-}
-.pdv2-iw__dot--on .pdv2-iw__dot-label { color: var(--ink); }
-.pdv2-iw__dot--done .pdv2-iw__dot-label { color: var(--ink-60); }
-
-/* stage — the active step, real photo left / full instructions right */
-.pdv2-iw__stage {
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(1.5rem, 3vw, 2.5rem);
-  align-items: stretch;
-  animation: pdv2-iw-in .4s cubic-bezier(0.16,1,0.3,1);
-}
-@keyframes pdv2-iw-in {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@media (max-width: 800px) { .pdv2-iw__stage { grid-template-columns: 1fr; } }
-
-.pdv2-iw__media {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  background: var(--bg-surface);
-  border: 1px solid var(--bg-line);
-  border-radius: 1.25rem;
-  overflow: hidden;
-}
-.pdv2-iw__photo { object-fit: cover; }
-.pdv2-iw__badge {
-  position: absolute; top: .85rem; left: .85rem; z-index: 1;
-  font-family: var(--ff-mono); font-size: .6rem; letter-spacing: .12em; text-transform: uppercase;
-  color: #fff; background: rgba(4,10,10,.6); backdrop-filter: blur(4px);
-  padding: .3rem .6rem; border-radius: 999px; border: 1px solid rgba(255,255,255,.15);
-}
-.pdv2-iw__media--schematic {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(circle at 50% 42%, rgba(43,191,179,0.16), transparent 68%), var(--bg-surface);
-}
-.pdv2-iw__ghost {
-  position: absolute; right: .8rem; bottom: -.2rem;
-  font-family: var(--ff-display); font-size: 4.2rem; line-height: 1;
-  color: transparent; -webkit-text-stroke: 1px rgba(43,191,179,0.2);
-  letter-spacing: -.02em; user-select: none;
-}
-.pdv2-iw__ring {
-  position: absolute; top: 50%; left: 50%; width: 130px; height: 130px;
-  transform: translate(-50%, -50%);
-  border: 1px dashed rgba(43,191,179,0.25); border-radius: 50%;
-  animation: pdv2-iw-ring-spin 18s linear infinite;
-}
-@keyframes pdv2-iw-ring-spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .pdv2-iw__ring { animation: none; } }
-.pdv2-iw__icon {
-  position: relative; z-index: 1;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--brand-teal);
-  filter: drop-shadow(0 0 18px rgba(43,191,179,0.22));
-}
-
-.pdv2-iw__body { display: flex; flex-direction: column; gap: .4rem; }
-.pdv2-iw__stepnum {
-  font-family: var(--ff-mono); font-size: .78rem; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--brand-teal);
-}
-.pdv2-iw__title {
-  font-family: var(--ff-display); font-size: clamp(1.3rem, 2.4vw, 1.7rem);
-  color: var(--ink); line-height: 1.15;
-}
-/* full instructions — no line-clamp, the whole step reads through */
-.pdv2-iw__detail {
-  font-family: var(--ff-body); font-size: .92rem; color: var(--ink-60);
-  line-height: 1.7; flex: 1;
-}
-.pdv2-iw__nav { display: flex; justify-content: space-between; gap: 1rem; margin-top: auto; padding-top: 1rem; }
-.pdv2-iw__nav-btn {
-  display: inline-flex; align-items: center; gap: .5rem;
-  padding: .7rem 1.1rem; border-radius: .7rem; border: 1px solid var(--bg-line);
-  background: none; color: var(--ink-60); cursor: pointer; font-size: .85rem;
-  transition: border-color .15s ease, color .15s ease, background .15s ease;
-}
-.pdv2-iw__nav-btn:hover:not(:disabled) { border-color: var(--brand-teal); color: var(--brand-teal); }
-.pdv2-iw__nav-btn:disabled { opacity: .35; cursor: default; }
-.pdv2-iw__nav-btn--primary {
-  background: var(--brand-teal); border-color: var(--brand-teal); color: #04211e; font-weight: 600;
-}
-.pdv2-iw__nav-btn--primary:hover:not(:disabled) { background: var(--brand-teal-dk); color: #04211e; }
-
-/* ════════════════════════════════════════
-   DELIVERY ROADMAP — a horizontal row of icon-only badges (order
-   confirmation → production → FAT → shipping → install) sitting on a
-   shared top rail, glassmorphic with a layered 3D shadow + specular
-   highlight. Every stage's text card is visible by default (lead time is
-   a top-of-mind decision factor, not something worth making a buyer dig
-   for); hover/tap still lifts the card and brightens the badge as a
-   lighter touch of interactivity.
+   DELIVERY ROADMAP — every stage shown at once, connected by a single
+   running line: horizontal across the top on desktop (all N stages in
+   one row, line passes through every marker), becomes a vertical line
+   down the left edge on mobile so the same "one continuous path" reading
+   survives the stacked layout instead of turning into a plain list.
 ════════════════════════════════════════ */
 .pdv2-roadmap {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: clamp(.5rem, 2vw, 1.5rem);
+  grid-template-columns: repeat(var(--road-count, 5), 1fr);
+  gap: clamp(.75rem, 2vw, 1.5rem);
   padding: clamp(3rem, 6vw, 4.5rem) 0 0;
 }
-@media (max-width: 720px) {
-  .pdv2-roadmap { grid-template-columns: repeat(3, 1fr); row-gap: 3.5rem; }
-}
-/* shared top rail linking every badge into one row */
+/* shared rail behind every marker, spanning the full row */
 .pdv2-roadmap::before {
   content: "";
-  position: absolute; left: 0; right: 0; top: 27px; height: 2px;
-  background: linear-gradient(to right, transparent, var(--bg-line) 4%, var(--bg-line) 96%, transparent);
+  position: absolute; left: 34px; right: 34px; top: 34px; height: 2px;
+  background: linear-gradient(to right, var(--brand-teal), rgba(43,191,179,.15));
   z-index: 0;
 }
-@media (max-width: 720px) { .pdv2-roadmap::before { display: none; } }
+@media (max-width: 860px) {
+  .pdv2-roadmap { grid-template-columns: 1fr; row-gap: 2rem; padding-top: 1rem; }
+  /* vertical rail down the left edge instead of a horizontal one */
+  .pdv2-roadmap::before {
+    left: 34px; right: auto; top: 34px; bottom: 34px; width: 2px; height: auto;
+    background: linear-gradient(to bottom, var(--brand-teal), rgba(43,191,179,.15));
+  }
+}
 
 .pdv2-roadmap-node {
   position: relative;
   display: flex; flex-direction: column; align-items: center;
+  height: 100%;
   z-index: 1;
 }
-
-/* rail segment behind this badge draws in teal on scroll, reads as the
-   row "completing" left to right */
-.pdv2-roadmap-node__feed {
-  position: absolute; left: 0; right: 0; top: 27px; height: 2px;
-  transform-origin: left center; transform: scaleX(0);
-  background: var(--brand-teal);
-  animation: pdv2-road-feed 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
-  animation-delay: calc(var(--road-i, 0) * 0.15s + 0.2s);
-}
-@media (max-width: 720px) { .pdv2-roadmap-node__feed { display: none; } }
-@keyframes pdv2-road-feed { to { transform: scaleX(1); } }
-@media (prefers-reduced-motion: reduce) {
-  .pdv2-roadmap-node__feed { animation: none; transform: scaleX(1); }
+@media (max-width: 860px) {
+  .pdv2-roadmap-node { flex-direction: row; align-items: flex-start; gap: 1rem; }
 }
 
-/* badge — glassmorphic 3D, icon-only. Layered box-shadow fakes real depth
-   (ambient + contact + inner glass highlight). */
+/* badge — bare icon, no box/border/shadow; sits centered on the rail */
 .pdv2-roadmap-node__marker {
-  position: relative;
-  width: 56px; height: 56px; border-radius: 18px;
+  position: relative; flex-shrink: 0;
+  width: 68px; height: 68px;
   display: flex; align-items: center; justify-content: center;
   color: var(--brand-teal);
-  background:
-    linear-gradient(145deg, rgba(43,191,179,.22), rgba(43,191,179,.04)),
-    var(--bg-surface);
-  border: 1px solid rgba(43,191,179,.35);
-  box-shadow:
-    0 1px 0 0 rgba(255,255,255,.06) inset,
-    0 -6px 14px -8px rgba(0,0,0,.6) inset,
-    0 14px 28px -12px rgba(0,0,0,.65);
-  backdrop-filter: blur(6px);
+  background: var(--bg-base); border: none;
   z-index: 2;
   cursor: pointer;
-  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s ease, border-color 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), color 0.3s ease;
 }
-
 .pdv2-roadmap-node:hover .pdv2-roadmap-node__marker,
 .pdv2-roadmap-node--open .pdv2-roadmap-node__marker {
-  transform: translateY(-4px) scale(1.08) rotate(-3deg);
-  border-color: var(--brand-teal);
-  box-shadow:
-    0 1px 0 0 rgba(255,255,255,.1) inset,
-    0 -6px 14px -8px rgba(0,0,0,.5) inset,
-    0 22px 40px -14px rgba(43,191,179,.4),
-    0 0 0 6px rgba(43,191,179,.1);
+  transform: translateY(-3px);
+}
+@media (max-width: 860px) {
+  .pdv2-roadmap-node:hover .pdv2-roadmap-node__marker,
+  .pdv2-roadmap-node--open .pdv2-roadmap-node__marker { transform: translateX(-3px); }
 }
 .pdv2-roadmap-node__num {
-  position: absolute; top: -8px; right: -8px;
-  width: 20px; height: 20px; border-radius: 50%;
-  background: var(--bg-base); border: 1px solid rgba(43,191,179,.4);
-  color: var(--ink-60);
-  font-family: var(--ff-mono); font-size: .6rem; font-weight: 700;
+  position: absolute; top: 0; right: 4px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--bg-base);
+  color: var(--ink-35);
+  font-family: var(--ff-mono); font-size: .58rem; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   z-index: 3;
 }
+/* real step photo instead of an icon, when one is available — small
+   round mask so it reads as part of the same marker line, not a photo card */
+.pdv2-roadmap-node__photo {
+  position: relative;
+  width: 68px; height: 68px; border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--brand-teal);
+}
+.pdv2-roadmap-node__photo img { object-fit: cover; }
 
-/* connecting drop-line from the badge down to its text box — always
-   shown (cards no longer hide behind hover/tap) */
+/* connecting drop-line from the badge down to its text box (desktop) —
+   on mobile the rail itself runs beside the card instead, so this is
+   hidden there to avoid a redundant second line */
 .pdv2-roadmap-node__drop {
   width: 2px; height: 1.75rem;
   background: linear-gradient(to bottom, var(--brand-teal), rgba(43,191,179,.15));
 }
+@media (max-width: 860px) { .pdv2-roadmap-node__drop { display: none; } }
 
 /* the text box — always visible; a light lift on hover is still a nice
    touch but the card itself no longer hides by default. */
 .pdv2-roadmap-node__body {
-  width: 100%;
+  width: 100%; flex: 1 1 auto;
   display: flex; flex-direction: column; gap: .5rem;
   background:
     linear-gradient(160deg, rgba(43,191,179,.05), transparent 60%),
     var(--bg-surface);
   border: 1px solid var(--bg-line);
-  border-radius: 1rem; padding: 1.1rem 1.1rem;
+  border-radius: 1rem; padding: 1.4rem 1.4rem;
   box-shadow: 0 20px 44px -20px rgba(0,0,0,.55);
   transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, border-color 0.3s ease;
 }
@@ -3798,10 +3658,10 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   padding: .15rem .45rem; border-radius: 999px; white-space: nowrap;
 }
 .pdv2-roadmap-node__title {
-  font-family: var(--ff-display); font-size: .98rem; color: var(--ink); line-height: 1.2;
+  font-family: var(--ff-display); font-size: 1.18rem; color: var(--ink); line-height: 1.2;
 }
 .pdv2-roadmap-node__detail {
-  font-family: var(--ff-body); font-size: .76rem; color: var(--ink-60); line-height: 1.5;
+  font-family: var(--ff-body); font-size: .85rem; color: var(--ink-60); line-height: 1.55;
 }
 
 /* running total — sums every stage's duration into one real "days from
@@ -3823,6 +3683,126 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-roadmap-total__val {
   font-family: var(--ff-display); font-size: 1.15rem; color: var(--brand-teal);
 }
+
+/* ════════════════════════════════════════
+   ROADMAP DETAIL MODAL — opened by clicking any roadmap/guide card
+   (DeliveryRoadmap or InstallationWalkthrough). Bigger type, the step's
+   icon animated in on open, and a direct "ask AI" hand-off.
+════════════════════════════════════════ */
+.pdv2-rmodal-veil {
+  position: fixed; inset: 0; z-index: 9300;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+  background: rgba(4,10,10,.6);
+  backdrop-filter: blur(6px);
+  animation: pdv2-rmodal-veil-in .25s ease both;
+}
+@keyframes pdv2-rmodal-veil-in { from { opacity: 0; } to { opacity: 1; } }
+
+.pdv2-rmodal {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: .6rem;
+  background:
+    linear-gradient(160deg, rgba(43,191,179,.07), transparent 55%),
+    var(--bg-surface);
+  border: 1px solid var(--bg-line);
+  border-radius: 1.5rem;
+  padding: clamp(2rem, 5vw, 3rem) clamp(1.5rem, 4vw, 2.5rem) 2rem;
+  box-shadow: 0 40px 90px -30px rgba(0,0,0,.7);
+  animation: pdv2-rmodal-in .35s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes pdv2-rmodal-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pdv2-rmodal-veil, .pdv2-rmodal { animation: none; }
+}
+
+.pdv2-rmodal__close {
+  position: absolute; top: 1rem; right: 1rem;
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-raise); border: 1px solid var(--bg-line);
+  color: var(--ink-60); cursor: pointer;
+  transition: border-color .15s ease, color .15s ease;
+}
+.pdv2-rmodal__close:hover { border-color: var(--brand-teal); color: var(--brand-teal); }
+
+.pdv2-rmodal__mark {
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: .25rem;
+}
+.pdv2-rmodal__icon {
+  color: var(--brand-teal);
+  filter: drop-shadow(0 0 22px rgba(43,191,179,0.3));
+  animation: pdv2-rmodal-mark-in .5s .1s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.pdv2-rmodal__photo {
+  position: relative; width: 120px; height: 120px; border-radius: 50%;
+  overflow: hidden; border: 2px solid var(--brand-teal);
+  animation: pdv2-rmodal-mark-in .5s .1s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.pdv2-rmodal__photo img { object-fit: cover; }
+@keyframes pdv2-rmodal-mark-in {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pdv2-rmodal__icon, .pdv2-rmodal__photo { animation: none; }
+}
+
+.pdv2-rmodal__stage {
+  font-family: var(--ff-mono); font-size: .7rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--brand-teal);
+}
+.pdv2-rmodal__title {
+  font-family: var(--ff-display); font-size: clamp(1.4rem, 3vw, 1.9rem);
+  color: var(--ink); line-height: 1.15;
+}
+.pdv2-rmodal__meta {
+  font-family: var(--ff-mono); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--brand-teal); background: rgba(43,191,179,.1); border: 1px solid rgba(43,191,179,.25);
+  padding: .25rem .65rem; border-radius: 999px;
+}
+.pdv2-rmodal__detail {
+  font-family: var(--ff-body); font-size: .96rem; color: var(--ink-60);
+  line-height: 1.7; max-width: 42ch;
+}
+
+.pdv2-rmodal__facts {
+  width: 100%;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: .75rem;
+  margin-top: .5rem;
+}
+.pdv2-rmodal__fact {
+  display: flex; flex-direction: column; gap: .2rem;
+  padding: .75rem;
+  background: var(--bg-raise); border: 1px solid var(--bg-line); border-radius: .7rem;
+}
+.pdv2-rmodal__fact dt {
+  font-family: var(--ff-mono); font-size: .6rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-35);
+}
+.pdv2-rmodal__fact dd {
+  font-family: var(--ff-display); font-size: .95rem; color: var(--ink); margin: 0;
+}
+
+.pdv2-rmodal__ask {
+  display: inline-flex; align-items: center; gap: .55rem;
+  margin-top: .75rem;
+  padding: .8rem 1.4rem; border-radius: .8rem;
+  background: var(--brand-teal); border: 1px solid var(--brand-teal);
+  color: #04211e; font-family: var(--ff-display); font-size: .92rem; font-weight: 600;
+  cursor: pointer;
+  transition: background .15s ease, transform .15s ease;
+}
+.pdv2-rmodal__ask:hover { background: var(--brand-teal-dk); transform: translateY(-1px); }
 
 /* ════════════════════════════════════════
    MACHINE PARTS — real, admin-added components. Each card is a photo

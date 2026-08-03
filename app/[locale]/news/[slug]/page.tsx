@@ -36,16 +36,15 @@ export default async function ArticlePage({ params }: { params: { slug: string }
 
   return (
     <>
-      {/* ── Page base reset to light ── */}
-      <div style={{ background: "#f8fafc", minHeight: "100vh" }}>
+      <div style={{ background: "var(--bg-base)", minHeight: "100vh" }}>
 
       {/* ── Hero ── */}
       <div style={{
-        background: "#f8fafc",
-        borderBottom: "1px solid #e2e8f0",
+        background: "var(--bg-base)",
+        borderBottom: "1px solid var(--bg-line)",
         paddingTop: "clamp(5rem,10vw,8rem)",
         backgroundImage:
-          "linear-gradient(#e2e8f0 1px,transparent 1px),linear-gradient(90deg,#e2e8f0 1px,transparent 1px)",
+          "linear-gradient(var(--bg-line) 1px,transparent 1px),linear-gradient(90deg,var(--bg-line) 1px,transparent 1px)",
         backgroundSize: "80px 80px",
       }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(1.25rem,4vw,3rem)" }}>
@@ -54,14 +53,14 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           <p style={{
             fontFamily: "var(--ff-mono)", fontSize: "0.65rem",
             letterSpacing: "0.12em", textTransform: "uppercase",
-            color: "#475569", marginBottom: "2rem",
+            color: "var(--ink-60)", marginBottom: "2rem",
             display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap",
           }}>
-            <Link href="/" style={{ color: "#475569" }}>{t("breadcrumbHome")}</Link>
-            <span style={{ color: "#b8c5d6" }}>›</span>
-            <Link href="/news" style={{ color: "#475569" }}>{t("breadcrumbNews")}</Link>
-            <span style={{ color: "#b8c5d6" }}>›</span>
-            <span style={{ color: "#0f172a" }}>{a.category}</span>
+            <Link href="/" style={{ color: "var(--ink-60)" }}>{t("breadcrumbHome")}</Link>
+            <span style={{ color: "var(--ink-35)" }}>›</span>
+            <Link href="/news" style={{ color: "var(--ink-60)" }}>{t("breadcrumbNews")}</Link>
+            <span style={{ color: "var(--ink-35)" }}>›</span>
+            <span style={{ color: "var(--ink)" }}>{a.category}</span>
           </p>
 
           <div className="article-hero-grid" style={{
@@ -82,18 +81,18 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 }}>{a.category}</span>
                 <span style={{
                   fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
-                  letterSpacing: "0.1em", color: "#b8c5d6",
+                  letterSpacing: "0.1em", color: "var(--ink-35)",
                 }}>{fmt(a.date)}</span>
               </div>
               <h1 style={{
                 fontFamily: "var(--ff-display)",
                 fontSize: "clamp(2.2rem,5vw,4rem)",
-                lineHeight: 0.93, color: "#0f172a",
+                lineHeight: 0.93, color: "var(--ink)",
                 letterSpacing: "0.01em", marginBottom: "1.25rem",
               }}>{a.title}</h1>
               <p style={{
                 fontFamily: "var(--ff-body)", fontSize: "1.08rem", fontWeight: 400,
-                color: "#475569", lineHeight: 1.75,
+                color: "var(--ink-60)", lineHeight: 1.75,
               }}>{a.excerpt}</p>
 
               {/* tags */}
@@ -103,8 +102,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                     fontFamily: "var(--ff-mono)", fontSize: "0.68rem",
                     letterSpacing: "0.1em", textTransform: "uppercase",
                     padding: "0.3rem 0.65rem",
-                    border: "1px solid #e2e8f0",
-                    color: "#475569",
+                    border: "1px solid var(--bg-line)",
+                    color: "var(--ink-60)",
                   }}>{t}</span>
                 ))}
               </div>
@@ -113,8 +112,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             {/* right — hero image */}
             <div className="article-hero-img" style={{
               width: "clamp(200px,28vw,380px)",
-              background: "#ffffff",
-              border: "1px solid #e2e8f0",
+              background: "var(--bg-surface)",
+              border: "1px solid var(--bg-line)",
               display: "flex", alignItems: "center", justifyContent: "center",
               aspectRatio: "4/3", position: "relative", overflow: "hidden",
               flexShrink: 0,
@@ -144,7 +143,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
 
       {/* ── Article body + sidebar ── */}
       <div className="article-content-grid" style={{
-        background: "#f8fafc",
+        background: "var(--bg-base)",
         maxWidth: 1280, margin: "0 auto",
         padding: "clamp(3rem,6vw,5rem) clamp(1.25rem,4vw,3rem)",
         display: "grid",
@@ -153,8 +152,13 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         alignItems: "start",
       }}>
 
-        {/* body */}
-        <div className="article-body"
+        {/* body — data-no-anim: the site-wide SectionAnimator fades every
+             h1/h2/h3/p on scroll via generic tag selectors, but this
+             content is injected via dangerouslySetInnerHTML after the
+             animator has already scanned the DOM once, so its
+             ScrollTrigger never revisits these nodes — they stay stuck
+             at opacity:0 forever, hiding most of the article. */}
+        <div className="article-body" data-no-anim
           dangerouslySetInnerHTML={{ __html: renderNewsBody(a.body) }}
         />
 
@@ -163,8 +167,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           {/* links */}
           {a.links && a.links.length > 0 && (
             <div style={{
-              background: "#ffffff",
-              border: "1px solid #e2e8f0",
+              background: "var(--bg-surface)",
+              border: "1px solid var(--bg-line)",
               borderTop: "3px solid var(--brand-red)",
               padding: "1.5rem",
               marginBottom: "1.5rem",
@@ -172,7 +176,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               <span style={{
                 fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
                 letterSpacing: "0.16em", textTransform: "uppercase",
-                color: "#b8c5d6", display: "block", marginBottom: "1rem",
+                color: "var(--ink-35)", display: "block", marginBottom: "1rem",
               }}>{t("relatedLinks")}</span>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                 {a.links.map((l) => (
@@ -193,7 +197,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             display: "flex", alignItems: "center", gap: "0.5rem",
             fontFamily: "var(--ff-mono)", fontSize: "0.65rem",
             letterSpacing: "0.1em", textTransform: "uppercase",
-            color: "#475569", textDecoration: "none",
+            color: "var(--ink-60)", textDecoration: "none",
             marginBottom: "1.5rem",
           }}>
             {t("allNews")}
@@ -201,14 +205,14 @@ export default async function ArticlePage({ params }: { params: { slug: string }
 
           {/* tags */}
           <div style={{
-            background: "#f8fafc",
-            border: "1px solid #e2e8f0",
+            background: "var(--bg-base)",
+            border: "1px solid var(--bg-line)",
             padding: "1.25rem",
           }}>
             <span style={{
               fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
               letterSpacing: "0.16em", textTransform: "uppercase",
-              color: "#b8c5d6", display: "block", marginBottom: "0.75rem",
+              color: "var(--ink-35)", display: "block", marginBottom: "0.75rem",
             }}>{t("tags")}</span>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
               {a.tags.map((t) => (
@@ -216,8 +220,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                   fontFamily: "var(--ff-mono)", fontSize: "0.66rem",
                   letterSpacing: "0.1em", textTransform: "uppercase",
                   padding: "0.28rem 0.6rem",
-                  border: "1px solid #e2e8f0",
-                  color: "#475569",
+                  border: "1px solid var(--bg-line)",
+                  color: "var(--ink-60)",
                 }}>{t}</span>
               ))}
             </div>
@@ -228,22 +232,24 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       {/* ── Related articles ── */}
       {related.length > 0 && (
         <div style={{
-          borderTop: "1px solid #e2e8f0",
-          background: "#ffffff",
+          borderTop: "1px solid var(--bg-line)",
+          background: "var(--bg-surface)",
           padding: "clamp(3rem,6vw,5rem) clamp(1.25rem,4vw,3rem)",
         }}>
           <div style={{ maxWidth: 1280, margin: "0 auto" }}>
             <span className="eyebrow" style={{ marginBottom: "0.75rem", color: "var(--brand-red)" }}>{t("relatedArticles")}</span>
-            <div style={{
+            {/* data-no-anim: see note on the news index page — the
+                site-wide SectionAnimator doesn't reliably reveal h3/p
+                elements already in the initial viewport. */}
+            <div data-no-anim style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))",
-              gap: "1px", background: "#e2e8f0",
-              border: "1px solid #e2e8f0", marginTop: "1.5rem",
+              gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))",
+              gap: "1.5rem", marginTop: "1.5rem",
             }}>
               {related.map((r) => (
                 <Link key={r.slug} href={`/news/${r.slug}`} className="ns-card">
                   <div className="ns-card__img-wrap">
-                    <Image src={r.image} alt={r.title} className="ns-card__img" width={600} height={400} style={{ width: "100%", height: "auto" }} loading="lazy" />
+                    <Image src={r.image} alt={r.title} className="ns-card__img" width={600} height={400} loading="lazy" />
                   </div>
                   <div className="ns-card__body">
                     <div className="ns-card__meta">
@@ -261,7 +267,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         </div>
       )}
 
-      </div>{/* end light wrapper */}
+      </div>
 
       {/* ── CTA ── */}
       <section style={{
@@ -284,35 +290,35 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       </section>
 
       <style suppressHydrationWarning>{`
-        .article-body { line-height: 1.8; color: #475569; font-family: var(--ff-body); font-size: 1rem; font-weight: 400; }
+        .article-body { line-height: 1.8; color: var(--ink-60); font-family: var(--ff-body); font-size: 1rem; font-weight: 400; }
         .article-body p { margin-bottom: 1.25rem; }
-        .article-body h3 { font-family: var(--ff-display); font-size: 1.5rem; color: #0f172a; letter-spacing: 0.01em; line-height: 1; margin: 2.25rem 0 0.75rem; }
+        .article-body h3 { font-family: var(--ff-display); font-size: 1.5rem; color: var(--ink); letter-spacing: 0.01em; line-height: 1; margin: 2.25rem 0 0.75rem; }
         .article-body ul { padding-left: 1.25rem; margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.45rem; }
-        .article-body li { position: relative; color: #475569; }
-        .article-body strong { color: #0f172a; font-weight: 600; }
+        .article-body li { position: relative; color: var(--ink-60); }
+        .article-body strong { color: var(--ink); font-weight: 600; }
 
         .article-sidebar-link {
           font-family: var(--ff-mono); font-size: 0.65rem;
           letter-spacing: 0.08em; text-transform: uppercase;
           color: var(--brand-red); text-decoration: none;
           display: block; padding: 0.5rem 0;
-          border-bottom: 1px solid #e2e8f0;
+          border-bottom: 1px solid var(--bg-line);
           transition: color 0.15s;
         }
         .article-sidebar-link:last-child { border-bottom: none; }
-        .article-sidebar-link:hover { color: #0f172a; }
+        .article-sidebar-link:hover { color: var(--ink); }
 
-        .ns-card { display: flex; flex-direction: column; background: #ffffff; text-decoration: none; transition: background 0.18s; }
-        .ns-card:hover { background: #fef2f4; }
-        .ns-card__img-wrap { width: 100%; aspect-ratio: 16/9; background: #f8fafc; overflow: hidden; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #e2e8f0; }
-        .ns-card__img { width: 60%; height: 75%; object-fit: contain; filter: drop-shadow(0 6px 16px rgba(15,23,42,0.12)); transition: transform 0.35s cubic-bezier(0.16,1,0.3,1); }
+        .ns-card { display: flex; flex-direction: column; background: var(--bg-surface); text-decoration: none; border: 1px solid var(--bg-line); transition: background 0.18s, border-color 0.18s; }
+        .ns-card:hover { background: var(--bg-raise); border-color: var(--brand-teal); }
+        .ns-card__img-wrap { width: 100%; aspect-ratio: 16/9; background: var(--bg-base); overflow: hidden; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--bg-line); padding: 1.1rem; }
+        .ns-card__img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 6px 16px rgba(15,23,42,0.12)); transition: transform 0.35s cubic-bezier(0.16,1,0.3,1); }
         .ns-card:hover .ns-card__img { transform: scale(1.06) translateY(-2%); }
         .ns-card__body { padding: 1.1rem 1.1rem 1.4rem; display: flex; flex-direction: column; flex: 1; }
         .ns-card__meta { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem; }
         .ns-card__cat { font-family: var(--ff-mono); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--brand-red); }
-        .ns-card__date { font-family: var(--ff-mono); font-size: 0.66rem; letter-spacing: 0.1em; color: #b8c5d6; }
-        .ns-card__title { font-family: var(--ff-display); font-size: clamp(1rem,1.8vw,1.2rem); color: #0f172a; line-height: 1.15; letter-spacing: 0.01em; margin-bottom: 0.6rem; }
-        .ns-card__excerpt { font-family: var(--ff-body); font-size: 0.82rem; font-weight: 400; color: #475569; line-height: 1.6; flex: 1; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .ns-card__date { font-family: var(--ff-mono); font-size: 0.66rem; letter-spacing: 0.1em; color: var(--ink-35); }
+        .ns-card__title { font-family: var(--ff-display); font-size: clamp(1rem,1.8vw,1.2rem); color: var(--ink); line-height: 1.15; letter-spacing: 0.01em; margin-bottom: 0.6rem; }
+        .ns-card__excerpt { font-family: var(--ff-body); font-size: 0.82rem; font-weight: 400; color: var(--ink-35); line-height: 1.6; flex: 1; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .ns-card__cta { font-family: var(--ff-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand-red); }
 
         @media (max-width: 768px) {

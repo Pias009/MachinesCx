@@ -14,11 +14,15 @@ export default function ProductionLineTeaser() {
   const [closing, setClosing] = useState(false);
 
   // Hidden on the production-line page itself (no point promoting the page
-  // you're already on), the admin panel, and once dismissed for the session.
+  // you're already on), the admin panel, article pages (its fixed bottom
+  // position overlaps real article text at every viewport width — a
+  // responsive audit caught it covering spec rows and body paragraphs),
+  // and once dismissed for the session.
   const hiddenRoute =
     !pathname ||
     /\/production-line(\/|$)/.test(pathname) ||
-    pathname.startsWith("/cx-ops-x7k9q2");
+    pathname.startsWith("/cx-ops-x7k9q2") ||
+    /\/news\/[^/]+$/.test(pathname);
 
   useEffect(() => {
     if (hiddenRoute) return;

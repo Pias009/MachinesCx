@@ -9,6 +9,7 @@ import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
 import ProcessIcon, { resolveIcon, type IconName } from "@/components/ProcessIcon";
 import DeliveryStageIcon, { resolveDeliveryStage } from "@/components/DeliveryStageIcon";
+import { openAshaChat } from "@/components/ChatWidget";
 import CustomSections from "@/components/CustomSections";
 import MachineParts from "@/components/MachineParts";
 import ProductStage3D from "@/components/ProductStage3D";
@@ -112,49 +113,117 @@ function sumDurationRange(durations: string[]): { low: number; high: number } | 
   return { low, high };
 }
 
-/* Horizontal row of icon-only badges on a shared rail; the stage's text
-   box is hidden until the visitor hovers it (desktop, pure CSS :hover) or
-   taps it (touch — no hover to rely on, so a real "open" click-state
-   drives the same reveal via --open class, toggled closed by tapping the
-   same node again or anywhere else). A connecting line drops from the
-   badge to the box as part of the same reveal. */
+/* Shared expanded view for a roadmap/guide node — opened by clicking any
+   card in either DeliveryRoadmap or InstallationWalkthrough. Bigger
+   type, the step's icon animated in, every field the compact card has
+   plus room for more (kept generic via optional extraFacts), and a
+   direct hand-off into the AI chat pre-filled with this step's context
+   so a visitor can ask a follow-up without retyping what they're asking
+   about. */
+function RoadmapDetailModal({
+  icon, photo, stepLabel, title, meta, detail, extraFacts, askContext, onClose,
+}: {
+  icon?: React.ReactNode;
+  photo?: string;
+  stepLabel: string;
+  title: string;
+  meta?: string;
+  detail: string;
+  extraFacts?: { label: string; value: string }[];
+  askContext: string;
+  onClose: () => void;
+}) {
+  const t = useTranslations("productDetail");
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  return (
+    <div className="pdv2-rmodal-veil" onClick={onClose}>
+      <div
+        className="pdv2-rmodal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button type="button" className="pdv2-rmodal__close" aria-label={t("close")} onClick={onClose}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
+        </button>
+
+        <div className="pdv2-rmodal__mark">
+          {photo ? (
+            <span className="pdv2-rmodal__photo"><Image src={photo} alt="" fill sizes="120px" /></span>
+          ) : (
+            <span className="pdv2-rmodal__icon">{icon}</span>
+          )}
+        </div>
+
+        <span className="pdv2-rmodal__stage">{stepLabel}</span>
+        <h3 className="pdv2-rmodal__title">{title}</h3>
+        {meta && <span className="pdv2-rmodal__meta">{meta}</span>}
+        <p className="pdv2-rmodal__detail">{detail}</p>
+
+        {extraFacts && extraFacts.length > 0 && (
+          <dl className="pdv2-rmodal__facts">
+            {extraFacts.map((f) => (
+              <div key={f.label} className="pdv2-rmodal__fact">
+                <dt>{f.label}</dt>
+                <dd>{f.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
+        <button
+          type="button"
+          className="pdv2-rmodal__ask"
+          onClick={() => { openAshaChat(askContext); onClose(); }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3a7 7 0 0 0-7 7c0 2 .8 3.8 2.1 5.1L6 20l4.4-1.8c.5.1 1.1.2 1.6.2a7 7 0 0 0 0-14z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" /></svg>
+          {t("askAboutStep")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* Horizontal row of icon-only badges on a shared rail, every stage's
+   card visible at once. Clicking a card opens the bigger RoadmapDetailModal
+   with the animated icon, full copy, and a direct "ask AI" hand-off. */
 function DeliveryRoadmap({ phases }: { phases: DeliveryPhase[] }) {
   const t = useTranslations("productDetail");
   const [openIdx, setOpenIdx] = useState<number | null>(null);
-  const rootRef = useRef<HTMLDivElement>(null);
   const total = sumDurationRange(phases.map((p) => p.duration));
-
-  // tap-to-close on touch devices — a tap outside the open node (or on the
-  // page generally) closes it, since there's no hover-out to fall back on
-  useEffect(() => {
-    if (openIdx === null) return;
-    function onPointerDown(e: PointerEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpenIdx(null);
-    }
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [openIdx]);
+  const open = openIdx !== null ? phases[openIdx] : null;
 
   return (
     <>
-      <div className="pdv2-roadmap" data-reveal="scale" ref={rootRef}>
+      <div
+        className="pdv2-roadmap"
+        data-reveal="scale"
+        style={{ "--road-count": phases.length } as React.CSSProperties}
+      >
         {phases.map((phase, i) => (
-          <div
+          <button
             key={i}
-            className={`pdv2-roadmap-node${openIdx === i ? " pdv2-roadmap-node--open" : ""}`}
+            type="button"
+            className="pdv2-roadmap-node"
             style={{ "--road-i": i } as React.CSSProperties}
+            onClick={() => setOpenIdx(i)}
+            aria-haspopup="dialog"
           >
-            <span className="pdv2-roadmap-node__feed" aria-hidden="true" />
-            <button
-              type="button"
-              className="pdv2-roadmap-node__marker"
-              aria-expanded={openIdx === i}
-              aria-label={phase.label}
-              onClick={() => setOpenIdx((cur) => (cur === i ? null : i))}
-            >
-              <DeliveryStageIcon name={resolveDeliveryStage(phase.label)} size={26} />
+            <span className="pdv2-roadmap-node__marker" aria-hidden="true">
+              <DeliveryStageIcon name={resolveDeliveryStage(phase.label)} size={32} />
               <span className="pdv2-roadmap-node__num">{i + 1}</span>
-            </button>
+            </span>
             <span className="pdv2-roadmap-node__drop" aria-hidden="true" />
             <div className="pdv2-roadmap-node__body">
               <div className="pdv2-roadmap-node__top">
@@ -164,7 +233,7 @@ function DeliveryRoadmap({ phases }: { phases: DeliveryPhase[] }) {
               <h3 className="pdv2-roadmap-node__title">{phase.label}</h3>
               <p className="pdv2-roadmap-node__detail">{phase.detail}</p>
             </div>
-          </div>
+          </button>
         ))}
       </div>
 
@@ -175,6 +244,18 @@ function DeliveryRoadmap({ phases }: { phases: DeliveryPhase[] }) {
             {t("deliveryRoadmapTotalVal", { low: total.low, high: total.high })}
           </span>
         </div>
+      )}
+
+      {open && (
+        <RoadmapDetailModal
+          icon={<DeliveryStageIcon name={resolveDeliveryStage(open.label)} size={56} />}
+          stepLabel={t("deliveryRoadmapStageLabel", { num: (openIdx as number) + 1 })}
+          title={open.label}
+          meta={open.duration}
+          detail={open.detail}
+          askContext={t("askDeliveryStageContext", { stage: open.label, detail: open.detail })}
+          onClose={() => setOpenIdx(null)}
+        />
       )}
     </>
   );
@@ -194,79 +275,70 @@ const PLACEHOLDER_INSTALL_IMAGES = new Set([
   "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784475586/cx-machinery/hbm6bsjplk1yqxbvyfvx.jpg",
 ]);
 
-/* Step-by-step installation walkthrough — one step shown at a time with
-   its real admin-uploaded photo (falls back to the schematic icon panel
-   for any step not yet photographed) and the FULL detail text, not the
-   old grid's 2-line-clamped preview. Progress dots + Prev/Next make this
-   read as an actual manual to walk through, not a set of cards to skim. */
+/* Installation guide — every step shown at once along a connecting line
+   (same "roadmap" pattern as DeliveryRoadmap above), instead of one card
+   at a time behind a tab strip. Each marker carries the step icon; the
+   card under it holds the full title + detail text, no line-clamping.
+   Clicking a card opens the same shared RoadmapDetailModal. */
 function InstallationWalkthrough({ steps }: { steps: SetupStep[] }) {
   const t = useTranslations("productDetail");
-  const [idx, setIdx] = useState(0);
-  const step = steps[idx];
-  const stepIsPlaceholder = !step.image || PLACEHOLDER_INSTALL_IMAGES.has(step.image);
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const open = openIdx !== null ? steps[openIdx] : null;
+  const openIsPlaceholder = open ? (!open.image || PLACEHOLDER_INSTALL_IMAGES.has(open.image)) : true;
 
   return (
-    <div className="pdv2-iw">
-      <div className="pdv2-iw__progress-section">
-        <div className="pdv2-iw__progress" role="tablist" aria-label={t("setupInstallationGuide")}>
-          {steps.map((s, i) => (
+    <>
+      <div
+        className="pdv2-roadmap"
+        data-reveal="scale"
+        style={{ "--road-count": steps.length } as React.CSSProperties}
+      >
+        {steps.map((step, i) => {
+          const stepIsPlaceholder = !step.image || PLACEHOLDER_INSTALL_IMAGES.has(step.image);
+          return (
             <button
               key={i}
               type="button"
-              role="tab"
-              aria-selected={i === idx}
-              aria-label={t("installStepAria", { num: i + 1, total: steps.length })}
-              title={s.title}
-              className={`pdv2-iw__dot${i === idx ? " pdv2-iw__dot--on" : i < idx ? " pdv2-iw__dot--done" : ""}`}
-              onClick={() => setIdx(i)}
+              className="pdv2-roadmap-node"
+              style={{ "--road-i": i } as React.CSSProperties}
+              onClick={() => setOpenIdx(i)}
+              aria-haspopup="dialog"
             >
-              <span className="pdv2-iw__dot-icon">
-                {i < idx ? (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <span className="pdv2-roadmap-node__marker" aria-hidden="true">
+                {step.image && !stepIsPlaceholder ? (
+                  <span className="pdv2-roadmap-node__photo">
+                    <Image src={step.image} alt="" fill sizes="68px" />
+                  </span>
                 ) : (
-                  <ProcessIcon name={resolveIcon(s.title)} size={14} />
+                  <ProcessIcon name={resolveIcon(step.title)} size={32} />
                 )}
+                <span className="pdv2-roadmap-node__num">{i + 1}</span>
               </span>
-              <span className="pdv2-iw__dot-label">{s.title}</span>
+              <span className="pdv2-roadmap-node__drop" aria-hidden="true" />
+              <div className="pdv2-roadmap-node__body">
+                <div className="pdv2-roadmap-node__top">
+                  <span className="pdv2-roadmap-node__stage">{t("installStepBadge", { num: i + 1, total: steps.length })}</span>
+                </div>
+                <h3 className="pdv2-roadmap-node__title">{step.title}</h3>
+                <p className="pdv2-roadmap-node__detail">{step.detail}</p>
+              </div>
             </button>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
-      <div key={idx} className="pdv2-iw__stage" data-reveal="scale">
-        <div className="pdv2-iw__media">
-          {step.image && !stepIsPlaceholder ? (
-            <Image src={step.image} alt={step.title} fill sizes="(max-width: 900px) 100vw, 640px" className="pdv2-iw__photo" />
-          ) : (
-            <div className="pdv2-iw__media--schematic">
-              <span className="pdv2-iw__ghost" aria-hidden="true">{String(idx + 1).padStart(2, "0")}</span>
-              <span className="pdv2-iw__ring" aria-hidden="true" />
-              <span className="pdv2-iw__icon"><ProcessIcon name={resolveIcon(step.title)} size={72} /></span>
-            </div>
-          )}
-          {!stepIsPlaceholder && (
-            <span className="pdv2-iw__badge">{t("installStepBadge", { num: idx + 1, total: steps.length })}</span>
-          )}
-        </div>
-
-        <div className="pdv2-iw__body">
-          <span className="pdv2-iw__stepnum">{String(idx + 1).padStart(2, "0")}</span>
-          <h3 className="pdv2-iw__title">{step.title}</h3>
-          <p className="pdv2-iw__detail">{step.detail}</p>
-
-          <div className="pdv2-iw__nav">
-            <button type="button" className="pdv2-iw__nav-btn" disabled={idx === 0} onClick={() => setIdx((i) => i - 1)}>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              {t("installPrevStep")}
-            </button>
-            <button type="button" className="pdv2-iw__nav-btn pdv2-iw__nav-btn--primary" disabled={idx === steps.length - 1} onClick={() => setIdx((i) => i + 1)}>
-              {t("installNextStep")}
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 2l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+      {open && (
+        <RoadmapDetailModal
+          icon={<ProcessIcon name={resolveIcon(open.title)} size={56} />}
+          photo={!openIsPlaceholder ? open.image : undefined}
+          stepLabel={t("installStepBadge", { num: (openIdx as number) + 1, total: steps.length })}
+          title={open.title}
+          detail={open.detail}
+          askContext={t("askInstallStepContext", { step: open.title, detail: open.detail })}
+          onClose={() => setOpenIdx(null)}
+        />
+      )}
+    </>
   );
 }
 

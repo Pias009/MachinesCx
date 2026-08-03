@@ -63,7 +63,7 @@ export default async function NewsIndexPage() {
         {/* ── Featured article ── */}
         <Link href={`/news/${featured.slug}`} className="news-featured">
           <div className="news-featured__img-wrap">
-            <Image src={featured.image} alt={featured.title} className="news-featured__img" width={1200} height={800} style={{ width: "100%", height: "auto" }} priority />
+            <Image src={featured.image} alt={featured.title} className="news-featured__img" width={1200} height={800} priority />
           </div>
           <div className="news-featured__body">
             <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginBottom: "1rem" }}>
@@ -97,18 +97,23 @@ export default async function NewsIndexPage() {
           </div>
         </Link>
 
-        {/* ── Rest of articles ── */}
-        <div style={{
+        {/* ── Rest of articles ──
+             data-no-anim: the site-wide SectionAnimator auto-fades every
+             h1/h2/h3/p on scroll, but these cards render inside the
+             initial viewport and its ScrollTrigger doesn't reliably
+             reveal already-in-view elements on load — leaves titles and
+             excerpts stuck at opacity:0. Opt this grid out rather than
+             touch the shared animator every other page depends on. */}
+        <div data-no-anim style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill,minmax(clamp(240px,24vw,300px),1fr))",
-          gap: "1px", background: "var(--bg-line)",
-          border: "1px solid var(--bg-line)",
-          marginTop: "1px",
+          gridTemplateColumns: "repeat(auto-fit,minmax(clamp(240px,24vw,300px),1fr))",
+          gap: "1.5rem",
+          marginTop: "1.5rem",
         }}>
           {rest.map((a) => (
             <Link key={a.slug} href={`/news/${a.slug}`} className="ns-card">
               <div className="ns-card__img-wrap">
-                <Image src={a.image} alt={a.title} className="ns-card__img" width={600} height={400} style={{ width: "100%", height: "auto" }} loading="lazy" />
+                <Image src={a.image} alt={a.title} className="ns-card__img" width={600} height={400} loading="lazy" />
               </div>
               <div className="ns-card__body">
                 <div className="ns-card__meta">
@@ -143,9 +148,10 @@ export default async function NewsIndexPage() {
           min-height: 320px;
           border-right: 1px solid var(--bg-line);
           overflow: hidden;
+          padding: clamp(1.5rem, 4vw, 3rem);
         }
         .news-featured__img {
-          width: 65%; height: auto; object-fit: contain;
+          width: 100%; height: 100%; object-fit: contain;
           filter: drop-shadow(0 12px 32px rgba(15,23,42,0.14));
           transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
         }
@@ -168,17 +174,19 @@ export default async function NewsIndexPage() {
         .ns-card {
           display: flex; flex-direction: column;
           background: var(--bg-surface); text-decoration: none;
-          transition: background 0.18s;
+          border: 1px solid var(--bg-line);
+          transition: background 0.18s, border-color 0.18s;
         }
-        .ns-card:hover { background: var(--bg-raise); }
+        .ns-card:hover { background: var(--bg-raise); border-color: var(--brand-teal); }
         .ns-card__img-wrap {
           width: 100%; aspect-ratio: 16/9;
           background: var(--bg-base); overflow: hidden;
           display: flex; align-items: center; justify-content: center;
           border-bottom: 1px solid var(--bg-line);
+          padding: 1.1rem;
         }
         .ns-card__img {
-          width: 60%; height: 75%; object-fit: contain;
+          width: 100%; height: 100%; object-fit: contain;
           filter: drop-shadow(0 6px 16px rgba(15,23,42,0.12));
           transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
         }

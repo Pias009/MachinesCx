@@ -1,10 +1,25 @@
+"use client";
+import { useRef } from "react";
 import { useTranslations } from "next-intl";
 import { ProductFamily } from "@/lib/products";
 
 export default function SpecTable({ family }: { family: ProductFamily }) {
   const t = useTranslations("specTable");
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Wide comparison tables only scroll sideways, which a plain vertical
+  // wheel/trackpad gesture won't trigger in any browser by default —
+  // redirect vertical wheel input to horizontal scroll while hovering.
+  function handleWheel(e: React.WheelEvent<HTMLDivElement>) {
+    const el = wrapRef.current;
+    if (!el || el.scrollWidth <= el.clientWidth) return;
+    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    el.scrollLeft += e.deltaY;
+    e.preventDefault();
+  }
+
   return (
-    <div className="spec-wrap">
+    <div className="spec-wrap" ref={wrapRef} onWheel={handleWheel}>
       <table className="spec-table">
         <thead>
           <tr>
@@ -23,6 +38,7 @@ export default function SpecTable({ family }: { family: ProductFamily }) {
           ))}
         </tbody>
       </table>
+      <div className="spec-wrap-fade" aria-hidden="true" />
     </div>
   );
 }

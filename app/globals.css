@@ -894,9 +894,28 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .mat-badge { font-family: var(--ff-mono); font-size: 0.7rem; letter-spacing: 0.08em; color: var(--brand-red); border: 1px solid rgba(43,191,179,0.25); padding: 0.4rem 0.75rem; }
 
 /* spec table */
-.spec-wrap { overflow-x: auto; }
+.spec-wrap {
+  overflow-x: auto;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-line) transparent;
+}
+.spec-wrap::-webkit-scrollbar { height: 6px; }
+.spec-wrap::-webkit-scrollbar-thumb { background: var(--bg-line); border-radius: 3px; }
+.spec-wrap-fade {
+  /* right-edge fade — signals there's more table to scroll to; sibling
+     of the scrolling element so it can stay fixed in the viewport
+     instead of scrolling away with the table content. */
+  position: absolute; top: 0; right: 0; bottom: 0;
+  width: 28px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--bg-base) 88%);
+}
 .spec-table { width: 100%; border-collapse: collapse; min-width: 500px; }
 .spec-table th, .spec-table td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid var(--bg-line); vertical-align: top; }
+.spec-table th:first-child, .spec-table td:first-child {
+  position: sticky; left: 0; z-index: 1;
+  box-shadow: 1px 0 0 var(--bg-line);
+}
 .spec-table thead th { background: var(--slate); font-family: var(--ff-display); text-transform: uppercase; font-size: 1rem; color: #fff; }
 .spec-table thead th:first-child { background: #1e293b; }
 [data-theme="light"] .spec-table thead th              { background: #ffffff; color: #0d2220; border-bottom: 2px solid rgba(13,34,32,0.12); }
@@ -907,6 +926,12 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .spec-table tbody tr:nth-child(odd) td  { background: var(--bg-base); }
 .spec-table tbody tr:nth-child(even) td { background: var(--bg-surface); }
 .spec-table tbody tr:hover td { background: var(--bg-raise); }
+/* sticky first column needs its own explicit (not inherited) opaque
+   background per row-parity — a sticky layer can otherwise composite
+   before the cascade resolves, letting scrolled-past cells show through */
+.spec-table tbody tr:nth-child(odd) td:first-child  { background: var(--bg-base); }
+.spec-table tbody tr:nth-child(even) td:first-child { background: var(--bg-surface); }
+.spec-table tbody tr:hover td:first-child { background: var(--bg-raise); }
 
 /* =======================  CONTACT  ======================= */
 .contact-page {
@@ -4304,7 +4329,6 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-rating-bar__pct { width: 2.5rem; text-align: right; opacity: 0.85; }
 
 /* review card */
-.pdv2-review-carousel {}
 .pdv2-reviews__h2 {
   font-family: var(--ff-display); font-size: clamp(1.8rem, 3.5vw, 2.8rem);
   color: var(--ink); line-height: 1; margin-bottom: 1.5rem;
@@ -4459,7 +4483,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   position: relative; overflow: hidden;
 }
 .pdv2-cta-band__form-side::before {
-  content: ; position: absolute; inset: 0;
+  content: ""; position: absolute; inset: 0;
   background-image:
     linear-gradient(rgba(43,191,179,0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(43,191,179,0.05) 1px, transparent 1px);

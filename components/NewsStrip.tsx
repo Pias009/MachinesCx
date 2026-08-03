@@ -354,7 +354,7 @@ export default function NewsStrip() {
         }
         .ns2-date {
           font-family: var(--ff-mono); font-size: 0.64rem;
-          letter-spacing: 0.1em; color: rgba(255,255,255,0.55);
+          letter-spacing: 0.1em; color: rgba(255,255,255,0.72);
         }
         .ns2-title {
           font-family: var(--ff-body);

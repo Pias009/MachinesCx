@@ -658,7 +658,7 @@ export default function PrintingShowcase() {
                   height:          isMobile ? 44 : 56,
                   borderRadius:    "50%",
                   background:      "transparent",
-                  border:          "2px solid rgba(255,255,255,0.35)",
+                  border:          "2px solid rgba(255,255,255,0.55)",
                   color:           "white",
                   display:         "flex",
                   alignItems:      "center",
@@ -675,7 +675,7 @@ export default function PrintingShowcase() {
                 onMouseLeave={e => {
                   (e.currentTarget as HTMLElement).style.transform = "";
                   (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.35)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.55)";
                 }}
               >
                 {dir === "prev"
@@ -754,7 +754,7 @@ export default function PrintingShowcase() {
                   <span className="ps-col-num" style={{
                     fontFamily: "var(--ff-mono)", fontSize: "0.62rem",
                     letterSpacing: "0.14em", textTransform: "uppercase",
-                    color: i === active ? "var(--brand-teal)" : "rgba(255,255,255,0.35)",
+                    color: i === active ? "var(--brand-teal)" : "rgba(255,255,255,0.55)",
                     display: "block", minWidth: 28,
                     transition: `color ${DURATION}ms ${ease}`,
                   }}>
@@ -762,7 +762,7 @@ export default function PrintingShowcase() {
                   </span>
                   <span style={{
                     fontFamily: "var(--ff-display)", fontSize: "0.75rem",
-                    color: i === active ? "#fff" : "rgba(255,255,255,0.45)",
+                    color: i === active ? "#fff" : "rgba(255,255,255,0.65)",
                     letterSpacing: "0.02em", textTransform: "uppercase",
                     transition: `color ${DURATION}ms ${ease}`,
                   }}>

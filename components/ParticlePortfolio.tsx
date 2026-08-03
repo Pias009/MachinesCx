@@ -257,7 +257,7 @@ export default function ParticlePortfolio(){
         .pp-panel__q-label {
           font-family: var(--ff-mono); font-size: 0.6rem;
           letter-spacing: 0.08em; text-transform: uppercase;
-          color: rgba(255,255,255,0.55);
+          color: rgba(255,255,255,0.72);
         }
         .pp-panel__q-val {
           font-family: var(--ff-display); font-size: 0.95rem;
@@ -512,7 +512,7 @@ export default function ParticlePortfolio(){
                     : "drop-shadow(0 4px 12px rgba(0,0,0,0.7)) saturate(0.7) brightness(0.85)",
                 }}/>
                 <span className={`pp-node__name${isOn?"":" pp-node__name--dim"}`} style={{
-                  color: isOn ? a.hex : "rgba(255,255,255,0.55)",
+                  color: isOn ? a.hex : "rgba(255,255,255,0.72)",
                   transition: "color 0.4s",
                 }}>{s.stage}</span>
               </button>

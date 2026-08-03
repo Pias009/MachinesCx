@@ -223,10 +223,10 @@ export default function AboutPage() {
   const lightBg = "#f8fafc";
   const bg = isDark ? darkBg : lightBg;
   const textPrimary = isDark ? "#fff" : "#111827";
-  const textMuted = isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)";
-  const textBody = isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)";
-  const textBodyAlt = isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.6)";
-  const textDim = isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)";
+  const textMuted = isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)";
+  const textBody = isDark ? "rgba(255,255,255,0.82)" : "rgba(0,0,0,0.75)";
+  const textBodyAlt = isDark ? "rgba(255,255,255,0.75)" : "rgba(0,0,0,0.7)";
+  const textDim = isDark ? "rgba(255,255,255,0.60)" : "rgba(0,0,0,0.55)";
   const border = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)";
   const gridBg = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)";
   const cardBg = isDark ? "#0f1420" : "#fff";
@@ -449,7 +449,7 @@ export default function AboutPage() {
                     <Image src={c.img} alt={c.name} fill sizes="(max-width: 768px) 50vw, 25vw" style={{ objectFit: "contain" }} />
                   </div>
                   <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.2rem", color: textPrimary, letterSpacing: "0.04em", marginBottom: "0.5rem" }}>{c.name}</h4>
-                  <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.75rem", color: isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.5)", lineHeight: 1.5, margin: 0 }}>{c.desc}</p>
+                  <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.75rem", color: isDark ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.6)", lineHeight: 1.5, margin: 0 }}>{c.desc}</p>
                 </div>
               ))}
             </div>

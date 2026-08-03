@@ -85,16 +85,16 @@ export default function SiteNav() {
         .sn {
           position: fixed; top: 0; left: 0; right: 0; z-index: 200;
           height: 72px; width: 100%; overflow: hidden;
-          background: rgba(15,23,42,0.72);
+          background: var(--bg-surface);
           backdrop-filter: blur(20px) saturate(1.6);
-          border-bottom: 1px solid rgba(255,255,255,0.07);
+          border-bottom: 1px solid var(--bg-line);
           transition: background 0.35s, border-color 0.35s, box-shadow 0.35s;
         }
         /* scrolled — slightly more opaque */
         .sn--on {
-          background: rgba(10,14,26,0.92);
-          border-color: rgba(255,255,255,0.1);
-          box-shadow: 0 4px 32px rgba(0,0,0,0.35);
+          background: var(--bg-raise);
+          border-color: var(--bg-line);
+          box-shadow: 0 4px 32px color-mix(in srgb, var(--bg-base) 60%, transparent);
         }
         /* Red top accent line */
         .sn::before {
@@ -359,8 +359,8 @@ export default function SiteNav() {
           position: fixed;
           top: 0; left: 0; bottom: 0;
           width: min(82vw, 320px);
-          background: #080e0d;
-          border-right: 1px solid rgba(43,191,179,0.18);
+          background: var(--bg-base);
+          border-right: 1px solid var(--bg-line);
           z-index: 9100;
           flex-direction: column;
           padding: 0;
@@ -472,71 +472,60 @@ export default function SiteNav() {
           .sn__burger { display: flex; }
         }
 
-        /* ── Light mode ── */
-        [data-theme="light"] .sn {
-          background: rgba(255,255,255,0.78);
-          border-bottom-color: rgba(13,34,32,0.1);
-        }
-        [data-theme="light"] .sn--on {
-          background: rgba(255,255,255,0.94);
-          border-color: rgba(13,34,32,0.12);
-          box-shadow: 0 4px 32px rgba(13,34,32,0.08);
-        }
-        [data-theme="light"] .sn__logo { color: #0d2220; }
-        [data-theme="light"] .sn__cat-btn { color: rgba(13,34,32,0.75); }
+        /* ── Light mode — handled by CSS variables, no overrides needed ── */
+        [data-theme="light"] .sn__logo { color: var(--ink); }
+        [data-theme="light"] .sn__cat-btn { color: var(--ink-60); }
         [data-theme="light"] .sn__cat-btn:hover,
-        [data-theme="light"] .sn__cat--open .sn__cat-btn { color: #0d2220; }
-        [data-theme="light"] .sn__link { color: rgba(13,34,32,0.75); }
-        [data-theme="light"] .sn__link:hover { color: #0d2220; }
-        [data-theme="light"] .sn__divider { background: rgba(13,34,32,0.25); }
+        [data-theme="light"] .sn__cat--open .sn__cat-btn { color: var(--ink); }
+        [data-theme="light"] .sn__link { color: var(--ink-60); }
+        [data-theme="light"] .sn__link:hover { color: var(--ink); }
+        [data-theme="light"] .sn__divider { background: var(--ink-15); }
 
         [data-theme="light"] .sn__dd {
-          background: rgba(255,255,255,0.98);
-          border-color: rgba(13,34,32,0.1);
+          background: color-mix(in srgb, var(--bg-surface) 98%, transparent);
+          border-color: var(--bg-line);
         }
         [data-theme="light"] .sn__dd-item:hover,
-        [data-theme="light"] .sn__dd-item--on { background: rgba(13,34,32,0.05); }
-        [data-theme="light"] .sn__dd-series { color: #0d2220; }
-        [data-theme="light"] .sn__dd-tag { color: rgba(13,34,32,0.6); }
+        [data-theme="light"] .sn__dd-item--on { background: var(--brand-teal-dim); }
+        [data-theme="light"] .sn__dd-series { color: var(--ink); }
+        [data-theme="light"] .sn__dd-tag { color: var(--ink-35); }
         [data-theme="light"] .sn__dd-preview {
-          border-left-color: rgba(13,34,32,0.08);
-          background: rgba(13,34,32,0.02);
+          border-left-color: var(--bg-line);
+          background: var(--brand-teal-glow);
         }
         [data-theme="light"] .sn__dd-scrollbtn {
-          background: rgba(255,255,255,0.92);
-          border-color: rgba(43,191,179,0.3);
+          background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
+          border-color: color-mix(in srgb, var(--brand-teal) 30%, transparent);
         }
-        [data-theme="light"] .sn__dd-scrollbtn:hover { background: rgba(43,191,179,0.14); }
+        [data-theme="light"] .sn__dd-scrollbtn:hover { background: var(--brand-teal-dim); }
 
         /* burger icon */
-        [data-theme="light"] .sn__burger span { background: #0d2220; }
+        [data-theme="light"] .sn__burger span { background: var(--ink); }
 
-        /* mobile drawer */
+        /* mobile drawer — handled by CSS variables */
         [data-theme="light"] .sn__mobile {
-          background: #ffffff;
-          border-right-color: rgba(43,191,179,0.2);
-          box-shadow: 8px 0 40px rgba(13,34,32,0.12);
+          box-shadow: 8px 0 40px color-mix(in srgb, var(--bg-base) 15%, transparent);
         }
         [data-theme="light"] .sn__mob-header {
-          border-bottom-color: rgba(43,191,179,0.14);
-          background: rgba(43,191,179,0.05);
+          border-bottom-color: var(--bg-line);
+          background: var(--brand-teal-dim);
         }
-        [data-theme="light"] .sn__mob-logo { color: #0d2220; }
+        [data-theme="light"] .sn__mob-logo { color: var(--ink); }
         [data-theme="light"] .sn__mob-close {
-          background: rgba(13,34,32,0.05);
-          border-color: rgba(13,34,32,0.1);
-          color: rgba(13,34,32,0.6);
+          background: var(--bg-line);
+          border-color: var(--bg-line);
+          color: var(--ink-60);
         }
         [data-theme="light"] .sn__mob-close:hover { background: rgba(43,191,179,0.14); color: var(--brand-teal); }
         [data-theme="light"] .sn__mobile-link {
-          color: rgba(13,34,32,0.75);
-          border-bottom-color: rgba(13,34,32,0.06);
+          color: var(--ink-60);
+          border-bottom-color: var(--bg-line);
         }
         [data-theme="light"] .sn__mobile-link:hover {
-          color: #0d2220;
-          background: rgba(43,191,179,0.08);
+          color: var(--ink);
+          background: var(--brand-teal-dim);
         }
-        [data-theme="light"] .sn__mob-bd { background: rgba(13,34,32,0.35); }
+        [data-theme="light"] .sn__mob-bd { background: color-mix(in srgb, var(--ink) 35%, transparent); }
       `}</style>
 
       <nav className={`sn${scrolled ? " sn--on" : ""}`}>
@@ -632,7 +621,7 @@ export default function SiteNav() {
         </div>
 
         {/* Language + CTA pinned to bottom */}
-        <div style={{ padding:"1.25rem", borderTop:"1px solid rgba(43,191,179,0.12)", flexShrink:0, display:"flex", flexDirection:"column", gap:"0.85rem" }}>
+        <div style={{ padding:"1.25rem", borderTop:"1px solid var(--bg-line)", flexShrink:0, display:"flex", flexDirection:"column", gap:"0.85rem" }}>
           <LanguageSwitcher />
           <TransitionLink href="/inquiries" className="sn__mobile-cta" onClick={() => setMobileOpen(false)}>
             {t("getQuote")}

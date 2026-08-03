@@ -187,7 +187,7 @@ export default function LoadingScreen() {
           <div style={{
             fontSize: "clamp(0.62rem,0.6vw,0.64rem)",
             letterSpacing: "0.18em", textTransform: "uppercase",
-            color: "rgba(255,255,255,0.55)", marginTop: "0.5rem",
+            color: "rgba(255,255,255,0.72)", marginTop: "0.5rem",
             animation: "ls-rise 1.0s 1.4s cubic-bezier(0.22,1,0.36,1) both",
           }}>
             Film Blowing · Bag Making · Recycling · Flexo Print
@@ -200,7 +200,7 @@ export default function LoadingScreen() {
           animation: "ls-rise 1.0s 1.7s cubic-bezier(0.22,1,0.36,1) both",
         }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.45rem" }}>
-            <span style={{ fontSize: "0.62rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)" }}>
+            <span style={{ fontSize: "0.62rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.72)" }}>
               {pct < 100 ? "Initialising" : label}
             </span>
             <span style={{

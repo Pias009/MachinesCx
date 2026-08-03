@@ -3547,35 +3547,46 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 ════════════════════════════════════════ */
 .pdv2-iw { display: flex; flex-direction: column; gap: 1.5rem; }
 
-/* progress rail — every step's title is visible as a rail of pills, click
-   any one to jump there directly; done steps show a check, not just a number */
+/* progress section — its own panel, visually separated from the stage
+   card below rather than sitting directly on top of it */
+.pdv2-iw__progress-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-line);
+  border-radius: 1rem;
+  padding: .75rem 1rem;
+}
+
+/* progress rail — small icon-first chips, no fill/border chrome; the
+   active step's icon + label pick up teal, everything else stays quiet.
+   All steps share the row width and wrap on narrow screens instead of
+   scrolling, so every step stays visible at once. */
 .pdv2-iw__progress {
-  display: flex; gap: .5rem; overflow-x: auto; padding: .25rem .1rem .5rem;
-  scrollbar-width: none;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem 1rem;
+  padding: .25rem .1rem .5rem;
 }
-.pdv2-iw__progress::-webkit-scrollbar { display: none; }
 .pdv2-iw__dot {
-  flex-shrink: 0; display: flex; align-items: center; gap: .5rem;
-  background: var(--bg-surface); border: 1px solid var(--bg-line);
-  border-radius: 999px; padding: .45rem .9rem .45rem .45rem; cursor: pointer;
-  transition: border-color .2s ease, background .2s ease;
+  /* visual size stays small (icon+label), but padding pads the actual
+     click/tap target out to the 44px accessibility minimum */
+  flex: 0 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .2rem;
+  background: none; border: none; cursor: pointer;
+  min-width: 44px; min-height: 44px; padding: .5rem .4rem;
 }
-.pdv2-iw__dot:hover { border-color: rgba(43,191,179,.4); }
-.pdv2-iw__dot--on { border-color: var(--brand-teal); background: rgba(43,191,179,.06); }
-.pdv2-iw__dot-num {
-  flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+.pdv2-iw__dot-icon {
+  flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--ff-mono); font-size: .68rem; font-weight: 700;
-  background: var(--bg-raise); color: var(--ink-35);
-  transition: background .2s ease, color .2s ease;
+  color: var(--ink-35);
+  transition: color .2s ease, transform .2s ease;
 }
-.pdv2-iw__dot--on .pdv2-iw__dot-num { background: var(--brand-teal); color: #04211e; }
-.pdv2-iw__dot--done .pdv2-iw__dot-num { background: rgba(43,191,179,.15); color: var(--brand-teal); }
+.pdv2-iw__dot:hover .pdv2-iw__dot-icon { color: var(--ink-60); transform: translateY(-1px); }
+.pdv2-iw__dot--on .pdv2-iw__dot-icon { color: var(--brand-teal); }
+.pdv2-iw__dot--done .pdv2-iw__dot-icon { color: var(--brand-teal); opacity: .55; }
 .pdv2-iw__dot-label {
-  font-family: var(--ff-mono); font-size: .68rem; letter-spacing: .04em;
-  color: var(--ink-60); white-space: nowrap;
+  font-family: var(--ff-mono); font-size: .56rem; letter-spacing: .03em;
+  color: var(--ink-35); white-space: nowrap;
+  transition: color .2s ease;
 }
 .pdv2-iw__dot--on .pdv2-iw__dot-label { color: var(--ink); }
+.pdv2-iw__dot--done .pdv2-iw__dot-label { color: var(--ink-60); }
 
 /* stage — the active step, real photo left / full instructions right */
 .pdv2-iw__stage {
@@ -3626,12 +3637,8 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 @media (prefers-reduced-motion: reduce) { .pdv2-iw__ring { animation: none; } }
 .pdv2-iw__icon {
   position: relative; z-index: 1;
-  width: 96px; height: 96px;
   display: flex; align-items: center; justify-content: center;
   color: var(--brand-teal);
-  background: rgba(43,191,179,0.08);
-  border: 1px solid rgba(43,191,179,0.3);
-  border-radius: 1.1rem;
   filter: drop-shadow(0 0 18px rgba(43,191,179,0.22));
 }
 

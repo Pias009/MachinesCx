@@ -40,6 +40,7 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: `${BRAND} — Blown Film, Bag Making & Recycling Machinery`,
   description: "Multi-layer blown-film lines, bag-making converters and recycling lines. From benchtop trials to 5-layer co-extrusion at 400 kg/h.",
+  icons: { icon: "/logo.jpeg" },
 };
 
 export function generateStaticParams() {

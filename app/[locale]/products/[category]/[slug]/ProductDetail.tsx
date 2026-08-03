@@ -180,6 +180,20 @@ function DeliveryRoadmap({ phases }: { phases: DeliveryPhase[] }) {
   );
 }
 
+/* These 5 URLs are the only installation-step images in the whole catalog
+   (data/products.json) and all 5 resolve to the same company-logo image —
+   an upstream upload mistake, not per-product content. Until real
+   installation photos are uploaded, treat any step using one of these as
+   unphotographed and fall back to the schematic icon panel instead of
+   stretching the logo across a full-bleed photo frame. */
+const PLACEHOLDER_INSTALL_IMAGES = new Set([
+  "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784475562/cx-machinery/zozsjky029iyownsltvu.jpg",
+  "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784475565/cx-machinery/ng70kjlqjyw09ks53fst.jpg",
+  "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784475570/cx-machinery/vcgmjlbeiwyemzegqeud.jpg",
+  "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784475582/cx-machinery/norwig4mx5puijehnnaa.jpg",
+  "https://res.cloudinary.com/dpyhwgsqk/image/upload/v1784475586/cx-machinery/hbm6bsjplk1yqxbvyfvx.jpg",
+]);
+
 /* Step-by-step installation walkthrough — one step shown at a time with
    its real admin-uploaded photo (falls back to the schematic icon panel
    for any step not yet photographed) and the FULL detail text, not the
@@ -189,38 +203,50 @@ function InstallationWalkthrough({ steps }: { steps: SetupStep[] }) {
   const t = useTranslations("productDetail");
   const [idx, setIdx] = useState(0);
   const step = steps[idx];
+  const stepIsPlaceholder = !step.image || PLACEHOLDER_INSTALL_IMAGES.has(step.image);
 
   return (
     <div className="pdv2-iw">
-      <div className="pdv2-iw__progress" role="tablist" aria-label={t("setupInstallationGuide")}>
-        {steps.map((s, i) => (
-          <button
-            key={i}
-            type="button"
-            role="tab"
-            aria-selected={i === idx}
-            aria-label={t("installStepAria", { num: i + 1, total: steps.length })}
-            className={`pdv2-iw__dot${i === idx ? " pdv2-iw__dot--on" : i < idx ? " pdv2-iw__dot--done" : ""}`}
-            onClick={() => setIdx(i)}
-          >
-            <span className="pdv2-iw__dot-num">{i < idx ? "✓" : i + 1}</span>
-            <span className="pdv2-iw__dot-label">{s.title}</span>
-          </button>
-        ))}
+      <div className="pdv2-iw__progress-section">
+        <div className="pdv2-iw__progress" role="tablist" aria-label={t("setupInstallationGuide")}>
+          {steps.map((s, i) => (
+            <button
+              key={i}
+              type="button"
+              role="tab"
+              aria-selected={i === idx}
+              aria-label={t("installStepAria", { num: i + 1, total: steps.length })}
+              title={s.title}
+              className={`pdv2-iw__dot${i === idx ? " pdv2-iw__dot--on" : i < idx ? " pdv2-iw__dot--done" : ""}`}
+              onClick={() => setIdx(i)}
+            >
+              <span className="pdv2-iw__dot-icon">
+                {i < idx ? (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                ) : (
+                  <ProcessIcon name={resolveIcon(s.title)} size={14} />
+                )}
+              </span>
+              <span className="pdv2-iw__dot-label">{s.title}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div key={idx} className="pdv2-iw__stage" data-reveal="scale">
         <div className="pdv2-iw__media">
-          {step.image ? (
+          {step.image && !stepIsPlaceholder ? (
             <Image src={step.image} alt={step.title} fill sizes="(max-width: 900px) 100vw, 640px" className="pdv2-iw__photo" />
           ) : (
             <div className="pdv2-iw__media--schematic">
               <span className="pdv2-iw__ghost" aria-hidden="true">{String(idx + 1).padStart(2, "0")}</span>
               <span className="pdv2-iw__ring" aria-hidden="true" />
-              <span className="pdv2-iw__icon"><ProcessIcon name={resolveIcon(step.title)} size={52} /></span>
+              <span className="pdv2-iw__icon"><ProcessIcon name={resolveIcon(step.title)} size={72} /></span>
             </div>
           )}
-          <span className="pdv2-iw__badge">{t("installStepBadge", { num: idx + 1, total: steps.length })}</span>
+          {!stepIsPlaceholder && (
+            <span className="pdv2-iw__badge">{t("installStepBadge", { num: idx + 1, total: steps.length })}</span>
+          )}
         </div>
 
         <div className="pdv2-iw__body">

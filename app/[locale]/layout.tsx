@@ -7,15 +7,13 @@ import { Bebas_Neue, Inter, JetBrains_Mono } from "next/font/google";
 import "../globals.css";
 import SiteNav from "@/components/SiteNav";
 import PageNav from "@/components/PageNav";
-import SiteFooter from "@/components/SiteFooter";
-import PageTransitionOverlay from "@/components/PageTransitionOverlay";
-import PageMountTrigger from "@/components/PageMountTrigger";
 import LoadingScreen from "@/components/LoadingScreen";
-import SectionAnimator from "@/components/SectionAnimator";
-import AppToaster from "@/components/AppToaster";
 import { BRAND } from "@/lib/products";
 import { routing, rtlLocales, type Locale } from "@/i18n/routing";
 
+const SiteFooter = dynamic(() => import("@/components/SiteFooter"), { ssr: false });
+const SectionAnimator = dynamic(() => import("@/components/SectionAnimator"), { ssr: false });
+const AppToaster = dynamic(() => import("@/components/AppToaster"), { ssr: false });
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 const ProductionLineTeaser = dynamic(() => import("@/components/ProductionLineTeaser"), { ssr: false });
 
@@ -121,8 +119,6 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <LoadingScreen />
           <SectionAnimator />
-          <PageTransitionOverlay />
-          <PageMountTrigger />
           <SiteNav />
           <PageNav />
           <main>{children}</main>

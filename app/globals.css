@@ -472,8 +472,10 @@
 [data-theme="light"] .btn--hot               { color: #fff !important; }
 [data-theme="light"] .sn__cta                { color: #080e0d !important; }
 
-/* ── ThemeToggle stays legible ── */
-[data-theme="light"] .theme-toggle     { color: #0d2220 !important; }
+/* ── ThemeToggle + LanguageSwitcher stay legible ── */
+[data-theme="light"] .tt-btn           { color: #0d2220 !important; }
+[data-theme="light"] .ls-btn           { color: #0d2220 !important; background: rgba(13,34,32,0.08) !important; border-color: rgba(13,34,32,0.2) !important; }
+[data-theme="light"] .ls-btn:hover     { color: #0d2220 !important; background: rgba(43,191,179,0.1) !important; border-color: var(--brand-teal) !important; }
 
 /* ── reset ──
    Wrapped in @layer base (not left unlayered) so Tailwind's utility

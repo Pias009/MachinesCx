@@ -133,13 +133,13 @@ export default function SiteFooter() {
             <div className="footer-qr-row" style={{ display: "flex", gap: "1rem" }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem" }}>
                 <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "0.4rem", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <img src="/qr-whatsapp.png" alt={t("whatsapp")} width={80} height={80} style={{ display: "block" }} />
+                  <Image src="/qr-whatsapp.png" alt={t("whatsapp")} width={80} height={80} style={{ display: "block" }} />
                 </div>
                 <span className="footer-qr-label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.55rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>{t("whatsapp")}</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem" }}>
                 <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "0.4rem", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <img src="/qr-website.png" alt={t("website")} width={80} height={80} style={{ display: "block" }} />
+                  <Image src="/qr-website.png" alt={t("website")} width={80} height={80} style={{ display: "block" }} />
                 </div>
                 <span className="footer-qr-label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.55rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>{t("website")}</span>
               </div>

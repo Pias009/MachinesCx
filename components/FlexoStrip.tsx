@@ -280,9 +280,23 @@ export default function FlexoStrip() {
           .fls-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 640px) {
-          .fls-section { padding: clamp(2.5rem,7vw,3.5rem) 0 clamp(2rem,5vw,3rem) !important; }
-          .fls-header { margin-bottom: clamp(1.5rem,4vw,2.25rem) !important; }
-          .fls-title-clip h2 { font-size: clamp(2rem, 9vw, 3.2rem) !important; }
+          .fls-section { padding: clamp(2rem,6vw,3rem) 0 clamp(1.5rem,4vw,2.5rem) !important; }
+          .fls-header { margin-bottom: clamp(1rem,3vw,1.5rem) !important; }
+          .fls-title-clip h2 { font-size: clamp(1.8rem, 8vw, 2.6rem) !important; }
+          .fls-grid { gap: .75rem !important; }
+          .fls-card__photo { height: clamp(120px, 35vw, 180px) !important; }
+          .fls-card__body { padding: .75rem .9rem .85rem !important; }
+          .fls-card__name { font-size: clamp(0.95rem, 3.5vw, 1.15rem) !important; }
+          .fls-card__tag { font-size: .7rem !important; margin-top: .2rem !important; }
+          .fls-card__badge { font-size: .5rem !important; padding: .2rem .4rem !important; top: .5rem !important; left: .5rem !important; }
+          .fls-card__specs { padding: .75rem .9rem !important; gap: .4rem !important; }
+          .fls-card__spec-label { font-size: .5rem !important; }
+          .fls-card__spec-value { font-size: .85rem !important; }
+          .fls-cta-row { margin-top: 1.25rem !important; }
+          .fls-cta-row a { font-size: .7rem !important; }
+          .fls-strip { padding: .85rem 1rem !important; gap: 1rem !important; flex-direction: column !important; align-items: flex-start !important; }
+          .fls-strip > div { gap: 1rem !important; }
+          .fls-strip > div > div { gap: .15rem !important; }
         }
         @media (prefers-reduced-motion: reduce) {
           .fls-card, .fls-card__photo img, .fls-card__specs { transition: none; }
@@ -374,7 +388,7 @@ export default function FlexoStrip() {
         </div>
 
         {/* ── Bottom spec strip ── */}
-        <div ref={stripRef} style={{
+        <div ref={stripRef} className="fls-strip" style={{
           marginTop: "clamp(2.5rem,5vw,4rem)", padding: "1.25rem 1.5rem",
           border: "1px solid var(--line)",
           borderTop: "2px solid var(--brand-teal)",

@@ -67,6 +67,7 @@ export default function ClientJourney() {
   const gridRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const overlayCardRef = useRef<HTMLDivElement>(null);
+  const [activeSlide, setActiveSlide] = useState(0);
 
   // clicking an icon in the left pipeline jumps straight to its card —
   // a plain scroll, no motion effects on the card itself
@@ -176,6 +177,26 @@ export default function ClientJourney() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [openId, closeOverlay]);
+
+  // Track scroll position on mobile slider to update dot indicators
+  useEffect(() => {
+    const rail = gridRef.current;
+    if (!rail) return;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const scrollLeft = rail.scrollLeft;
+        const cardWidth = rail.scrollWidth / STEPS.length;
+        const idx = Math.round(scrollLeft / cardWidth);
+        setActiveSlide(Math.min(idx, STEPS.length - 1));
+        ticking = false;
+      });
+    };
+    rail.addEventListener("scroll", onScroll, { passive: true });
+    return () => rail.removeEventListener("scroll", onScroll);
+  }, [STEPS.length]);
 
   // one-time reveal when the grid enters view: each badge starts centered
   // over its card with the text hidden, then slides to its resting
@@ -333,7 +354,7 @@ export default function ClientJourney() {
         .cj__pipe-btn:focus-visible { outline: 2px solid var(--step-color); outline-offset: 3px; }
 
         @media (max-width: 720px) {
-          .cj__body { flex-direction: column; }
+          .cj__body { flex-direction: column; gap: 0; }
           .cj__pipeline {
             flex-direction: row; width: 100%; overflow-x: auto;
             gap: 1rem; padding-block: 0.5rem;
@@ -554,7 +575,63 @@ export default function ClientJourney() {
           .cj__rail { grid-template-columns: repeat(2, 1fr); }
         }
         @media (max-width: 640px) {
-          .cj__rail { grid-template-columns: 1fr; }
+          .cj__body { flex-direction: column; gap: 0; }
+          .cj__pipeline { display: none; }
+          .cj__rail {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            gap: 0.75rem;
+            padding-bottom: 1rem;
+            margin-inline: calc(-1 * clamp(1.5rem, 5vw, 4.5rem));
+            padding-inline: clamp(1.5rem, 5vw, 4.5rem);
+            scrollbar-width: none;
+          }
+          .cj__rail::-webkit-scrollbar { display: none; }
+          .cj__step {
+            flex: 0 0 82vw;
+            min-width: 0;
+            scroll-snap-align: center;
+            flex-direction: column;
+            gap: 0.7rem;
+            padding: 1rem;
+            border-radius: 12px;
+          }
+          .cj__badge {
+            width: 42px; height: 42px; border-radius: 11px;
+          }
+          .cj__badge::before { inset: -4px; border-radius: 14px; }
+          .cj__badge svg { width: 18px; height: 18px; }
+          .cj__label { font-size: .95rem; }
+          .cj__tagline { font-size: .8rem; line-height: 1.4; margin-top: .25rem; }
+          .cj__num { font-size: .65rem; }
+          .cj__metrics { gap: .3rem .8rem; padding-top: .5rem; }
+          .cj__metric { font-size: .68rem; gap: .3rem; }
+          .cj__desc { font-size: .8rem; margin-top: .6rem; padding-top: .6rem; }
+          .cj__footer { flex-direction: column; text-align: center; gap: 1rem; }
+          .cj__head-meta { display: none; }
+        }
+
+        /* swipe dots indicator for mobile slider */
+        .cj__dots {
+          display: none;
+          justify-content: center;
+          gap: 6px;
+          margin-top: 0.75rem;
+        }
+        .cj__dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: var(--bg-line);
+          border: none; padding: 0; cursor: pointer;
+          transition: background 0.2s, transform 0.2s;
+        }
+        .cj__dot--active {
+          background: var(--brand-teal);
+          transform: scale(1.3);
+        }
+        @media (max-width: 640px) {
+          .cj__dots { display: flex; }
         }
 
         .cj__footer {
@@ -663,8 +740,24 @@ export default function ClientJourney() {
                         straight to the overlay as before. */}
                     <div className="cj__preview" aria-hidden="true">
                       <p className="cj__desc cj__desc--preview">{s.desc}</p>
-                    </div>
-                  </div>
+            </div>
+            <div className="cj__dots" aria-hidden="true">
+              {STEPS.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className={`cj__dot${i === activeSlide ? " cj__dot--active" : ""}`}
+                  onClick={() => {
+                    const rail = gridRef.current;
+                    if (!rail) return;
+                    const cardWidth = rail.scrollWidth / STEPS.length;
+                    rail.scrollTo({ left: cardWidth * i, behavior: "smooth" });
+                  }}
+                  aria-label={`Go to step ${i + 1}`}
+                />
+              ))}
+            </div>
+          </div>
                 </div>
               ))}
             </div>

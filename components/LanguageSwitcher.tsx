@@ -100,11 +100,11 @@ export default function LanguageSwitcher() {
         .ls-opt--on .ls-opt__check { opacity: 1; }
 
         [data-theme="light"] .ls-btn {
-          background: rgba(13,34,32,0.05);
-          border-color: rgba(13,34,32,0.12);
-          color: rgba(13,34,32,0.75);
+          background: rgba(13,34,32,0.08);
+          border-color: rgba(13,34,32,0.2);
+          color: #0d2220;
         }
-        [data-theme="light"] .ls-btn:hover { color: #0d2220; }
+        [data-theme="light"] .ls-btn:hover { background: rgba(43,191,179,0.1); border-color: var(--brand-teal); color: #0d2220; }
         [data-theme="light"] .ls-dd {
           background: rgba(255,255,255,0.98);
           border-color: rgba(13,34,32,0.1);

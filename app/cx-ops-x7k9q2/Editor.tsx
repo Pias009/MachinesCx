@@ -1,11 +1,18 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { Camera, Star, X, Plus, CheckCircle2, Package, Loader2 } from "lucide-react";
+import { Camera, Star, X, Plus, CheckCircle2, Package, Loader2, AlertTriangle } from "lucide-react";
 import type { Field, Collection, SectionSchema } from "@/lib/cmsSchemas";
 import { CATEGORY_ICON as SHARED_CATEGORY_ICON } from "./adminIcons";
 
 type Json = Record<string, unknown>;
 type Item = Record<string, unknown>;
+
+// ── validation types ───────────────────────────────────────
+interface ValidationWarning {
+  field: string;
+  message: string;
+  severity: "error" | "warning";
+}
 
 // ── shared styles ──────────────────────────────────────────
 const label: React.CSSProperties = {
@@ -48,6 +55,99 @@ function FieldLabel({ children, hint }: { children: React.ReactNode; hint?: stri
       <span style={{ ...label, display: "block" }}>{children}</span>
       {hint && <span style={{ ...hintStyle, display: "block", marginTop: "0.15rem" }}>{hint}</span>}
     </div>
+  );
+}
+
+// ── validation warning modal ──────────────────────────────
+function WarningModal({ warnings, onConfirm, onCancel, title }: {
+  warnings: ValidationWarning[];
+  onConfirm: () => void;
+  onCancel: () => void;
+  title: string;
+}) {
+  const errors = warnings.filter(w => w.severity === "error");
+  const warns = warnings.filter(w => w.severity === "warning");
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 9999,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)",
+    }} onClick={onCancel}>
+      <div style={{
+        background: "var(--adm-surface-2)", border: "1px solid var(--adm-border-hi)",
+        borderRadius: 16, padding: "2rem", maxWidth: 520, width: "90%",
+        boxShadow: "0 24px 60px -12px rgba(0,0,0,0.6)",
+      }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: 10,
+            background: errors.length > 0 ? "rgba(255,107,125,0.15)" : "rgba(245,196,81,0.15)",
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            <AlertTriangle size={20} color={errors.length > 0 ? "#ff6b7d" : "#f5c451"} />
+          </div>
+          <div>
+            <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "1.3rem", color: "#fff", margin: 0 }}>{title}</h3>
+            <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: "rgba(255,255,255,0.5)", margin: "0.25rem 0 0" }}>
+              {errors.length > 0 ? "Fix these errors before saving" : "Save anyway or fix first?"}
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem", maxHeight: 240, overflowY: "auto" }}>
+          {errors.map((w, i) => (
+            <div key={`e-${i}`} style={{
+              display: "flex", gap: "0.6rem", alignItems: "flex-start",
+              padding: "0.7rem 0.9rem", borderRadius: 10,
+              background: "rgba(255,107,125,0.08)", border: "1px solid rgba(255,107,125,0.2)",
+            }}>
+              <X size={15} color="#ff6b7d" style={{ marginTop: 2, flexShrink: 0 }} />
+              <div>
+                <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 600, color: "#ff8a97" }}>{w.field}</span>
+                <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.82rem", color: "rgba(255,255,255,0.6)", margin: "0.15rem 0 0" }}>{w.message}</p>
+              </div>
+            </div>
+          ))}
+          {warns.map((w, i) => (
+            <div key={`w-${i}`} style={{
+              display: "flex", gap: "0.6rem", alignItems: "flex-start",
+              padding: "0.7rem 0.9rem", borderRadius: 10,
+              background: "rgba(245,196,81,0.08)", border: "1px solid rgba(245,196,81,0.2)",
+            }}>
+              <AlertTriangle size={15} color="#f5c451" style={{ marginTop: 2, flexShrink: 0 }} />
+              <div>
+                <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 600, color: "#f5c451" }}>{w.field}</span>
+                <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.82rem", color: "rgba(255,255,255,0.6)", margin: "0.15rem 0 0" }}>{w.message}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "flex", gap: "0.75rem", justifyContent: "flex-end" }}>
+          <button type="button" onClick={onCancel} style={{
+            ...btnBase, background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.7)",
+          }}>Cancel</button>
+          {errors.length === 0 && (
+            <button type="button" onClick={onConfirm} style={{
+              ...btnBase, background: "var(--brand-teal)", color: "#04211e",
+            }}>Save anyway</button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── inline warning indicator on fields ────────────────────
+function FieldWarning({ msg }: { msg: string }) {
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: "0.3rem",
+      fontFamily: "var(--ff-body)", fontSize: "0.78rem", fontWeight: 600,
+      color: "#f5c451", marginTop: "0.3rem",
+    }}>
+      <AlertTriangle size={12} /> {msg}
+    </span>
   );
 }
 
@@ -531,77 +631,126 @@ function FieldControl({ field, value, item, onChange, onItemChange }: {
         n[i] = { ...n[i], ...p };
         onChange(n);
       };
+      // inline validation per section
+      const sectionWarnings = (r: Row, i: number) => {
+        const w: { field: string; msg: string; err: boolean }[] = [];
+        if ((r.kind === "banner" || r.kind === "split") && !r.title?.trim()) {
+          w.push({ field: "title", msg: "Title required — section won't appear on site", err: true });
+        }
+        if ((r.kind === "banner" || r.kind === "split") && !r.image?.trim()) {
+          w.push({ field: "image", msg: "No image uploaded", err: false });
+        }
+        if (r.kind === "split" && !r.text?.trim()) {
+          w.push({ field: "text", msg: "No body text — only title will show", err: false });
+        }
+        if (r.kind === "gallery" && (!r.photos || r.photos.filter(p => p.src).length === 0)) {
+          w.push({ field: "photos", msg: "Gallery has no photos — won't appear on site", err: true });
+        }
+        return w;
+      };
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          {rows.map((r, i) => (
-            <div key={i} style={{ borderRadius: 12, background: "rgba(255,255,255,0.04)", padding: "1rem", display: "flex", flexDirection: "column", gap: "0.75rem", border: "1px solid rgba(255,255,255,0.08)" }}>
-              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
-                <select style={{ ...inputStyle, flex: "0 0 260px" }} value={r.kind}
-                  onChange={e => patch(i, { kind: e.target.value as Row["kind"] })}>
-                  {(Object.keys(KIND_LABEL) as Row["kind"][]).map(k => <option key={k} value={k} style={{ color: "#e0e0e0", background: "#111" }}>{KIND_LABEL[k]}</option>)}
-                </select>
-                <div style={{ flex: 1 }} />
-                <button type="button" title="Move up" style={iconBtn} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
-                <button type="button" title="Move down" style={iconBtn} disabled={i === rows.length - 1} onClick={() => move(i, 1)}>↓</button>
-                <button type="button" style={dangerBtn} onClick={() => onChange(rows.filter((_, j) => j !== i))}>Remove section</button>
-              </div>
-
-              <input style={inputStyle} value={r.title} placeholder="Section title"
-                onChange={e => patch(i, { title: e.target.value })} />
-
-              {(r.kind === "banner" || r.kind === "split") && (
-                <div>
-                  <span style={{ ...hintStyle, display: "block", marginBottom: "0.35rem" }}>Image</span>
-                  <ImageField value={r.image ?? ""} onChange={v => patch(i, { image: v })} />
+          {rows.map((r, i) => {
+            const warnings = sectionWarnings(r, i);
+            const hasError = warnings.some(w => w.err);
+            return (
+              <div key={i} style={{
+                borderRadius: 12, background: "rgba(255,255,255,0.04)", padding: "1rem",
+                display: "flex", flexDirection: "column", gap: "0.75rem",
+                border: hasError ? "1px solid rgba(255,107,125,0.35)" : warnings.length > 0 ? "1px solid rgba(245,196,81,0.3)" : "1px solid rgba(255,255,255,0.08)",
+              }}>
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
+                  <select style={{ ...inputStyle, flex: "0 0 260px" }} value={r.kind}
+                    onChange={e => patch(i, { kind: e.target.value as Row["kind"] })}>
+                    {(Object.keys(KIND_LABEL) as Row["kind"][]).map(k => <option key={k} value={k} style={{ color: "#e0e0e0", background: "#111" }}>{KIND_LABEL[k]}</option>)}
+                  </select>
+                  <div style={{ flex: 1 }} />
+                  <button type="button" title="Move up" style={iconBtn} disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
+                  <button type="button" title="Move down" style={iconBtn} disabled={i === rows.length - 1} onClick={() => move(i, 1)}>↓</button>
+                  <button type="button" style={dangerBtn} onClick={() => onChange(rows.filter((_, j) => j !== i))}>Remove section</button>
                 </div>
-              )}
 
-              {r.kind === "split" && (
-                <div style={{ display: "flex", gap: "1.25rem", alignItems: "center" }}>
-                  <span style={{ ...hintStyle }}>Image side:</span>
-                  <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", cursor: "pointer" }}>
-                    <input type="radio" checked={(r.imageSide ?? "left") === "left"} onChange={() => patch(i, { imageSide: "left" })} />
-                    <span style={{ ...hintStyle, color: "rgba(255,255,255,0.8)" }}>Left</span>
-                  </label>
-                  <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", cursor: "pointer" }}>
-                    <input type="radio" checked={r.imageSide === "right"} onChange={() => patch(i, { imageSide: "right" })} />
-                    <span style={{ ...hintStyle, color: "rgba(255,255,255,0.8)" }}>Right</span>
-                  </label>
-                </div>
-              )}
+                <input style={{
+                  ...inputStyle,
+                  borderColor: (r.kind === "banner" || r.kind === "split") && !r.title?.trim() ? "rgba(255,107,125,0.5)" : undefined,
+                }} value={r.title} placeholder="Section title (required for banner/split)"
+                  onChange={e => patch(i, { title: e.target.value })} />
+                {(r.kind === "banner" || r.kind === "split") && !r.title?.trim() && (
+                  <FieldWarning msg="Title required — section won't appear on the live site" />
+                )}
 
-              {(r.kind === "text" || r.kind === "split" || r.kind === "banner") && (
-                <textarea style={{ ...inputStyle, minHeight: 90, resize: "vertical" }}
-                  value={r.text ?? ""} placeholder={r.kind === "banner" ? "Caption text (optional)" : "Body text"}
-                  onChange={e => patch(i, { text: e.target.value })} />
-              )}
+                {(r.kind === "banner" || r.kind === "split") && (
+                  <div>
+                    <span style={{ ...hintStyle, display: "block", marginBottom: "0.35rem" }}>Image</span>
+                    <ImageField value={r.image ?? ""} onChange={v => patch(i, { image: v })} />
+                    {!r.image?.trim() && (
+                      <FieldWarning msg="No image uploaded — section may look empty" />
+                    )}
+                  </div>
+                )}
 
-              {r.kind === "gallery" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-                  {(r.photos ?? []).map((p, pi) => (
-                    <div key={pi} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
-                      <div style={{ flex: 1 }}>
-                        <ImageField value={p.src} onChange={v => {
-                          const photos = (r.photos ?? []).map(x => ({ ...x }));
-                          photos[pi].src = v;
-                          patch(i, { photos });
-                        }} />
-                        <input style={{ ...inputStyle, marginTop: "0.5rem" }} value={p.caption} placeholder="Caption"
-                          onChange={e => {
+                {r.kind === "split" && (
+                  <div style={{ display: "flex", gap: "1.25rem", alignItems: "center" }}>
+                    <span style={{ ...hintStyle }}>Image side:</span>
+                    <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", cursor: "pointer" }}>
+                      <input type="radio" checked={(r.imageSide ?? "left") === "left"} onChange={() => patch(i, { imageSide: "left" })} />
+                      <span style={{ ...hintStyle, color: "rgba(255,255,255,0.8)" }}>Left</span>
+                    </label>
+                    <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", cursor: "pointer" }}>
+                      <input type="radio" checked={r.imageSide === "right"} onChange={() => patch(i, { imageSide: "right" })} />
+                      <span style={{ ...hintStyle, color: "rgba(255,255,255,0.8)" }}>Right</span>
+                    </label>
+                  </div>
+                )}
+
+                {(r.kind === "text" || r.kind === "split" || r.kind === "banner") && (
+                  <textarea style={{ ...inputStyle, minHeight: 90, resize: "vertical" }}
+                    value={r.text ?? ""} placeholder={r.kind === "banner" ? "Caption text (optional)" : "Body text"}
+                    onChange={e => patch(i, { text: e.target.value })} />
+                )}
+
+                {r.kind === "gallery" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                    {(r.photos ?? []).map((p, pi) => (
+                      <div key={pi} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start" }}>
+                        <div style={{ flex: 1 }}>
+                          <ImageField value={p.src} onChange={v => {
                             const photos = (r.photos ?? []).map(x => ({ ...x }));
-                            photos[pi].caption = e.target.value;
+                            photos[pi].src = v;
                             patch(i, { photos });
                           }} />
+                          <input style={{ ...inputStyle, marginTop: "0.5rem" }} value={p.caption} placeholder="Caption"
+                            onChange={e => {
+                              const photos = (r.photos ?? []).map(x => ({ ...x }));
+                              photos[pi].caption = e.target.value;
+                              patch(i, { photos });
+                            }} />
+                        </div>
+                        <button type="button" style={dangerBtn} onClick={() => patch(i, { photos: (r.photos ?? []).filter((_, j) => j !== pi) })}>Remove</button>
                       </div>
-                      <button type="button" style={dangerBtn} onClick={() => patch(i, { photos: (r.photos ?? []).filter((_, j) => j !== pi) })}>Remove</button>
-                    </div>
-                  ))}
-                  <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }}
-                    onClick={() => patch(i, { photos: [...(r.photos ?? []), { src: "", caption: "" }] })}>+ Add photo</button>
-                </div>
-              )}
-            </div>
-          ))}
+                    ))}
+                    <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }}
+                      onClick={() => patch(i, { photos: [...(r.photos ?? []), { src: "", caption: "" }] })}>+ Add photo</button>
+                  </div>
+                )}
+
+                {/* inline warnings */}
+                {warnings.length > 0 && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem", marginTop: "0.25rem" }}>
+                    {warnings.map((w, wi) => (
+                      <div key={wi} style={{
+                        display: "flex", alignItems: "center", gap: "0.4rem",
+                        fontFamily: "var(--ff-body)", fontSize: "0.78rem", fontWeight: 600,
+                        color: w.err ? "#ff8a97" : "#f5c451",
+                      }}>
+                        <AlertTriangle size={12} /> {w.msg}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
           <button type="button" style={{ ...smallBtn, alignSelf: "flex-start" }}
             onClick={() => onChange([...rows, { kind: "banner", title: "", image: "", text: "" }])}>+ Add section</button>
         </div>
@@ -831,13 +980,196 @@ function CategoryTiles({ categories, items, onSelect }: {
   );
 }
 
+// ── validate custom sections before save ──────────────────
+function validateCustomSections(sections: unknown[]): ValidationWarning[] {
+  const warnings: ValidationWarning[] = [];
+  if (!Array.isArray(sections)) return warnings;
+
+  sections.forEach((s, i) => {
+    const kind = (s as Record<string, unknown>).kind;
+    const title = String((s as Record<string, unknown>).title ?? "").trim();
+    const image = String((s as Record<string, unknown>).image ?? "").trim();
+    const text = String((s as Record<string, unknown>).text ?? "").trim();
+    const photos = (s as Record<string, unknown>).photos as { src: string }[] | undefined;
+
+    const sectionLabel = `Section ${i + 1} (${kind || "unknown"})`;
+
+    if (kind === "banner" || kind === "split") {
+      if (!title) {
+        warnings.push({
+          field: `${sectionLabel} — Title`,
+          message: `This ${kind} section has no title. It will NOT appear on the live site without a title.`,
+          severity: "error",
+        });
+      }
+      if (!image) {
+        warnings.push({
+          field: `${sectionLabel} — Image`,
+          message: `This ${kind} section has no image. ${kind === "banner" ? "The banner will look empty." : "The split section will have a blank area."}`,
+          severity: "warning",
+        });
+      }
+    }
+
+    if (kind === "split" && !text) {
+      warnings.push({
+        field: `${sectionLabel} — Body text`,
+        message: "This split section has no body text. Only the title will show.",
+        severity: "warning",
+      });
+    }
+
+    if (kind === "gallery") {
+      const validPhotos = (photos ?? []).filter(p => p.src);
+      if (validPhotos.length === 0) {
+        warnings.push({
+          field: `${sectionLabel} — Photos`,
+          message: "This gallery has no uploaded photos. It will be invisible on the live site.",
+          severity: "error",
+        });
+      }
+    }
+  });
+
+  return warnings;
+}
+
+// ── validate product family before save ───────────────────
+function validateFamily(item: Item): ValidationWarning[] {
+  const warnings: ValidationWarning[] = [];
+  const name = String(item.name ?? "").trim();
+  const slug = String(item.slug ?? "").trim();
+  const images = item.images as string[] | undefined;
+
+  if (!name) {
+    warnings.push({ field: "Product name", message: "Product has no name. It will be hard to identify.", severity: "warning" });
+  }
+  if (!slug) {
+    warnings.push({ field: "Slug", message: "Product has no URL slug. The page link won't work.", severity: "error" });
+  }
+  if (!images || images.length === 0) {
+    warnings.push({ field: "Product photos", message: "No product photos uploaded. The product will show a fallback image.", severity: "warning" });
+  }
+
+  // validate custom sections within this family
+  const cs = item.customSections;
+  if (Array.isArray(cs) && cs.length > 0) {
+    warnings.push(...validateCustomSections(cs));
+  }
+
+  return warnings;
+}
+
+// ── validate all data before section-level save ───────────
+function validateSectionData(data: Json, schema: SectionSchema): ValidationWarning[] {
+  const warnings: ValidationWarning[] = [];
+
+  for (const col of schema.collections) {
+    const items = data[col.key] as Item[] | undefined;
+    if (!items || !Array.isArray(items)) continue;
+
+    items.forEach((item, i) => {
+      if (col.key === "families") {
+        const familyWarnings = validateFamily(item);
+        // prefix with product name for context
+        const productName = String(item.name ?? item.series ?? `#${i + 1}`);
+        familyWarnings.forEach(w => {
+          w.field = `[${productName}] ${w.field}`;
+          warnings.push(w);
+        });
+      }
+    });
+  }
+
+  return warnings;
+}
+
+// ── product editor modal ──────────────────────────────────
+function ProductEditorModal({ item, index, collection, onClose, onSave, onFieldChange, onFieldItemChange }: {
+  item: Item;
+  index: number;
+  collection: Collection;
+  onClose: () => void;
+  onSave: () => void;
+  onFieldChange: (key: string, v: unknown) => void;
+  onFieldItemChange: (key: string, v: unknown) => void;
+}) {
+  const [dirty, setDirty] = useState(false);
+
+  const handleChange = useCallback((key: string, v: unknown) => {
+    setDirty(true);
+    onFieldChange(key, v);
+  }, [onFieldChange]);
+
+  const handleItemChange = useCallback((key: string, v: unknown) => {
+    setDirty(true);
+    onFieldItemChange(key, v);
+  }, [onFieldItemChange]);
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 9998,
+      display: "flex", flexDirection: "column",
+      background: "var(--adm-bg)",
+    }}>
+      {/* modal header */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "1rem 1.5rem", borderBottom: "1px solid var(--adm-border)",
+        background: "var(--adm-surface)", flexShrink: 0,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <button type="button" onClick={() => {
+            if (dirty && !confirm("You have unsaved changes. Discard?")) return;
+            onClose();
+          }} style={{
+            ...iconBtn, padding: "0.6rem",
+          }}>← Back</button>
+          <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.3rem", color: "#fff", margin: 0 }}>
+            Edit: {String(item.name ?? item.series ?? `#${index + 1}`)}
+          </h2>
+          {dirty && <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.8rem", color: "#f5c451" }}>● Unsaved</span>}
+        </div>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <button type="button" onClick={onClose} style={{
+            ...btnBase, background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.7)",
+          }}>Close</button>
+          <button type="button" onClick={() => { setDirty(false); onSave(); }} style={{
+            ...btnBase, background: "var(--brand-teal)", color: "#04211e",
+          }}>
+            <CheckCircle2 size={14} /> Save product
+          </button>
+        </div>
+      </div>
+
+      {/* modal body */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "1.5rem" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <ItemFieldsPanel
+            collection={collection}
+            item={item}
+            onFieldChange={handleChange}
+            onFieldItemChange={handleItemChange}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── main editor ────────────────────────────────────────────
 export default function Editor({ schema }: { schema: SectionSchema }) {
   const [data, setData] = useState<Json | null>(null);
-  const [openIdx, setOpenIdx] = useState<Record<string, number>>({});
   const [status, setStatus] = useState<"idle" | "dirty" | "saving" | "saved" | "error">("idle");
   const [errMsg, setErrMsg] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  // validation modal state
+  const [pendingWarnings, setPendingWarnings] = useState<ValidationWarning[] | null>(null);
+  const [pendingSaveFn, setPendingSaveFn] = useState<(() => void) | null>(null);
+
+  // product editor modal state
+  const [modalItem, setModalItem] = useState<{ item: Item; index: number; collection: Collection } | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -853,7 +1185,8 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
     setStatus("dirty");
   }, []);
 
-  async function save() {
+  // actual save (called after validation passes)
+  async function doSave() {
     if (!data) return;
     setStatus("saving"); setErrMsg("");
     try {
@@ -873,6 +1206,18 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
     }
   }
 
+  // save with validation check
+  function save() {
+    if (!data) return;
+    const warnings = validateSectionData(data, schema);
+    if (warnings.length > 0) {
+      setPendingWarnings(warnings);
+      setPendingSaveFn(() => doSave);
+    } else {
+      doSave();
+    }
+  }
+
   if (!data) {
     if (status === "error") {
       return <div style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: "#ff8a97", padding: "2rem 0" }}>{errMsg}</div>;
@@ -888,6 +1233,43 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
 
   return (
     <div style={{ maxWidth: 1200 }} className="adm-rise">
+      {/* validation warning modal */}
+      {pendingWarnings && (
+        <WarningModal
+          title="Review before saving"
+          warnings={pendingWarnings}
+          onConfirm={() => { setPendingWarnings(null); pendingSaveFn?.(); }}
+          onCancel={() => { setPendingWarnings(null); setPendingSaveFn(null); }}
+        />
+      )}
+
+      {/* product editor modal */}
+      {modalItem && (
+        <ProductEditorModal
+          item={modalItem.item}
+          index={modalItem.index}
+          collection={modalItem.collection}
+          onClose={() => setModalItem(null)}
+          onSave={() => { doSave(); setModalItem(null); }}
+          onFieldChange={(key, v) => {
+            mutate(d => {
+              const n = ((d[modalItem.collection.key] as Item[]) ?? []).map(x => ({ ...x }));
+              n[modalItem.index][key] = v;
+              return { ...d, [modalItem.collection.key]: n };
+            });
+            setModalItem(prev => prev ? { ...prev, item: { ...prev.item, [key]: v } } : null);
+          }}
+          onFieldItemChange={(key, v) => {
+            mutate(d => {
+              const n = ((d[modalItem.collection.key] as Item[]) ?? []).map(x => ({ ...x }));
+              n[modalItem.index][key] = v;
+              return { ...d, [modalItem.collection.key]: n };
+            });
+            setModalItem(prev => prev ? { ...prev, item: { ...prev.item, [key]: v } } : null);
+          }}
+        />
+      )}
+
       {/* header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1.25rem", flexWrap: "wrap", marginBottom: "2rem" }}>
         <div>
@@ -926,13 +1308,9 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
       {/* collections */}
       {schema.collections.map(col => {
         const allItems = ((data[col.key] as Item[]) ?? []);
-        const open = openIdx[col.key] ?? -1;
         const isFamilies = col.key === "families";
         const categoryList = isFamilies ? ((data.categories as Item[]) ?? []) : [];
 
-        // products: show category tiles until one is picked, then only that
-        // category's machines — with real indices mapped back into allItems
-        // so move/delete/edit still act on the right item in the full array.
         const visibleIndices = isFamilies && activeCategory
           ? allItems.reduce<number[]>((acc, it, idx) => { if (it.category === activeCategory) acc.push(idx); return acc; }, [])
           : allItems.map((_, idx) => idx);
@@ -958,7 +1336,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem", gap: "0.75rem", flexWrap: "wrap" }}>
               <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.3rem", color: "#fff", margin: 0 }}>
                 {isFamilies && (
-                  <button type="button" onClick={() => { setActiveCategory(null); setOpenIdx(o => ({ ...o, [col.key]: -1 })); }}
+                  <button type="button" onClick={() => { setActiveCategory(null); }}
                     style={{ background: "none", border: "none", cursor: "pointer", color: "var(--brand-teal)", fontFamily: "var(--ff-body)", fontSize: "0.9rem", fontWeight: 700, marginRight: "0.9rem", verticalAlign: "middle" }}>
                     ← Back to categories
                   </button>
@@ -969,8 +1347,12 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
                 <button type="button" style={smallBtn} onClick={() => {
                   const template = JSON.parse(JSON.stringify(col.template ?? {}));
                   if (isFamilies && activeCategory) template.category = activeCategory;
-                  mutate(d => ({ ...d, [col.key]: [...allItems, template] }));
-                  setOpenIdx(o => ({ ...o, [col.key]: allItems.length }));
+                  mutate(d => {
+                    const newItems = [...allItems, template];
+                    const newIdx = newItems.length - 1;
+                    setTimeout(() => setModalItem({ item: template, index: newIdx, collection: col }), 50);
+                    return { ...d, [col.key]: newItems };
+                  });
                 }}>
                   + Add {(col.singular ?? col.label.replace(/s$/, "")).toLowerCase()}
                 </button>
@@ -979,30 +1361,34 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
               {items.map((item, listI) => {
-                const i = visibleIndices[listI]; // real index in allItems
+                const i = visibleIndices[listI];
                 const title = col.titleKeys.map(k => String(item[k] ?? "")).filter(Boolean).join(" — ") || `#${listI + 1}`;
-                const isOpen = open === i;
+                const itemWarnings = isFamilies ? validateFamily(item) : [];
+                const hasErrors = itemWarnings.some(w => w.severity === "error");
+                const hasWarnings = itemWarnings.some(w => w.severity === "warning");
                 return (
                   <div key={i} className="adm-panel" style={{
                     borderRadius: 14,
-                    background: isOpen ? "var(--adm-surface-2)" : "var(--adm-surface)",
+                    background: "var(--adm-surface)",
                     overflow: "hidden",
                     transition: "background 0.18s ease, border-color 0.18s ease",
-                    borderColor: isOpen ? "rgba(43,191,179,0.25)" : "var(--adm-border)",
+                    borderColor: hasErrors ? "rgba(255,107,125,0.35)" : hasWarnings ? "rgba(245,196,81,0.3)" : "var(--adm-border)",
                   }}>
-                    {/* row header */}
                     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.9rem 1.1rem" }}>
                       <button type="button"
-                        onClick={() => setOpenIdx(o => ({ ...o, [col.key]: isOpen ? -1 : i }))}
+                        onClick={() => setModalItem({ item, index: i, collection: col })}
                         style={{ flex: 1, textAlign: "left", background: "none", border: "none", cursor: "pointer", color: "#fff", fontFamily: "var(--ff-body)", fontSize: "1rem", fontWeight: 600, padding: 0, display: "flex", alignItems: "center", gap: "0.75rem" }}>
                         <span style={{
                           width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
-                          background: "rgba(43,191,179,0.16)", color: "var(--brand-teal)",
+                          background: hasErrors ? "rgba(255,107,125,0.16)" : hasWarnings ? "rgba(245,196,81,0.16)" : "rgba(43,191,179,0.16)",
+                          color: hasErrors ? "#ff8a97" : hasWarnings ? "#f5c451" : "var(--brand-teal)",
                           display: "flex", alignItems: "center", justifyContent: "center",
                           fontFamily: "var(--ff-body)", fontSize: "0.8rem", fontWeight: 700,
                         }}>{listI + 1}</span>
                         {title}
-                        <span style={{ marginLeft: "auto", color: "rgba(255,255,255,0.4)", fontSize: "0.85rem" }}>{isOpen ? "▲ Close" : "▼ Edit"}</span>
+                        {hasErrors && <span title="Has errors"><AlertTriangle size={14} color="#ff8a97" /></span>}
+                        {hasWarnings && !hasErrors && <span title="Has warnings"><AlertTriangle size={14} color="#f5c451" /></span>}
+                        <span style={{ marginLeft: "auto", color: "rgba(255,255,255,0.4)", fontSize: "0.85rem" }}>Edit →</span>
                       </button>
                       <button type="button" title="Move up" style={iconBtn} disabled={listI === 0}
                         onClick={() => mutate(d => {
@@ -1020,27 +1406,9 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
                         })}>↓</button>
                       {col.canAdd && (
                         <button type="button" title="Delete" style={dangerBtn}
-                          onClick={() => { if (confirm(`Delete “${title}”?`)) mutate(d => ({ ...d, [col.key]: allItems.filter((_, j) => j !== i) })); }}>Delete</button>
+                          onClick={() => { if (confirm('Delete "' + title + '"?')) mutate(d => ({ ...d, [col.key]: allItems.filter((_, j) => j !== i) })); }}>Delete</button>
                       )}
                     </div>
-
-                    {/* fields — grouped into tabs when the collection declares `groups` */}
-                    {isOpen && (
-                      <ItemFieldsPanel
-                        collection={col}
-                        item={item}
-                        onFieldChange={(key, v) => mutate(d => {
-                          const n = allItems.map(x => ({ ...x }));
-                          n[i][key] = v;
-                          return { ...d, [col.key]: n };
-                        })}
-                        onFieldItemChange={(key, v) => mutate(d => {
-                          const n = allItems.map(x => ({ ...x }));
-                          n[i][key] = v;
-                          return { ...d, [col.key]: n };
-                        })}
-                      />
-                    )}
                   </div>
                 );
               })}

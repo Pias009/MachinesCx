@@ -433,8 +433,8 @@ export default function ClientJourney() {
           width: 68px; height: 68px; border-radius: 18px;
         }
         .cj__overlay-card .cj__badge svg { width: 28px; height: 28px; }
-        .cj__overlay-card .cj__label { font-size: 1.35rem; margin-top: .3rem; }
-        .cj__overlay-card .cj__tagline { font-size: .92rem; margin-top: .4rem; }
+        .cj__overlay-card .cj__label { font-size: 1.35rem; margin-top: .3rem; font-family: var(--ff-body); }
+        .cj__overlay-card .cj__tagline { font-size: .95rem; margin-top: .4rem; font-family: var(--ff-body); }
         .cj__overlay-card .cj__desc { font-size: .92rem; }
 
         /* ── ask-an-agent — two equal paths handed off from this step's
@@ -522,30 +522,30 @@ export default function ClientJourney() {
         .cj__badge svg { width: 22px; height: 22px; color: #fff; }
 
         .cj__num {
-          font-family: var(--ff-mono); font-weight: 700; font-size: .64rem;
-          letter-spacing: .1em; color: var(--step-color);
+          font-family: var(--ff-body); font-weight: 700; font-size: .72rem;
+          letter-spacing: .08em; color: var(--step-color);
           display: block;
         }
         .cj__label {
-          font-family: var(--ff-display); font-weight: 700; font-size: 1.02rem;
+          font-family: var(--ff-body); font-weight: 700; font-size: 1.05rem;
           letter-spacing: -.005em; color: var(--ink);
-          margin: .15rem 0 0; text-transform: uppercase;
+          margin: .15rem 0 0;
         }
         .cj__tagline {
-          font-family: var(--ff-body); font-size: .8rem; line-height: 1.4;
+          font-family: var(--ff-body); font-size: .88rem; line-height: 1.5;
           color: var(--ink-60);
-          margin: .25rem 0 0;
+          margin: .35rem 0 0;
           flex: 1 1 auto;
         }
         .cj__metrics {
-          display: flex; flex-wrap: wrap; gap: .3rem 1.1rem;
+          display: flex; flex-wrap: wrap; gap: .4rem 1.2rem;
           border-top: 1px solid var(--bg-line);
-          padding-top: .6rem;
+          padding-top: .65rem;
           margin-top: auto;
         }
         .cj__metric {
-          display: flex; align-items: baseline; gap: .35rem;
-          font-family: var(--ff-mono); font-size: .68rem;
+          display: flex; align-items: baseline; gap: .4rem;
+          font-family: var(--ff-body); font-size: .75rem;
         }
         .cj__metric-v { color: var(--ink); font-weight: 700; }
         .cj__metric-l { color: var(--ink-35); letter-spacing: .04em; text-transform: uppercase; }

@@ -594,7 +594,7 @@ export default function MachineCatalogSection() {
       <section ref={sectionRef} className="mcs" data-no-anim aria-label={t("sectionAria")}>
         <div ref={shutterRef} className="mcs__shutter" aria-hidden="true">
           <div ref={shutterMarkRef} className="mcs__shutter-mark">
-            <img src="/logo.jpeg" alt="" />
+            <Image src="/logo.jpeg" alt="" width={40} height={40} />
           </div>
         </div>
         <div className="mcs__blob mcs__blob--t" aria-hidden="true" />

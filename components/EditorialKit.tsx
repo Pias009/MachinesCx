@@ -33,43 +33,6 @@ export function PlusMark({ className = "" }: { className?: string }) {
   );
 }
 
-/** Column of plus marks — the reference board's left-edge bullet stack. */
-export function PlusRail({ count = 4, className = "" }: { count?: number; className?: string }) {
-  return (
-    <div className={`flex flex-col gap-3 ${className}`} aria-hidden="true">
-      {Array.from({ length: count }, (_, i) => (
-        <PlusMark key={i} />
-      ))}
-    </div>
-  );
-}
-
-/** Tiny mono "KEY : value" row — the reference board's metadata lines. */
-export function MetaRow({ k, v }: { k: string; v: string }) {
-  return (
-    <div className="flex items-baseline gap-4 font-mono text-[0.68rem] uppercase tracking-[0.12em]">
-      <span className="text-[var(--brand-teal)]">{k}</span>
-      <span className="text-[var(--ink-60)] normal-case tracking-normal">{v}</span>
-    </div>
-  );
-}
-
-/** Three-dot pager mark (● ○ ●) from the reference board's top-right corner. */
-export function DotPager({ active = 2, of = 3 }: { active?: number; of?: number }) {
-  return (
-    <div className="flex items-center gap-1.5" aria-hidden="true">
-      {Array.from({ length: of }, (_, i) => (
-        <span
-          key={i}
-          className={`inline-block h-1.5 w-1.5 rounded-full ${
-            i === active ? "bg-[var(--brand-rose,#e11d48)]" : "bg-current opacity-30"
-          }`}
-        />
-      ))}
-    </div>
-  );
-}
-
 /** Section heading in the editorial register — mono eyebrow + teal tick +
  * display headline, replacing pdv2-section-head for every restyled block. */
 export function SectionHead({

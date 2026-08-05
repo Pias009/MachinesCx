@@ -265,18 +265,35 @@ export default function ParticlePortfolio(){
           transition: color 0.4s;
         }
         .pp-panel__cta {
+          position: relative; overflow: hidden;
           display: inline-flex; align-items: center; gap: 0.6rem;
-          padding: 0.6rem 1.1rem; flex-shrink: 0;
-          border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+          padding: 0.7rem 1.3rem; flex-shrink: 0;
+          border: 1.5px solid var(--accent);
+          background: color-mix(in srgb, var(--accent) 16%, transparent);
           color: var(--accent); text-decoration: none;
-          font-family: var(--ff-mono); font-size: 0.64rem;
+          font-family: var(--ff-mono); font-size: 0.68rem; font-weight: 700;
           letter-spacing: 0.12em; text-transform: uppercase;
-          transition: background 0.2s, border-color 0.2s, color 0.4s, transform 0.15s var(--ease-out, ease);
           white-space: nowrap;
+          box-shadow: 0 0 0 0 transparent, 0 4px 16px -8px color-mix(in srgb, var(--accent) 45%, transparent);
+          transition: background 0.2s, border-color 0.2s, color 0.4s, transform 0.15s var(--ease-out, ease), box-shadow 0.25s var(--ease-out, ease);
         }
-        .pp-panel__cta:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); border-color: var(--accent); transform: translateY(-2px); }
+        .pp-panel__cta::before {
+          content: ""; position: absolute; inset: 0; pointer-events: none;
+          background: linear-gradient(120deg, transparent 30%, color-mix(in srgb, var(--accent) 55%, transparent) 48%, transparent 66%);
+          transform: translateX(-120%);
+        }
+        .pp-panel__cta:hover {
+          background: color-mix(in srgb, var(--accent) 26%, transparent);
+          transform: translateY(-2px);
+          box-shadow: 0 0 0 0 transparent, 0 12px 28px -8px color-mix(in srgb, var(--accent) 65%, transparent);
+        }
+        .pp-panel__cta:hover::before { animation: pp-cta-shine 0.9s var(--ease-out, ease); }
         .pp-panel__cta:active { transform: translateY(0) scale(0.96); transition-duration: .08s; }
-        @media (prefers-reduced-motion: reduce) { .pp-panel__cta { transform: none !important; } }
+        @keyframes pp-cta-shine { to { transform: translateX(120%); } }
+        @media (prefers-reduced-motion: reduce) {
+          .pp-panel__cta { transform: none !important; }
+          .pp-panel__cta::before { display: none; }
+        }
         @media (max-width: 1400px) { .pp-panel__role { display: none; } }
         @media (max-width: 1100px) { .pp-panel__q--extra { display: none; } }
 

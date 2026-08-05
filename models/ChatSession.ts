@@ -29,6 +29,10 @@ export interface IChatSession {
   messages: ChatMessageDoc[];
   contactCaptured?: { name?: string; email?: string; phone?: string };
   pendingInquiry?: PendingInquiryDoc | null;
+  // Guards lib/leadNotify.ts from sending more than one "lead captured"
+  // heads-up email per session, even though the guided flow can re-touch
+  // pendingInquiry.email across several turns.
+  leadNotified?: boolean;
   createdAt: Date;
 }
 
@@ -56,8 +60,11 @@ const ChatSessionSchema = new Schema<IChatSession>({
     phone: { type: String },
   },
   pendingInquiry: { type: PendingInquirySchema, default: null },
-  // TTL index: Mongo deletes the document 7 days after createdAt, automatically.
-  createdAt: { type: Date, default: Date.now, expires: 60 * 60 * 24 * 7 },
+  leadNotified: { type: Boolean, default: false },
+  // TTL index: Mongo deletes the document 180 days after createdAt,
+  // automatically — extended from the original 7 days so chat transcripts
+  // stay around long enough for the admin analytics "AI chat activity" view.
+  createdAt: { type: Date, default: Date.now, expires: 60 * 60 * 24 * 180 },
 });
 
 const ChatSession = models.ChatSession ?? model<IChatSession>("ChatSession", ChatSessionSchema);

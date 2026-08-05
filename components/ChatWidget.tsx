@@ -6,10 +6,14 @@ import { useRouter } from "@/i18n/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { HardHat, X } from "lucide-react";
+import { getVisitorSessionId } from "@/lib/clientSession";
+import { trackChatOpen } from "@/lib/track";
 
 const AGENT_NAME = "ASHA";
-const SESSION_KEY = "asha_session_id";
 const OPEN_EVENT = "asha:open";
+/** Broadcasts the panel's open/closed state — components/ProactiveNudge.tsx
+ *  listens so it never shows its own bubble on top of the open chat panel. */
+export const ASHA_STATE_EVENT = "asha:state";
 
 /** Opens the ASHA chat widget from anywhere on the site (e.g. a homepage CTA). */
 export function openAshaChat(prefillMessage?: string) {
@@ -42,16 +46,6 @@ interface MachineSummary {
   models: string[];
   specs: { label: string; values: string[] }[];
   href: string;
-}
-
-function getSessionId(): string {
-  if (typeof window === "undefined") return "";
-  let id = localStorage.getItem(SESSION_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(SESSION_KEY, id);
-  }
-  return id;
 }
 
 function parseNumeric(v: string): number | null {
@@ -380,7 +374,7 @@ export default function ChatWidget() {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    sessionIdRef.current = getSessionId();
+    sessionIdRef.current = getVisitorSessionId();
   }, []);
 
   useEffect(() => {
@@ -435,6 +429,10 @@ export default function ChatWidget() {
     }
   }, [open, panelVisible]);
 
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent(ASHA_STATE_EVENT, { detail: { open } }));
+  }, [open]);
+
   const loadHistory = useCallback(async () => {
     if (hydrated || !sessionIdRef.current) return;
     setHydrated(true);
@@ -460,6 +458,7 @@ export default function ChatWidget() {
     setShowTooltip(false);
     localStorage.setItem("asha_tooltip_dismissed", "1");
     loadHistory();
+    trackChatOpen();
     if (prefillMessage) setInput(prefillMessage);
   }, [loadHistory]);
 

@@ -16,6 +16,8 @@ const SectionAnimator = dynamic(() => import("@/components/SectionAnimator"), { 
 const AppToaster = dynamic(() => import("@/components/AppToaster"), { ssr: false });
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 const ProductionLineTeaser = dynamic(() => import("@/components/ProductionLineTeaser"), { ssr: false });
+const VisitorTracker = dynamic(() => import("@/components/VisitorTracker"), { ssr: false });
+const ProactiveNudge = dynamic(() => import("@/components/ProactiveNudge"), { ssr: false });
 
 const bebas = Bebas_Neue({
   subsets: ["latin"],
@@ -125,6 +127,8 @@ export default async function LocaleLayout({
           <SiteFooter />
           <ChatWidget />
           <ProductionLineTeaser />
+          <VisitorTracker />
+          <ProactiveNudge />
           <AppToaster />
         </NextIntlClientProvider>
       </body>

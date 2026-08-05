@@ -5,6 +5,7 @@ import { answerWithGroq } from "@/lib/groq";
 import { answerWithOpenRouter } from "@/lib/openrouter";
 import { answerLocally, isBasicQuery } from "@/lib/localAgent";
 import { createInquiry } from "@/lib/inquiries";
+import { notifyLeadCaptured } from "@/lib/leadNotify";
 
 export const runtime = "nodejs";
 
@@ -75,6 +76,18 @@ export async function POST(req: NextRequest) {
 
   session.messages.push({ role: "assistant", content: answer.text, at: new Date() });
   session.pendingInquiry = answer.pendingInquiry ?? null;
+
+  const capturedEmail = session.pendingInquiry?.email;
+  if (capturedEmail && !session.leadNotified) {
+    session.leadNotified = true;
+    notifyLeadCaptured({
+      sessionId,
+      name: session.pendingInquiry?.name,
+      email: capturedEmail,
+      machineName: session.pendingInquiry?.machineName,
+    }).catch(e => console.error("ASHA chat: lead notification failed:", e));
+  }
+
   await session.save();
 
   if (answer.completedInquiry) {

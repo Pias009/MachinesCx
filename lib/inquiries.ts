@@ -7,6 +7,7 @@
 import { connectDB } from "@/lib/mongodb";
 import Inquiry, { type InquiryMachine, type InquiryPart, type InquiryType } from "@/models/Inquiry";
 import { sendEmail } from "@/lib/resend";
+import { renderEmailLayout, infoBlock, messageBlock, dataTable } from "@/lib/emailTemplate";
 
 export interface CreateInquiryInput {
   inquiryType?: InquiryType;
@@ -78,37 +79,47 @@ export async function createInquiry(body: CreateInquiryInput) {
   const notifyTo = process.env.INQUIRY_NOTIFY_EMAIL || process.env.ADMIN_EMAIL;
   if (notifyTo && process.env.RESEND_API_KEY) {
     const typeLabel = TYPE_LABELS[inquiryType];
-    let machineRows = "";
-    let partRows = "";
+
+    const infoRows = [
+      { label: "Name", value: escapeHtml(body.name) + (body.company ? ` — ${escapeHtml(body.company)}` : "") },
+      { label: "Email", value: escapeHtml(body.email) },
+      ...(body.phone ? [{ label: "Phone", value: escapeHtml(body.phone) }] : []),
+      ...(body.country ? [{ label: "Country", value: escapeHtml(body.country) }] : []),
+      { label: "Type", value: `${typeLabel} · Source: ${(body.source ?? "direct").toUpperCase()}` },
+    ];
+
+    const bodyParts = [infoBlock(infoRows)];
 
     if (body.machines && body.machines.length > 0) {
-      machineRows = body.machines.map(m =>
-        `<tr><td style="padding:4px 12px 4px 0">${escapeHtml(m.name)}</td><td style="padding:4px 12px">${escapeHtml(m.model)}</td><td style="padding:4px">${m.qty}</td></tr>`
-      ).join("");
+      bodyParts.push(`<p style="margin:0 0 4px; font-weight:700;">Machines</p>` + dataTable(
+        ["Machine", "Model", "Qty"],
+        body.machines.map(m => [escapeHtml(m.name), escapeHtml(m.model), String(m.qty)]),
+      ));
     }
-
     if (body.parts && body.parts.length > 0) {
-      partRows = body.parts.map(p =>
-        `<tr><td style="padding:4px 12px 4px 0">${escapeHtml(p.name)}</td><td style="padding:4px 12px">${escapeHtml(p.machine)}</td><td style="padding:4px">${p.quantity}</td></tr>`
-      ).join("");
+      bodyParts.push(`<p style="margin:0 0 4px; font-weight:700;">Parts</p>` + dataTable(
+        ["Part", "Machine", "Qty"],
+        body.parts.map(p => [escapeHtml(p.name), escapeHtml(p.machine), String(p.quantity)]),
+      ));
     }
+    if (body.message) {
+      bodyParts.push(messageBlock(escapeHtml(body.message).replace(/\n/g, "<br/>")));
+    }
+    if (body.images && body.images.length > 0) {
+      bodyParts.push(`<p style="margin:14px 0 0; font-size:13px; color:#5b6b68;"><strong>${body.images.length} attached photo${body.images.length > 1 ? "s" : ""}</strong> — view in the admin panel.</p>`);
+    }
+    bodyParts.push(`<p style="margin:18px 0 0; font-size:12px; color:#5b6b68;">View and reply from the admin panel.</p>`);
 
     try {
       await sendEmail({
         to: notifyTo,
         replyTo: body.email,
         subject: `[${typeLabel}] New inquiry from ${body.name}${body.company ? ` (${body.company})` : ""}`,
-        html: `
-          <h2>New ${typeLabel}</h2>
-          <p><strong>${escapeHtml(body.name)}</strong>${body.company ? ` — ${escapeHtml(body.company)}` : ""}<br/>
-          ${escapeHtml(body.email)}${body.phone ? ` · ${escapeHtml(body.phone)}` : ""}${body.country ? ` · ${escapeHtml(body.country)}` : ""}<br/>
-          <span style="color:#888;font-size:13px">Type: ${typeLabel} · Source: ${(body.source ?? "direct").toUpperCase()}</span></p>
-          ${machineRows ? `<h3>Machines</h3><table style="border-collapse:collapse">${machineRows}</table>` : ""}
-          ${partRows ? `<h3>Parts</h3><table style="border-collapse:collapse">${partRows}</table>` : ""}
-          ${body.message ? `<p><strong>Message:</strong><br/>${escapeHtml(body.message).replace(/\n/g, "<br/>")}</p>` : ""}
-          ${body.images && body.images.length > 0 ? `<p><strong>${body.images.length} attached photo${body.images.length > 1 ? "s" : ""}</strong> — view in the admin panel.</p>` : ""}
-          <p style="color:#888;font-size:12px">View and reply from the admin panel.</p>
-        `,
+        html: renderEmailLayout({
+          preheader: `${typeLabel} from ${body.name}`,
+          heading: `New ${typeLabel}`,
+          bodyHtml: bodyParts.join(""),
+        }),
       });
     } catch (e) {
       console.error("Failed to send inquiry notification email:", e);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requestEmailChange, getAdminEmail } from "@/lib/adminCredentials";
 import { sendEmail } from "@/lib/resend";
+import { renderEmailLayout } from "@/lib/emailTemplate";
 
 export const runtime = "nodejs";
 
@@ -34,11 +35,16 @@ export async function POST(req: NextRequest) {
     await sendEmail({
       to: newEmail,
       subject: "Confirm your new Ashal Innomach admin email",
-      html: `
-        <p>You (or someone with admin access) requested to change the sign-in email for the Ashal Innomach admin panel to this address.</p>
-        <p><a href="${confirmUrl}">Click here to confirm this email change</a></p>
-        <p>This link expires in 30 minutes. If you didn't request this, ignore this email — your admin login is unaffected until this link is used.</p>
-      `,
+      html: renderEmailLayout({
+        preheader: "Confirm this address to finish changing your admin sign-in email",
+        heading: "Confirm your new admin email",
+        bodyHtml: `
+          <p style="margin:0 0 8px;">You (or someone with admin access) requested to change the sign-in email for the Ashal Innomach admin panel to this address.</p>
+          <p style="margin:0; font-size:13px; color:#5b6b68;">This link expires in 30 minutes. If you didn't request this, ignore this email — your admin login is unaffected until this link is used.</p>
+        `,
+        ctaLabel: "Confirm this email change",
+        ctaUrl: confirmUrl,
+      }),
     });
   } catch (e) {
     console.error("Failed to send admin email-change confirmation:", e);

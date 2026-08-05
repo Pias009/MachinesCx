@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Inquiry from "@/models/Inquiry";
 import { sendEmail, loadLocalImageAttachments } from "@/lib/resend";
+import { renderEmailLayout } from "@/lib/emailTemplate";
 
 export const runtime = "nodejs";
 
@@ -30,11 +31,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     await sendEmail({
       to: inquiry.email,
       subject: `Re: your inquiry to Ashal Innomach`,
-      html: `
-        <p>Hi ${escapeHtml(inquiry.name)},</p>
-        <p>${escapeHtml(body.message).replace(/\n/g, "<br/>")}</p>
-        <p style="color:#888;font-size:12px;margin-top:24px">— Ashal Innomach</p>
-      `,
+      html: renderEmailLayout({
+        preheader: body.message.trim().slice(0, 120),
+        heading: `Hi ${escapeHtml(inquiry.name)},`,
+        bodyHtml: `<p style="margin:0;">${escapeHtml(body.message).replace(/\n/g, "<br/>")}</p>`,
+      }),
       attachments,
     });
   } catch (e) {

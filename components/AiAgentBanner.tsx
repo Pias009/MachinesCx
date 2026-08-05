@@ -149,6 +149,7 @@ export default function AiAgentBanner() {
           flex-shrink: 0;
         }
         .aib__cta {
+          position: relative; overflow: hidden;
           display: inline-flex; align-items: center; gap: .8rem;
           padding: 1rem 1.9rem;
           background: var(--brand-amber);
@@ -157,9 +158,25 @@ export default function AiAgentBanner() {
           border-radius: 999px;
           font-family: var(--ff-body); font-size: .98rem;
           font-weight: 600;
+          box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 10px 24px -14px rgba(245,158,11,0);
+          transition: background .2s var(--ease-out, ease), transform .16s var(--ease-out, ease), box-shadow .2s var(--ease-out, ease);
+        }
+        .aib__cta::before {
+          content: ""; position: absolute; inset: 0; pointer-events: none;
+          background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.45) 48%, transparent 66%);
+          transform: translateX(-120%);
         }
         .aib__cta:hover {
           background: #e08b0a;
+          transform: translateY(-2px);
+          box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 16px 34px -12px rgba(245,158,11,0.55);
+        }
+        .aib__cta:hover::before { animation: aib-cta-shine 0.9s var(--ease-out, ease); }
+        .aib__cta:active { transform: translateY(0) scale(0.96); transition-duration: .08s; }
+        @keyframes aib-cta-shine { to { transform: translateX(120%); } }
+        @media (prefers-reduced-motion: reduce) {
+          .aib__cta { transform: none !important; }
+          .aib__cta::before { display: none; }
         }
         .aib__cta-icon {
           display: flex; align-items: center; justify-content: center;

@@ -115,12 +115,50 @@ function specSummary(f: ProductFamily): string {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Conversational filler/acknowledgement/question tokens that must never be
+// captured as a person's name — without this check, replying "ok" to "what's
+// your name?" would literally set the visitor's name to "Ok". Checked
+// per-word (see looksLikeName) so multi-word filler like "yeah sure" or "got
+// it" is caught too, not just single-word replies.
+const NAME_FILLER_TOKENS = new Set([
+  "ok", "okay", "okey", "okie", "k", "kk", "yes", "yeah", "yep", "yup", "ya",
+  "no", "nope", "nah", "sure", "alright", "aight", "fine", "cool", "great",
+  "good", "nice", "thanks", "thank", "you", "thx", "ty", "hi", "hello", "hey",
+  "yo", "please", "continue", "next", "done", "got", "it", "understood",
+  "sounds", "why", "what", "how", "who", "when", "where", "sorry", "wait",
+  "hold", "on", "one", "sec", "hmm", "hm", "um", "uh", "idk", "dont", "don't",
+  "know", "i", "n/a", "na", "none", "skip",
+]);
+
+/**
+ * True if `raw` plausibly reads as a person's name rather than filler,
+ * an acknowledgement, or a question. Unicode-letter-aware (not a Latin-only
+ * character allowlist) so real names in Arabic/Hindi script — this site
+ * ships ar/hi locales — aren't rejected as "not looking like a name".
+ */
+function looksLikeName(raw: string): boolean {
+  const trimmed = raw.trim();
+  if (!trimmed) return false;
+  if (trimmed.includes("?")) return false;
+  const normalized = trimmed.toLowerCase().replace(/[^\p{L}\p{N}\s'-]/gu, "").trim();
+  if (!normalized) return false;
+  if (/^[\d\s'-]+$/.test(normalized)) return false; // pure digits/punctuation, no letters
+  if (normalized.length < 2) return false; // single character ("k", "y") is filler, not an initial
+  const words = normalized.split(/\s+/).filter(Boolean);
+  if (words.length > 6) return false; // reads like a sentence, not a name
+  if (words.every(w => NAME_FILLER_TOKENS.has(w))) return false; // "ok", "yeah sure", "got it", "no thanks", ...
+  return true;
+}
+
 /** Advances a guided name → email → qty inquiry flow already in progress. */
 function continueInquiryFlow(message: string, pending: PendingInquiry): LocalAnswer {
   const trimmed = message.trim();
 
   if (pending.stage === "name") {
     if (!trimmed) return { text: "I'll need your name to send this along — what's your name?", actions: [], pendingInquiry: pending };
+    if (!looksLikeName(trimmed)) {
+      return { text: "Sorry, I didn't catch your name there — could you tell me your name?", actions: [], pendingInquiry: pending };
+    }
     const next: PendingInquiry = { ...pending, name: trimmed, stage: "email" };
     return { text: `Thanks, ${trimmed}! What's the best email to reach you at?`, actions: [], pendingInquiry: next };
   }

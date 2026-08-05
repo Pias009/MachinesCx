@@ -271,10 +271,12 @@ export default function ParticlePortfolio(){
           color: var(--accent); text-decoration: none;
           font-family: var(--ff-mono); font-size: 0.64rem;
           letter-spacing: 0.12em; text-transform: uppercase;
-          transition: background 0.2s, border-color 0.2s, color 0.4s, border-color 0.4s;
+          transition: background 0.2s, border-color 0.2s, color 0.4s, transform 0.15s var(--ease-out, ease);
           white-space: nowrap;
         }
-        .pp-panel__cta:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); border-color: var(--accent); }
+        .pp-panel__cta:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); border-color: var(--accent); transform: translateY(-2px); }
+        .pp-panel__cta:active { transform: translateY(0) scale(0.96); transition-duration: .08s; }
+        @media (prefers-reduced-motion: reduce) { .pp-panel__cta { transform: none !important; } }
         @media (max-width: 1400px) { .pp-panel__role { display: none; } }
         @media (max-width: 1100px) { .pp-panel__q--extra { display: none; } }
 

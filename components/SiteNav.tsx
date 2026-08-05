@@ -205,6 +205,7 @@ export default function SiteNav() {
 
         /* ── CTA button ── */
         .sn__cta {
+          position: relative; overflow: hidden;
           margin-inline-start: auto; flex-shrink: 0;
           font-family: var(--ff-display); font-size: 0.95rem;
           letter-spacing: 0.06em; text-transform: uppercase;
@@ -214,9 +215,25 @@ export default function SiteNav() {
           border: 1px solid var(--brand-teal);
           font-weight: 700;
           white-space: nowrap;
+          box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 8px 20px -14px rgba(43,191,179,0);
+          transition: background .2s var(--ease-out, ease), transform .16s var(--ease-out, ease), box-shadow .2s var(--ease-out, ease);
+        }
+        .sn__cta::before {
+          content: ""; position: absolute; inset: 0; pointer-events: none;
+          background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.4) 48%, transparent 66%);
+          transform: translateX(-120%);
         }
         .sn__cta:hover {
           background: #3dd6ca;
+          transform: translateY(-2px);
+          box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 14px 30px -12px rgba(43,191,179,0.55);
+        }
+        .sn__cta:hover::before { animation: sn-cta-shine 0.9s var(--ease-out, ease); }
+        .sn__cta:active { transform: translateY(0) scale(0.96); transition-duration: .08s; }
+        @keyframes sn-cta-shine { to { transform: translateX(120%); } }
+        @media (prefers-reduced-motion: reduce) {
+          .sn__cta { transform: none !important; }
+          .sn__cta::before { display: none; }
         }
 
         /* ── Dropdown ── */
@@ -456,9 +473,10 @@ export default function SiteNav() {
           background: var(--brand-teal); color: #080e0d;
           font-weight: 700; padding: .9rem 1.5rem;
           text-decoration: none; border: 1px solid var(--brand-teal);
-          transition: background .18s;
+          transition: background .18s, transform .14s var(--ease-out, ease);
         }
         .sn__mobile-cta:hover { background: #3dd6ca; }
+        .sn__mobile-cta:active { transform: scale(0.97); transition-duration: .08s; }
 
         /* below this, the 4 category buttons + logo + actions no longer fit
            on one line even with the secondary links already hidden (see the

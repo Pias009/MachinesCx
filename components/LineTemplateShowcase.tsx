@@ -113,9 +113,15 @@ export default function LineTemplateShowcase({
           padding: .9rem 1.75rem; border-radius: .75rem; border: none;
           background: var(--brand-teal); color: #04211e; cursor: pointer;
           font-family: var(--ff-display); font-size: 1rem; letter-spacing: .02em;
-          transition: background .15s;
+          box-shadow: 0 8px 20px -14px rgba(43,191,179,0);
+          transition: background .15s, transform .15s var(--ease-out, ease), box-shadow .2s var(--ease-out, ease);
         }
-        .lts__explore-cta:hover { background: var(--brand-teal-dk); }
+        .lts__explore-cta:hover {
+          background: var(--brand-teal-dk);
+          transform: translateY(-2px);
+          box-shadow: 0 14px 30px -12px rgba(43,191,179,.5);
+        }
+        .lts__explore-cta:active { transform: translateY(0) scale(0.97); transition-duration: .08s; }
         .lts__ai-line-btn {
           display: inline-flex; align-items: center; gap: .6rem;
           padding: .9rem 1.5rem; border-radius: .75rem;
@@ -267,9 +273,17 @@ export default function LineTemplateShowcase({
           padding: .9rem 1.75rem; border-radius: .75rem; border: none;
           background: var(--brand-teal); color: #04211e; cursor: pointer;
           font-family: var(--ff-display); font-size: 1rem; letter-spacing: .02em;
-          width: fit-content; transition: background .15s;
+          width: fit-content;
+          box-shadow: 0 8px 20px -14px rgba(43,191,179,0);
+          transition: background .15s, transform .15s var(--ease-out, ease), box-shadow .2s var(--ease-out, ease);
         }
-        .lts__cta:hover { background: var(--brand-teal-dk); }
+        .lts__cta:hover {
+          background: var(--brand-teal-dk);
+          transform: translateY(-2px);
+          box-shadow: 0 14px 30px -12px rgba(43,191,179,.5);
+        }
+        .lts__cta:active { transform: translateY(0) scale(0.97); transition-duration: .08s; }
+        @media (prefers-reduced-motion: reduce) { .lts__cta, .lts__explore-cta { transform: none !important; } }
       `}</style>
 
       <button type="button" className="lts__back" onClick={mode === "explore" ? () => setMode("overview") : onBack}>

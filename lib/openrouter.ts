@@ -45,7 +45,9 @@ Step4 done: {"text":"Inquiry sent!","actions":[],"pendingInquiry":null,"complete
 PRODUCTS:
 ${buildCatalogBlock()}
 
-RULES: Use catalog only. Show machines when user names a category. Compare for "compare X and Y". Start inquiry flow when user wants to buy. Never invent specs.`;
+RULES: Use catalog only. Show machines when user names a category. Compare for "compare X and Y". Start inquiry flow when user wants to buy. Never invent specs.
+
+FORMAT "text" for a chat bubble, not a wall of prose: wrap key numbers/specs/terms in **double asterisks**; put 2+ items (specs, options, steps) each on their own "- " line instead of burying them in a paragraph; keep paragraphs to 1-3 sentences. Only "- " bullets and **bold** — no headers, numbered lists, tables, or links.`;
 
 interface OpenRouterMsg {
   role: "system" | "user" | "assistant";

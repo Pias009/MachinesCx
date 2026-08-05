@@ -197,7 +197,16 @@ export default async function NewsIndexPage() {
         .ns-card__date { font-family: var(--ff-mono); font-size: 0.66rem; letter-spacing: 0.1em; color: var(--ink-35); }
         .ns-card__title { font-family: var(--ff-display); font-size: clamp(1rem,1.8vw,1.2rem); color: var(--ink); line-height: 1.15; letter-spacing: 0.01em; margin-bottom: 0.6rem; }
         .ns-card__excerpt { font-family: var(--ff-body); font-size: 0.82rem; font-weight: 400; color: var(--ink-35); line-height: 1.6; flex: 1; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .ns-card__cta { font-family: var(--ff-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand-red); }
+        .ns-card__cta {
+          display: inline-block;
+          font-family: var(--ff-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+          color: var(--brand-red);
+          transition: color 0.18s, transform 0.18s var(--ease-out, ease);
+        }
+        .ns-card:hover .ns-card__cta { color: var(--brand-teal-dk); transform: translateX(4px); }
+        @media (prefers-reduced-motion: reduce) {
+          .ns-card:hover .ns-card__cta { transform: none; }
+        }
       `}</style>
     </>
   );

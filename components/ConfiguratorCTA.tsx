@@ -214,9 +214,18 @@ export default function ConfiguratorCTA() {
           letter-spacing: .1em; text-transform: uppercase;
           font-weight: 600;
           color: #fff; text-decoration: none;
+          box-shadow: 0 8px 20px -14px rgba(43,191,179,0);
+          transition: background .18s var(--ease-out, ease), border-color .18s var(--ease-out, ease),
+                      transform .15s var(--ease-out, ease), box-shadow .2s var(--ease-out, ease);
         }
         .cc__cta:hover {
           background: var(--brand-teal-dk);
+          transform: translateY(-2px);
+          box-shadow: 0 14px 30px -12px rgba(43,191,179,.5);
+        }
+        .cc__cta:active {
+          transform: translateY(0) scale(0.98);
+          transition-duration: .08s;
         }
         .cc__cta--secondary {
           background: transparent;
@@ -225,6 +234,7 @@ export default function ConfiguratorCTA() {
         .cc__cta--secondary:hover {
           background: rgba(255,255,255,0.06);
           border-color: rgba(255,255,255,0.4);
+          box-shadow: none;
         }
         .cc__cta--secondary .cc__cta-arr { background: rgba(255,255,255,0.1); }
         .cc__cta-arr {
@@ -277,6 +287,7 @@ export default function ConfiguratorCTA() {
           .cc__title { font-size: clamp(1.7rem,9vw,2.6rem); }
           .cc__cta { width: 100%; justify-content: center; }
         }
+        @media (prefers-reduced-motion: reduce) { .cc__cta { transform: none !important; } }
       `}</style>
 
       <section ref={sectionRef} className="cc" data-no-anim aria-label={t("sectionAria")}>

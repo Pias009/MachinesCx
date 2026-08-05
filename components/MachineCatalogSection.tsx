@@ -261,12 +261,14 @@ export default function MachineCatalogSection() {
           font-family: var(--ff-mono); font-size: .72rem;
           letter-spacing: .1em; text-transform: uppercase;
           text-decoration: none; white-space: nowrap;
-          transition: border-color .18s, color .18s;
+          transition: border-color .18s, color .18s, background .18s, transform .15s var(--ease-out, ease);
           flex-shrink: 0;
         }
-        .mcs__cta:hover { border-color: var(--brand-teal); color: var(--brand-teal); }
+        .mcs__cta:hover { border-color: var(--brand-teal); color: var(--brand-teal); background: rgba(43,191,179,.08); transform: translateY(-2px); }
+        .mcs__cta:active { transform: translateY(0) scale(0.97); transition-duration: .08s; }
         [data-theme="light"] .mcs__cta { border-color: rgba(0,0,0,0.15); }
         [data-theme="light"] .mcs__cta:hover { border-color: var(--brand-teal); color: var(--brand-teal); }
+        @media (prefers-reduced-motion: reduce) { .mcs__cta { transform: none !important; } }
 
         /* ── Tabs ── */
         .mcs__tabs {

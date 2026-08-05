@@ -76,10 +76,25 @@ function MachineCards({ slugs, onInquire, onExplore }: { slugs: string[]; onInqu
   if (!machines) return <div className="asha-cards-loading">{t("loading.machines")}</div>;
   if (machines.length === 0) return null;
 
+  function handleTilt(e: React.MouseEvent<HTMLDivElement>) {
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;
+    const py = (e.clientY - r.top) / r.height;
+    el.style.setProperty("--tilt-x", `${(px - 0.5) * 9}deg`);
+    el.style.setProperty("--tilt-y", `${(0.5 - py) * 7}deg`);
+    el.style.setProperty("--mx", `${px * 100}%`);
+    el.style.setProperty("--my", `${py * 100}%`);
+  }
+  function resetTilt(e: React.MouseEvent<HTMLDivElement>) {
+    e.currentTarget.style.setProperty("--tilt-x", "0deg");
+    e.currentTarget.style.setProperty("--tilt-y", "0deg");
+  }
+
   return (
     <div className="asha-cards">
       {machines.map(m => (
-        <div key={m.slug} className="asha-card">
+        <div key={m.slug} className="asha-card" onMouseMove={handleTilt} onMouseLeave={resetTilt}>
           <div className="asha-card-img-col">
             <Image src={m.image} alt={m.name} fill sizes="100px" className="asha-card-img" />
           </div>
@@ -101,6 +116,53 @@ function MachineCards({ slugs, onInquire, onExplore }: { slugs: string[]; onInqu
       ))}
     </div>
   );
+}
+
+/** Renders a **bold**-span within one line of bubble text. */
+function renderInline(line: string, keyPrefix: string): React.ReactNode[] {
+  return line.split(/(\*\*[^*]+\*\*)/g).filter(Boolean).map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      return <mark key={`${keyPrefix}-${i}`} className="asha-highlight">{part.slice(2, -2)}</mark>;
+    }
+    return <span key={`${keyPrefix}-${i}`}>{part}</span>;
+  });
+}
+
+/**
+ * Turns ASHA's lightweight-markdown replies ("- " bullets, **bold** spans)
+ * into real paragraphs/lists instead of one dense text blob — the system
+ * prompts (lib/groq.ts, lib/openrouter.ts) are told to write in this format.
+ */
+function FormattedText({ text }: { text: string }) {
+  const blocks: React.ReactNode[] = [];
+  let listBuffer: string[] = [];
+  let blockKey = 0;
+
+  const flushList = () => {
+    if (listBuffer.length === 0) return;
+    const items = listBuffer;
+    blocks.push(
+      <ul key={`ul-${blockKey++}`} className="asha-bubble-list">
+        {items.map((item, i) => <li key={i}>{renderInline(item, `li-${blockKey}-${i}`)}</li>)}
+      </ul>
+    );
+    listBuffer = [];
+  };
+
+  for (const rawLine of text.split("\n")) {
+    const line = rawLine.trim();
+    if (!line) { flushList(); continue; }
+    const bulletMatch = line.match(/^[-•*]\s+(.*)/);
+    if (bulletMatch) {
+      listBuffer.push(bulletMatch[1]);
+    } else {
+      flushList();
+      blocks.push(<p key={`p-${blockKey++}`}>{renderInline(line, `p-${blockKey}`)}</p>);
+    }
+  }
+  flushList();
+
+  return <>{blocks}</>;
 }
 
 /** Clickable quick-reply chips for a "quick_replies" action — lets the visitor pick an option instead of typing. */
@@ -262,7 +324,7 @@ function MachineDetailView({ slug, onInquire }: { slug: string; onInquire: (slug
                     <div key={model} className="asha-detail-spec-bar-row">
                       <span className="asha-detail-spec-bar-model">{model}</span>
                       <div className="asha-detail-spec-bar-track">
-                        <div className="asha-detail-spec-bar-fill" style={{ width: `${pct}%` }} />
+                        <div className="asha-detail-spec-bar-fill" style={{ transform: `scaleX(${pct / 100})` }} />
                       </div>
                       <span className="asha-detail-spec-bar-value">{val}</span>
                     </div>
@@ -302,6 +364,8 @@ function ActionRenderer({ action, onInquire, onQuickReply, onExplore }: ActionRe
 export default function ChatWidget() {
   const t = useTranslations("chatWidget");
   const [open, setOpen] = useState(false);
+  const [panelVisible, setPanelVisible] = useState(false);
+  const [panelClosing, setPanelClosing] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -358,6 +422,18 @@ export default function ChatWidget() {
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  // Panel mount/unmount is decoupled from `open` so the close animation can
+  // finish before the panel actually unmounts — plain conditional rendering
+  // would cut the exit transition off at frame zero.
+  useEffect(() => {
+    if (open) {
+      setPanelVisible(true);
+      setPanelClosing(false);
+    } else if (panelVisible) {
+      setPanelClosing(true);
+    }
+  }, [open, panelVisible]);
 
   const loadHistory = useCallback(async () => {
     if (hydrated || !sessionIdRef.current) return;
@@ -559,10 +635,13 @@ export default function ChatWidget() {
         </div>
       )}
 
-      {open && (
-        <div className={`asha-panel ${expanded ? "asha-panel--expanded" : ""}`}>
+      {panelVisible && (
+        <div
+          className={`asha-panel ${expanded ? "asha-panel--expanded" : ""} ${panelClosing ? "asha-panel--closing" : "asha-panel--opening"}`}
+          onAnimationEnd={() => { if (panelClosing) { setPanelVisible(false); setPanelClosing(false); } }}
+        >
           <div className="asha-header">
-            <div className={`asha-avatar ${sending ? "asha-avatar--thinking" : ""}`}>A</div>
+            <div className={`asha-avatar ${sending ? "asha-avatar--thinking" : ""}`} aria-hidden="true" />
             <div className="asha-header-text">
               <div className="asha-title">{AGENT_NAME}</div>
               <div className="asha-subtitle">{t("header.subtitle")}</div>
@@ -584,7 +663,9 @@ export default function ChatWidget() {
             {messages.map((m, i) => (
               <div key={i} className="asha-msg-group">
                 <div className={`asha-bubble ${m.role}`}>
-                  {m.content || (sending && i === messages.length - 1 ? <span className="asha-typing"><span>·</span><span>·</span><span>·</span></span> : "")}
+                  {m.content
+                    ? <FormattedText text={m.content} />
+                    : (sending && i === messages.length - 1 ? <span className="asha-typing"><span>·</span><span>·</span><span>·</span></span> : "")}
                 </div>
                 {m.actions?.map((action, ai) => <ActionRenderer key={ai} action={action} onInquire={onInquire} onQuickReply={onQuickReply} onExplore={onExplore} />)}
               </div>
@@ -611,11 +692,33 @@ export default function ChatWidget() {
         .asha-launcher {
           position: fixed; bottom: 24px; right: 24px; z-index: 9200;
           width: 58px; height: 58px; border-radius: 50%;
-          background: var(--brand-teal); color: #06110f;
+          background:
+            radial-gradient(circle at 32% 26%, #8ff3e9 0%, var(--brand-teal) 46%, #0c544d 100%);
+          color: #06110f;
           border: none; cursor: pointer;
           display: flex; align-items: center; justify-content: center;
+          box-shadow:
+            inset -4px -6px 10px rgba(0,0,0,0.35),
+            inset 3px 4px 6px rgba(255,255,255,0.3),
+            0 10px 28px -6px rgba(43,191,179,0.55),
+            0 2px 8px rgba(0,0,0,0.35);
+          transition: transform 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out);
         }
-        .asha-launcher:hover { background: #3dd6ca; }
+        .asha-launcher:hover {
+          transform: translateY(-2px);
+          box-shadow:
+            inset -4px -6px 10px rgba(0,0,0,0.3),
+            inset 3px 4px 6px rgba(255,255,255,0.35),
+            0 14px 36px -6px rgba(43,191,179,0.7),
+            0 2px 8px rgba(0,0,0,0.35);
+        }
+        .asha-launcher:active {
+          transform: scale(0.93) translateY(0);
+          box-shadow:
+            inset -2px -3px 6px rgba(0,0,0,0.4),
+            inset 2px 2px 3px rgba(255,255,255,0.2),
+            0 4px 14px -4px rgba(43,191,179,0.5);
+        }
         .asha-engineer-icon {
           animation: asha-idle-float 3s ease-in-out infinite;
         }
@@ -665,10 +768,22 @@ export default function ChatWidget() {
           display: flex; flex-direction: column; overflow: hidden;
           font-family: var(--ff-body), system-ui, sans-serif;
           color-scheme: dark;
+          transform-origin: bottom right;
+          will-change: transform, opacity;
         }
         .asha-panel--expanded {
           width: min(720px, calc(100vw - 32px));
           height: min(88vh, 860px);
+        }
+        .asha-panel--opening { animation: asha-panel-in 0.4s cubic-bezier(0.22,1,0.36,1) both; }
+        .asha-panel--closing { animation: asha-panel-out 0.22s cubic-bezier(0.4,0,1,1) both; }
+        @keyframes asha-panel-in {
+          0%   { opacity: 0; transform: perspective(1200px) translateY(26px) translateZ(-50px) rotateX(-10deg) scale(0.92); }
+          100% { opacity: 1; transform: perspective(1200px) translateY(0) translateZ(0) rotateX(0deg) scale(1); }
+        }
+        @keyframes asha-panel-out {
+          0%   { opacity: 1; transform: perspective(1200px) translateY(0) translateZ(0) rotateX(0deg) scale(1); }
+          100% { opacity: 0; transform: perspective(1200px) translateY(16px) translateZ(-40px) rotateX(-8deg) scale(0.95); }
         }
 
         .asha-header {
@@ -679,12 +794,21 @@ export default function ChatWidget() {
         .asha-header-text { flex: 1; }
         .asha-avatar {
           width: 36px; height: 36px; border-radius: 50%;
-          background: var(--brand-teal-dim);
-          color: var(--brand-teal);
+          background:
+            radial-gradient(circle at 30% 26%, #a4f6ee 0%, var(--brand-teal) 40%, #0d5a52 100%);
+          box-shadow:
+            inset -3px -4px 7px rgba(0,0,0,0.4),
+            inset 2px 3px 4px rgba(255,255,255,0.35),
+            0 3px 10px rgba(0,0,0,0.35);
           display: flex; align-items: center; justify-content: center;
-          font-weight: 700; font-size: 0.95rem;
           flex-shrink: 0;
           position: relative;
+        }
+        .asha-avatar--thinking::before {
+          content: ""; position: absolute; inset: -1px; border-radius: 50%;
+          background: conic-gradient(from 0deg, transparent 0%, rgba(255,255,255,0.65) 14%, transparent 32%);
+          mix-blend-mode: screen;
+          animation: asha-sheen-spin 1.1s linear infinite;
         }
         .asha-avatar--thinking::after {
           content: ""; position: absolute; inset: -4px;
@@ -695,6 +819,7 @@ export default function ChatWidget() {
         .asha-avatar--thinking {
           animation: asha-avatar-breathe 0.7s ease-in-out infinite;
         }
+        @keyframes asha-sheen-spin { to { transform: rotate(360deg); } }
         .asha-title { color: var(--ink); font-weight: 700; font-size: 0.95rem; }
         .asha-subtitle { color: var(--ink-35); font-size: 0.78rem; }
         .asha-expand-btn {
@@ -710,11 +835,38 @@ export default function ChatWidget() {
           flex: 1; overflow-y: auto; padding: 1rem 1rem 0.5rem;
           display: flex; flex-direction: column; gap: 0.9rem;
         }
-        .asha-msg-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .asha-msg-group {
+          display: flex; flex-direction: column; gap: 0.5rem;
+          animation: asha-msg-in 0.32s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        @keyframes asha-msg-in {
+          0%   { opacity: 0; transform: translateY(10px) scale(0.98); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
         .asha-bubble {
           max-width: 88%; padding: 0.6rem 0.85rem; border-radius: 12px;
-          font-size: 0.9rem; line-height: 1.45; white-space: pre-wrap;
+          font-size: 0.9rem; line-height: 1.5;
         }
+        .asha-bubble p { margin: 0 0 0.6rem; }
+        .asha-bubble p:last-child { margin-bottom: 0; }
+        .asha-bubble-list {
+          list-style: none; margin: 0.1rem 0 0.65rem; padding: 0;
+          display: flex; flex-direction: column; gap: 0.4rem;
+        }
+        .asha-bubble-list:last-child { margin-bottom: 0; }
+        .asha-bubble-list li { position: relative; padding-left: 1.05rem; }
+        .asha-bubble-list li::before {
+          content: ""; position: absolute; left: 0; top: 0.52em;
+          width: 6px; height: 6px; border-radius: 50%;
+          background: var(--brand-teal);
+        }
+        .asha-bubble.user .asha-bubble-list li::before { background: #06110f; }
+        .asha-highlight {
+          background: rgba(43,191,179,0.18); color: var(--brand-teal);
+          padding: 0.03rem 0.35rem; border-radius: 4px; font-weight: 700;
+          box-decoration-break: clone; -webkit-box-decoration-break: clone;
+        }
+        .asha-bubble.user .asha-highlight { background: rgba(6,17,15,0.16); color: #06110f; }
         .asha-bubble.assistant {
           align-self: flex-start;
           background: var(--bg-raise);
@@ -733,6 +885,7 @@ export default function ChatWidget() {
         .asha-cards { display: flex; flex-direction: column; gap: 0.6rem; }
 
         .asha-card {
+          position: relative;
           display: flex; gap: 0;
           background: var(--bg-raise);
           border: 1px solid var(--bg-line);
@@ -742,7 +895,21 @@ export default function ChatWidget() {
         }
         .asha-card:hover {
           border-color: var(--brand-teal);
-          box-shadow: 0 0 0 1px rgba(43,191,179,0.12);
+          box-shadow: 0 10px 28px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(43,191,179,0.12);
+        }
+        .asha-card::after {
+          content: ""; position: absolute; inset: 0; opacity: 0; pointer-events: none;
+          border-radius: inherit;
+          background: radial-gradient(220px 140px at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.10), transparent 65%);
+          transition: opacity 0.25s;
+        }
+        .asha-card:hover::after { opacity: 1; }
+        @media (hover: hover) and (pointer: fine) {
+          .asha-card {
+            --tilt-x: 0deg; --tilt-y: 0deg;
+            transform: perspective(900px) rotateX(var(--tilt-y)) rotateY(var(--tilt-x));
+            transition: transform 0.12s ease-out, border-color 0.18s, box-shadow 0.18s;
+          }
         }
 
         .asha-card-img-col {
@@ -909,10 +1076,11 @@ export default function ChatWidget() {
           border-radius: 4px; overflow: hidden;
         }
         .asha-detail-spec-bar-fill {
-          height: 100%;
+          width: 100%; height: 100%;
+          transform-origin: left center;
           background: linear-gradient(90deg, var(--brand-teal), rgba(43,191,179,0.55));
           border-radius: 4px;
-          transition: width 0.45s ease;
+          transition: transform 0.45s ease;
         }
         .asha-detail-spec-bar-value {
           width: 4.5rem; flex-shrink: 0;
@@ -1142,6 +1310,16 @@ export default function ChatWidget() {
           background: var(--brand-teal); color: #06110f; border-color: var(--brand-teal);
         }
         .asha-reply-popup__btn--primary:hover { background: #3dd6ca; }
+
+        @keyframes asha-fade { from { opacity: 0; } to { opacity: 1; } }
+        @media (prefers-reduced-motion: reduce) {
+          .asha-panel--opening, .asha-panel--closing { animation: asha-fade 0.15s ease both; }
+          .asha-msg-group { animation: asha-fade 0.15s ease both; }
+          .asha-card { transform: none !important; transition: border-color 0.18s, box-shadow 0.18s !important; }
+          .asha-avatar--thinking::before { animation: none; }
+          .asha-engineer-icon { animation: none; }
+          .asha-launcher, .asha-launcher:hover, .asha-launcher:active { transform: none; transition: box-shadow 0.18s; }
+        }
 
         @media (max-width: 480px) {
           .asha-panel, .asha-panel--expanded {

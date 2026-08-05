@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Inbox, Wrench, ClipboardList, Package, Mail, CheckCircle2, Send } from "lucide-react";
+import { Inbox, Wrench, ClipboardList, Package, Mail, CheckCircle2, Send, Trash2 } from "lucide-react";
 import AdminShell from "../AdminShell";
 import { familyBySlug, familyImages } from "@/lib/products";
 import type { InquiryMachine, InquiryPart, InquiryReply, InquiryType } from "@/models/Inquiry";
@@ -101,6 +101,8 @@ export default function InquiriesPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "new" | "read" | "replied">("all");
   const [typeFilter, setTypeFilter] = useState<"all" | InquiryType>("all");
+  const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
 
   async function load() {
     const res = await fetch("/api/admin/inquiries");
@@ -121,6 +123,44 @@ export default function InquiriesPage() {
         body: JSON.stringify({ status: "read" }),
       });
       setInquiries(prev => prev?.map(i => i._id === inq._id ? { ...i, status: "read" } : i) ?? null);
+    }
+  }
+
+  function toggleChecked(id: string) {
+    setCheckedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleCheckAll(ids: string[]) {
+    setCheckedIds(prev => {
+      const allChecked = ids.length > 0 && ids.every(id => prev.has(id));
+      return allChecked ? new Set() : new Set(ids);
+    });
+  }
+
+  async function deleteChecked() {
+    if (checkedIds.size === 0) return;
+    const count = checkedIds.size;
+    if (!confirm(`Delete ${count} inquir${count === 1 ? "y" : "ies"}? This can't be undone.`)) return;
+    setDeleting(true);
+    try {
+      const ids = Array.from(checkedIds);
+      const res = await fetch("/api/admin/inquiries", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      if (!res.ok) throw new Error("Failed to delete");
+      setInquiries(prev => prev?.filter(i => !checkedIds.has(i._id)) ?? null);
+      if (selectedId && checkedIds.has(selectedId)) setSelectedId(null);
+      setCheckedIds(new Set());
+    } catch {
+      alert("Failed to delete selected inquiries — please try again.");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -230,18 +270,66 @@ export default function InquiriesPage() {
               ))}
             </div>
 
+            {/* selection / bulk-delete bar */}
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "0.5rem 0.9rem", borderBottom: "1px solid rgba(255,255,255,0.06)",
+            }}>
+              <label style={{
+                display: "flex", alignItems: "center", gap: "0.45rem", cursor: filtered.length ? "pointer" : "default",
+                fontFamily: "var(--ff-body)", fontSize: "0.78rem", fontWeight: 600,
+                color: filtered.length ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.25)",
+              }}>
+                <input
+                  type="checkbox"
+                  disabled={filtered.length === 0}
+                  checked={filtered.length > 0 && filtered.every(i => checkedIds.has(i._id))}
+                  onChange={() => toggleCheckAll(filtered.map(i => i._id))}
+                  style={{ width: 14, height: 14, accentColor: "var(--brand-teal)", cursor: "pointer" }}
+                />
+                {checkedIds.size > 0 ? `${checkedIds.size} selected` : "Select all"}
+              </label>
+
+              {checkedIds.size > 0 && (
+                <button onClick={deleteChecked} disabled={deleting} style={{
+                  display: "flex", alignItems: "center", gap: "0.35rem",
+                  padding: "0.35rem 0.65rem", borderRadius: 6,
+                  border: "1px solid rgba(255,107,125,0.28)",
+                  background: "rgba(255,107,125,0.12)", color: "var(--adm-danger)",
+                  fontFamily: "var(--ff-body)", fontSize: "0.75rem", fontWeight: 700,
+                  cursor: deleting ? "default" : "pointer", opacity: deleting ? 0.6 : 1,
+                  transition: "background 0.16s, border-color 0.16s",
+                  animation: "adm-fade 0.2s var(--adm-ease)",
+                }}>
+                  {deleting ? <span className="adm-spinner" style={{ width: 12, height: 12 }} /> : <Trash2 size={13} />}
+                  Delete
+                </button>
+              )}
+            </div>
+
             <div style={{ maxHeight: "68vh", overflowY: "auto" }}>
               {filtered.map((inq, idx) => {
                 const inqType = typeConfig(inq.inquiryType);
                 const TypeIcon = inqType.icon;
+                const checked = checkedIds.has(inq._id);
                 return (
-                  <button key={inq._id} onClick={() => selectInquiry(inq)} className="adm-rise" style={{
-                    display: "block", width: "100%", textAlign: "left", padding: "0.9rem 1.1rem",
-                    border: "none", borderBottom: "1px solid rgba(255,255,255,0.05)", cursor: "pointer",
+                  <div key={inq._id} className="adm-rise" style={{
+                    display: "flex", alignItems: "flex-start", gap: "0.6rem",
+                    borderBottom: "1px solid rgba(255,255,255,0.05)",
                     background: selectedId === inq._id ? "#1a1a1a" : "transparent",
                     transition: "background 0.15s ease",
                     animationDelay: `${Math.min(idx, 8) * 0.03}s`,
                   }}>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleChecked(inq._id)}
+                      style={{ width: 14, height: 14, marginTop: "1.15rem", marginLeft: "1.1rem", accentColor: "var(--brand-teal)", cursor: "pointer", flexShrink: 0 }}
+                    />
+                    <button onClick={() => selectInquiry(inq)} style={{
+                      display: "block", flex: 1, minWidth: 0, textAlign: "left", padding: "0.9rem 1.1rem 0.9rem 0",
+                      border: "none", background: "transparent", cursor: "pointer",
+                    }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.25rem" }}>
                       <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.95rem", fontWeight: 700, color: "#fff" }}>{inq.name}</span>
                       <span style={{ width: 8, height: 8, borderRadius: "50%", background: STATUS_COLOR[inq.status], flexShrink: 0 }} />
@@ -289,7 +377,8 @@ export default function InquiriesPage() {
                     <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.75rem", color: "rgba(255,255,255,0.35)" }}>
                       {timeAgo(inq.createdAt)}
                     </div>
-                  </button>
+                    </button>
+                  </div>
                 );
               })}
               {filtered.length === 0 && (

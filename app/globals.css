@@ -483,12 +483,24 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .btn {
   display: inline-flex; align-items: center; gap: 0.5rem;
   font-family: var(--ff-mono); font-size: 0.78rem; letter-spacing: 0.08em;
-  text-transform: uppercase; padding: 0.85rem 1.5rem; transition: all 0.18s;
+  text-transform: uppercase; padding: 0.85rem 1.5rem;
+  transition: background .2s var(--ease-out), color .2s var(--ease-out),
+              border-color .2s var(--ease-out), transform .16s var(--ease-out),
+              box-shadow .2s var(--ease-out);
 }
-.btn--hot { background: var(--brand-red); color: #fff; font-weight: 600; }
-.btn--hot:hover { background: var(--brand-teal-dk); color: #fff; }
+.btn--hot {
+  background: var(--brand-red); color: #fff; font-weight: 600;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.14) inset, 0 8px 20px -14px rgba(43,191,179,0);
+}
+.btn--hot:hover {
+  background: var(--brand-teal-dk); color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.16) inset, 0 14px 30px -12px rgba(43,191,179,0.55);
+}
+.btn--hot:active { transform: translateY(0) scale(0.97); transition-duration: .08s; }
 .btn--ghost { border: 1px solid var(--bg-line); color: var(--ink-35); }
-.btn--ghost:hover { border-color: var(--brand-red); color: var(--brand-red); }
+.btn--ghost:hover { border-color: var(--brand-red); color: var(--brand-red); transform: translateY(-2px); }
+.btn--ghost:active { transform: translateY(0) scale(0.97); transition-duration: .08s; }
 
 /* =======================  AETHER BUTTON ======================= */
 .aether-btn {
@@ -497,6 +509,8 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 }
 .aether-btn > a,
 .aether-btn > button {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -512,11 +526,35 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   color: #ffffff;
   white-space: nowrap;
   text-decoration: none;
-  transition: background .18s;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.14) inset, 0 8px 20px -14px rgba(43,191,179,0);
+  transition: background .2s var(--ease-out), transform .16s var(--ease-out), box-shadow .2s var(--ease-out);
+}
+.aether-btn > a::before,
+.aether-btn > button::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 48%, transparent 66%);
+  transform: translateX(-120%);
 }
 .aether-btn > a:hover,
 .aether-btn > button:hover {
   background: var(--brand-teal-dk);
+  transform: translateY(-2px);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.16) inset, 0 14px 32px -12px rgba(43,191,179,0.55);
+}
+.aether-btn > a:hover::before,
+.aether-btn > button:hover::before {
+  animation: aether-shine 0.9s var(--ease-out);
+}
+.aether-btn > a:active,
+.aether-btn > button:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.1) inset, 0 6px 16px -10px rgba(43,191,179,0.4);
+  transition-duration: .08s;
+}
+@keyframes aether-shine { to { transform: translateX(120%); } }
+@media (prefers-reduced-motion: reduce) {
+  .aether-btn > a, .aether-btn > button, .btn--hot, .btn--ghost { transform: none !important; }
+  .aether-btn > a::before, .aether-btn > button::before { display: none; }
 }
 
 /* =======================  CATALOGUE PAGES (/products)  =======================

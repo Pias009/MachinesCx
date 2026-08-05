@@ -323,6 +323,42 @@ export default function AboutPage() {
           .ab-photo-strip__figure--tall { min-height: 220px !important; }
           .ab-photo-tile { min-height: 200px !important; }
         }
+
+        .about-cta {
+          position: relative; overflow: hidden;
+          font-family: var(--ff-display); font-size: 0.9rem;
+          letter-spacing: 0.06em; text-transform: uppercase;
+          padding: 0.85rem 2rem; text-decoration: none; font-weight: 700;
+          transition: background .2s var(--ease-out, ease), color .2s var(--ease-out, ease),
+                      border-color .2s var(--ease-out, ease), transform .16s var(--ease-out, ease),
+                      box-shadow .2s var(--ease-out, ease);
+        }
+        .about-cta--solid {
+          color: #080e0d; background: var(--brand-red); border: 1px solid var(--brand-red);
+          box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 8px 20px -14px rgba(43,191,179,0);
+        }
+        .about-cta--solid::before {
+          content: ""; position: absolute; inset: 0; pointer-events: none;
+          background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.4) 48%, transparent 66%);
+          transform: translateX(-120%);
+        }
+        .about-cta--solid:hover {
+          background: var(--brand-teal-dk);
+          transform: translateY(-2px);
+          box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 14px 30px -12px rgba(43,191,179,0.55);
+        }
+        .about-cta--solid:hover::before { animation: about-cta-shine 0.9s var(--ease-out, ease); }
+        .about-cta--ghost {
+          background: transparent;
+          font-weight: 500;
+        }
+        .about-cta--ghost:hover { border-color: var(--brand-teal) !important; color: var(--brand-teal) !important; transform: translateY(-2px); }
+        .about-cta:active { transform: translateY(0) scale(0.97); transition-duration: .08s; }
+        @keyframes about-cta-shine { to { transform: translateX(120%); } }
+        @media (prefers-reduced-motion: reduce) {
+          .about-cta { transform: none !important; }
+          .about-cta--solid::before { display: none; }
+        }
       `}</style>
 
       {/* CONTENT SECTION */}
@@ -563,8 +599,8 @@ export default function AboutPage() {
               <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.5rem", color: textPrimary, marginBottom: "1rem" }}>{t("contact.cardTitle")}</h4>
               <p style={{ fontFamily: "var(--ff-body)", fontSize: "0.9rem", color: textMuted, lineHeight: 1.7, marginBottom: "2rem" }}>{t("contact.cardDesc")}</p>
               <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-                <TransitionLink href="/inquiries" style={{ fontFamily: "var(--ff-display)", fontSize: "0.9rem", letterSpacing: "0.06em", textTransform: "uppercase", color: "#080e0d", background: "var(--brand-red)", padding: "0.85rem 2rem", textDecoration: "none", fontWeight: 700, border: "1px solid var(--brand-red)" }}>{t("contact.requestQuote")}</TransitionLink>
-                <TransitionLink href="/products" style={{ fontFamily: "var(--ff-display)", fontSize: "0.9rem", letterSpacing: "0.06em", textTransform: "uppercase", color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)", background: "transparent", padding: "0.85rem 2rem", textDecoration: "none", border: "1px solid " + (isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)") }}>{t("contact.browseMachines")}</TransitionLink>
+                <TransitionLink href="/inquiries" className="about-cta about-cta--solid">{t("contact.requestQuote")}</TransitionLink>
+                <TransitionLink href="/products" className="about-cta about-cta--ghost" style={{ color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)", border: "1px solid " + (isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)") }}>{t("contact.browseMachines")}</TransitionLink>
               </div>
             </div>
           </div>

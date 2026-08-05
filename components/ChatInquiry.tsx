@@ -552,8 +552,10 @@ export const chatStyles = `
     letter-spacing: .1em; text-transform: uppercase;
     color: var(--ink-35); text-decoration: none; margin-bottom: 1rem;
     background: none; border: none; cursor: pointer;
+    transition: color .15s, transform .15s var(--ease-out, ease);
   }
-  .ci-back:hover { color: var(--ink); }
+  .ci-back:hover { color: var(--ink); transform: translateX(-3px); }
+  .ci-back:active { transform: translateX(-3px) scale(0.94); transition-duration: .08s; }
 
   /* the form itself — one scrollable document, not a step-reveal panel */
   .ci-convo {
@@ -645,8 +647,9 @@ export const chatStyles = `
 
   /* qty stepper */
   .ci-qty { display: inline-flex; align-items: center; border: 1px solid var(--bg-line); border-radius: .6rem; overflow: hidden; background: var(--bg-raise); width: fit-content; }
-  .ci-qty__btn { width: 40px; height: 40px; background: none; border: none; color: var(--ink-60); font-size: 1.1rem; cursor: pointer; }
+  .ci-qty__btn { width: 40px; height: 40px; background: none; border: none; color: var(--ink-60); font-size: 1.1rem; cursor: pointer; transition: background .15s, color .15s, transform .1s var(--ease-out, ease); }
   .ci-qty__btn:hover { background: rgba(43,191,179,.12); color: var(--brand-teal); }
+  .ci-qty__btn:active { transform: scale(0.85); transition-duration: .06s; }
   .ci-qty__val { min-width: 48px; text-align: center; font-family: var(--ff-mono); font-size: .9rem; color: var(--ink); }
 
   /* an already-added machine/part entry */
@@ -664,15 +667,17 @@ export const chatStyles = `
     transition: border-color .15s, color .15s;
   }
   .ci-entry__remove:hover { border-color: #ef4444; color: #ef4444; }
+  .ci-entry__remove:active { transform: scale(0.88); transition-duration: .08s; }
 
   .ci-add-another {
     display: inline-flex; align-items: center; gap: .45rem; width: fit-content;
     padding: .6rem 1rem; border-radius: .6rem;
     border: 1px dashed var(--brand-teal); background: rgba(43,191,179,.06);
     color: var(--brand-teal); font-size: .85rem; cursor: pointer;
-    transition: background .15s;
+    transition: background .15s, transform .14s var(--ease-out, ease);
   }
-  .ci-add-another:hover { background: rgba(43,191,179,.12); }
+  .ci-add-another:hover { background: rgba(43,191,179,.12); transform: translateY(-1px); }
+  .ci-add-another:active { transform: translateY(0) scale(0.97); transition-duration: .08s; }
 
   /* submit bar pinned at the bottom of the form */
   .ci-submit-bar {
@@ -682,10 +687,17 @@ export const chatStyles = `
     padding: .8rem 1.75rem; border-radius: .7rem; border: none;
     background: var(--brand-teal); color: #04211e; cursor: pointer;
     font-family: var(--ff-display); font-size: .95rem; letter-spacing: .02em;
-    transition: background .15s;
+    box-shadow: 0 8px 20px -14px rgba(43,191,179,0);
+    transition: background .15s, transform .15s var(--ease-out, ease), box-shadow .2s var(--ease-out, ease);
   }
-  .ci-submit-bar__btn:hover:not(:disabled) { background: var(--brand-teal-dk); }
+  .ci-submit-bar__btn:hover:not(:disabled) {
+    background: var(--brand-teal-dk);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px -12px rgba(43,191,179,.5);
+  }
+  .ci-submit-bar__btn:active:not(:disabled) { transform: translateY(0) scale(0.97); transition-duration: .08s; }
   .ci-submit-bar__btn:disabled { opacity: .4; cursor: default; }
+  @media (prefers-reduced-motion: reduce) { .ci-submit-bar__btn { transform: none !important; } }
 
   /* insight side panel — a live spec-sheet readout: corner brackets and
      animated spec bars, built from the site's existing teal/industrial
@@ -845,10 +857,18 @@ export const chatStyles = `
     width: 100%; margin-top: 1.1rem; padding: .8rem; border-radius: .7rem;
     border: none; background: var(--brand-teal); color: #04211e;
     font-family: var(--ff-display); font-size: .95rem; letter-spacing: .02em;
-    cursor: pointer; transition: background .15s;
+    cursor: pointer;
+    box-shadow: 0 8px 20px -14px rgba(43,191,179,0);
+    transition: background .15s, transform .15s var(--ease-out, ease), box-shadow .2s var(--ease-out, ease);
   }
-  .ci-review-card__send:hover:not(:disabled) { background: var(--brand-teal-dk); }
+  .ci-review-card__send:hover:not(:disabled) {
+    background: var(--brand-teal-dk);
+    transform: translateY(-2px);
+    box-shadow: 0 16px 34px -12px rgba(43,191,179,.55);
+  }
+  .ci-review-card__send:active:not(:disabled) { transform: translateY(0) scale(0.98); transition-duration: .08s; }
   .ci-review-card__send:disabled { opacity: .5; cursor: default; }
+  @media (prefers-reduced-motion: reduce) { .ci-review-card__send { transform: none !important; } }
 
   /* production-line summary — ordered machine cards + specs, shown before
      the contact-details ReviewCard for multi-machine line orders */
@@ -917,15 +937,23 @@ export const chatStyles = `
     padding: .75rem 1.5rem; border-radius: .7rem; border: none;
     background: var(--brand-teal); color: #04211e; cursor: pointer;
     font-family: var(--ff-display); font-size: .9rem; letter-spacing: .02em;
-    transition: background .15s;
+    box-shadow: 0 8px 20px -14px rgba(43,191,179,0);
+    transition: background .15s, transform .15s var(--ease-out, ease), box-shadow .2s var(--ease-out, ease);
   }
-  .ci-aichat__start-btn:hover { background: var(--brand-teal-dk); }
+  .ci-aichat__start-btn:hover {
+    background: var(--brand-teal-dk);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px -12px rgba(43,191,179,.5);
+  }
+  .ci-aichat__start-btn:active { transform: translateY(0) scale(0.97); transition-duration: .08s; }
   .ci-aichat__skip-btn {
     padding: .75rem 1.25rem; border-radius: .7rem; border: 1px solid var(--bg-line);
     background: none; color: var(--ink-60); cursor: pointer; font-size: .85rem;
-    transition: border-color .15s, color .15s;
+    transition: border-color .15s, color .15s, transform .14s var(--ease-out, ease);
   }
-  .ci-aichat__skip-btn:hover { border-color: var(--ink-35); color: var(--ink); }
+  .ci-aichat__skip-btn:hover { border-color: var(--ink-35); color: var(--ink); transform: translateY(-1px); }
+  .ci-aichat__skip-btn:active { transform: translateY(0) scale(0.97); transition-duration: .08s; }
+  @media (prefers-reduced-motion: reduce) { .ci-aichat__start-btn, .ci-aichat__skip-btn { transform: none !important; } }
 
   .ci-aichat__thread {
     display: flex; flex-direction: column; gap: .85rem;
@@ -960,9 +988,10 @@ export const chatStyles = `
     padding: .45rem .8rem; border-radius: .6rem;
     border: 1px dashed var(--brand-teal); background: rgba(43,191,179,.06);
     color: var(--brand-teal); font-size: .78rem; cursor: pointer;
-    transition: background .15s;
+    transition: background .15s, transform .12s var(--ease-out, ease);
   }
-  .ci-aichat__sug:hover:not(:disabled) { background: rgba(43,191,179,.14); }
+  .ci-aichat__sug:hover:not(:disabled) { background: rgba(43,191,179,.14); transform: translateY(-1px); }
+  .ci-aichat__sug:active:not(:disabled) { transform: translateY(0) scale(0.96); transition-duration: .08s; }
   .ci-aichat__sug--applied {
     border-style: solid; border-color: var(--bg-line); background: var(--bg-surface);
     color: var(--ink-35); cursor: default;
@@ -980,18 +1009,23 @@ export const chatStyles = `
     flex-shrink: 0; width: 40px; height: 40px; border-radius: .7rem;
     background: var(--brand-teal); color: #04211e; border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    transition: background .15s;
+    transition: background .15s, transform .12s var(--ease-out, ease);
   }
-  .ci-aichat__send:hover:not(:disabled) { background: var(--brand-teal-dk); }
+  .ci-aichat__send:hover:not(:disabled) { background: var(--brand-teal-dk); transform: translateY(-1px); }
+  .ci-aichat__send:active:not(:disabled) { transform: translateY(0) scale(0.9); transition-duration: .08s; }
   .ci-aichat__send:disabled { opacity: .4; cursor: default; }
 
   .ci-aichat__footer { display: flex; justify-content: flex-end; padding-top: .25rem; border-top: 1px solid var(--bg-line); }
   .ci-aichat__continue-btn {
     padding: .65rem 1.1rem; border-radius: .6rem; border: 1px solid var(--bg-line);
     background: none; color: var(--ink); cursor: pointer; font-size: .85rem;
-    transition: border-color .15s, color .15s;
+    transition: border-color .15s, color .15s, transform .14s var(--ease-out, ease);
   }
-  .ci-aichat__continue-btn:hover { border-color: var(--brand-teal); color: var(--brand-teal); }
+  .ci-aichat__continue-btn:hover { border-color: var(--brand-teal); color: var(--brand-teal); transform: translateY(-1px); }
+  .ci-aichat__continue-btn:active { transform: translateY(0) scale(0.97); transition-duration: .08s; }
+  @media (prefers-reduced-motion: reduce) {
+    .ci-aichat__sug, .ci-aichat__send, .ci-aichat__continue-btn { transform: none !important; }
+  }
 
   /* photo gallery — used both inline in a field and in the review section */
   .ci-gallery { display: flex; flex-wrap: wrap; gap: .5rem; }
@@ -1010,10 +1044,14 @@ export const chatStyles = `
     border: 1px dashed var(--bg-line); background: var(--bg-surface);
     color: var(--ink-35); cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    transition: border-color .15s, color .15s;
+    transition: border-color .15s, color .15s, transform .12s var(--ease-out, ease);
   }
-  .ci-gallery__add:hover:not(:disabled) { border-color: var(--brand-teal); color: var(--brand-teal); }
+  .ci-gallery__add:hover:not(:disabled) { border-color: var(--brand-teal); color: var(--brand-teal); transform: translateY(-1px); }
+  .ci-gallery__add:active:not(:disabled) { transform: translateY(0) scale(0.92); transition-duration: .08s; }
   .ci-gallery__add:disabled { opacity: .5; cursor: default; }
+  .ci-gallery__remove { transition: transform .12s var(--ease-out, ease); }
+  .ci-gallery__remove:hover { transform: scale(1.12); }
+  .ci-gallery__remove:active { transform: scale(0.9); transition-duration: .08s; }
   .ci-gallery__spinner {
     width: 14px; height: 14px; border-radius: 50%;
     border: 2px solid var(--bg-line); border-top-color: var(--brand-teal);

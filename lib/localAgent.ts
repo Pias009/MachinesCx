@@ -1,10 +1,13 @@
 // ---------------------------------------------------------------------------
-// Rule-based ASHA answer engine — no LLM, no API key, no network call. Reads
-// the live catalogue (lib/products.ts, backed by data/products.json) and
-// composes replies entirely from real fields, so it can never hallucinate a
-// spec. Trades free-form fluency for zero cost and total reliability.
+// Rule-based ASHA answer engine. Reads the live catalogue (lib/products.ts,
+// backed by data/products.json) and composes catalog replies entirely from
+// real fields, so it can never hallucinate a spec. The guided name → email →
+// qty inquiry flow below is regex-first (instant, zero cost) but falls back
+// to a Groq classification call (lib/groq.ts) for any reply the regex can't
+// confidently read — that's the only place this module touches the network.
 // ---------------------------------------------------------------------------
 import { categories, families, type ProductFamily, type CategorySlug } from "@/lib/products";
+import { classifyFlowReply, type FlowClassification, type FlowStage } from "@/lib/groq";
 import type { ChatAction, PendingInquiryDoc as PendingInquiry } from "@/models/ChatSession";
 
 export interface LocalAnswer {
@@ -115,77 +118,191 @@ function specSummary(f: ProductFamily): string {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Conversational filler/acknowledgement/question tokens that must never be
-// captured as a person's name — without this check, replying "ok" to "what's
-// your name?" would literally set the visitor's name to "Ok". Checked
-// per-word (see looksLikeName) so multi-word filler like "yeah sure" or "got
-// it" is caught too, not just single-word replies.
+// Conversational filler/acknowledgement tokens that must never be captured
+// as a person's name — without this check, replying "ok" to "what's your
+// name?" would literally set the visitor's name to "Ok". Checked per-word
+// (see isFillerOnly) so multi-word filler like "yeah sure" or "got it" is
+// caught too, not just single-word replies.
 const NAME_FILLER_TOKENS = new Set([
   "ok", "okay", "okey", "okie", "k", "kk", "yes", "yeah", "yep", "yup", "ya",
   "no", "nope", "nah", "sure", "alright", "aight", "fine", "cool", "great",
   "good", "nice", "thanks", "thank", "you", "thx", "ty", "hi", "hello", "hey",
   "yo", "please", "continue", "next", "done", "got", "it", "understood",
-  "sounds", "why", "what", "how", "who", "when", "where", "sorry", "wait",
-  "hold", "on", "one", "sec", "hmm", "hm", "um", "uh", "idk", "dont", "don't",
-  "know", "i", "n/a", "na", "none", "skip",
+  "sounds", "sorry", "wait", "hold", "on", "one", "sec", "hmm", "hm", "um",
+  "uh", "idk", "dont", "don't", "know", "i", "n/a", "na", "none", "skip",
 ]);
 
+// Words that open a genuine question ("How do I install this?") rather than
+// a name reply — only checked together with a "?" and 3+ words, so a name
+// typed with a stray trailing "?" (e.g. "pias?") is never caught by this.
+const QUESTION_OPENERS = new Set([
+  "how", "what", "why", "when", "where", "who", "which", "can", "could",
+  "would", "does", "do", "is", "are", "will", "should", "tell", "show", "explain",
+]);
+
+// Explicit intent to back out of the guided flow — checked before any
+// stage-specific logic so it works from name/email/qty alike, instead of
+// leaving the visitor stuck re-answering the same prompt with no way out.
+const CANCEL_PHRASES = new Set([
+  "cancel", "stop", "nevermind", "never mind", "forget it", "exit", "quit",
+  "no thanks", "not now", "not interested", "later", "back", "go back",
+  "start over", "restart",
+]);
+
+/** Lowercases, strips punctuation (keeping letters/digits/apostrophe/hyphen — Unicode-aware, not Latin-only), and splits into words. */
+function normalizeWords(raw: string): string[] {
+  const normalized = raw.trim().toLowerCase().replace(/[^\p{L}\p{N}\s'-]/gu, "").trim();
+  return normalized ? normalized.split(/\s+/).filter(Boolean) : [];
+}
+
+function isCancelIntent(raw: string): boolean {
+  return CANCEL_PHRASES.has(normalizeWords(raw).join(" "));
+}
+
+function isFillerOnly(words: string[]): boolean {
+  return words.length > 0 && words.every(w => NAME_FILLER_TOKENS.has(w));
+}
+
+function looksLikeQuestion(raw: string, words: string[]): boolean {
+  return raw.trim().endsWith("?") && words.length >= 3 && QUESTION_OPENERS.has(words[0]);
+}
+
 /**
- * True if `raw` plausibly reads as a person's name rather than filler,
- * an acknowledgement, or a question. Unicode-letter-aware (not a Latin-only
+ * True if `raw` plausibly reads as a person's name rather than filler, an
+ * acknowledgement, or a question. Unicode-letter-aware (not a Latin-only
  * character allowlist) so real names in Arabic/Hindi script — this site
- * ships ar/hi locales — aren't rejected as "not looking like a name".
+ * ships ar/hi locales — aren't rejected as "not looking like a name". Trailing
+ * punctuation ("pias?") is stripped rather than treated as an automatic
+ * disqualifier, so a stray "?" doesn't reject an otherwise valid name.
  */
 function looksLikeName(raw: string): boolean {
   const trimmed = raw.trim();
   if (!trimmed) return false;
-  if (trimmed.includes("?")) return false;
-  const normalized = trimmed.toLowerCase().replace(/[^\p{L}\p{N}\s'-]/gu, "").trim();
-  if (!normalized) return false;
-  if (/^[\d\s'-]+$/.test(normalized)) return false; // pure digits/punctuation, no letters
-  if (normalized.length < 2) return false; // single character ("k", "y") is filler, not an initial
-  const words = normalized.split(/\s+/).filter(Boolean);
+  const words = normalizeWords(trimmed);
+  if (words.length === 0) return false;
+  if (words.every(w => /^\d+$/.test(w))) return false; // pure numbers, no letters
+  if (words.join("").length < 2) return false; // single character ("k", "y") is filler, not an initial
   if (words.length > 6) return false; // reads like a sentence, not a name
-  if (words.every(w => NAME_FILLER_TOKENS.has(w))) return false; // "ok", "yeah sure", "got it", "no thanks", ...
+  if (isFillerOnly(words)) return false; // "ok", "yeah sure", "got it", "no thanks", ...
+  if (looksLikeQuestion(trimmed, words)) return false; // "how do I install this?"
   return true;
 }
 
-/** Advances a guided name → email → qty inquiry flow already in progress. */
-function continueInquiryFlow(message: string, pending: PendingInquiry): LocalAnswer {
+/** Calls Groq's flow classifier with a timeout, degrading to "unclear" (never throwing) so a slow/unavailable API can't break the guided flow. */
+async function classifyFlowReplySafe(stage: FlowStage, message: string, machineName: string): Promise<FlowClassification> {
+  try {
+    return await Promise.race([
+      classifyFlowReply(stage, message, machineName),
+      new Promise<FlowClassification>((_, reject) => setTimeout(() => reject(new Error("classify timeout")), 6000)),
+    ]);
+  } catch (e) {
+    console.error("ASHA guided flow: Groq classification unavailable, falling back to local heuristics:", e);
+    return { intent: "unclear", value: null, reply: null };
+  }
+}
+
+function completeInquiry(pending: PendingInquiry, qty: number): LocalAnswer {
+  return {
+    text: `Perfect — I've sent your inquiry for ${qty} × ${pending.machineName ?? "this machine"} to our team. Someone will reach out to ${pending.email} shortly. Anything else I can help with?`,
+    actions: [],
+    pendingInquiry: null,
+    completedInquiry: {
+      name: pending.name ?? "",
+      email: pending.email ?? "",
+      qty,
+      slug: pending.slug ?? "",
+      machineName: pending.machineName ?? pending.slug ?? "Unspecified machine",
+    },
+  };
+}
+
+const CANCELED_TEXT = "No problem — I've canceled that inquiry. What else can I help with?";
+
+/**
+ * Advances a guided name → email → qty inquiry flow already in progress.
+ * Each stage tries a cheap, instant local check first (valid email regex,
+ * digits present, a name that isn't obviously filler/a question); only when
+ * that's ambiguous does it fall back to classifyFlowReplySafe for a real
+ * judgment call — this is what lets ASHA tell "pias?" (a name) apart from
+ * "yeah sure" (filler) and "how do I install this?" (an actual question)
+ * without hand-tuning ever more regex edge cases.
+ */
+async function continueInquiryFlow(message: string, pending: PendingInquiry): Promise<LocalAnswer> {
   const trimmed = message.trim();
+  const machineName = pending.machineName ?? "this machine";
+
+  if (isCancelIntent(trimmed)) {
+    return { text: CANCELED_TEXT, actions: [], pendingInquiry: null };
+  }
 
   if (pending.stage === "name") {
     if (!trimmed) return { text: "I'll need your name to send this along — what's your name?", actions: [], pendingInquiry: pending };
-    if (!looksLikeName(trimmed)) {
-      return { text: "Sorry, I didn't catch your name there — could you tell me your name?", actions: [], pendingInquiry: pending };
+
+    const words = normalizeWords(trimmed);
+    if (looksLikeName(trimmed) && !looksLikeQuestion(trimmed, words)) {
+      // Strip stray trailing punctuation ("pias?" → "pias") so the cleaned
+      // name — not the raw keystrokes — is what's stored and sent to sales.
+      const cleanedName = trimmed.replace(/[?!.,]+$/, "").trim() || trimmed;
+      const next: PendingInquiry = { ...pending, name: cleanedName, stage: "email" };
+      return { text: `Thanks, ${cleanedName}! What's the best email to reach you at?`, actions: [], pendingInquiry: next };
     }
-    const next: PendingInquiry = { ...pending, name: trimmed, stage: "email" };
-    return { text: `Thanks, ${trimmed}! What's the best email to reach you at?`, actions: [], pendingInquiry: next };
+
+    const c = await classifyFlowReplySafe("name", trimmed, machineName);
+    if (c.intent === "cancel") return { text: CANCELED_TEXT, actions: [], pendingInquiry: null };
+    if (c.intent === "question") {
+      const answer = c.reply || "I'll come back to that in a moment.";
+      return { text: `${answer}\n\nAnyway — what's your name? (Or say "cancel" to stop this inquiry.)`, actions: [], pendingInquiry: pending };
+    }
+    if (c.intent === "answer" && c.value && looksLikeName(c.value)) {
+      const cleanedName = c.value.trim();
+      const next: PendingInquiry = { ...pending, name: cleanedName, stage: "email" };
+      return { text: `Thanks, ${cleanedName}! What's the best email to reach you at?`, actions: [], pendingInquiry: next };
+    }
+    return { text: "Sorry, I didn't catch your name there — what's your name? (Or say \"cancel\" to stop this inquiry.)", actions: [], pendingInquiry: pending };
   }
 
   if (pending.stage === "email") {
-    if (!EMAIL_RE.test(trimmed)) {
-      return { text: "That doesn't look like a valid email — could you double check it?", actions: [], pendingInquiry: pending };
+    if (EMAIL_RE.test(trimmed)) {
+      const next: PendingInquiry = { ...pending, email: trimmed, stage: "qty" };
+      return { text: `Got it. How many units of ${machineName} are you looking for? (Just say a number, or "1" if you're not sure yet.)`, actions: [], pendingInquiry: next };
     }
-    const next: PendingInquiry = { ...pending, email: trimmed, stage: "qty" };
-    return { text: `Got it. How many units of ${pending.machineName ?? "this machine"} are you looking for? (Just say a number, or "1" if you're not sure yet.)`, actions: [], pendingInquiry: next };
+
+    const c = await classifyFlowReplySafe("email", trimmed, machineName);
+    if (c.intent === "cancel") return { text: CANCELED_TEXT, actions: [], pendingInquiry: null };
+    if (c.intent === "question") {
+      const answer = c.reply || "I'll come back to that in a moment.";
+      return { text: `${answer}\n\nAnyway — what's the best email to reach you at? (Or say "cancel" to stop this inquiry.)`, actions: [], pendingInquiry: pending };
+    }
+    if (c.intent === "answer" && c.value && EMAIL_RE.test(c.value.trim())) {
+      const cleanEmail = c.value.trim();
+      const next: PendingInquiry = { ...pending, email: cleanEmail, stage: "qty" };
+      return { text: `Got it. How many units of ${machineName} are you looking for? (Just say a number, or "1" if you're not sure yet.)`, actions: [], pendingInquiry: next };
+    }
+    return { text: "That doesn't look like a valid email — could you double check it? (Or say \"cancel\" to stop this inquiry.)", actions: [], pendingInquiry: pending };
   }
 
   if (pending.stage === "qty") {
-    const num = parseInt(trimmed.match(/\d+/)?.[0] ?? "1", 10);
-    const qty = Number.isFinite(num) && num > 0 ? num : 1;
-    return {
-      text: `Perfect — I've sent your inquiry for ${qty} × ${pending.machineName ?? "this machine"} to our team. Someone will reach out to ${pending.email} shortly. Anything else I can help with?`,
-      actions: [],
-      pendingInquiry: null,
-      completedInquiry: {
-        name: pending.name ?? "",
-        email: pending.email ?? "",
-        qty,
-        slug: pending.slug ?? "",
-        machineName: pending.machineName ?? pending.slug ?? "Unspecified machine",
-      },
-    };
+    const digitMatch = trimmed.match(/\d+/);
+    if (digitMatch) {
+      const num = parseInt(digitMatch[0], 10);
+      return completeInquiry(pending, Number.isFinite(num) && num > 0 ? num : 1);
+    }
+
+    const c = await classifyFlowReplySafe("qty", trimmed, machineName);
+    if (c.intent === "cancel") return { text: CANCELED_TEXT, actions: [], pendingInquiry: null };
+    if (c.intent === "question") {
+      const answer = c.reply || "I'll come back to that in a moment.";
+      return { text: `${answer}\n\nAnyway — how many units are you looking for? (Or say "cancel" to stop this inquiry.)`, actions: [], pendingInquiry: pending };
+    }
+    if (c.intent === "answer" && c.value) {
+      // Covers spelled-out numbers ("two", "a couple") the classifier can
+      // read but a digit regex can't — falls back to 1 if it still can't tell.
+      const num = parseInt(c.value.match(/\d+/)?.[0] ?? "1", 10);
+      return completeInquiry(pending, Number.isFinite(num) && num > 0 ? num : 1);
+    }
+    // Unclear — default to 1, same graceful fallback the prompt already
+    // invites ("or '1' if you're not sure yet") rather than looping forever.
+    return completeInquiry(pending, 1);
   }
 
   return { text: "Let's start over — what would you like to inquire about?", actions: [], pendingInquiry: null };
@@ -230,7 +347,7 @@ export function isBasicQuery(rawMessage: string, pendingInquiry: PendingInquiry 
   return false;
 }
 
-export function answerLocally(rawMessage: string, pendingInquiry: PendingInquiry | null | undefined): LocalAnswer {
+export async function answerLocally(rawMessage: string, pendingInquiry: PendingInquiry | null | undefined): Promise<LocalAnswer> {
   // A guided inquiry flow in progress takes priority over intent matching —
   // the visitor is answering a direct question, not asking a new one.
   if (pendingInquiry && pendingInquiry.stage !== "done") {

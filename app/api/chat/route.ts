@@ -43,9 +43,12 @@ export async function POST(req: NextRequest) {
     ]);
   }
 
-  // For basic queries (greetings, simple asks), skip the LLM round-trip entirely.
+  // For basic queries (greetings, simple asks), skip the general-chat LLM
+  // round-trip — the guided inquiry flow inside answerLocally may still make
+  // its own short Groq classification call for an ambiguous reply, but never
+  // the full chat completion.
   if (isBasicQuery(message.trim(), session.pendingInquiry ?? null)) {
-    answer = answerLocally(message.trim(), session.pendingInquiry ?? null);
+    answer = await answerLocally(message.trim(), session.pendingInquiry ?? null);
   } else {
     try {
       // Groq is the primary backend — fast inference, more capable model,
@@ -65,7 +68,7 @@ export async function POST(req: NextRequest) {
         );
       } catch (e) {
         console.error("ASHA chat: OpenRouter unavailable, falling back to local engine:", e);
-        answer = answerLocally(message.trim(), session.pendingInquiry ?? null);
+        answer = await answerLocally(message.trim(), session.pendingInquiry ?? null);
       }
     }
   }

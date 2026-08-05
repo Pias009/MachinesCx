@@ -116,6 +116,70 @@ function extractJson(raw: string): LocalAnswer | null {
   }
 }
 
+export type FlowStage = "name" | "email" | "qty";
+
+export interface FlowClassification {
+  intent: "answer" | "cancel" | "question" | "unclear";
+  /** Cleaned value (name / email / quantity) when intent === "answer". */
+  value: string | null;
+  /** Short answer to relay to the visitor when intent === "question". */
+  reply: string | null;
+}
+
+const FLOW_FIELD_LABEL: Record<FlowStage, string> = {
+  name: "their full name",
+  email: "their email address",
+  qty: "the quantity (a number) they want",
+};
+
+/**
+ * Classifies a single reply inside ASHA's guided name → email → qty inquiry
+ * flow. Used as the smart fallback when lib/localAgent.ts's cheap regex
+ * checks can't confidently tell a real answer apart from filler ("ok"), a
+ * cancel request, or an unrelated question — regex kept misjudging these
+ * (e.g. "yeah sure" read as a name), so ambiguous replies now get a real
+ * LLM judgment call instead of another hand-tuned heuristic.
+ */
+export async function classifyFlowReply(
+  stage: FlowStage,
+  message: string,
+  machineName: string,
+): Promise<FlowClassification> {
+  const prompt = `You are classifying ONE visitor reply inside a guided sales-inquiry chat. They were just asked for ${FLOW_FIELD_LABEL[stage]} regarding "${machineName}".
+
+Classify the reply into exactly one intent:
+- "answer": a plausible, genuine ${stage}. Put it cleaned of filler/stray punctuation into "value".
+- "cancel": they want to stop or back out of this inquiry (e.g. "cancel", "nevermind", "not interested", "stop", "forget it", "I changed my mind").
+- "question": they're asking something unrelated instead of answering (e.g. "how do I install this?", "what's the warranty?", "does it ship to Brazil?"). Put a short, honest, helpful answer in "reply" — if you don't actually know, say so briefly, never invent facts.
+- "unclear": pure filler/acknowledgement with no real content ("ok", "yes", "sure", "hi", a random word) — not a real ${stage}, not a cancel, not a real question.
+
+Reply ONLY with this JSON: {"intent":"answer","value":"...","reply":null} — pick the one matching intent, keep the other two fields null.`;
+
+  const messages: { role: "system" | "user"; content: string }[] = [
+    { role: "system", content: prompt },
+    { role: "user", content: message },
+  ];
+
+  try {
+    const raw = await groqJsonCompletion(messages, { maxTokens: 300, temperature: 0.1 });
+    const cleaned = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/g, "");
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return { intent: "unclear", value: null, reply: null };
+    const parsed = JSON.parse(jsonMatch[0]);
+    const intent: FlowClassification["intent"] =
+      parsed.intent === "answer" || parsed.intent === "cancel" || parsed.intent === "question"
+        ? parsed.intent
+        : "unclear";
+    return {
+      intent,
+      value: typeof parsed.value === "string" ? parsed.value : null,
+      reply: typeof parsed.reply === "string" ? parsed.reply : null,
+    };
+  } catch {
+    return { intent: "unclear", value: null, reply: null };
+  }
+}
+
 export async function answerWithGroq(
   messages: ChatMessageDoc[],
   pendingInquiry: LocalAnswer["pendingInquiry"],

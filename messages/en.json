@@ -2114,5 +2114,82 @@
   },
   "specTable": {
     "specification": "Specification"
+  },
+  "legalPage": {
+    "eyebrow": "Legal",
+    "titlePrefix": "Privacy &",
+    "titleEm": "Terms",
+    "sub": "How Wenzhou Ashal Innomach Technology Co., Ltd. collects, uses, and protects your data, and the terms that govern your use of our website and services.",
+    "tabsAria": "Legal document sections",
+    "privacy": {
+      "tabLabel": "Privacy Policy",
+      "title": "Privacy Policy",
+      "updated": "Last updated: January 2026",
+      "sections": [
+        {
+          "heading": "1. Information We Collect",
+          "body": "We collect information you provide directly to us, such as your name, company name, email address, phone number, and country when you submit an inquiry, request a quote, or contact our engineering team. We also automatically collect limited technical data — including IP address, browser type, and pages visited — through standard web server logs and analytics to help us improve the site."
+        },
+        {
+          "heading": "2. How We Use Your Information",
+          "body": "We use the information you provide to respond to inquiries, prepare quotations, process spare-parts requests, schedule engineering consultations, and send order or shipping updates. We do not use your data for automated decision-making, and we never sell your personal information to third parties."
+        },
+        {
+          "heading": "3. Sharing of Information",
+          "body": "We may share information with trusted logistics partners, payment processors, or freight forwarders solely to fulfill an order or inquiry you have initiated. We may also disclose information if required by law, such as to comply with customs or export documentation for international machinery shipments."
+        },
+        {
+          "heading": "4. Data Retention",
+          "body": "We retain inquiry and order records for as long as necessary to provide after-sales support, honor warranty terms, and meet our accounting and export-compliance obligations. You may request deletion of your personal data at any time, subject to any legal retention requirements."
+        },
+        {
+          "heading": "5. Cookies & Analytics",
+          "body": "Our website uses essential cookies to remember your language and theme preference, and analytics cookies to understand how visitors use the site. You can disable non-essential cookies through your browser settings without affecting core site functionality."
+        },
+        {
+          "heading": "6. Data Security",
+          "body": "We apply reasonable technical and organizational safeguards to protect your information from unauthorized access, alteration, or disclosure. However, no method of transmission over the internet is entirely secure, and we cannot guarantee absolute security."
+        },
+        {
+          "heading": "7. Your Rights & Contact",
+          "body": "You may request access to, correction of, or deletion of your personal data by contacting us at info@cxmachinery.com. If you are located in a jurisdiction with specific data-protection laws (such as GDPR), you may have additional rights under that law."
+        }
+      ]
+    },
+    "terms": {
+      "tabLabel": "Terms & Conditions",
+      "title": "Terms & Conditions",
+      "updated": "Last updated: January 2026",
+      "sections": [
+        {
+          "heading": "1. Acceptance of Terms",
+          "body": "By accessing this website or submitting an inquiry to Wenzhou Ashal Innomach Technology Co., Ltd., you agree to be bound by these Terms & Conditions. If you do not agree, please discontinue use of the site."
+        },
+        {
+          "heading": "2. Quotations & Pricing",
+          "body": "All prices, specifications, and lead times shown on this website or provided in quotations are indicative and subject to confirmation at the time of order. Final pricing depends on machine configuration, quantity, incoterms, and prevailing raw-material costs, and is confirmed in a formal, signed sales contract."
+        },
+        {
+          "heading": "3. Orders & Payment",
+          "body": "Orders are confirmed only upon receipt of a signed sales contract and the agreed deposit payment. Standard payment terms, delivery timelines, and installation support are detailed in each contract and may vary by machine family and destination country."
+        },
+        {
+          "heading": "4. Intellectual Property",
+          "body": "All content on this website — including machine designs, diagrams, product photography, and text — is the property of Wenzhou Ashal Innomach Technology Co., Ltd. and may not be reproduced, distributed, or used commercially without prior written consent."
+        },
+        {
+          "heading": "5. Warranty",
+          "body": "Machines are covered under the warranty terms specified in the sales contract, typically covering manufacturing defects for a defined period from installation or shipment. Warranty does not cover damage from misuse, unauthorized modification, or normal wear of consumable parts."
+        },
+        {
+          "heading": "6. Limitation of Liability",
+          "body": "To the extent permitted by law, Wenzhou Ashal Innomach Technology Co., Ltd. shall not be liable for indirect, incidental, or consequential damages arising from the use of our website or products, beyond the remedies expressly stated in the applicable sales contract."
+        },
+        {
+          "heading": "7. Governing Law",
+          "body": "These Terms & Conditions are governed by the laws of the People's Republic of China. Any disputes arising from these terms or from a sales contract shall first be addressed through good-faith negotiation, and if unresolved, submitted to arbitration as specified in the relevant contract."
+        }
+      ]
+    }
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { families, type ProductFamily } from "@/lib/products";
+import { groqJsonCompletion } from "@/lib/groq";
 
 export const runtime = "nodejs";
 
@@ -84,6 +85,29 @@ RULES:
 - Keep "text" to 2-4 sentences.
 - Never invent specs or prices.`;
 
+function parseReviewJson(raw: string): ReviewAnswer | null {
+  let text = raw.trim();
+  text = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/g, "");
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) return null;
+  try {
+    const parsed = JSON.parse(jsonMatch[0]);
+    return {
+      text: typeof parsed.text === "string" ? parsed.text : "",
+      suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function callGroq(messages: { role: "system" | "user" | "assistant"; content: string }[]): Promise<ReviewAnswer> {
+  const raw = await groqJsonCompletion(messages, { maxTokens: 700, temperature: 0.4 });
+  const parsed = parseReviewJson(raw);
+  if (!parsed) throw new Error("Groq: could not parse JSON response");
+  return parsed;
+}
+
 async function callOpenRouter(messages: { role: "system" | "user" | "assistant"; content: string }[]): Promise<ReviewAnswer> {
   const modelsToTry = [PRIMARY_MODEL, ...FALLBACK_MODELS.filter(m => m !== PRIMARY_MODEL)].slice(0, 3);
   const TIMEOUT_MS = 8000;
@@ -159,7 +183,13 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const answer = await callOpenRouter(apiMessages);
+    let answer: ReviewAnswer;
+    try {
+      answer = await callGroq(apiMessages);
+    } catch (groqErr) {
+      console.error("inquiry-review: Groq unavailable, falling back to OpenRouter:", groqErr);
+      answer = await callOpenRouter(apiMessages);
+    }
     // Guard against a hallucinated slug/index slipping through.
     const validSlugs = new Set(families.map((f: ProductFamily) => f.slug));
     const suggestions = answer.suggestions.filter(s => {

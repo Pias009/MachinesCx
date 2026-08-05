@@ -98,8 +98,8 @@ export default function SiteFooter() {
   ];
 
   const LEGAL_LINKS = [
-    { label: t("legal.privacy"), href: "#" },
-    { label: t("legal.terms"), href: "#" },
+    { label: t("legal.privacy"), href: "/legal#privacy" },
+    { label: t("legal.terms"), href: "/legal#terms" },
   ];
 
   return (

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Inbox, LogOut, Menu, X } from "lucide-react";
+import { Home, Inbox, LogOut, Menu, Settings, X } from "lucide-react";
 import { SECTION_SCHEMAS } from "@/lib/cmsSchemas";
 import { ADMIN_PATH } from "@/lib/adminAuth";
 import { SectionIcon } from "./adminIcons";
@@ -86,6 +86,14 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               Inquiries
             </span>
             {newCount > 0 && <span className="adm-badge">{newCount}</span>}
+          </Link>
+
+          <Link
+            href={`/${ADMIN_PATH}/settings`}
+            className={navLink(`/${ADMIN_PATH}/settings`, pathname === `/${ADMIN_PATH}/settings`)}
+          >
+            <span className="adm-nav__link-icon"><Settings size={16} /></span>
+            Settings
           </Link>
 
           <div className="adm-nav__section">Edit site content</div>

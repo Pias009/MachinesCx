@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import ChatSession from "@/models/ChatSession";
+import { answerWithGroq } from "@/lib/groq";
 import { answerWithOpenRouter } from "@/lib/openrouter";
 import { answerLocally, isBasicQuery } from "@/lib/localAgent";
 import { createInquiry } from "@/lib/inquiries";
@@ -35,22 +36,37 @@ export async function POST(req: NextRequest) {
 
   let answer: Awaited<ReturnType<typeof answerWithOpenRouter>>;
 
-  // For basic queries (greetings, simple asks), skip OpenRouter entirely
+  function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+    return Promise.race([
+      p,
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error(`${label} timeout`)), ms)),
+    ]);
+  }
+
+  // For basic queries (greetings, simple asks), skip the LLM round-trip entirely.
   if (isBasicQuery(message.trim(), session.pendingInquiry ?? null)) {
     answer = answerLocally(message.trim(), session.pendingInquiry ?? null);
   } else {
     try {
-      // Race OpenRouter against a 10 s overall timeout so the user never
-      // waits longer than that before getting the local fallback.
-      answer = await Promise.race([
-        answerWithOpenRouter(session.messages, session.pendingInquiry ?? null),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("OpenRouter overall timeout")), 10_000),
-        ),
-      ]);
-    } catch (e) {
-      console.error("ASHA chat: OpenRouter unavailable, falling back to local engine:", e);
-      answer = answerLocally(message.trim(), session.pendingInquiry ?? null);
+      // Groq is the primary backend — fast inference, more capable model,
+      // handles general questions in addition to catalog lookups.
+      answer = await withTimeout(
+        answerWithGroq(session.messages, session.pendingInquiry ?? null),
+        10_000,
+        "Groq overall",
+      );
+    } catch (groqErr) {
+      console.error("ASHA chat: Groq unavailable, falling back to OpenRouter:", groqErr);
+      try {
+        answer = await withTimeout(
+          answerWithOpenRouter(session.messages, session.pendingInquiry ?? null),
+          10_000,
+          "OpenRouter overall",
+        );
+      } catch (e) {
+        console.error("ASHA chat: OpenRouter unavailable, falling back to local engine:", e);
+        answer = answerLocally(message.trim(), session.pendingInquiry ?? null);
+      }
     }
   }
 

@@ -933,9 +933,22 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .footer-col-chev { display: none; }
 .footer-col-body { display: flex; flex-direction: column; gap: 0.6rem; }
 
-/* ── Social icons ── */
-.footer-social-icon { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.72); transition: background 0.2s, color 0.2s; }
-.footer-social-icon:hover { background: var(--brand-teal); color: #fff; }
+/* ── Social icons — real brand-colored logos (not currentColor), so the
+   hover treatment lifts/brightens the circle instead of washing over the
+   icon's own color with a flat teal tint. ── */
+.footer-social-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.72);
+  transition: background 0.2s var(--ease-out, ease), transform 0.18s var(--ease-out, ease), box-shadow 0.2s var(--ease-out, ease);
+}
+.footer-social-icon:hover {
+  background: rgba(255,255,255,0.16);
+  transform: translateY(-2px) scale(1.06);
+  box-shadow: 0 8px 18px -8px rgba(0,0,0,0.45);
+}
+.footer-social-icon:active { transform: translateY(0) scale(0.94); transition-duration: 0.08s; }
+@media (prefers-reduced-motion: reduce) { .footer-social-icon { transform: none !important; } }
 
 @media(max-width:900px){
   .footer-shortcuts { grid-template-columns: repeat(3, 1fr); }
@@ -1008,7 +1021,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 [data-theme="light"] .footer-col { border-top-color: rgba(43,191,179,0.18); }
 [data-theme="light"] .footer-col-chev { color: rgba(13,34,32,0.60); }
 [data-theme="light"] .footer-social-icon { background: rgba(13,34,32,0.06); color: rgba(13,34,32,0.72); }
-[data-theme="light"] .footer-social-icon:hover { background: var(--brand-teal); color: #fff; }
+[data-theme="light"] .footer-social-icon:hover { background: rgba(13,34,32,0.12); box-shadow: 0 8px 18px -10px rgba(13,34,32,0.35); }
 [data-theme="light"] .footer-bar        { border-top-color: rgba(43,191,179,0.18); }
 [data-theme="light"] .footer-bar p      { color: rgba(13,34,32,0.72); }
 [data-theme="light"] .footer-blurb      { color: rgba(13,34,32,0.72); }

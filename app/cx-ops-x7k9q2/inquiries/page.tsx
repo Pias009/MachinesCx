@@ -141,28 +141,35 @@ export default function InquiriesPage() {
     });
   }
 
-  async function deleteChecked() {
-    if (checkedIds.size === 0) return;
-    const count = checkedIds.size;
+  async function deleteIds(ids: string[]) {
+    if (ids.length === 0) return;
+    const count = ids.length;
     if (!confirm(`Delete ${count} inquir${count === 1 ? "y" : "ies"}? This can't be undone.`)) return;
     setDeleting(true);
     try {
-      const ids = Array.from(checkedIds);
       const res = await fetch("/api/admin/inquiries", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids }),
       });
       if (!res.ok) throw new Error("Failed to delete");
-      setInquiries(prev => prev?.filter(i => !checkedIds.has(i._id)) ?? null);
-      if (selectedId && checkedIds.has(selectedId)) setSelectedId(null);
-      setCheckedIds(new Set());
+      const idSet = new Set(ids);
+      setInquiries(prev => prev?.filter(i => !idSet.has(i._id)) ?? null);
+      if (selectedId && idSet.has(selectedId)) setSelectedId(null);
+      setCheckedIds(prev => {
+        const next = new Set(prev);
+        ids.forEach(id => next.delete(id));
+        return next;
+      });
     } catch {
-      alert("Failed to delete selected inquiries — please try again.");
+      alert(`Failed to delete ${count === 1 ? "the inquiry" : "selected inquiries"} — please try again.`);
     } finally {
       setDeleting(false);
     }
   }
+
+  const deleteChecked = () => deleteIds(Array.from(checkedIds));
+  const deleteOne = (id: string) => deleteIds([id]);
 
   // Legacy inquiries predate the inquiryType field — treat a missing type
   // as "direct" everywhere (filtering, counts, badges), matching the
@@ -378,6 +385,24 @@ export default function InquiriesPage() {
                       {timeAgo(inq.createdAt)}
                     </div>
                     </button>
+                    <button
+                      className="inq-row-del"
+                      onClick={e => { e.stopPropagation(); deleteOne(inq._id); }}
+                      disabled={deleting}
+                      title="Delete inquiry"
+                      aria-label={`Delete inquiry from ${inq.name}`}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        width: 28, height: 28, borderRadius: 6, flexShrink: 0,
+                        marginTop: "0.85rem", marginRight: "0.8rem",
+                        background: "transparent", border: "none",
+                        color: "rgba(255,255,255,0.25)", cursor: deleting ? "default" : "pointer",
+                        opacity: deleting ? 0.4 : 1,
+                        transition: "background 0.15s, color 0.15s",
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 );
               })}
@@ -391,7 +416,7 @@ export default function InquiriesPage() {
 
           {/* ── detail + reply ── */}
           {selected ? (
-            <InquiryDetail key={selected._id} inquiry={selected} onReplied={load} />
+            <InquiryDetail key={selected._id} inquiry={selected} onReplied={load} onDelete={() => deleteOne(selected._id)} deleting={deleting} />
           ) : (
             <div className="adm-panel" style={{ padding: "3rem", textAlign: "center" }}>
               <Mail size={22} color="rgba(255,255,255,0.25)" style={{ marginBottom: "0.75rem" }} />
@@ -400,11 +425,15 @@ export default function InquiriesPage() {
           )}
         </div>
       )}
+
+      <style jsx>{`
+        .inq-row-del:hover:not(:disabled) { background: rgba(255,107,125,0.12); color: var(--adm-danger); }
+      `}</style>
     </AdminShell>
   );
 }
 
-function InquiryDetail({ inquiry, onReplied }: { inquiry: InquiryRow; onReplied: () => void }) {
+function InquiryDetail({ inquiry, onReplied, onDelete, deleting }: { inquiry: InquiryRow; onReplied: () => void; onDelete: () => void; deleting: boolean }) {
   const [message, setMessage] = useState("");
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
@@ -455,37 +484,51 @@ function InquiryDetail({ inquiry, onReplied }: { inquiry: InquiryRow; onReplied:
   return (
     <div className="adm-panel adm-rise" style={{ padding: "1.75rem", display: "flex", flexDirection: "column", gap: "1.75rem" }}>
       {/* header with type badge */}
-      <div>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.6rem" }}>
-          <span style={{
-            display: "inline-flex", alignItems: "center", gap: "0.3rem",
-            padding: "0.25rem 0.7rem", borderRadius: 6,
-            background: `${inqTypeInfo.color}22`, color: inqTypeInfo.color,
-            fontFamily: "var(--ff-body)", fontSize: "0.82rem", fontWeight: 700,
-          }}>
-            <InqTypeIcon size={13} /> {inqTypeInfo.label}
-          </span>
-          <span style={{
-            display: "inline-flex", alignItems: "center", gap: "0.25rem",
-            padding: "0.2rem 0.55rem", borderRadius: 5,
-            background: `${STATUS_COLOR[inquiry.status]}22`,
-            color: STATUS_COLOR[inquiry.status],
-            fontFamily: "var(--ff-body)", fontSize: "0.75rem", fontWeight: 700,
-          }}>
-            {STATUS_LABEL[inquiry.status]}
-          </span>
-          {flowLabel(inquiry.flow) && (
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.6rem" }}>
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: "0.3rem",
+              padding: "0.25rem 0.7rem", borderRadius: 6,
+              background: `${inqTypeInfo.color}22`, color: inqTypeInfo.color,
+              fontFamily: "var(--ff-body)", fontSize: "0.82rem", fontWeight: 700,
+            }}>
+              <InqTypeIcon size={13} /> {inqTypeInfo.label}
+            </span>
             <span style={{
               display: "inline-flex", alignItems: "center", gap: "0.25rem",
               padding: "0.2rem 0.55rem", borderRadius: 5,
-              background: "rgba(43,191,179,0.14)", color: "var(--brand-teal)",
+              background: `${STATUS_COLOR[inquiry.status]}22`,
+              color: STATUS_COLOR[inquiry.status],
               fontFamily: "var(--ff-body)", fontSize: "0.75rem", fontWeight: 700,
             }}>
-              {flowLabel(inquiry.flow)}
+              {STATUS_LABEL[inquiry.status]}
             </span>
-          )}
+            {flowLabel(inquiry.flow) && (
+              <span style={{
+                display: "inline-flex", alignItems: "center", gap: "0.25rem",
+                padding: "0.2rem 0.55rem", borderRadius: 5,
+                background: "rgba(43,191,179,0.14)", color: "var(--brand-teal)",
+                fontFamily: "var(--ff-body)", fontSize: "0.75rem", fontWeight: 700,
+              }}>
+                {flowLabel(inquiry.flow)}
+              </span>
+            )}
+          </div>
+          <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.6rem", color: "#fff", margin: 0 }}>{inquiry.name}</h2>
         </div>
-        <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.6rem", color: "#fff", margin: 0 }}>{inquiry.name}</h2>
+        <button onClick={onDelete} disabled={deleting} style={{
+          display: "flex", alignItems: "center", gap: "0.4rem", flexShrink: 0,
+          padding: "0.5rem 0.85rem", borderRadius: 8,
+          border: "1px solid rgba(255,107,125,0.28)",
+          background: "rgba(255,107,125,0.1)", color: "var(--adm-danger)",
+          fontFamily: "var(--ff-body)", fontSize: "0.78rem", fontWeight: 700,
+          cursor: deleting ? "default" : "pointer", opacity: deleting ? 0.6 : 1,
+          transition: "background 0.16s, border-color 0.16s",
+        }}>
+          {deleting ? <span className="adm-spinner" style={{ width: 13, height: 13 }} /> : <Trash2 size={14} />}
+          Delete
+        </button>
       </div>
 
       {/* customer details */}

@@ -145,11 +145,41 @@ export default function AnalyticsPage() {
               </div>
             )}
 
+            {/* ── recent sessions — the live per-visitor log, promoted to the
+                second section so it's the first thing seen after the stat
+                readouts ── */}
+            <div className="trm-panel" style={{ marginBottom: "1.1rem" }}>
+              <div className="trm-panel__head">
+                <Users size={14} />
+                <span><TypedLine text="tail -f visitor_sessions.log" /></span>
+                <span className="trm-live"><span className="trm-live-dot" /> live</span>
+              </div>
+              <div className="trm-panel__body trm-log">
+                {data.recentSessions.length === 0 ? (
+                  <div className="trm-empty">no sessions recorded yet</div>
+                ) : data.recentSessions.map((s, i) => (
+                  <div
+                    key={s.sessionId}
+                    className="trm-log-row trm-row-click"
+                    style={{ animationDelay: `${Math.min(i, 14) * 0.035}s` }}
+                    onClick={() => setSelectedSessionId(s.sessionId)}
+                  >
+                    <span className="trm-log-flag">{flagEmoji(s.countryCode)}</span>
+                    <span className="trm-log-prompt">$</span>
+                    <span className="trm-log-text">
+                      {s.countryCode || "??"}{s.city ? ` · ${s.city}` : ""} · {s.device || "?"}/{s.browser || "?"} · {s.pageCount} page{s.pageCount === 1 ? "" : "s"} · {formatDuration(s.totalDurationMs)}{s.chatOpened ? " · chat" : ""} · {s.landingPath || "/"}
+                    </span>
+                    <span className="trm-log-meta">{timeAgo(s.lastSeen)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div className="trm-grid">
               {/* ── by country ── */}
               <div className="trm-panel">
                 <div className="trm-panel__head"><Globe size={14} /> visitors_by_country</div>
-                <div className="trm-panel__body">
+                <div className="trm-panel__body trm-panel__body--scroll">
                   {data.byCountry.length === 0 ? (
                     <div className="trm-empty">no traffic recorded yet</div>
                   ) : data.byCountry.slice(0, 12).map(c => (
@@ -212,35 +242,6 @@ export default function AnalyticsPage() {
                 ))}
               </div>
             </div>
-
-            {/* ── recent sessions ── */}
-            <div className="trm-panel" style={{ marginTop: "1.1rem" }}>
-              <div className="trm-panel__head"><Users size={14} /> recent_sessions</div>
-              <div className="trm-panel__body trm-table-wrap">
-                {data.recentSessions.length === 0 ? (
-                  <div className="trm-empty">no sessions recorded yet</div>
-                ) : (
-                  <table className="trm-table">
-                    <thead>
-                      <tr><th>where</th><th>device</th><th>landing</th><th>pages</th><th>time</th><th>chat</th><th>last seen</th></tr>
-                    </thead>
-                    <tbody>
-                      {data.recentSessions.map(s => (
-                        <tr key={s.sessionId} className="trm-row-click" onClick={() => setSelectedSessionId(s.sessionId)}>
-                          <td>{flagEmoji(s.countryCode)} {s.countryCode || "??"}{s.city ? ` · ${s.city}` : ""}</td>
-                          <td>{s.device || "?"} / {s.browser || "?"}</td>
-                          <td className="trm-path">{s.landingPath || "/"}</td>
-                          <td>{s.pageCount}</td>
-                          <td>{formatDuration(s.totalDurationMs)}</td>
-                          <td>{s.chatOpened ? <span className="trm-yes">yes</span> : <span className="trm-no">·</span>}</td>
-                          <td>{timeAgo(s.lastSeen)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            </div>
           </>
         )}
       </div>
@@ -295,7 +296,22 @@ export default function AnalyticsPage() {
           font-size: 0.78rem; color: var(--brand-teal); letter-spacing: 0.02em;
         }
         .trm-panel__body { padding: 0.85rem 1rem; }
+        .trm-panel__body--scroll { max-height: 220px; overflow-y: auto; }
         .trm-empty { color: var(--adm-text-faint); font-size: 0.8rem; padding: 0.5rem 0; }
+
+        .trm-live {
+          display: flex; align-items: center; gap: 0.35rem; margin-left: auto;
+          font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase;
+          color: var(--adm-text-faint);
+        }
+        .trm-live-dot {
+          width: 6px; height: 6px; border-radius: 50%; background: var(--brand-teal);
+          animation: trm-live-pulse 1.6s ease-in-out infinite;
+        }
+        @keyframes trm-live-pulse {
+          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(43,191,179,0.5); }
+          50% { opacity: 0.65; box-shadow: 0 0 0 4px rgba(43,191,179,0); }
+        }
 
         .trm-bar-row {
           display: flex; align-items: center; gap: 0.55rem;
@@ -342,6 +358,7 @@ export default function AnalyticsPage() {
         @media (prefers-reduced-motion: reduce) {
           .trm-cursor { animation: none; opacity: 1; }
           .trm-log-row { animation: none; }
+          .trm-live-dot { animation: none; }
         }
       `}</style>
     </AdminShell>

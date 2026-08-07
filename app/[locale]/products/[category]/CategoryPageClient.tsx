@@ -270,6 +270,7 @@ export default function CategoryPageClient({ category, families, allCategories }
                 <Link
                   key={f.slug}
                   href={`/products/${f.category}/${f.slug}`}
+                  prefetch={false}
                   className="ccp-card"
                   data-idx={idx}
                 >

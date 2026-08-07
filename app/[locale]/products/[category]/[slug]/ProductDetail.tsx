@@ -1146,6 +1146,7 @@ export default function ProductDetail({ family, category, related }: Props) {
                 <Link
                   key={r.slug}
                   href={`/products/${r.category}/${r.slug}`}
+                  prefetch={false}
                   className="group flex flex-col overflow-hidden rounded-xl border border-[var(--bg-line)] bg-[var(--bg-surface)] transition-all duration-200 hover:-translate-y-1 hover:border-[var(--brand-teal)]/40 hover:shadow-[0_20px_40px_-20px_rgba(0,0,0,0.5)]"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden bg-[var(--bg-base)]">

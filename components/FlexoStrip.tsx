@@ -351,6 +351,7 @@ export default function FlexoStrip() {
             <TransitionLink
               key={m.slug}
               href={`/products/printing/${m.slug}`}
+              prefetch={false}
               className="fls-card"
               aria-label={`${m.label} — ${t("viewFullSpec")}`}
             >

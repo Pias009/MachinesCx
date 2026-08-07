@@ -662,6 +662,7 @@ export default function MachineCatalogSection() {
                 <TransitionLink
                   key={fam.slug}
                   href={`/products/${fam.category}/${fam.slug}`}
+                  prefetch={false}
                   className={`mcs-card mcs-card--${fam.category}${isFirstTabRef.current ? " mcs-card--gsap-entrance" : ""}`}
                   style={{ animationDelay: `${Math.min(i, 15) * 28}ms` }}
                 >

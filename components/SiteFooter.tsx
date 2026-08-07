@@ -9,10 +9,10 @@ import { BRAND } from "@/lib/products";
 
 gsap.registerPlugin(useGSAP);
 
-const PHONE_DISPLAY = "+86 577 8888 8888";
-const PHONE_TEL = "+8657788888888";
-const WHATSAPP_NUMBER = "8657788888888";
-const EMAIL = "info@cxmachinery.com";
+const PHONE_DISPLAY = "+86 159 8877 5831";
+const PHONE_TEL = "+8615988775831";
+const WHATSAPP_NUMBER = "8615988775831";
+const EMAIL = "shal@ashalinnomech.com";
 
 /* mobile-only accordion — desktop ignores `open` entirely via CSS
    (see .footer-col-toggle / .footer-col-body display rules) so this
@@ -131,12 +131,18 @@ export default function SiteFooter() {
 
             {/* QR Codes */}
             <div className="footer-qr-row" style={{ display: "flex", gap: "1rem" }}>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem" }}>
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t("whatsapp")}
+                style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem", textDecoration: "none" }}
+              >
                 <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "0.4rem", border: "1px solid rgba(255,255,255,0.08)" }}>
                   <Image src="/qr-whatsapp.png" alt={t("whatsapp")} width={80} height={80} style={{ display: "block" }} />
                 </div>
                 <span className="footer-qr-label" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.55rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>{t("whatsapp")}</span>
-              </div>
+              </a>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem" }}>
                 <div style={{ background: "#fff", borderRadius: "0.5rem", padding: "0.4rem", border: "1px solid rgba(255,255,255,0.08)" }}>
                   <Image src="/qr-website.png" alt={t("website")} width={80} height={80} style={{ display: "block" }} />

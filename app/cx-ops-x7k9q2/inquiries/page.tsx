@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { Inbox, Wrench, ClipboardList, Package, Mail, CheckCircle2, Send, Trash2 } from "lucide-react";
 import AdminShell from "../AdminShell";
 import { familyBySlug, familyImages } from "@/lib/products";
-import type { InquiryMachine, InquiryPart, InquiryReply, InquiryType } from "@/models/Inquiry";
+import type { InquiryMachine, InquiryPart, InquiryReply, InquiryRoadmap, InquiryType } from "@/models/Inquiry";
+import CustomerRoadmap from "./CustomerRoadmap";
 
 interface InquiryRow {
   _id: string;
@@ -21,6 +22,8 @@ interface InquiryRow {
   replies: InquiryReply[];
   source: string;
   flow?: string;
+  sessionId?: string;
+  roadmap?: InquiryRoadmap | null;
   createdAt: string;
 }
 
@@ -416,7 +419,7 @@ export default function InquiriesPage() {
 
           {/* ── detail + reply ── */}
           {selected ? (
-            <InquiryDetail key={selected._id} inquiry={selected} onReplied={load} onDelete={() => deleteOne(selected._id)} deleting={deleting} />
+            <InquiryDetail key={selected._id} inquiry={selected} allInquiries={inquiries ?? []} onReplied={load} onDelete={() => deleteOne(selected._id)} deleting={deleting} />
           ) : (
             <div className="adm-panel" style={{ padding: "3rem", textAlign: "center" }}>
               <Mail size={22} color="rgba(255,255,255,0.25)" style={{ marginBottom: "0.75rem" }} />
@@ -433,7 +436,7 @@ export default function InquiriesPage() {
   );
 }
 
-function InquiryDetail({ inquiry, onReplied, onDelete, deleting }: { inquiry: InquiryRow; onReplied: () => void; onDelete: () => void; deleting: boolean }) {
+function InquiryDetail({ inquiry, allInquiries, onReplied, onDelete, deleting }: { inquiry: InquiryRow; allInquiries: InquiryRow[]; onReplied: () => void; onDelete: () => void; deleting: boolean }) {
   const [message, setMessage] = useState("");
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
@@ -549,6 +552,9 @@ function InquiryDetail({ inquiry, onReplied, onDelete, deleting }: { inquiry: In
           <div key={k} style={rowStyle}><span style={keyStyle}>{k}</span><span style={valStyle}>{v}</span></div>
         ))}
       </div>
+
+      {/* customer analytics + AI relationship roadmap */}
+      <CustomerRoadmap inquiry={inquiry} allInquiries={allInquiries} />
 
       {/* customer-attached reference photos (talk-to-engineer, not tied to a machine/part) */}
       {(inquiry.images ?? []).length > 0 && (

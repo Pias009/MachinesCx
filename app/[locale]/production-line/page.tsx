@@ -5,9 +5,11 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { toast } from "sonner";
 import { families, familiesByCategory, familyImage, categories, type ProductFamily, type CategorySlug } from "@/lib/products";
+import { getVisitorSessionId } from "@/lib/clientSession";
 import { lineTemplates, lineTemplateById, type LineTemplate } from "@/lib/productionLineTemplates";
 import { evaluateLineStatus, type LineStatus } from "@/lib/lineStatus";
 import LineTemplateShowcase from "@/components/LineTemplateShowcase";
+import TransitionLink from "@/components/TransitionLink";
 import {
   Field, Section, EntryRow, AddAnotherButton,
   InsightPanel, ReviewCard, ImageGallery, LineSummaryCard, chatStyles, type ReviewRow, type SummaryMachine,
@@ -247,6 +249,7 @@ function ProductionLineInner() {
           })),
           source: typeof window !== "undefined" ? (sessionStorage.getItem("cx_source") ?? "direct") : "direct",
           flow,
+          sessionId: getVisitorSessionId(),
         }),
       });
       if (!res.ok) {
@@ -310,6 +313,9 @@ function ProductionLineInner() {
               </div>
               <h1 className="ci-success__title">{t("successTitle", { name: form.name })}</h1>
               <p className="ci-success__sub">{t("successSub", { email: form.email })}</p>
+              <TransitionLink href="/account/login" style={{ display: "inline-block", marginTop: "1rem", fontSize: "0.85rem", fontWeight: 600, color: "var(--brand-teal)" }}>
+                Check your inquiry status anytime →
+              </TransitionLink>
             </div>
           </div>
         </div>

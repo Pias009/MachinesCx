@@ -18,6 +18,7 @@ const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false
 const ProductionLineTeaser = dynamic(() => import("@/components/ProductionLineTeaser"), { ssr: false });
 const VisitorTracker = dynamic(() => import("@/components/VisitorTracker"), { ssr: false });
 const ProactiveNudge = dynamic(() => import("@/components/ProactiveNudge"), { ssr: false });
+const ProductLeadCapture = dynamic(() => import("@/components/ProductLeadCapture"), { ssr: false });
 
 const bebas = Bebas_Neue({
   subsets: ["latin"],
@@ -129,6 +130,7 @@ export default async function LocaleLayout({
           <ProductionLineTeaser />
           <VisitorTracker />
           <ProactiveNudge />
+          <ProductLeadCapture />
           <AppToaster />
         </NextIntlClientProvider>
       </body>

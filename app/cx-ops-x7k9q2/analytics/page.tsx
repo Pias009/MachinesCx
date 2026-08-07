@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { Terminal, Globe, Clock, Users, Activity, MessageSquare } from "lucide-react";
+import { Terminal, Globe, Clock, Users, Activity, MessageSquare, Mail } from "lucide-react";
 import AdminShell from "../AdminShell";
+import SessionDetailPanel from "./SessionDetailPanel";
+import { formatDuration } from "@/lib/format";
 
 interface Totals {
   totalSessions: number;
@@ -18,24 +20,19 @@ interface SessionRow {
   referrer: string; source: string; pageCount: number; totalDurationMs: number;
   chatOpened: boolean; firstSeen: string; lastSeen: string;
 }
+interface DraftRow { sessionId: string; countryCode: string; name: string; email: string; subject: string; generatedAt: string; }
 interface AnalyticsData {
   totals: Totals;
   byCountry: CountryRow[];
   topPages: PageRow[];
   recentSessions: SessionRow[];
   chatActivity: ChatRow[];
+  pendingHookDrafts: DraftRow[];
 }
 
 function flagEmoji(code: string) {
   if (!code || code.length !== 2) return "🏳️";
   return String.fromCodePoint(...[...code.toUpperCase()].map(c => 127397 + c.charCodeAt(0)));
-}
-
-function formatDuration(ms: number) {
-  const totalSec = Math.round(ms / 1000);
-  const mins = Math.floor(totalSec / 60);
-  const secs = totalSec % 60;
-  return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
 }
 
 function timeAgo(iso: string) {
@@ -67,13 +64,14 @@ function TypedLine({ text, speed = 16 }: { text: string; speed?: number }) {
 
 export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
     fetch("/api/admin/analytics")
       .then(r => r.json())
       .then(j => { if (alive) setData(j); })
-      .catch(() => { if (alive) setData({ totals: { totalSessions: 0, sessionsToday: 0, avgDurationMs: 0, chatOpenRate: 0 }, byCountry: [], topPages: [], recentSessions: [], chatActivity: [] }); });
+      .catch(() => { if (alive) setData({ totals: { totalSessions: 0, sessionsToday: 0, avgDurationMs: 0, chatOpenRate: 0 }, byCountry: [], topPages: [], recentSessions: [], chatActivity: [], pendingHookDrafts: [] }); });
     return () => { alive = false; };
   }, []);
 
@@ -119,7 +117,33 @@ export default function AnalyticsPage() {
                 <div className="trm-stat__value">{data.totals.chatOpenRate}%</div>
                 <div className="trm-stat__label">opened ASHA chat</div>
               </div>
+              <div className="trm-stat">
+                <div className="trm-stat__icon"><Mail size={16} /></div>
+                <div className="trm-stat__value">{data.pendingHookDrafts.length}</div>
+                <div className="trm-stat__label">hook drafts awaiting review</div>
+              </div>
             </div>
+
+            {/* ── pending hook email drafts ── */}
+            {data.pendingHookDrafts.length > 0 && (
+              <div className="trm-panel" style={{ marginBottom: "1.1rem" }}>
+                <div className="trm-panel__head"><Mail size={14} /> pending_hook_drafts — awaiting your review</div>
+                <div className="trm-panel__body trm-table-wrap">
+                  <table className="trm-table">
+                    <thead><tr><th>who</th><th>subject</th><th>generated</th></tr></thead>
+                    <tbody>
+                      {data.pendingHookDrafts.map(d => (
+                        <tr key={d.sessionId} className="trm-row-click" onClick={() => setSelectedSessionId(d.sessionId)}>
+                          <td>{flagEmoji(d.countryCode)} {d.name || "—"} · {d.email}</td>
+                          <td className="trm-path">{d.subject}</td>
+                          <td>{timeAgo(d.generatedAt)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
 
             <div className="trm-grid">
               {/* ── by country ── */}
@@ -172,7 +196,12 @@ export default function AnalyticsPage() {
                 {data.chatActivity.length === 0 ? (
                   <div className="trm-empty">no chat activity yet</div>
                 ) : data.chatActivity.map((c, i) => (
-                  <div key={c.sessionId + i} className="trm-log-row" style={{ animationDelay: `${Math.min(i, 10) * 0.04}s` }}>
+                  <div
+                    key={c.sessionId + i}
+                    className="trm-log-row trm-row-click"
+                    style={{ animationDelay: `${Math.min(i, 10) * 0.04}s` }}
+                    onClick={() => setSelectedSessionId(c.sessionId)}
+                  >
                     <span className="trm-log-flag">{flagEmoji(c.countryCode)}</span>
                     <span className="trm-log-prompt">$</span>
                     <span className="trm-log-text">
@@ -197,7 +226,7 @@ export default function AnalyticsPage() {
                     </thead>
                     <tbody>
                       {data.recentSessions.map(s => (
-                        <tr key={s.sessionId}>
+                        <tr key={s.sessionId} className="trm-row-click" onClick={() => setSelectedSessionId(s.sessionId)}>
                           <td>{flagEmoji(s.countryCode)} {s.countryCode || "??"}{s.city ? ` · ${s.city}` : ""}</td>
                           <td>{s.device || "?"} / {s.browser || "?"}</td>
                           <td className="trm-path">{s.landingPath || "/"}</td>
@@ -215,6 +244,10 @@ export default function AnalyticsPage() {
           </>
         )}
       </div>
+
+      {selectedSessionId && (
+        <SessionDetailPanel sessionId={selectedSessionId} onClose={() => setSelectedSessionId(null)} />
+      )}
 
       <style jsx>{`
         .trm-root { font-family: var(--ff-mono, monospace); }
@@ -288,6 +321,9 @@ export default function AnalyticsPage() {
         .trm-path { color: var(--adm-text); max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap !important; }
         .trm-yes { color: var(--brand-teal); font-weight: 600; }
         .trm-no { color: var(--adm-text-faint); }
+
+        .trm-row-click { cursor: pointer; transition: background 0.12s; }
+        .trm-row-click:hover { background: rgba(43,191,179,0.06); }
 
         .trm-log { display: flex; flex-direction: column; gap: 0.2rem; max-height: 340px; overflow-y: auto; }
         .trm-log-row {

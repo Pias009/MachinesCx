@@ -6,15 +6,10 @@ import { connectDB } from "@/lib/mongodb";
 import { sendEmail } from "@/lib/resend";
 import VisitorSession from "@/models/VisitorSession";
 import { renderEmailLayout, infoBlock } from "@/lib/emailTemplate";
+import { formatDuration } from "@/lib/format";
 
 function escapeHtml(s: string) {
   return s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
-}
-
-function formatDuration(ms: number) {
-  const mins = Math.floor(ms / 60000);
-  const secs = Math.floor((ms % 60000) / 1000);
-  return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
 }
 
 export interface LeadCapturedInput {

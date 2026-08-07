@@ -16,15 +16,14 @@ function getApiKey(): string {
   return key;
 }
 
+// Names only — see the matching comment in lib/groq.ts for why: a message
+// naming a specific machine is already answered locally with real spec
+// data before this fallback engine ever runs.
 function buildCatalogBlock(): string {
   const lines: string[] = [];
   for (const c of categories) {
     const catFamilies = families.filter(f => f.category === c.slug);
-    lines.push(`[${c.name}] ${c.tagline}`);
-    for (const f of catFamilies) {
-      const topSpecs = f.specs.slice(0, 4).map(s => `${s.label}: ${s.values.join("/")}`).join("; ");
-      lines.push(`  ${f.name} (${f.series}) models: ${f.models.join(", ")} — ${topSpecs}`);
-    }
+    lines.push(`[${c.name}] ${catFamilies.map(f => f.name).join(", ")}`);
   }
   return lines.join("\n");
 }
@@ -45,7 +44,7 @@ Step4 done: {"text":"Inquiry sent!","actions":[],"pendingInquiry":null,"complete
 PRODUCTS:
 ${buildCatalogBlock()}
 
-RULES: Use catalog only. Show machines when user names a category. Compare for "compare X and Y". Start inquiry flow when user wants to buy. Never invent specs.
+RULES: PRODUCTS above has names only, no specs — if asked a spec/number question, don't invent one; tell the visitor to name the machine directly and it'll pull exact numbers. Show machines when user names a category. Compare for "compare X and Y". Start inquiry flow when user wants to buy.
 
 FORMAT "text" for a chat bubble, not a wall of prose: wrap key numbers/specs/terms in **double asterisks**; put 2+ items (specs, options, steps) each on their own "- " line instead of burying them in a paragraph; keep paragraphs to 1-3 sentences. Only "- " bullets and **bold** — no headers, numbered lists, tables, or links.`;
 

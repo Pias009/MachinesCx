@@ -2,10 +2,10 @@
 import { useTranslations } from "next-intl";
 import TransitionLink from "@/components/TransitionLink";
 
-const PHONE_DISPLAY = "+86 577 8888 8888";
-const PHONE_TEL = "+8657788888888";
-const WHATSAPP_NUMBER = "8657788888888";
-const EMAIL = "info@cxmachinery.com";
+const PHONE_DISPLAY = "+86 159 8877 5831";
+const PHONE_TEL = "+8615988775831";
+const WHATSAPP_NUMBER = "8615988775831";
+const EMAIL = "shal@ashalinnomech.com";
 
 const METHOD_ICONS = {
   call: (

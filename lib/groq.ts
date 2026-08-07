@@ -50,24 +50,27 @@ export async function groqJsonCompletion(
   throw new Error(`Groq exhausted all models — last error: ${String(lastErr)}`);
 }
 
+// Names + series only, no specs — a message naming any specific machine or
+// model number is already caught by lib/localAgent.ts's findMachines() and
+// answered locally with real spec data before this ever reaches Groq (see
+// isBasicQuery), so Groq only needs enough of the catalog to recognize and
+// reference machines by name, not recite their full spec sheets. Keeping
+// full specs here was the main contributor to blowing the free-tier
+// tokens-per-minute limit a few turns into a real conversation.
 function buildCatalogBlock(): string {
   const lines: string[] = [];
   for (const c of categories) {
     const catFamilies = families.filter(f => f.category === c.slug);
-    lines.push(`[${c.name}] ${c.tagline}`);
-    for (const f of catFamilies) {
-      const topSpecs = f.specs.slice(0, 4).map(s => `${s.label}: ${s.values.join("/")}`).join("; ");
-      lines.push(`  ${f.name} (${f.series}) models: ${f.models.join(", ")} — ${topSpecs}`);
-    }
+    lines.push(`[${c.name}] ${catFamilies.map(f => f.name).join(", ")}`);
   }
   return lines.join("\n");
 }
 
 const SYSTEM_PROMPT = `You are ASHA, the AI sales & technical assistant for ASHAL INNOMACH, a plastics processing machinery manufacturer (film blowing, bag making, recycling, printing lines).
 
-You are knowledgeable and capable well beyond a spec lookup tool: answer any question the visitor asks — machine specs, how a process works (e.g. how blown film extrusion works, what a granulator does), industry/material questions (plastics, resins, output units), general business questions about working with ASHAL INNOMACH, comparisons, troubleshooting-style questions, or general knowledge questions unrelated to machinery. Be substantive and specific, not a generic chatbot deflecting to "I can only help with machines." If a question is genuinely outside anything useful you can say, answer as best you can and gently note your specialty is ASHAL INNOMACH's machinery.
+You are knowledgeable and capable well beyond a spec lookup tool: answer any question the visitor asks — how a process works (e.g. how blown film extrusion works, what a granulator does), industry/material questions (plastics, resins, output units), general business questions about working with ASHAL INNOMACH, troubleshooting-style questions, or general knowledge questions unrelated to machinery. Be substantive and specific, not a generic chatbot deflecting to "I can only help with machines." If a question is genuinely outside anything useful you can say, answer as best you can and gently note your specialty is ASHAL INNOMACH's machinery.
 
-For facts about ASHAL INNOMACH's own machines, ONLY use the PRODUCTS catalog below — never invent a spec, model number, or capability that isn't listed. For general/world knowledge, answer from your own knowledge normally.
+The PRODUCTS list below has names only, grouped by category — NOT specs, NOT model numbers, NOT capacities. If the visitor names a specific machine, that message never reaches you (a separate system answers it from the real spec sheet). If a visitor asks a spec/number question you land on anyway, do NOT invent a figure — tell them to name the machine directly (e.g. "ask me about the ABCDE-2200") and it'll pull the exact numbers. You may still name/recommend machines from the list by name and category.
 
 Format the "text" value for a chat bubble, never as a dense wall of prose:
 - Wrap key numbers, specs, model names, and other load-bearing terms in **double asterisks** so they stand out.

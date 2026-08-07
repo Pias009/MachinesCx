@@ -11,6 +11,15 @@ export const runtime = "nodejs";
 
 const AGENT_NAME = "ASHA";
 
+// Groq/OpenRouter get the full system prompt (including the product catalog)
+// on every call, so an unbounded conversation history was blowing past the
+// free-tier token-per-minute limit a few turns into a real conversation —
+// Groq would fail, fall through to OpenRouter, which would also time out,
+// landing on the local engine's generic fallback. Capping history to the
+// most recent turns keeps every call well under the limit regardless of how
+// long the conversation runs.
+const MAX_HISTORY_MESSAGES = 16;
+
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get("sessionId");
   if (!sessionId) return Response.json({ messages: [] });
@@ -49,13 +58,14 @@ export async function POST(req: NextRequest) {
   // its own short Groq classification call for an ambiguous reply, but never
   // the full chat completion.
   if (isBasicQuery(message.trim(), session.pendingInquiry ?? null)) {
-    answer = await answerLocally(message.trim(), session.pendingInquiry ?? null);
+    answer = await answerLocally(message.trim(), session.pendingInquiry ?? null, session.contactCaptured);
   } else {
+    const recentMessages = session.messages.slice(-MAX_HISTORY_MESSAGES);
     try {
       // Groq is the primary backend — fast inference, more capable model,
       // handles general questions in addition to catalog lookups.
       answer = await withTimeout(
-        answerWithGroq(session.messages, session.pendingInquiry ?? null),
+        answerWithGroq(recentMessages, session.pendingInquiry ?? null),
         10_000,
         "Groq overall",
       );
@@ -63,13 +73,13 @@ export async function POST(req: NextRequest) {
       console.error("ASHA chat: Groq unavailable, falling back to OpenRouter:", groqErr);
       try {
         answer = await withTimeout(
-          answerWithOpenRouter(session.messages, session.pendingInquiry ?? null),
+          answerWithOpenRouter(recentMessages, session.pendingInquiry ?? null),
           10_000,
           "OpenRouter overall",
         );
       } catch (e) {
         console.error("ASHA chat: OpenRouter unavailable, falling back to local engine:", e);
-        answer = await answerLocally(message.trim(), session.pendingInquiry ?? null);
+        answer = await answerLocally(message.trim(), session.pendingInquiry ?? null, session.contactCaptured);
       }
     }
   }
@@ -77,9 +87,17 @@ export async function POST(req: NextRequest) {
   session.messages.push({ role: "assistant", content: answer.text, at: new Date() });
   session.pendingInquiry = answer.pendingInquiry ?? null;
 
+  // Remember name+email once an inquiry completes, so a second inquiry later
+  // in the same conversation (a different machine, more units, etc.) can
+  // skip straight to quantity instead of re-collecting from scratch.
+  if (answer.completedInquiry) {
+    session.contactCaptured = { name: answer.completedInquiry.name, email: answer.completedInquiry.email };
+  }
+
   const capturedEmail = session.pendingInquiry?.email;
   if (capturedEmail && !session.leadNotified) {
     session.leadNotified = true;
+    session.leadCapturedAt = new Date();
     notifyLeadCaptured({
       sessionId,
       name: session.pendingInquiry?.name,
@@ -98,6 +116,7 @@ export async function POST(req: NextRequest) {
         email,
         message: `Submitted by ${AGENT_NAME} (AI chat assistant) via the guided in-chat inquiry flow.`,
         machines: [{ slug, name: machineName, series: "", model: "", qty, notes: "" }],
+        sessionId,
       });
     } catch (e) {
       console.error("ASHA chat: failed to create inquiry from guided flow:", e);

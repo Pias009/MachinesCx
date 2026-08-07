@@ -308,9 +308,22 @@ async function continueInquiryFlow(message: string, pending: PendingInquiry): Pr
   return { text: "Let's start over — what would you like to inquire about?", actions: [], pendingInquiry: null };
 }
 
-function startInquiryFlow(machine: ProductFamily | undefined): LocalAnswer {
-  const pending: PendingInquiry = { stage: "name", slug: machine?.slug, machineName: machine?.name };
+/** When this session already has a name+email on file (a prior inquiry in
+ *  the same conversation), reuse it instead of re-collecting from scratch —
+ *  skip straight to quantity. */
+function startInquiryFlow(machine: ProductFamily | undefined, contact?: { name?: string; email?: string }): LocalAnswer {
   const machineText = machine ? ` for the ${machine.name}` : "";
+
+  if (contact?.name && contact?.email) {
+    const pending: PendingInquiry = { stage: "qty", slug: machine?.slug, machineName: machine?.name, name: contact.name, email: contact.email };
+    return {
+      text: `Happy to help set up another inquiry${machineText}! I'll use ${contact.name} (${contact.email}) again — how many units are you looking for?`,
+      actions: [],
+      pendingInquiry: pending,
+    };
+  }
+
+  const pending: PendingInquiry = { stage: "name", slug: machine?.slug, machineName: machine?.name };
   return {
     text: `Happy to help set up an inquiry${machineText}! First — what's your name?`,
     actions: [],
@@ -319,9 +332,16 @@ function startInquiryFlow(machine: ProductFamily | undefined): LocalAnswer {
 }
 
 /**
- * Returns true when the query is simple enough to skip OpenRouter entirely.
- * Covers greetings, quick-reply picks, inquiry flow steps, and short
- * category / list requests — anything the local engine handles instantly.
+ * Returns true when the query is one the local engine can answer with a
+ * real, grounded match (a specific machine, category, buy/compare/list
+ * intent) — anything vaguer than that goes to Groq instead, which has full
+ * conversation history and won't repeat the same canned line turn after
+ * turn. Previously any message under 5 words was routed here regardless of
+ * whether it actually matched anything, which meant short, unmatched
+ * follow-ups ("and pricing?", "tell me more", "what about that one") kept
+ * hitting the same static "I'm not sure..." fallback on repeat — reading as
+ * ASHA being stuck in a loop. Groq is now the default for anything that
+ * isn't a clean catalog lookup.
  */
 export function isBasicQuery(rawMessage: string, pendingInquiry: PendingInquiry | null | undefined): boolean {
   // Guided inquiry flow is always local (no LLM needed for name/email/qty).
@@ -335,19 +355,28 @@ export function isBasicQuery(rawMessage: string, pendingInquiry: PendingInquiry 
   // Identity questions ("who are you", "tell me about yourself")
   if (IDENTITY_WORDS.some(w => msg.includes(w))) return true;
 
-  // Short messages (< 5 words) that don't reference specific machine details
-  // are very likely category picks, list requests, or vague questions the
-  // local engine handles well — and far faster than a round-trip to an LLM.
-  const wordCount = msg.split(/\s+/).filter(Boolean).length;
-  if (wordCount <= 4) return true;
+  // A specific machine was named — the local engine can answer this from
+  // real catalog data without any LLM round-trip.
+  const matchedMachines = findMachines(rawMessage);
+  if (matchedMachines.length > 0) return true;
+
+  // Clear intent words the local engine has a real, non-generic handler for.
+  if (BUY_WORDS.some(w => msg.includes(w))) return true;
+  if (LIST_WORDS.some(w => msg.includes(w))) return true;
+  if (RECOMMEND_WORDS.some(w => msg.includes(w))) return true;
+  if (COMPARE_WORDS.some(w => msg.includes(w))) return true;
 
   // Category-only mentions (no machine slug or model number)
-  if (findCategory(rawMessage) && !findMachines(rawMessage).length) return true;
+  if (findCategory(rawMessage)) return true;
 
   return false;
 }
 
-export async function answerLocally(rawMessage: string, pendingInquiry: PendingInquiry | null | undefined): Promise<LocalAnswer> {
+export async function answerLocally(
+  rawMessage: string,
+  pendingInquiry: PendingInquiry | null | undefined,
+  contactCaptured?: { name?: string; email?: string },
+): Promise<LocalAnswer> {
   // A guided inquiry flow in progress takes priority over intent matching —
   // the visitor is answering a direct question, not asking a new one.
   if (pendingInquiry && pendingInquiry.stage !== "done") {
@@ -383,7 +412,7 @@ export async function answerLocally(rawMessage: string, pendingInquiry: PendingI
   const colorTarget = parseColorTarget(rawMessage);
 
   if (isBuy) {
-    return startInquiryFlow(matchedMachines[0]);
+    return startInquiryFlow(matchedMachines[0], contactCaptured);
   }
 
   if (isCompare && matchedMachines.length >= 2) {

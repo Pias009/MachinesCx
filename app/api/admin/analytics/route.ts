@@ -10,9 +10,14 @@ export const dynamic = "force-dynamic";
 export async function GET(_req: NextRequest) {
   await connectDB();
 
-  const [sessions, chatSessions] = await Promise.all([
+  const [sessions, chatSessions, pendingDraftSessions] = await Promise.all([
     VisitorSession.find().sort({ lastSeen: -1 }).limit(500).lean(),
     ChatSession.find().sort({ createdAt: -1 }).limit(50).lean(),
+    // Queried independently of the top-50-most-recent list above — a draft
+    // can finish generating (after the intentional 7+ minute delay) well
+    // after its chat session has aged out of "most recent 50", so deriving
+    // this from chatSessions would silently lose drafts on any busy day.
+    ChatSession.find({ "hookDraft.status": "pending" }).sort({ "hookDraft.generatedAt": -1 }).limit(50).lean(),
   ]);
 
   const now = Date.now();
@@ -63,6 +68,30 @@ export async function GET(_req: NextRequest) {
     };
   });
 
+  // The pending draft's own session may have aged out of the top-500 list
+  // above (it only needed one pageview to seed it, possibly long before the
+  // draft finished generating) — fetch its country directly rather than
+  // silently showing "??" whenever that happens.
+  const missingSessionIds = pendingDraftSessions
+    .map(cs => cs.sessionId)
+    .filter(id => !sessionsById.has(id));
+  const extraVisitorSessions = missingSessionIds.length
+    ? await VisitorSession.find({ sessionId: { $in: missingSessionIds } }).lean()
+    : [];
+  for (const v of extraVisitorSessions) sessionsById.set(v.sessionId, v);
+
+  const pendingHookDrafts = pendingDraftSessions.map(cs => {
+    const visitor = sessionsById.get(cs.sessionId);
+    return {
+      sessionId: cs.sessionId,
+      countryCode: visitor?.countryCode || "??",
+      name: cs.pendingInquiry?.name || cs.contactCaptured?.name || "",
+      email: cs.pendingInquiry?.email || cs.contactCaptured?.email || "",
+      subject: cs.hookDraft?.subject || "",
+      generatedAt: cs.hookDraft?.generatedAt,
+    };
+  });
+
   const recentSessions = sessions.slice(0, 40).map(s => ({
     sessionId: s.sessionId,
     countryCode: s.countryCode,
@@ -87,5 +116,6 @@ export async function GET(_req: NextRequest) {
     topPages,
     recentSessions,
     chatActivity,
+    pendingHookDrafts,
   });
 }

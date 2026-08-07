@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { openAshaChat, ASHA_STATE_EVENT } from "./ChatWidget";
+import { LEAD_POPUP_STATE_EVENT } from "./ProductLeadCapture";
 
 const DWELL_MS = 10_000;
 const SEEN_KEY = "asha_nudge_seen";
@@ -29,6 +30,7 @@ export default function ProactiveNudge() {
   const [visible, setVisible] = useState(false);
   const [machineName, setMachineName] = useState("");
   const chatOpenRef = useRef(false);
+  const leadPopupOpenRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -37,8 +39,15 @@ export default function ProactiveNudge() {
       chatOpenRef.current = open;
       if (open) setVisible(false);
     };
+    const onLeadPopupState = (e: Event) => {
+      leadPopupOpenRef.current = (e as CustomEvent<{ open: boolean }>).detail?.open ?? false;
+    };
     window.addEventListener(ASHA_STATE_EVENT, onState);
-    return () => window.removeEventListener(ASHA_STATE_EVENT, onState);
+    window.addEventListener(LEAD_POPUP_STATE_EVENT, onLeadPopupState);
+    return () => {
+      window.removeEventListener(ASHA_STATE_EVENT, onState);
+      window.removeEventListener(LEAD_POPUP_STATE_EVENT, onLeadPopupState);
+    };
   }, []);
 
   useEffect(() => {
@@ -62,7 +71,7 @@ export default function ProactiveNudge() {
         const name = data.machines?.[0]?.name;
         if (!name) return;
         timerRef.current = setTimeout(() => {
-          if (chatOpenRef.current) return;
+          if (chatOpenRef.current || leadPopupOpenRef.current) return;
           setMachineName(name);
           setVisible(true);
           markSeen(slug);

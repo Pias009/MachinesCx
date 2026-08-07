@@ -22,6 +22,7 @@ export interface CreateInquiryInput {
   parts?: InquiryPart[];
   source?: string;
   flow?: string;
+  sessionId?: string;
 }
 
 function escapeHtml(s: string) {
@@ -64,7 +65,11 @@ export async function createInquiry(body: CreateInquiryInput) {
     inquiryType,
     name: body.name.trim(),
     company: body.company?.trim() ?? "",
-    email: body.email.trim(),
+    // Lowercased so it matches exactly what the customer-portal login (which
+    // normalizes the entered address the same way) queries against — email
+    // local parts aren't meaningfully case-sensitive in practice, and every
+    // downstream lookup (login, roadmap repeat-customer matching) assumes this.
+    email: body.email.trim().toLowerCase(),
     phone: body.phone?.trim() ?? "",
     country: body.country?.trim() ?? "",
     message: body.message?.trim() ?? "",
@@ -74,6 +79,7 @@ export async function createInquiry(body: CreateInquiryInput) {
     status: "new",
     source: body.source ?? "direct",
     flow: body.flow ?? "",
+    sessionId: body.sessionId,
   });
 
   const notifyTo = process.env.INQUIRY_NOTIFY_EMAIL || process.env.ADMIN_EMAIL;

@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { families, familiesByCategory, type ProductFamily, type CategorySlug } from "@/lib/products";
+import { getVisitorSessionId } from "@/lib/clientSession";
 import TransitionLink from "@/components/TransitionLink";
 import {
   Field, Section, MachinePicker,
@@ -86,6 +87,7 @@ function DirectInquiryInner() {
             model: family.models[modelIdx], qty, notes, images,
           }],
           source: typeof window !== "undefined" ? (sessionStorage.getItem("cx_source") ?? "direct") : "direct",
+          sessionId: getVisitorSessionId(),
         }),
       });
       if (!res.ok) {
@@ -130,6 +132,9 @@ function DirectInquiryInner() {
               </div>
               <h1 className="ci-success__title">{t("successTitle", { name: form.name })}</h1>
               <p className="ci-success__sub">{t("successSub", { email: form.email })}</p>
+              <TransitionLink href="/account/login" style={{ display: "inline-block", marginTop: "1rem", fontSize: "0.85rem", fontWeight: 600, color: "var(--brand-teal)" }}>
+                Check your inquiry status anytime →
+              </TransitionLink>
             </div>
           </div>
         </div>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { familiesByCategory, type ProductFamily, type CategorySlug } from "@/lib/products";
+import { getVisitorSessionId } from "@/lib/clientSession";
 import TransitionLink from "@/components/TransitionLink";
 import {
   Field, Section, MachinePicker, EntryRow, AddAnotherButton,
@@ -99,6 +100,7 @@ function PartsInquiryInner() {
             quantity: p.quantity, notes: p.notes, images: p.images,
           })),
           source: typeof window !== "undefined" ? (sessionStorage.getItem("cx_source") ?? "direct") : "direct",
+          sessionId: getVisitorSessionId(),
         }),
       });
       if (!res.ok) {
@@ -141,6 +143,9 @@ function PartsInquiryInner() {
               </div>
               <h1 className="ci-success__title">{t("successTitle", { name: form.name })}</h1>
               <p className="ci-success__sub">{t("successSub", { email: form.email })}</p>
+              <TransitionLink href="/account/login" style={{ display: "inline-block", marginTop: "1rem", fontSize: "0.85rem", fontWeight: 600, color: "var(--brand-teal)" }}>
+                Check your inquiry status anytime →
+              </TransitionLink>
             </div>
           </div>
         </div>

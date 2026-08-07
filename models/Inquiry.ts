@@ -26,6 +26,14 @@ export interface InquiryReply {
   sentBy: string;     // admin email
 }
 
+export interface InquiryRoadmap {
+  text: string;
+  /** How many days until the AI suggests the next touchpoint with this customer. */
+  nextTouchpointDays: number;
+  generatedAt: Date;
+  basedOnReplyCount: number;
+}
+
 export type InquiryType = "talk-to-engineer" | "direct" | "parts";
 
 export interface IInquiry {
@@ -46,6 +54,14 @@ export interface IInquiry {
    *  (real marketing attribution). E.g. "production-line:template:retail-bag-line"
    *  or "production-line:custom". Empty for inquiries from the existing forms. */
   flow: string;
+  /** Links back to the VisitorSession/ChatSession this inquiry came from
+   *  (localStorage "asha_session_id"), when the submitter had one — lets
+   *  the admin panel show real browsing behavior alongside the inquiry.
+   *  Absent for inquiries submitted before this existed. */
+  sessionId?: string;
+  /** Cached AI-generated customer-relationship plan — see
+   *  app/api/admin/inquiries/[id]/roadmap/route.ts. */
+  roadmap?: InquiryRoadmap | null;
   createdAt: Date;
 }
 
@@ -75,6 +91,13 @@ const InquiryReplySchema = new Schema<InquiryReply>({
   sentBy:  { type: String, default: "" },
 }, { _id: false });
 
+const InquiryRoadmapSchema = new Schema<InquiryRoadmap>({
+  text:                { type: String, required: true },
+  nextTouchpointDays:  { type: Number, required: true },
+  generatedAt:         { type: Date, required: true },
+  basedOnReplyCount:   { type: Number, required: true },
+}, { _id: false });
+
 const InquirySchema = new Schema<IInquiry>({
   inquiryType:{ type: String, enum: ["talk-to-engineer", "direct", "parts"], default: "direct", index: true },
   name:       { type: String, required: true },
@@ -90,6 +113,8 @@ const InquirySchema = new Schema<IInquiry>({
   replies:    { type: [InquiryReplySchema], default: [] },
   source:     { type: String, default: "direct" },
   flow:       { type: String, default: "" },
+  sessionId:  { type: String, index: true },
+  roadmap:    { type: InquiryRoadmapSchema, default: null },
   createdAt:  { type: Date, default: Date.now, index: true },
 });
 

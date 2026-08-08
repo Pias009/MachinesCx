@@ -5,7 +5,7 @@ import TransitionLink from "@/components/TransitionLink";
 const PHONE_DISPLAY = "+86 159 8877 5831";
 const PHONE_TEL = "+8615988775831";
 const WHATSAPP_NUMBER = "8615988775831";
-const EMAIL = "shal@ashalinnomech.com";
+const EMAIL = "ashal@ashalinnomech.com";
 
 const METHOD_ICONS = {
   call: (

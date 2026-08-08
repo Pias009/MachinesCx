@@ -12,7 +12,7 @@ gsap.registerPlugin(useGSAP);
 const PHONE_DISPLAY = "+86 159 8877 5831";
 const PHONE_TEL = "+8615988775831";
 const WHATSAPP_NUMBER = "8615988775831";
-const EMAIL = "shal@ashalinnomech.com";
+const EMAIL = "ashal@ashalinnomech.com";
 
 /* mobile-only accordion — desktop ignores `open` entirely via CSS
    (see .footer-col-toggle / .footer-col-body display rules) so this

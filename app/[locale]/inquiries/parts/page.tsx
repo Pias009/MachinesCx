@@ -112,6 +112,7 @@ function PartsInquiryInner() {
         localStorage.setItem("cx_inquiry_lastSeen", new Date().toISOString());
       }
       setSent(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) {
       setSendError((e as Error).message || "Something went wrong — please try again.");
     } finally {

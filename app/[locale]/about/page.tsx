@@ -2,8 +2,13 @@
 
 import { useState, useEffect, useRef, type CSSProperties } from "react";
 import { useTranslations } from "next-intl";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 import TransitionLink from "@/components/TransitionLink";
+import AboutAtmosphere from "@/components/AboutAtmosphere";
 import Image from "next/image";
+
+gsap.registerPlugin(useGSAP);
 
 const HQ_BUILDING_PHOTO = "/about-photos/hq-building-generated.png";
 const WAREHOUSE_1 = "/about-photos/warehouse-building-1.jpeg";
@@ -206,6 +211,8 @@ function StatItem({ v, suffix, l }: { v: number; suffix: string; l: string }) {
 export default function AboutPage() {
   const t = useTranslations("about");
   const [isDark, setIsDark] = useState(true);
+  const atmosphereSectionRef = useRef<HTMLElement>(null);
+  const atmosphereCopyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.title = t("pageTitle");
@@ -218,6 +225,24 @@ export default function AboutPage() {
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     return () => { observer.disconnect(); };
   }, [t]);
+
+  useGSAP(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let cancelled = false;
+    import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
+      if (cancelled || !atmosphereCopyRef.current) return;
+      gsap.registerPlugin(ScrollTrigger);
+      gsap.fromTo(
+        atmosphereCopyRef.current,
+        { opacity: 0, y: 28 },
+        {
+          opacity: 1, y: 0, duration: 0.9, ease: "power3.out",
+          scrollTrigger: { trigger: atmosphereSectionRef.current, start: "top 78%" },
+        }
+      );
+    });
+    return () => { cancelled = true; };
+  }, { scope: atmosphereSectionRef });
 
   const darkBg = "#0a0e1a";
   const lightBg = "#f8fafc";
@@ -392,12 +417,23 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Company profile copy */}
-        <section className="about-section" style={{ padding: "clamp(4rem,8vw,8rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto", width: "100%" }}>
-            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1.5rem" }}>{t("whoWeAre.kicker")}</span>
-            <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: textBody, lineHeight: 1.8, maxWidth: "60ch", marginBottom: "1.5rem" }}>{t("whoWeAre.p1")}</p>
-            <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: textBodyAlt, lineHeight: 1.8, maxWidth: "60ch" }}>{t("whoWeAre.p2")}</p>
+        {/* Company profile copy — atmospheric smoke background, always dark
+            (like the hero/stats bands) regardless of site theme */}
+        <section
+          ref={atmosphereSectionRef}
+          className="about-section"
+          style={{
+            position: "relative", overflow: "hidden", isolation: "isolate",
+            background: "#070b12",
+            padding: "clamp(4rem,8vw,8rem) clamp(1.5rem,4vw,3rem)",
+            borderBottom: "1px solid " + border,
+          }}
+        >
+          <AboutAtmosphere />
+          <div ref={atmosphereCopyRef} style={{ position: "relative", zIndex: 1, maxWidth: 1200, margin: "0 auto", width: "100%" }}>
+            <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-teal)", display: "block", marginBottom: "1.5rem" }}>{t("whoWeAre.kicker")}</span>
+            <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: "rgba(242,239,230,0.88)", lineHeight: 1.8, maxWidth: "60ch", marginBottom: "1.5rem" }}>{t("whoWeAre.p1")}</p>
+            <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: "rgba(242,239,230,0.72)", lineHeight: 1.8, maxWidth: "60ch" }}>{t("whoWeAre.p2")}</p>
           </div>
         </section>
 

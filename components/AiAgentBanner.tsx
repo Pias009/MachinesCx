@@ -38,9 +38,13 @@ export default function AiAgentBanner() {
           { clipPath: "inset(0 0% 0 0)", opacity: 1, duration: 0.5, ease: "power2.out", scrollTrigger: st() }
         );
 
-        // Title — word-by-word rise, staggered response after the eyebrow
+        // Title — word-by-word rise, staggered response after the eyebrow.
+        // `ignore: "em"` keeps the gradient-clip <em>ASHA</em> word intact —
+        // SplitText re-wraps split words in new spans that don't inherit
+        // -webkit-background-clip:text, which made the gradient word render
+        // fully invisible once split.
         if (titleRef.current) {
-          const split = new SplitText(titleRef.current, { type: "words" });
+          const split = new SplitText(titleRef.current, { type: "words", ignore: "em" });
           gsap.fromTo(split.words,
             { y: "60%", opacity: 0 },
             { y: "0%", opacity: 1, duration: 0.6, ease: "power3.out", stagger: 0.05, delay: 0.15, scrollTrigger: st() }

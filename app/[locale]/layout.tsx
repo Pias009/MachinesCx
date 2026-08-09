@@ -85,13 +85,19 @@ export default async function LocaleLayout({
         ` }} />
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
-            // Auto-reload once if a stale deploy's _next chunk 404s
+            // Auto-reload once if a stale deploy's _next JS/CSS chunk 404s
             // (content-hashed filenames mean this only fires after a
-            // real deploy, not on ordinary cached navigation)
+            // real deploy, not on ordinary cached navigation). Scoped to
+            // SCRIPT/LINK tags only — /_next/image requests (plain <img>)
+            // fail transiently on scroll/slow network and used to trigger
+            // a full reload here, which felt like a random page reload
+            // mid-scroll (e.g. on the homepage's lazy-loaded product grid).
             var reloaded = sessionStorage.getItem('cr');
             window.addEventListener('error', function(e) {
               var t = e && e.target;
-              if (!t) return;
+              if (!t || !t.tagName) return;
+              var tag = t.tagName.toUpperCase();
+              if (tag !== 'SCRIPT' && tag !== 'LINK') return;
               var src = t.src || t.href || '';
               if (src.indexOf('/_next/') !== -1 && !reloaded) {
                 sessionStorage.setItem('cr', '1');

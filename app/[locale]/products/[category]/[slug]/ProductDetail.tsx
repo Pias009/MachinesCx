@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type CSSProperties } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -365,6 +365,96 @@ function InquiryButton({ slug, name }: { slug: string; name: string }) {
   );
 }
 
+/* reveal-once-on-scroll flag, same pattern as the bar/hbar charts on the
+   About page — used to gate animated fills so they grow into view instead
+   of snapping to their final width on mount. */
+function useInView<T extends HTMLElement>(threshold = 0.25) {
+  const ref = useRef<T>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ob = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setInView(true); ob.disconnect(); }
+    }, { threshold });
+    ob.observe(el);
+    return () => ob.disconnect();
+  }, [threshold]);
+  return { ref, inView };
+}
+
+/** First numeric token in a spec value ("400 KG/H" -> 400, "2100mm" -> 2100).
+ *  Returns null for specs that aren't meaningfully a single number
+ *  (ranges, ratios, multi-part dimensions) so those rows are left out of
+ *  the chart rather than plotted misleadingly. */
+function parseSpecNumber(value: string): number | null {
+  if (/[–\-\/×xX]/.test(value.replace(/^\s*-/, ""))) return null;
+  const m = value.match(/[\d.]+/);
+  if (!m) return null;
+  const n = parseFloat(m[0]);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Bar-chart comparison of one numeric spec across this family's models —
+ *  visually matches the About page's CapacityChart (title/unit header,
+ *  animated horizontal fills, scroll-triggered reveal). Clicking a bar
+ *  selects that model, same as clicking its column in the spec table. */
+function SpecCompareChart({
+  specs, models, activeModel, onSelect,
+}: {
+  specs: { label: string; values: string[] }[];
+  models: string[];
+  activeModel: number;
+  onSelect: (i: number) => void;
+}) {
+  const t = useTranslations("productDetail");
+  const { ref, inView } = useInView<HTMLDivElement>();
+
+  const rows = specs
+    .map(row => ({ label: row.label, nums: row.values.map(parseSpecNumber), raw: row.values }))
+    .filter(row => row.nums.every(n => n !== null) && new Set(row.nums).size > 1)
+    .slice(0, 3);
+
+  if (rows.length === 0) return null;
+
+  return (
+    <div className="pdv2-specchart" ref={ref} data-reveal>
+      {rows.map(row => {
+        const max = Math.max(...(row.nums as number[]));
+        return (
+          <div className="pdv2-specchart__row" key={row.label}>
+            <span className="pdv2-specchart__title">{row.label}</span>
+            <div className="pdv2-specchart__bars">
+              {models.map((m, i) => {
+                const val = row.nums[i] as number;
+                const fillStyle = {
+                  "--fill": inView ? val / max : 0,
+                  transitionDelay: `${i * 90}ms`,
+                } as CSSProperties;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    className={`pdv2-specchart__bar${i === activeModel ? " pdv2-specchart__bar--on" : ""}`}
+                    onClick={() => onSelect(i)}
+                  >
+                    <span className="pdv2-specchart__label">{m}</span>
+                    <span className="pdv2-specchart__track">
+                      <span className="pdv2-specchart__fill" style={fillStyle} />
+                    </span>
+                    <span className="pdv2-specchart__val">{row.raw[i]}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+      <p className="pdv2-specchart__hint">{t("clickColumnToHighlight")}</p>
+    </div>
+  );
+}
+
 const TABS = ["details", "sample", "packing"] as const;
 type TabKey = (typeof TABS)[number];
 
@@ -377,6 +467,7 @@ export default function ProductDetail({ family, category, related }: Props) {
   const [activeTab,    setActiveTab]    = useState<TabKey>("details");
   const [activePhoto,  setActivePhoto]  = useState(0);
   const [dvIdx, setDvIdx] = useState<Record<string, number>>({});
+  const { ref: ratingBarsRef, inView: ratingBarsInView } = useInView<HTMLDivElement>(0.4);
 
   /* real videos only — an unset/invalid URL never falls back to a fake
      placeholder video, it just means the section shows "coming soon" */
@@ -851,6 +942,9 @@ export default function ProductDetail({ family, category, related }: Props) {
                   comparing models by feel/thumb shouldn't have to scroll
                   in two directions at once. */}
               <SubHead title={t("fullSpecifications")} note={hasModels && t("clickColumnToHighlight")} />
+              {hasModels && (
+                <SpecCompareChart specs={family.specs} models={family.models} activeModel={activeModel} onSelect={setActiveModel} />
+              )}
               <div className="pdv2-table-wrap" data-reveal>
                 <table className="pdv2-table">
                   <thead>
@@ -1072,16 +1166,26 @@ export default function ProductDetail({ family, category, related }: Props) {
                   ? t("basedOnReviewsSingular", { count: reviews.length })
                   : t("basedOnReviewsPlural", { count: reviews.length })}
               </p>
-              <div className="relative z-[1] flex flex-col gap-2 border-t border-white/10 pt-6">
-                {[5,4,3,2,1].map((s, i) => (
-                  <div key={s} className="flex items-center gap-3 font-mono text-[0.7rem] text-white/70">
-                    <span className="w-3">{s}</span>
-                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
-                      <div className="h-full rounded-full bg-[var(--brand-teal)]" style={{ width: `${Math.round((ratingCounts[i] / reviews.length) * 100)}%` }} />
+              <div ref={ratingBarsRef} className="relative z-[1] flex flex-col gap-2 border-t border-white/10 pt-6">
+                {[5,4,3,2,1].map((s, i) => {
+                  const pct = Math.round((ratingCounts[i] / reviews.length) * 100);
+                  const fillStyle = {
+                    "--fill": ratingBarsInView ? pct / 100 : 0,
+                    transitionDelay: `${i * 90}ms`,
+                  } as CSSProperties;
+                  return (
+                    <div key={s} className="flex items-center gap-3 font-mono text-[0.7rem] text-white/70">
+                      <span className="w-3">{s}</span>
+                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+                        <div
+                          className="h-full origin-left rounded-full bg-[var(--brand-teal)] transition-transform duration-[900ms] ease-[cubic-bezier(.16,1,.3,1)]"
+                          style={{ transform: `scaleX(var(--fill, 0))`, ...fillStyle }}
+                        />
+                      </div>
+                      <span className="w-9 text-right">{pct}%</span>
                     </div>
-                    <span className="w-9 text-right">{Math.round((ratingCounts[i] / reviews.length) * 100)}%</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 

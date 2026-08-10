@@ -2417,6 +2417,60 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   font-family: var(--ff-mono); font-size: 0.85rem; font-weight: 500; color: var(--ink-60);
 }
 
+/* ── spec comparison chart — animated horizontal bars, one group per
+   numeric spec, one bar per model. Visually matches the About page's
+   chart treatment (ab-hbar) so the two pages read as one design system. ── */
+.pdv2-specchart {
+  display: flex; flex-direction: column; gap: 1.75rem;
+  padding: 1.5rem 1.5rem 1.75rem;
+  margin-bottom: 1.5rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-line);
+  border-radius: 12px;
+}
+.pdv2-specchart__row { display: flex; flex-direction: column; gap: 0.75rem; }
+.pdv2-specchart__title {
+  font-family: var(--ff-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-60);
+}
+.pdv2-specchart__bars { display: flex; flex-direction: column; gap: 0.5rem; }
+.pdv2-specchart__bar {
+  display: grid; grid-template-columns: 120px 1fr auto; align-items: center; gap: 0.85rem;
+  background: none; border: none; padding: 0.3rem 0; cursor: pointer; text-align: left; width: 100%;
+  font: inherit;
+}
+.pdv2-specchart__label {
+  font-family: var(--ff-body); font-size: 0.82rem; font-weight: 600; color: var(--ink-60);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: color 0.2s;
+}
+.pdv2-specchart__track {
+  position: relative; height: 10px; border-radius: 5px;
+  background: rgba(43,191,179,0.08); overflow: hidden;
+}
+.pdv2-specchart__fill {
+  position: absolute; inset: 0; border-radius: 5px;
+  background: linear-gradient(90deg, var(--brand-teal-dk, var(--brand-teal)), var(--brand-teal));
+  transform: scaleX(var(--fill, 0)); transform-origin: left;
+  transition: transform 0.9s cubic-bezier(.16,1,.3,1);
+  opacity: 0.45;
+}
+.pdv2-specchart__val {
+  font-family: var(--ff-mono); font-size: 0.8rem; color: var(--ink); white-space: nowrap;
+}
+.pdv2-specchart__bar--on .pdv2-specchart__label { color: var(--brand-teal); }
+.pdv2-specchart__bar--on .pdv2-specchart__fill { opacity: 1; }
+.pdv2-specchart__bar--on .pdv2-specchart__track { background: rgba(43,191,179,0.14); }
+.pdv2-specchart__hint {
+  margin: 0.25rem 0 0; font-family: var(--ff-mono); font-size: 0.65rem;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-35);
+}
+@media (max-width: 560px) {
+  .pdv2-specchart__bar { grid-template-columns: 84px 1fr auto; gap: 0.5rem; }
+  .pdv2-specchart__label { font-size: 0.74rem; }
+  .pdv2-specchart__val { font-size: 0.72rem; }
+}
+
 /* ── mobile spec cards — replaces the table below 700px so every model
    stays readable in one column instead of scrolling sideways through a
    table squeezed to fit a phone screen. One card per spec, one row per
@@ -3597,6 +3651,12 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 [data-theme=light] .pdv2-speccard__model  { color: rgba(13,34,32,0.5); }
 [data-theme=light] .pdv2-speccard__val    { color: #0d2220; }
 [data-theme=light] .pdv2-speccard__row--on { background: rgba(43,191,179,0.12); }
+[data-theme=light] .pdv2-specchart        { background: #ffffff; border-color: rgba(13,34,32,0.12); }
+[data-theme=light] .pdv2-specchart__title { color: rgba(13,34,32,0.6); }
+[data-theme=light] .pdv2-specchart__label { color: rgba(13,34,32,0.6); }
+[data-theme=light] .pdv2-specchart__val   { color: #0d2220; }
+[data-theme=light] .pdv2-specchart__hint  { color: rgba(13,34,32,0.4); }
+[data-theme=light] .pdv2-specchart__bar--on .pdv2-specchart__label { color: var(--brand-teal); }
 [data-theme=light] .pdv2-install        { background: #fff; border-color: rgba(13,34,32,0.12); }
 [data-theme=light] .pdv2-guide-card     { background: #ffffff; border-color: rgba(13,34,32,0.12); }
 [data-theme=light] .pdv2-guide-card__media { background: #fff; border-color: rgba(13,34,32,0.12); }

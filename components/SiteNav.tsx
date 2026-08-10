@@ -364,7 +364,7 @@ export default function SiteNav() {
         }
         .sn__burger span {
           display: block; width: 22px; height: 1.5px;
-          background: #fff; transition: transform .22s ease, opacity .22s ease;
+          background: var(--brand-teal); transition: transform .22s ease, opacity .22s ease;
         }
         .sn__burger--open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
         .sn__burger--open span:nth-child(2) { opacity: 0; }
@@ -516,9 +516,6 @@ export default function SiteNav() {
           border-color: color-mix(in srgb, var(--brand-teal) 30%, transparent);
         }
         [data-theme="light"] .sn__dd-scrollbtn:hover { background: var(--brand-teal-dim); }
-
-        /* burger icon */
-        [data-theme="light"] .sn__burger span { background: var(--ink); }
 
         /* mobile drawer — handled by CSS variables */
         [data-theme="light"] .sn__mobile {

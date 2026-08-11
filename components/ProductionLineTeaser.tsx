@@ -6,6 +6,7 @@ import TransitionLink from "@/components/TransitionLink";
 
 const SESSION_KEY = "cx_plteaser_dismissed";
 const SHOW_AFTER_MS = 2500;
+const AUTO_HIDE_MS = 5000;
 
 export default function ProductionLineTeaser() {
   const t = useTranslations("productionLineTeaser");
@@ -37,6 +38,15 @@ export default function ProductionLineTeaser() {
     setTimeout(() => setVisible(false), 300);
   }
 
+  // Auto-hide a few seconds after it appears — same behavior on every
+  // screen size, not just mobile.
+  useEffect(() => {
+    if (!visible) return;
+    const timer = setTimeout(dismiss, AUTO_HIDE_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
+
   if (hiddenRoute || !visible) return null;
 
   return (
@@ -50,13 +60,13 @@ export default function ProductionLineTeaser() {
         }
         .plt__bar {
           pointer-events: auto;
-          display: flex; align-items: center; gap: 1rem;
-          max-width: 720px; width: 100%;
+          display: flex; align-items: center; gap: .7rem;
+          max-width: 640px; width: 100%;
           background: var(--bg-surface);
           border: 1px solid var(--brand-teal);
-          border-radius: 1rem;
-          padding: .9rem 1rem .9rem 1.25rem;
-          box-shadow: 0 20px 60px -20px rgba(0,0,0,.5);
+          border-radius: .8rem;
+          padding: .55rem .6rem .55rem .8rem;
+          box-shadow: 0 16px 44px -18px rgba(0,0,0,.5);
           animation: plt-up .4s cubic-bezier(0.16,1,0.3,1);
         }
         .plt__bar--closing { animation: plt-down .3s cubic-bezier(0.4,0,1,1) forwards; }
@@ -64,24 +74,24 @@ export default function ProductionLineTeaser() {
         @keyframes plt-down { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(24px); } }
 
         .plt__icon {
-          flex-shrink: 0; width: 40px; height: 40px; border-radius: .75rem;
+          flex-shrink: 0; width: 30px; height: 30px; border-radius: .6rem;
           background: rgba(43,191,179,.12); border: 1px solid rgba(43,191,179,.28);
           display: flex; align-items: center; justify-content: center; color: var(--brand-teal);
         }
         .plt__text { flex: 1; min-width: 0; }
-        .plt__title { font-family: var(--ff-display); font-size: .95rem; color: var(--ink); line-height: 1.3; margin: 0; }
-        .plt__sub { font-size: .78rem; color: var(--ink-60); line-height: 1.4; margin: .15rem 0 0; }
+        .plt__title { font-family: var(--ff-display); font-size: .82rem; color: var(--ink); line-height: 1.25; margin: 0; }
+        .plt__sub { font-size: .7rem; color: var(--ink-60); line-height: 1.35; margin: .1rem 0 0; }
         .plt__cta {
           flex-shrink: 0;
-          padding: .6rem 1.1rem; border-radius: .65rem;
+          padding: .42rem .8rem; border-radius: .55rem;
           background: var(--brand-teal); color: #04211e;
-          font-family: var(--ff-display); font-size: .85rem; letter-spacing: .01em;
+          font-family: var(--ff-display); font-size: .76rem; letter-spacing: .01em;
           text-decoration: none; white-space: nowrap;
           transition: background .15s;
         }
         .plt__cta:hover { background: var(--brand-teal-dk); }
         .plt__close {
-          flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+          flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
           background: none; border: 1px solid var(--bg-line); color: var(--ink-35);
           display: flex; align-items: center; justify-content: center; cursor: pointer;
           transition: border-color .15s, color .15s;
@@ -89,7 +99,7 @@ export default function ProductionLineTeaser() {
         .plt__close:hover { border-color: var(--ink-35); color: var(--ink); }
 
         @media (max-width: 640px) {
-          .plt__bar { flex-wrap: wrap; padding: 1rem; }
+          .plt__bar { flex-wrap: wrap; padding: .65rem .7rem; gap: .5rem; }
           .plt__text { order: 1; flex-basis: 100%; }
           .plt__icon { order: 0; }
           .plt__cta { order: 2; }

@@ -4,6 +4,7 @@
 // ---------------------------------------------------------------------------
 
 export const BRAND = "Wenzhou Ashal Innomach Technology";
+export const SITE_URL = "https://www.wzashal.com";
 
 export type CategorySlug = "film-blowing" | "bag-making" | "recycling" | "printing";
 

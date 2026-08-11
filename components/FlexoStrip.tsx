@@ -277,7 +277,26 @@ export default function FlexoStrip() {
           .fls-grid { grid-template-columns: repeat(2, 1fr); }
         }
         @media (max-width: 560px) {
-          .fls-grid { grid-template-columns: 1fr; }
+          /* horizontal swipe row instead of stacking 4 full-width cards
+             vertically — keeps all machines reachable in one short scroll
+             gesture instead of a long vertical scroll */
+          .fls-grid {
+            display: flex;
+            grid-template-columns: unset;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 0.35rem;
+            margin-inline: calc(clamp(1.25rem, 4vw, 3rem) * -1);
+            padding-inline: clamp(1.25rem, 4vw, 3rem);
+            scrollbar-width: none;
+          }
+          .fls-grid::-webkit-scrollbar { display: none; }
+          .fls-card {
+            scroll-snap-align: start;
+            flex: 0 0 78%;
+            min-width: 78%;
+          }
         }
         @media (max-width: 640px) {
           .fls-section { padding: clamp(2rem,6vw,3rem) 0 clamp(1.5rem,4vw,2.5rem) !important; }

@@ -46,6 +46,18 @@ const STEP_COLORS = ["var(--brand-teal)", "var(--brand-amber)", "var(--brand-ros
 
 type StepCopy = { label: string; tagline: string; desc: string; metric1v: string; metric1l: string; metric2v: string; metric2l: string };
 
+// evenly space `count` points around a circle, starting at 12 o'clock —
+// returns each point as a % offset from the ring center so the layout
+// scales with the container instead of using fixed pixel radii
+const RING_RADIUS_PCT = 42;
+function ringPosition(index: number, count: number) {
+  const angle = (index / count) * 2 * Math.PI - Math.PI / 2;
+  return {
+    left: `${50 + RING_RADIUS_PCT * Math.cos(angle)}%`,
+    top: `${50 + RING_RADIUS_PCT * Math.sin(angle)}%`,
+  };
+}
+
 export default function ClientJourney() {
   const t = useTranslations("clientJourney");
   const stepsCopy = t.raw("steps") as Record<string, StepCopy>;
@@ -63,21 +75,15 @@ export default function ClientJourney() {
     };
   });
 
-  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const gridRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const ringRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const overlayCardRef = useRef<HTMLDivElement>(null);
-  const [activeSlide, setActiveSlide] = useState(0);
 
-  // clicking an icon in the left pipeline jumps straight to its card —
-  // a plain scroll, no motion effects on the card itself
-  const scrollToStep = (id: string) => {
-    cardRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "center" });
-  };
-
-  // clicking a card flips it away (rotateY + fade) from its grid slot,
-  // then the same step reappears as a larger centered overlay flipping
-  // in — the other 7 cards are untouched. Closing reverses both.
+  // clicking a ring icon flips it away (rotateY + fade) from its position
+  // on the circle, then the same step reappears as a larger centered
+  // overlay flipping in — the other 7 icons are untouched. Closing
+  // reverses both.
   const [openId, setOpenId] = useState<string | null>(null);
   const openStep = STEPS.find((s) => s.id === openId) ?? null;
 
@@ -106,14 +112,14 @@ export default function ClientJourney() {
             transformPerspective: 800,
             onComplete: () => {
               gsap.set(source, { clearProps: "rotateY,opacity,transformPerspective" });
-              source.classList.add("cj__step--source-hidden");
+              source.classList.add("cj__ring-icon--source-hidden");
               setOpenId(id);
             },
           }
         );
         return;
       }
-      source.classList.add("cj__step--source-hidden");
+      source.classList.add("cj__ring-icon--source-hidden");
     }
     setOpenId(id);
   };
@@ -125,7 +131,7 @@ export default function ClientJourney() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (!overlay || !card || reduced) {
-      if (source) source.classList.remove("cj__step--source-hidden");
+      if (source) source.classList.remove("cj__ring-icon--source-hidden");
       setOpenId(null);
       return;
     }
@@ -143,7 +149,7 @@ export default function ClientJourney() {
       duration: 0.3,
       ease: "power1.in",
       onComplete: () => {
-        if (source) source.classList.remove("cj__step--source-hidden");
+        if (source) source.classList.remove("cj__ring-icon--source-hidden");
         setOpenId(null);
         closingRef.current = false;
       },
@@ -178,71 +184,48 @@ export default function ClientJourney() {
     return () => window.removeEventListener("keydown", onKey);
   }, [openId, closeOverlay]);
 
-  // Track scroll position on mobile slider to update dot indicators
-  useEffect(() => {
-    const rail = gridRef.current;
-    if (!rail) return;
-    let ticking = false;
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const scrollLeft = rail.scrollLeft;
-        const cardWidth = rail.scrollWidth / STEPS.length;
-        const idx = Math.round(scrollLeft / cardWidth);
-        setActiveSlide(Math.min(idx, STEPS.length - 1));
-        ticking = false;
-      });
-    };
-    rail.addEventListener("scroll", onScroll, { passive: true });
-    return () => rail.removeEventListener("scroll", onScroll);
-  }, [STEPS.length]);
-
-  // one-time reveal when the grid enters view: each badge starts centered
-  // over its card with the text hidden, then slides to its resting
-  // left-aligned position while the text fades in — staggered per card
+  // one-time reveal when the ring enters view: every icon starts collapsed
+  // at the circle's center (scale 0, no opacity), then flies out to its
+  // resting position on the ring — staggered clockwise around the circle,
+  // not a generic fade. Runs once; icons stay in place after.
   useGSAP(() => {
-    const el = gridRef.current;
+    const el = ringRef.current;
     if (!el) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const cards = el.querySelectorAll<HTMLElement>(".cj__step");
-    if (reduced) return;
+    const icons = el.querySelectorAll<HTMLElement>(".cj__ring-icon");
+    if (!icons.length) return;
 
-    const badges = el.querySelectorAll<HTMLElement>(".cj__badge");
-    const texts = el.querySelectorAll<HTMLElement>(".cj__step-text");
+    if (reduced) {
+      gsap.set(icons, { opacity: 1, scale: 1, x: 0, y: 0 });
+      return;
+    }
 
-    gsap.set(texts, { opacity: 0 });
-    cards.forEach((card, i) => {
-      const badge = badges[i];
-      if (!badge) return;
-      const cardRect = card.getBoundingClientRect();
-      const badgeRect = badge.getBoundingClientRect();
-      const dx = (cardRect.width / 2) - (badgeRect.left - cardRect.left) - (badgeRect.width / 2);
-      gsap.set(badge, { x: dx });
+    // read each icon's authored (CSS-positioned) offset from the ring
+    // center before collapsing it, so the "fly out" animates back to
+    // exactly where the circular layout already placed it
+    const targets = Array.from(icons).map((icon) => {
+      const rect = icon.getBoundingClientRect();
+      const parentRect = el.getBoundingClientRect();
+      return {
+        x: rect.left + rect.width / 2 - (parentRect.left + parentRect.width / 2),
+        y: rect.top + rect.height / 2 - (parentRect.top + parentRect.height / 2),
+      };
     });
+
+    gsap.set(icons, { opacity: 0, scale: 0.2, x: (i) => -targets[i].x, y: (i) => -targets[i].y });
 
     ScrollTrigger.create({
       trigger: el,
-      start: "top 82%",
+      start: "top 75%",
       once: true,
       onEnter: () => {
-        cards.forEach((card, i) => {
-          const badge = badges[i];
-          const text = texts[i];
-          if (!badge) return;
-          gsap.to(badge, {
-            x: 0,
-            duration: 0.55,
-            ease: "power3.out",
-            delay: i * 0.08,
-            onComplete: () => {
-              if (text) gsap.to(text, { opacity: 1, duration: 0.35, ease: "power1.out" });
-            },
-          });
+        gsap.to(icons, {
+          opacity: 1, scale: 1, x: 0, y: 0,
+          duration: 0.8, ease: "back.out(1.4)", stagger: 0.09,
         });
       },
     });
-  }, { scope: gridRef });
+  }, { scope: ringRef });
 
   return (
     <>
@@ -306,101 +289,92 @@ export default function ClientJourney() {
           white-space: nowrap;
         }
 
-        /* ── body: left pipeline + full card grid, side by side ── */
-        .cj__body {
+        /* ── ring: all 8 steps arranged in a circle, the section's main
+           visual. Each icon's left/top (% of the ring) is computed in JS
+           via ringPosition() and set inline, so the layout scales cleanly
+           with the responsive ring size instead of using fixed pixel
+           offsets. A thin circular guide-line sits behind the icons so the
+           ring shape reads even before/without hover. ── */
+        .cj__ring-wrap {
           display: flex;
-          align-items: flex-start;
-          gap: clamp(1.5rem, 3vw, 2.5rem);
+          justify-content: center;
+          padding-block: clamp(1rem, 3vw, 2rem);
         }
-
-        /* ── left pipeline — every step's badge stacked in a column with a
-           single connecting line running through them (the original
-           design's track), used as a quick-access jump list next to the
-           full card grid rather than a duplicate of the grid's own icons ── */
-        .cj__pipeline {
+        .cj__ring {
           position: relative;
-          flex: 0 0 auto;
-          display: flex;
-          flex-direction: column;
-          gap: 1.35rem;
-          padding-block: 0.25rem;
+          width: min(560px, 92vw);
+          aspect-ratio: 1;
         }
-        .cj__pipe-line {
-          position: absolute;
-          top: 26px; bottom: 26px; left: 25px;
-          width: 2px;
-          background: var(--bg-line);
-          z-index: 0;
-        }
-        .cj__pipe-btn {
-          position: relative;
-          z-index: 1;
-          width: 52px; height: 52px;
+        .cj__ring-guide {
+          position: absolute; inset: 8%;
+          border: 1px dashed var(--bg-line);
           border-radius: 50%;
-          background: var(--bg-surface);
-          border: 2px solid var(--bg-line);
+        }
+        .cj__ring-center {
+          position: absolute; inset: 0;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          text-align: center;
+          gap: .3rem;
+          pointer-events: none;
+        }
+        .cj__ring-center-label {
+          font-family: var(--ff-mono); font-size: .68rem; letter-spacing: .12em;
+          text-transform: uppercase; color: var(--ink-35);
+        }
+        .cj__ring-center-value {
+          font-family: var(--ff-display); font-weight: 700; font-size: 1.1rem;
+          color: var(--ink);
+        }
+        /* positioning wrapper — left/top set inline per icon (percent of
+           ring), plain CSS transform for centering only. Never touched by
+           GSAP, so the flip animation (applied to .cj__ring-icon-flip
+           inside) can freely own the transform property without fighting
+           this element's own centering translate. */
+        .cj__ring-icon-pos {
+          position: absolute;
+          transform: translate(-50%, -50%);
+          width: 68px; height: 68px;
+        }
+        .cj__ring-icon {
+          width: 100%; height: 100%;
+          display: flex; flex-direction: column; align-items: center; gap: .4rem;
+          background: none; border: none; cursor: pointer;
+        }
+        .cj__ring-icon-badge {
+          width: 68px; height: 68px;
+          border-radius: 18px;
+          background: linear-gradient(155deg, var(--step-color) 0%, color-mix(in srgb, var(--step-color) 70%, #000) 100%);
           display: flex; align-items: center; justify-content: center;
-          transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s cubic-bezier(0.16,1,0.3,1);
+          box-shadow:
+            0 1px 0 rgba(255,255,255,0.25) inset,
+            0 8px 18px -9px var(--step-color);
+          transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s ease;
         }
-        .cj__pipe-btn svg { width: 20px; height: 20px; color: var(--step-color); transition: color 0.18s ease; }
-        .cj__pipe-btn:hover,
-        .cj__pipe-btn:focus-visible {
-          border-color: var(--step-color);
-          background: var(--step-color);
-          transform: scale(1.08);
+        .cj__ring-icon-badge svg { width: 26px; height: 26px; color: #fff; }
+        .cj__ring-icon:hover .cj__ring-icon-badge,
+        .cj__ring-icon:focus-visible .cj__ring-icon-badge {
+          transform: scale(1.12) translateY(-2px);
+          box-shadow: 0 14px 28px -10px var(--step-color);
         }
-        .cj__pipe-btn:hover svg,
-        .cj__pipe-btn:focus-visible svg { color: #fff; }
-        .cj__pipe-btn:focus-visible { outline: 2px solid var(--step-color); outline-offset: 3px; }
-
-        @media (max-width: 720px) {
-          .cj__body { flex-direction: column; gap: 0; }
-          .cj__pipeline {
-            flex-direction: row; width: 100%; overflow-x: auto;
-            gap: 1rem; padding-block: 0.5rem;
-          }
-          .cj__pipe-line { top: 25px; left: 26px; right: 26px; bottom: auto; width: auto; height: 2px; }
+        .cj__ring-icon:focus-visible .cj__ring-icon-badge { outline: 2px solid var(--step-color); outline-offset: 3px; }
+        .cj__ring-icon-label {
+          font-family: var(--ff-mono); font-size: .62rem; font-weight: 700;
+          letter-spacing: .06em; text-transform: uppercase; color: var(--ink-60);
+          white-space: nowrap;
         }
-
-        /* ── full card grid (all 8 steps, no pagination): each step is its
-           own bordered, elevated card, wrapping to as many rows as needed
-           (3 cols → 3+3+2). Static reveal, no auto-rotation. ── */
-        .cj__rail {
-          position: relative;
-          flex: 1 1 auto;
-          min-width: 0;
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 1.25rem;
-        }
-
-        /* icon badge fixed to the left, text column to its right — matches
-           the original rail's left-badge orientation instead of a top-down
-           stacked card */
-        .cj__step {
-          position: relative;
-          display: flex;
-          flex-direction: row;
-          align-items: flex-start;
-          gap: clamp(0.85rem, 1.6vw, 1.25rem);
-          padding: clamp(1.1rem, 1.8vw, 1.4rem);
-          background: var(--bg-surface);
-          border: 1px solid var(--bg-line);
-          border-radius: 14px;
-          cursor: pointer;
-          transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), border-color 0.2s ease, box-shadow 0.2s ease, grid-column 0.2s ease;
-        }
-        .cj__preview { display: none; }
-        /* clicked card flips away (rotateY) and fades — the enlarged
+        /* clicked icon flips away (rotateY) and fades — the enlarged
            version reappears as a centered overlay, driven by GSAP, so this
-           just hides the source card while that overlay is open */
-        .cj__step--source-hidden { visibility: hidden; }
-        .cj__step-text {
-          flex: 1 1 auto;
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
+           just hides the source icon while that overlay is open */
+        .cj__ring-icon--source-hidden { visibility: hidden; }
+
+        @media (max-width: 640px) {
+          .cj__ring { width: min(340px, 88vw); }
+          .cj__ring-icon-pos { width: 52px; height: 52px; }
+          .cj__ring-icon-badge { width: 52px; height: 52px; border-radius: 14px; }
+          .cj__ring-icon-badge svg { width: 20px; height: 20px; }
+          .cj__ring-icon-label { font-size: .56rem; }
         }
+
         .cj__desc {
           font-family: var(--ff-body); font-size: .85rem; line-height: 1.6;
           color: var(--ink-60);
@@ -571,67 +545,9 @@ export default function ClientJourney() {
         .cj__metric-v { color: var(--ink); font-weight: 700; }
         .cj__metric-l { color: var(--ink-35); letter-spacing: .04em; text-transform: uppercase; }
 
-        @media (max-width: 980px) {
-          .cj__rail { grid-template-columns: repeat(2, 1fr); }
-        }
         @media (max-width: 640px) {
-          .cj__body { flex-direction: column; gap: 0; }
-          .cj__pipeline { display: none; }
-          .cj__rail {
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            gap: 0.75rem;
-            padding-bottom: 1rem;
-            margin-inline: calc(-1 * clamp(1.5rem, 5vw, 4.5rem));
-            padding-inline: clamp(1.5rem, 5vw, 4.5rem);
-            scrollbar-width: none;
-          }
-          .cj__rail::-webkit-scrollbar { display: none; }
-          .cj__step {
-            flex: 0 0 82vw;
-            min-width: 0;
-            scroll-snap-align: center;
-            flex-direction: column;
-            gap: 0.7rem;
-            padding: 1rem;
-            border-radius: 12px;
-          }
-          .cj__badge {
-            width: 42px; height: 42px; border-radius: 11px;
-          }
-          .cj__badge::before { inset: -4px; border-radius: 14px; }
-          .cj__badge svg { width: 18px; height: 18px; }
-          .cj__label { font-size: .95rem; }
-          .cj__tagline { font-size: .8rem; line-height: 1.4; margin-top: .25rem; }
-          .cj__num { font-size: .65rem; }
-          .cj__metrics { gap: .3rem .8rem; padding-top: .5rem; }
-          .cj__metric { font-size: .68rem; gap: .3rem; }
-          .cj__desc { font-size: .8rem; margin-top: .6rem; padding-top: .6rem; }
           .cj__footer { flex-direction: column; text-align: center; gap: 1rem; }
           .cj__head-meta { display: none; }
-        }
-
-        /* swipe dots indicator for mobile slider */
-        .cj__dots {
-          display: none;
-          justify-content: center;
-          gap: 6px;
-          margin-top: 0.75rem;
-        }
-        .cj__dot {
-          width: 6px; height: 6px; border-radius: 50%;
-          background: var(--bg-line);
-          border: none; padding: 0; cursor: pointer;
-          transition: background 0.2s, transform 0.2s;
-        }
-        .cj__dot--active {
-          background: var(--brand-teal);
-          transform: scale(1.3);
-        }
-        @media (max-width: 640px) {
-          .cj__dots { display: flex; }
         }
 
         .cj__footer {
@@ -660,14 +576,8 @@ export default function ClientJourney() {
         .cj__cta:hover { background: var(--brand-teal-dk); }
         .cj__cta:active { transform: scale(0.97); }
 
-        .cj__step:focus-visible {
-          outline: 2px solid var(--step-color);
-          outline-offset: 4px;
-          border-radius: 12px;
-        }
-
         @media (prefers-reduced-motion: reduce) {
-          .cj__badge, .cj__step, .cj__preview { transition: none; }
+          .cj__badge, .cj__ring-icon-badge { transition: none; }
         }
       `}</style>
 
@@ -685,81 +595,33 @@ export default function ClientJourney() {
             <span className="cj__head-meta">{t("stepOfLabel", { num: "01", total: "08" })}</span>
           </div>
 
-          <div className="cj__body">
-            <div className="cj__pipeline" role="group" aria-label={t("stepsAria")}>
-              <div className="cj__pipe-line" aria-hidden="true" />
-              {STEPS.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  className="cj__pipe-btn"
-                  style={{ ["--step-color" as string]: s.color }}
-                  aria-label={s.label}
-                  onClick={() => scrollToStep(s.id)}
-                >
-                  <s.Icon strokeWidth={1.75} aria-hidden="true" />
-                </button>
-              ))}
-            </div>
-
-            <div className="cj__rail" role="list" aria-label={t("stepsAria")} ref={gridRef}>
-              {STEPS.map((s) => (
-                <div
-                  className="cj__step"
-                  key={s.id}
-                  role="listitem"
-                  tabIndex={0}
-                  ref={(node) => { cardRefs.current[s.id] = node; }}
-                  style={{ ["--step-color" as string]: s.color }}
-                  onClick={() => openCard(s.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      openCard(s.id);
-                    }
-                  }}
-                >
-                  <div className="cj__badge">
-                    <s.Icon strokeWidth={1.75} aria-hidden="true" />
+          <div className="cj__ring-wrap">
+            <div className="cj__ring" role="list" aria-label={t("stepsAria")} ref={ringRef}>
+              <div className="cj__ring-guide" aria-hidden="true" />
+              <div className="cj__ring-center" aria-hidden="true">
+                <span className="cj__ring-center-value">08</span>
+                <span className="cj__ring-center-label">{t("stepsAria")}</span>
+              </div>
+              {STEPS.map((s, i) => {
+                const pos = ringPosition(i, STEPS.length);
+                return (
+                  <div className="cj__ring-icon-pos" role="listitem" key={s.id} style={{ left: pos.left, top: pos.top }}>
+                    <button
+                      type="button"
+                      className="cj__ring-icon"
+                      ref={(node) => { cardRefs.current[s.id] = node; }}
+                      style={{ ["--step-color" as string]: s.color }}
+                      onClick={() => openCard(s.id)}
+                      aria-label={s.label}
+                    >
+                      <span className="cj__ring-icon-badge">
+                        <s.Icon strokeWidth={1.75} aria-hidden="true" />
+                      </span>
+                      <span className="cj__ring-icon-label">{s.label}</span>
+                    </button>
                   </div>
-                  <div className="cj__step-text">
-                    <span className="cj__num">{s.num}</span>
-                    <h3 className="cj__label">{s.label}</h3>
-                    <p className="cj__tagline">{s.tagline}</p>
-                    <div className="cj__metrics">
-                      {s.metrics.map((m, mi) => (
-                        <div className="cj__metric" key={mi}>
-                          <span className="cj__metric-v">{m.v}</span>
-                          <span className="cj__metric-l">{m.l}</span>
-                        </div>
-                      ))}
-                    </div>
-                    {/* desktop-only hover preview — reveals the same detail
-                        text the full overlay shows, without opening it.
-                        Touch devices have no hover, so tap still goes
-                        straight to the overlay as before. */}
-                    <div className="cj__preview" aria-hidden="true">
-                      <p className="cj__desc cj__desc--preview">{s.desc}</p>
-            </div>
-            <div className="cj__dots" aria-hidden="true">
-              {STEPS.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  className={`cj__dot${i === activeSlide ? " cj__dot--active" : ""}`}
-                  onClick={() => {
-                    const rail = gridRef.current;
-                    if (!rail) return;
-                    const cardWidth = rail.scrollWidth / STEPS.length;
-                    rail.scrollTo({ left: cardWidth * i, behavior: "smooth" });
-                  }}
-                  aria-label={`Go to step ${i + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

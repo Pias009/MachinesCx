@@ -1154,16 +1154,42 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 
 /* ── ScrollHome mobile — show all sections, stack layouts ── */
 @media (max-width: 768px) {
-  /* hide the GSAP floating machine — not needed on mobile */
-  #hero-machine-0 {
-    display: none !important;
-    visibility: hidden !important;
-  }
-  /* spacers (empty 50% divs) become zero */
+  /* The traveling machine shows on mobile too, same as desktop — sized
+     down to fit the stacked (not side-by-side) layout. Position comes
+     from the isMobile branch in ScrollHome's useGSAP, which targets each
+     section's .sh-machine-anchor / .sh-3col-center via live
+     getBoundingClientRect(). NOTE: .sh-section below sets
+     overflow:hidden for horizontal-overflow clipping — that must NOT
+     clip #hero-machine-0, since overflow:hidden on an ANCESTOR of a
+     position:fixed element has no effect on it (fixed positioning is
+     relative to the viewport, not the ancestor's box, as long as no
+     ancestor has a transform/filter/perspective — none of .sh-section's
+     ancestors do), so this is safe. */
+  /* No fixed width rule here — ScrollHome's useGSAP sizes
+     #hero-machine-0 dynamically off each anchor's live rect (so it
+     actually fills the anchor box instead of floating in a fixed
+     percentage that only loosely matched it). A CSS !important width
+     here would silently win over that JS-set inline width on every
+     frame, since !important always beats inline styles regardless of
+     which sets last — so intentionally leaving this unset. */
+  /* spacers (empty 50% side-columns in §1/§2) collapse — the machine no
+     longer needs a reserved side column there, it targets
+     .sh-machine-anchor inside the (now full-width) text column instead */
   .sh-spacer {
     display: none !important;
     width: 0 !important;
     flex: 0 0 0 !important;
+  }
+  /* invisible per-section "stage" the flying machine rests over in §1/§2.
+     aspect-ratio matches the machine photos' real ~1.45:1 shape (not
+     square) — a square anchor left the (shorter, wider) machine floating
+     in the middle of extra vertical dead space above/below it. */
+  .sh-machine-anchor {
+    display: block !important;
+    width: 100%; max-width: 340px;
+    aspect-ratio: 1.45 / 1;
+    min-height: 140px;
+    margin: 1rem auto 0;
   }
   /* text columns go full-width */
   .sh-sec, .sh-sec2-text {
@@ -1183,18 +1209,50 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
     overflow: hidden !important;
     padding: 3.5rem 0 2rem !important;
   }
-  /* §3 three-col stacks */
+  /* §3 on mobile: the carousel above (.sh-mob-carousel) is a full
+     replacement for this whole desktop block — same name, specs,
+     features, and CTA, just laid out for touch. Take the heading and the
+     three-column layout out of flow instead of stacking (or even
+     display:none-ing) them — stacking rendered BOTH versions one after
+     another (duplicate content, plus .sh-hot-head's own margin/height
+     showing as dead space between the carousel's specs and its own
+     features list). display:none was also wrong: .sh-3col-center
+     (sec3CenterRef) is a live getBoundingClientRect() target the mobile
+     "flying machine" scroll animation interpolates toward on its way into
+     §3 — display:none (or a height:0 parent) zeroes/collapses that rect
+     and corrupts the math. position:absolute removes .sh-3col from the
+     page's flow (no footprint, no dead space) while its own box — and
+     .sh-3col-center inside it — keeps real, measurable dimensions. */
+  .sh-hot-head { display: none !important; }
   .sh-3col {
-    display: flex !important;
-    flex-direction: column !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
     width: 100% !important;
-    padding: 1rem 1.25rem 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
-  .sh-3col > div { width: 100% !important; max-width: 100% !important; }
-  .sh-hot-head { font-size: clamp(1.8rem,9vw,2.8rem) !important; padding: 0 1.25rem !important; text-align: left !important; }
-  /* show mobile carousel in §3, hide desktop card strip */
+  /* The rule this comment block describes but didn't actually add — lost
+     in an earlier edit. .sh-3col is still display:flex/row (inline style,
+     untouched here) with sec3CenterRef's real siblings on either side
+     (specs text, features text) — as a bare width:40% flex item with no
+     protection, the empty center div was the path of least resistance
+     for the row to squeeze under space pressure from its text-bearing
+     neighbors, collapsing to 0 width. flex-shrink/grow:0 fixes the
+     squeeze; aspect-ratio/min-height give it real, sane dimensions. */
+  .sh-3col-center {
+    flex: 0 0 40% !important;
+    /* overrides the inline align-self:stretch (needed for desktop's
+       row layout) — stretch was matching .sh-3col's full row height
+       instead of letting aspect-ratio size it */
+    align-self: flex-start !important;
+    aspect-ratio: 1.45 / 1;
+    min-height: 140px;
+    max-width: 340px;
+    margin: 0 auto;
+  }
+  /* show mobile carousel in §3 */
   .sh-mob-carousel { display: block !important; }
-  .sh-card-strip-wrap { display: none !important; }
 }
 
 /* ── Product pages — category + single ── */

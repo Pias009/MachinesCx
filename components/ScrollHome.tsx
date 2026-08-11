@@ -49,12 +49,15 @@ export default function ScrollHome() {
   const CARDS = CARD_SLUGS.map((slug) => ({ slug, name: t(`cards.${slug}`) }));
   const machineRef   = useRef<HTMLDivElement>(null);
   const sec1Ref      = useRef<HTMLElement>(null);
+  const sec1AnchorRef = useRef<HTMLDivElement>(null);
   const sec2Ref      = useRef<HTMLDivElement>(null);
   const sec2TextRef  = useRef<HTMLDivElement>(null);
+  const sec2AnchorRef = useRef<HTMLDivElement>(null);
   const sec3Ref      = useRef<HTMLDivElement>(null);
   const sec3LeftRef  = useRef<HTMLDivElement>(null);
   const sec3RightRef = useRef<HTMLDivElement>(null);
   const sec3CenterRef = useRef<HTMLDivElement>(null);
+  const sec3CarouselImgRef = useRef<HTMLDivElement>(null);
   const cardStripRef = useRef<HTMLDivElement>(null);
   const cardRowRef   = useRef<HTMLDivElement>(null);
   const heroNameRef  = useRef<HTMLDivElement>(null);
@@ -92,9 +95,10 @@ export default function ScrollHome() {
 
         const xAt = (pct: number) => window.innerWidth  * pct - m.offsetWidth  / 2;
         const yAt = (pct: number) => window.innerHeight * pct - m.offsetHeight / 2;
+        const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
         gsap.set(m, {
-          x: () => xAt(0.75),
+          x: () => xAt(isMobile ? 0.5 : 0.75),
           y: () => yAt(0.58),
           rotateY: 0, scale: 1,
           opacity: 0,
@@ -103,11 +107,19 @@ export default function ScrollHome() {
           transformOrigin: "center center",
         });
 
-        // Show machine only when HeroSplash has fully scrolled off —
-        // trigger fires when sec1 top hits the top of the viewport
+        // Show the machine as soon as §1 is on screen — desktop waits
+        // until HeroSplash has fully scrolled off (sec1 top hits the
+        // viewport top); mobile shows it as soon as its anchor starts
+        // entering from the bottom ("top 90%") — the SAME element and
+        // threshold the position-hold trigger below starts from, so
+        // opacity and position always engage together. (Using sec1Ref
+        // itself here instead would fire earlier, since the anchor sits
+        // further down the section below the heading/copy/buttons —
+        // opacity would turn on a beat before position was set, flashing
+        // the machine at its stale page-load default spot.)
         ScrollTrigger.create({
-          trigger: sec1Ref.current,
-          start: "top top",
+          trigger: isMobile ? sec1AnchorRef.current : sec1Ref.current,
+          start: isMobile ? "top 90%" : "top top",
           onEnter: () => {
             gsap.set(m, { visibility: "visible" });
             gsap.to(m, { opacity: 1, duration: 0.4, ease: "power2.out" });
@@ -122,65 +134,229 @@ export default function ScrollHome() {
         gsap.set(sec3LeftRef.current,  { opacity: 1, x: 0 });
         gsap.set(sec3RightRef.current, { opacity: 1, x:  0 });
 
-        // ── §1 → §2 : right col → left col + flip ────────────────────────
-        // The flip lifts up in scale/z through the quarter-turn (deepest at
-        // 90°, where the machine is edge-on and would otherwise read as a
-        // flat width-collapse) then settles back down — sells the turn as
-        // a real 3D object rotating through depth, not a 2D card flip.
-        const tl1 = gsap.timeline({ paused: true });
+        if (isMobile) {
+          // ── Mobile: same traveling machine as desktop, no side columns
+          // to fly between though — §1/§2/§3 are stacked full-width.
+          // Each section gets a small invisible "stage" (.sh-machine-anchor
+          // for §1/§2, .sh-3col-center for §3 — same element desktop uses)
+          // and the machine's x/y continuously track that anchor's live
+          // getBoundingClientRect(), mirroring desktop's exact two-trigger
+          // range structure (tl1's range, then the §2→§3 range) plus one
+          // extra "hold" trigger covering §1 itself (desktop doesn't need
+          // this — the machine starts the whole sequence already inside
+          // §1's own column, it doesn't need a trigger to get there first).
+          const a1 = sec1AnchorRef.current;
+          const a2 = sec2AnchorRef.current;
+          const a3 = sec3CenterRef.current;
 
-        tl1.to(m, { x: () => xAt(0.25), duration: 0.60, ease: "power2.inOut" }, 0);
-        tl1.to(m, { rotateY: 90,  scale: 1.08, z: 60,  duration: 0.18, ease: "power3.in"  }, 0.60);
-        tl1.to(m, { rotateY: 180, scale: 1,    z: 0,   duration: 0.15, ease: "power3.out" }, 0.78);
+          // Fill each anchor's reserved box instead of floating in it —
+          // #hero-machine-0's CSS width was an independent viewport-%
+          // value only loosely tuned to match .sh-machine-anchor's own
+          // (100%, max-width:340px) sizing, so it landed well under the
+          // anchor's actual width and left a visible unfilled margin all
+          // around it. Sizing directly off the anchor's own live rect
+          // guarantees a real fit, and stays correct if the anchor's CSS
+          // ever changes without the two needing to be kept in sync by hand.
+          const FILL = 0.92;
+          const sizeToAnchor = (el: HTMLElement | null) => {
+            if (!el) return;
+            const w = el.getBoundingClientRect().width * FILL;
+            if (w > 0) gsap.set(m, { width: w });
+          };
+          const anchorX = (el: HTMLElement | null) => {
+            if (!el) return xAt(0.5);
+            const rect = el.getBoundingClientRect();
+            return rect.left + rect.width / 2 - m.offsetWidth / 2;
+          };
+          // Nudged up from dead-center within the anchor box (toward the
+          // text above it) — sitting exactly centered read as floating in
+          // its blank space rather than belonging to the section.
+          const ANCHOR_Y_LIFT = 6;
+          const anchorY = (el: HTMLElement | null) => {
+            if (!el) return yAt(0.58);
+            const rect = el.getBoundingClientRect();
+            return rect.top + rect.height / 2 - m.offsetHeight / 2 - ANCHOR_Y_LIFT;
+          };
 
-        ScrollTrigger.create({
-          trigger: s2, start: "top bottom+=100", end: "center center",
-          animation: tl1, scrub: 1.2, invalidateOnRefresh: true,
-        });
+          // Guard against implausible single-frame position jumps. Every
+          // legitimate update here — hold tracking a slowly-scrolling
+          // anchor, or a scrub-smoothed travel interpolation — moves the
+          // machine a few px at a time, never hundreds of px in one call.
+          // getBoundingClientRect() reads occasionally came back with a
+          // wildly wrong value for a single frame (observed: a live
+          // anchor mid-hold jumping from y≈266 to y≈2331 between two
+          // consecutive onUpdate calls with no matching scroll delta) —
+          // root cause not fully pinned down, but rejecting a jump no
+          // real scroll gesture could produce is correct either way.
+          let lastGoodY: number | null = null;
+          const setMachinePos = (x: number, y: number) => {
+            if (lastGoodY !== null && Math.abs(y - lastGoodY) > 600) return;
+            lastGoodY = y;
+            gsap.set(m, { x, y });
+          };
 
-        // ── §2 → §3 : left col → center, no flip ─────────────────────────
-        // x (horizontal handoff) and y (settle into the column box) are
-        // driven by ONE trigger spanning the whole section so there is no
-        // seam between separate triggers — a seam at "center center" broke
-        // continuity on reverse/upward scroll (onUpdate from the other
-        // trigger simply never fired again once you crossed back over it).
-        //
-        // y is interpolated FROM the §1/§2 resting position (yAt(0.58))
-        // TOWARD the column-center target, keyed on the same progress as x.
-        // Previously y was hard-set to the column target with no link back
-        // to the resting position, so scrolling back up out of §3 left the
-        // machine stuck at its last §3 value instead of returning upward.
-        const center = sec3CenterRef.current;
+          // Hold-then-travel, chained with zero gaps: each phase's start
+          // is exactly the previous phase's end (same technique desktop
+          // uses for its §2→§3 trigger) so there's never a moment where
+          // nothing is tracking the machine's position. While an anchor
+          // is prominently on screen (from first appearing down to its
+          // top having scrolled up to just 5% from the viewport top —
+          // "the blank space [is] 5% hidden by scroll") the machine sits
+          // at that anchor's live position; only after that does it
+          // travel toward the next one.
+          //
+          // The travel phase ends at SETTLE ("top 55%" — comfortably
+          // inside the viewport, not just barely peeking in) rather than
+          // "top 90%": at 90% only the very top edge of the next anchor
+          // has appeared, so its *center* (what anchorY actually targets)
+          // is still below the fold. Handing off to "hold" right then
+          // held the machine off-screen until scrolling caught up.
+          // SETTLE is reused as both the travel-end and the next hold's
+          // own start so the two stay perfectly chained either way.
+          const SETTLE = "top 55%";
 
-        const colCenterY = () => {
-          if (!center) return yAt(0.58);
-          const rect = center.getBoundingClientRect();
-          const half = m.offsetHeight / 2;
-          const colCenter = rect.top + rect.height / 2;
-          const minY = rect.top + half;
-          const maxY = rect.bottom - half;
-          return Math.min(Math.max(colCenter, minY), maxY) - half;
-        };
-
-        // Starts at s2 "center center" — i.e. exactly where tl1 above ends —
-        // not at s3's own "top bottom", which fires while §2 is still the
-        // section on screen and was fighting tl1 for control of x/y.
-        ScrollTrigger.create({
-          trigger: s2,
-          start: "center center",
-          endTrigger: s3,
-          end: "bottom top",
-          scrub: 1.2,
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            // x/y settle in over the first portion of the range, then hold
-            const settleProgress = Math.min(self.progress / 0.2, 1);
-            gsap.set(m, {
-              x: gsap.utils.interpolate(xAt(0.25), xAt(0.50), settleProgress),
-              y: gsap.utils.interpolate(yAt(0.58), colCenterY(), settleProgress),
+          if (a1) {
+            ScrollTrigger.create({
+              trigger: a1, start: "top 90%", end: "top 5%",
+              onUpdate: () => {
+                sizeToAnchor(a1);
+                setMachinePos(anchorX(a1), anchorY(a1));
+              },
             });
-          },
-        });
+          }
+
+          const travelThenHold = (from: HTMLElement, to: HTMLElement) => {
+            // `from`'s live position must be frozen at the moment travel
+            // starts, not re-read every frame: it's a normal element that
+            // keeps scrolling further past the top of the screen for the
+            // rest of the trigger's range, so its y grows increasingly
+            // (unboundedly) negative. Interpolating against that *live*
+            // value meant even a small early-progress weighting on an
+            // already-huge-negative number dragged the result far
+            // off-screen — which is exactly what was happening. `to` stays
+            // live since it only ever converges toward a sane on-screen
+            // spot as you scroll toward it, never diverges.
+            let start: { x: number; y: number } | null = null;
+            const captureStart = () => { start = { x: anchorX(from), y: anchorY(from) }; };
+            ScrollTrigger.create({
+              trigger: from, start: "top 5%",
+              endTrigger: to, end: SETTLE,
+              scrub: 0.6,
+              onEnter: captureStart,
+              onEnterBack: captureStart,
+              onUpdate: (self) => {
+                if (!start) captureStart();
+                sizeToAnchor(self.progress < 0.5 ? from : to);
+                setMachinePos(
+                  gsap.utils.interpolate(start!.x, anchorX(to), self.progress),
+                  gsap.utils.interpolate(start!.y, anchorY(to), self.progress),
+                );
+              },
+            });
+            ScrollTrigger.create({
+              trigger: to, start: SETTLE, end: "top 5%",
+              onUpdate: () => {
+                sizeToAnchor(to);
+                setMachinePos(anchorX(to), anchorY(to));
+              },
+            });
+          };
+
+          if (a1 && a2) travelThenHold(a1, a2);
+          if (a2 && a3) travelThenHold(a2, a3);
+
+          // §3's mobile carousel (.sh-mob-carousel) has its own real image
+          // right at the top of §3 — let the flying machine fade out
+          // before it arrives instead of flying on top of it and visibly
+          // overlapping mid-transit, then reveal the carousel image after.
+          // Both triggers use pure "top X%" viewport-percentage thresholds
+          // tied directly to the carousel image itself — not "top
+          // bottom+=Npx" pixel offsets against a *different* element
+          // (§3's section, or even just measuring from §3's own top):
+          // that arithmetic effectively subtracts one viewport height,
+          // and §2 here is barely taller than one viewport, so any such
+          // offset resolved to a scroll position back inside §2 — fading
+          // the machine out (or revealing the carousel) far earlier than
+          // intended. A percentage of the carousel image's own position
+          // has no such dependency on how tall the previous section is.
+          if (sec3CarouselImgRef.current) {
+            const carouselImg = sec3CarouselImgRef.current;
+            gsap.set(carouselImg, { opacity: 0 });
+            ScrollTrigger.create({
+              trigger: carouselImg,
+              start: "top 85%",
+              onEnter: () => gsap.to(m, { opacity: 0, duration: 0.3, ease: "power2.in" }),
+              onLeaveBack: () => gsap.to(m, { opacity: 1, duration: 0.3, ease: "power2.out" }),
+            });
+            ScrollTrigger.create({
+              trigger: carouselImg,
+              start: "top 60%",
+              onEnter: () => gsap.to(carouselImg, { opacity: 1, duration: 0.35, ease: "power2.out" }),
+              onLeaveBack: () => gsap.to(carouselImg, { opacity: 0, duration: 0.2, ease: "power2.in" }),
+            });
+          }
+        } else {
+          // ── §1 → §2 : right col → left col + flip ──────────────────────
+          // The flip lifts up in scale/z through the quarter-turn (deepest
+          // at 90°, where the machine is edge-on and would otherwise read
+          // as a flat width-collapse) then settles back down — sells the
+          // turn as a real 3D object rotating through depth, not a 2D
+          // card flip.
+          const tl1 = gsap.timeline({ paused: true });
+
+          tl1.to(m, { x: () => xAt(0.25), duration: 0.60, ease: "power2.inOut" }, 0);
+          tl1.to(m, { rotateY: 90,  scale: 1.08, z: 60,  duration: 0.18, ease: "power3.in"  }, 0.60);
+          tl1.to(m, { rotateY: 180, scale: 1,    z: 0,   duration: 0.15, ease: "power3.out" }, 0.78);
+
+          ScrollTrigger.create({
+            trigger: s2, start: "top bottom+=100", end: "center center",
+            animation: tl1, scrub: 1.2, invalidateOnRefresh: true,
+          });
+
+          // ── §2 → §3 : left col → center, no flip ────────────────────────
+          // x (horizontal handoff) and y (settle into the column box) are
+          // driven by ONE trigger spanning the whole section so there is no
+          // seam between separate triggers — a seam at "center center" broke
+          // continuity on reverse/upward scroll (onUpdate from the other
+          // trigger simply never fired again once you crossed back over it).
+          //
+          // y is interpolated FROM the §1/§2 resting position (yAt(0.58))
+          // TOWARD the column-center target, keyed on the same progress as x.
+          // Previously y was hard-set to the column target with no link back
+          // to the resting position, so scrolling back up out of §3 left the
+          // machine stuck at its last §3 value instead of returning upward.
+          const center = sec3CenterRef.current;
+
+          const colCenterY = () => {
+            if (!center) return yAt(0.58);
+            const rect = center.getBoundingClientRect();
+            const half = m.offsetHeight / 2;
+            const colCenter = rect.top + rect.height / 2;
+            const minY = rect.top + half;
+            const maxY = rect.bottom - half;
+            return Math.min(Math.max(colCenter, minY), maxY) - half;
+          };
+
+          // Starts at s2 "center center" — i.e. exactly where tl1 above ends —
+          // not at s3's own "top bottom", which fires while §2 is still the
+          // section on screen and was fighting tl1 for control of x/y.
+          ScrollTrigger.create({
+            trigger: s2,
+            start: "center center",
+            endTrigger: s3,
+            end: "bottom top",
+            scrub: 1.2,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              // x/y settle in over the first portion of the range, then hold
+              const settleProgress = Math.min(self.progress / 0.2, 1);
+              gsap.set(m, {
+                x: gsap.utils.interpolate(xAt(0.25), xAt(0.50), settleProgress),
+                y: gsap.utils.interpolate(yAt(0.58), colCenterY(), settleProgress),
+              });
+            },
+          });
+        }
 
         // ── Card strip: reveal right → left as it scrolls into view ──────
         const cards = cardStripRef.current
@@ -321,15 +497,28 @@ export default function ScrollHome() {
 
   // ── Mobile machine navigator ──────────────────────────────────────
   const [mobileIdx, setMobileIdx] = useState(0);
+  // Which feature cards are expanded, per-card (independent, not accordion).
+  // Reset on every machine switch so a card expanded for one machine doesn't
+  // stay open when its features array (different heads) loads in.
+  const [expandedFeatures, setExpandedFeatures] = useState<Set<string>>(new Set());
+  const toggleFeature = (head: string) => {
+    setExpandedFeatures(prev => {
+      const next = new Set(prev);
+      if (next.has(head)) next.delete(head); else next.add(head);
+      return next;
+    });
+  };
   const mobilePrev = () => {
     const idx = (mobileIdx - 1 + CARDS.length) % CARDS.length;
     setMobileIdx(idx);
     setSelectedProduct(CARDS[idx].slug);
+    setExpandedFeatures(new Set());
   };
   const mobileNext = () => {
     const idx = (mobileIdx + 1) % CARDS.length;
     setMobileIdx(idx);
     setSelectedProduct(CARDS[idx].slug);
+    setExpandedFeatures(new Set());
   };
   const mobileCard = CARDS[mobileIdx];
 
@@ -442,21 +631,10 @@ export default function ScrollHome() {
               {t("hero1.ctaSecondary")}
             </TransitionLink>
           </div>
-          {/* Machine image — mobile only */}
-          <Image
-            src="/machines/t-pro-heatseal.png"
-            alt={t("hero1.mobileMachineAlt")}
-            className="sh-machine-mobile"
-            width={320}
-            height={320}
-            style={{
-              display: "none",
-              width: "100%", maxWidth: "320px",
-              height: "auto",
-              margin: "2rem auto 0",
-              filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.6))",
-            }}
-          />
+          {/* Machine anchor — mobile only, invisible. Reserves the spot
+              the flying #hero-machine-0 rests at for this section (see
+              the mobile branch in useGSAP above). */}
+          <div ref={sec1AnchorRef} className="sh-machine-anchor" aria-hidden="true" />
         </div>
 
         <div className="sh-spacer" style={{ width: "50%" }} />
@@ -525,6 +703,9 @@ export default function ScrollHome() {
           <AetherBtn><TransitionLink href="/products/bag-making">
             {t("hero2.cta")}
           </TransitionLink></AetherBtn>
+
+          {/* Machine anchor — mobile only, same purpose as §1's. */}
+          <div ref={sec2AnchorRef} className="sh-machine-anchor" aria-hidden="true" />
         </div>
       </section>
 
@@ -542,7 +723,7 @@ export default function ScrollHome() {
         <div className="sh-mob-carousel">
 
           {/* 1. Main image + left/right arrows */}
-          <div style={{
+          <div ref={sec3CarouselImgRef} style={{
             position: "relative", width: "100%",
             background: "rgba(255,255,255,0.03)",
             display: "flex", alignItems: "center", justifyContent: "center",
@@ -597,7 +778,7 @@ export default function ScrollHome() {
             {CARDS.map((card, i) => (
               <button
                 key={card.slug}
-                onClick={() => { setMobileIdx(i); setSelectedProduct(card.slug); }}
+                onClick={() => { setMobileIdx(i); setSelectedProduct(card.slug); setExpandedFeatures(new Set()); }}
                 style={{
                   flexShrink: 0, width: "25%", minWidth: 80,
                   display: "flex", flexDirection: "column",
@@ -660,19 +841,74 @@ export default function ScrollHome() {
               ))}
             </div>
 
-            {/* Features */}
+            {/* Features — 2-col grid, each card independently expandable */}
             <div>
-              {(PRODUCT_DATA[mobileCard.slug]?.features ?? []).map(f => (
-                <div key={f.head} style={{
-                  marginBottom: "0.75rem",
-                  padding: "0.65rem 0.75rem",
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                }}>
-                  <span style={{ fontFamily: "var(--ff-display)", fontSize: "0.92rem", color: "rgba(255,255,255,0.9)", display: "block" }}>{f.head}</span>
-                  <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.76rem", color: "rgba(255,255,255,0.7)", lineHeight: 1.6, display: "block", marginTop: "0.15rem" }}>{f.body}</span>
-                </div>
-              ))}
+              <p style={{
+                fontFamily: "var(--ff-mono)", fontSize: "0.64rem",
+                letterSpacing: "0.16em", textTransform: "uppercase",
+                color: "var(--brand-teal)", marginBottom: "0.75rem",
+              }}>{t("hot.keyFeatures")}</p>
+
+              <div style={{
+                display: "grid", gridTemplateColumns: "1fr 1fr",
+                gap: "0.6rem", marginBottom: "1.5rem",
+              }}>
+                {(PRODUCT_DATA[mobileCard.slug]?.features ?? []).map(f => {
+                  const isOpen = expandedFeatures.has(f.head);
+                  return (
+                    <button
+                      key={f.head}
+                      type="button"
+                      onClick={() => toggleFeature(f.head)}
+                      aria-expanded={isOpen}
+                      style={{
+                        gridColumn: isOpen ? "1 / -1" : undefined,
+                        minHeight: 44,
+                        textAlign: "left",
+                        padding: "0.65rem 0.75rem",
+                        background: isOpen ? "rgba(43,191,179,0.06)" : "rgba(255,255,255,0.03)",
+                        border: isOpen ? "1px solid rgba(43,191,179,0.28)" : "1px solid rgba(255,255,255,0.07)",
+                        borderRadius: ".6rem",
+                        cursor: "pointer",
+                        transition: "background 0.2s, border-color 0.2s, grid-column 0.2s",
+                        display: "flex", flexDirection: "column",
+                      }}
+                    >
+                      <span style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.4rem",
+                      }}>
+                        <span style={{
+                          fontFamily: "var(--ff-display)", fontSize: "0.86rem",
+                          color: "rgba(255,255,255,0.9)",
+                        }}>{f.head}</span>
+                        <svg
+                          width="14" height="14" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                          aria-hidden="true"
+                          style={{
+                            flexShrink: 0, color: "var(--brand-teal)",
+                            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                            transition: "transform 0.2s",
+                          }}
+                        >
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      </span>
+                      {isOpen && (
+                        <span style={{
+                          fontFamily: "var(--ff-body)", fontSize: "0.76rem",
+                          color: "rgba(255,255,255,0.7)", lineHeight: 1.6,
+                          display: "block", marginTop: "0.4rem",
+                        }}>{f.body}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <AetherBtn><TransitionLink href="/products/bag-making">
+                {t("hot.cta")}
+              </TransitionLink></AetherBtn>
             </div>
           </div>
         </div>
@@ -726,7 +962,7 @@ export default function ScrollHome() {
           </div>
 
           {/* CENTER — machine floats here (fixed) */}
-          <div ref={sec3CenterRef} className="sh-spacer" style={{ width: "40%", alignSelf: "stretch" }} />
+          <div ref={sec3CenterRef} className="sh-3col-center" style={{ width: "40%", alignSelf: "stretch" }} />
 
           {/* RIGHT — key features */}
           <div ref={sec3RightRef} className="sh-sec" style={{ width: "30%" }}>
@@ -902,16 +1138,18 @@ export default function ScrollHome() {
           .sh-card, .sh-card__img, .sh-card__bar { transition: none; }
         }
 
-        /* ── ScrollHome mobile — all sections visible ── */
+        /* ── ScrollHome mobile ──────────────────────────────────────────
+           Most mobile layout rules for this component (stacking, spacer
+           collapse, §3 carousel swap, #hero-machine-0 sizing) live in
+           app/globals.css next to the rest of the .sh-* mobile block —
+           see the comment there. Only the bits unique to this file's own
+           style tag stay here. */
         @media (max-width: 768px) {
           .scroll-hint { display: none !important; }
-          .sh-machine-mobile { display: block !important; }
           .sh-sec h1 { font-size: clamp(2rem, 9vw, 3rem) !important; }
           .sh-sec h2 { font-size: clamp(1.7rem, 8vw, 2.8rem) !important; }
           .sh-sec p  { font-size: 0.88rem !important; max-width: 100% !important; }
           .sh-stat-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .sh-mob-carousel { display: block !important; }
-          .sh-card-strip-wrap { display: none !important; }
         }
 
         /* mobile carousel — hidden on desktop */

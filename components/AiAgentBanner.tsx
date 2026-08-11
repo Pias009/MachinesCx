@@ -81,6 +81,7 @@ export default function AiAgentBanner() {
           display: flex; align-items: center; justify-content: center;
           overflow: hidden;
           background: #0a1211;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
         .aib__blob {

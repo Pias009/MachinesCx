@@ -642,6 +642,8 @@
       "title": "Built for the people",
       "titleEm": "who run the line.",
       "body": "For plant managers, procurement leads, and factory owners buying film, bag-making, recycling, or printing equipment — anyone who needs a machine that runs the shift, not just the demo.",
+      "readMore": "Read more",
+      "readLess": "Show less",
       "imageAlt": "ABCDE-2200 five-layer co-extrusion line on the factory floor",
       "roles": {
         "plantManagers": "Plant Managers",

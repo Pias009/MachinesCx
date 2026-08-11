@@ -19,6 +19,7 @@ export default function AudienceSection() {
   const cardRef = useRef<HTMLDivElement>(null);
   const roleRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const [pluginReady, setPluginReady] = useState(false);
+  const [bodyExpanded, setBodyExpanded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -59,7 +60,7 @@ export default function AudienceSection() {
     <section
       ref={sectionRef}
       aria-label={t("sectionAria")}
-      className="relative overflow-hidden px-4 py-16 sm:px-6 sm:py-20 lg:px-8"
+      className="relative overflow-hidden px-4 py-10 sm:px-6 sm:py-12 lg:px-8"
       style={{ background: "var(--bg-base)" }}
     >
       <div
@@ -70,7 +71,7 @@ export default function AudienceSection() {
 
       <div
         ref={cardRef}
-        className="relative mx-auto flex max-w-6xl flex-col items-center gap-10 rounded-[28px] p-8 sm:p-12 lg:flex-row lg:gap-16 lg:p-16"
+        className="relative mx-auto flex max-w-6xl flex-col items-center gap-6 rounded-[28px] p-6 sm:p-8 lg:flex-row lg:gap-12 lg:p-10"
         style={{
           background: "var(--bg-surface)",
           border: "1px solid var(--bg-line)",
@@ -94,11 +95,29 @@ export default function AudienceSection() {
               {t("titleEm")}
             </em>
           </h2>
-          <p className="mx-auto max-w-md text-base leading-relaxed lg:mx-0" style={{ color: "var(--ink-60)" }}>
+          <p
+            className={`mx-auto max-w-md cursor-pointer text-base leading-relaxed transition-all lg:mx-0 ${bodyExpanded ? "" : "line-clamp-2"}`}
+            style={{ color: "var(--ink-60)" }}
+            onClick={() => setBodyExpanded(v => !v)}
+            role="button"
+            tabIndex={0}
+            aria-expanded={bodyExpanded}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setBodyExpanded(v => !v); }
+            }}
+          >
             {t("body")}
           </p>
+          <button
+            type="button"
+            className="mx-auto mt-1 block text-xs font-semibold uppercase tracking-wide lg:mx-0"
+            style={{ fontFamily: "var(--ff-mono)", color: "var(--brand-teal)" }}
+            onClick={() => setBodyExpanded(v => !v)}
+          >
+            {bodyExpanded ? t("readLess") : t("readMore")}
+          </button>
 
-          <div className="mt-6 flex flex-wrap justify-center gap-2 lg:justify-start">
+          <div className="mt-4 flex flex-wrap justify-center gap-2 lg:justify-start">
             {ROLE_KEYS.map((key, i) => (
               <span
                 key={key}
@@ -116,7 +135,7 @@ export default function AudienceSection() {
             ))}
           </div>
 
-          <div className="mt-8 flex justify-center lg:justify-start">
+          <div className="mt-6 flex justify-center lg:justify-start">
             <AetherBtn>
               <TransitionLink href="/products">
                 {t("cta")}

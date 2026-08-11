@@ -8,7 +8,7 @@ import "../globals.css";
 import SiteNav from "@/components/SiteNav";
 import PageNav from "@/components/PageNav";
 import LoadingScreen from "@/components/LoadingScreen";
-import { BRAND } from "@/lib/products";
+import { BRAND, SITE_URL } from "@/lib/products";
 import { routing, rtlLocales, type Locale } from "@/i18n/routing";
 
 const SiteFooter = dynamic(() => import("@/components/SiteFooter"), { ssr: false });
@@ -38,10 +38,27 @@ const jetbrains = JetBrains_Mono({
   display: "swap",
 });
 
+const title = `${BRAND} — Blown Film, Bag Making & Recycling Machinery`;
+const description = "Multi-layer blown-film lines, bag-making converters and recycling lines. From benchtop trials to 5-layer co-extrusion at 400 kg/h.";
+
 export const metadata: Metadata = {
-  title: `${BRAND} — Blown Film, Bag Making & Recycling Machinery`,
-  description: "Multi-layer blown-film lines, bag-making converters and recycling lines. From benchtop trials to 5-layer co-extrusion at 400 kg/h.",
-  icons: { icon: "/logo.jpeg" },
+  metadataBase: new URL(SITE_URL),
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    url: SITE_URL,
+    siteName: BRAND,
+    images: [{ url: "/logo.jpeg", width: 1042, height: 1042, alt: BRAND }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title,
+    description,
+    images: ["/logo.jpeg"],
+  },
 };
 
 export function generateStaticParams() {
@@ -123,6 +140,18 @@ export default async function LocaleLayout({
             }
           })();
         ` }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: BRAND,
+              url: SITE_URL,
+              logo: `${SITE_URL}/logo.jpeg`,
+            }),
+          }}
+        />
       </head>
       <body>
         <NextIntlClientProvider messages={messages}>

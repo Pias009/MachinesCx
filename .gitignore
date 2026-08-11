@@ -17,3 +17,6 @@ public/about-frames/
 # About page hero video — served from Cloudinary, not committed (large binary)
 public/about-hero.mp4
 /l.mp4
+
+# Ad-hoc dev/testing screenshots — not part of the app
+/shots/

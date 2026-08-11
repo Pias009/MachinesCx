@@ -257,7 +257,7 @@ export default function HeroSplash() {
         .hs {
           position: relative;
           background: var(--bg-base);
-          min-height: 100vh;
+          min-height: 88vh;
           display: flex;
           flex-direction: column;
           overflow: hidden;
@@ -403,7 +403,7 @@ export default function HeroSplash() {
           flex-direction: column;
           align-items: center;
           text-align: center;
-          padding: clamp(6.5rem, 12vh, 9rem) 1.5rem 1.5rem;
+          padding: clamp(5.5rem, 10vh, 7.5rem) 1.5rem 1.5rem;
         }
 
         .hs__eyebrow {
@@ -494,11 +494,11 @@ export default function HeroSplash() {
         }
 
         .hs__btn-primary {
-          display: inline-flex; align-items: center; gap: .5rem;
-          padding: .9rem 1.9rem;
+          display: inline-flex; align-items: center; gap: .4rem;
+          padding: .65rem 1.4rem;
           background: var(--brand-red); color: #fff;
-          font-family: var(--ff-mono); font-size: .78rem;
-          letter-spacing: .1em; text-transform: uppercase; font-weight: 600;
+          font-family: var(--ff-mono); font-size: .7rem;
+          letter-spacing: .09em; text-transform: uppercase; font-weight: 600;
           text-decoration: none; border: 1px solid var(--brand-red);
           transition: background .18s, box-shadow .18s; white-space: nowrap;
         }
@@ -507,12 +507,12 @@ export default function HeroSplash() {
           box-shadow: 0 4px 20px rgba(43,191,179,0.45);
         }
         .hs__btn-secondary {
-          display: inline-flex; align-items: center; gap: .5rem;
-          padding: .9rem 1.9rem;
+          display: inline-flex; align-items: center; gap: .4rem;
+          padding: .65rem 1.4rem;
           background: transparent; color: var(--ink-60);
           border: 1px solid var(--ink-15);
-          font-family: var(--ff-mono); font-size: .78rem;
-          letter-spacing: .1em; text-transform: uppercase;
+          font-family: var(--ff-mono); font-size: .7rem;
+          letter-spacing: .09em; text-transform: uppercase;
           text-decoration: none;
           transition: border-color .18s, color .18s; white-space: nowrap;
         }

@@ -75,7 +75,7 @@ export default function FlexoPrintingPage() {
         .fp-tier-btn {
           display:flex; flex-direction:column; align-items:flex-start;
           gap:0.2rem; padding:1rem 1.4rem;
-          border:1px solid var(--line); background:var(--surface);
+          border:1px solid var(--bg-line); background:var(--bg-surface);
           cursor:pointer; text-align:left;
           transition:border-color .2s cubic-bezier(.16,1,.3,1), background .2s cubic-bezier(.16,1,.3,1), transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s cubic-bezier(.16,1,.3,1);
         }
@@ -90,8 +90,8 @@ export default function FlexoPrintingPage() {
           background:var(--brand-teal-glow) !important;
           box-shadow:0 12px 24px -14px rgba(43,191,179,0.4);
         }
-        .fp-tier-label { font-family:var(--ff-display); font-size:1.35rem; letter-spacing:.02em; color:var(--slate); line-height:1; }
-        .fp-tier-sub   { font-family:var(--ff-mono); font-size:0.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--slate-60); }
+        .fp-tier-label { font-family:var(--ff-display); font-size:1.35rem; letter-spacing:.02em; color:var(--ink); line-height:1; }
+        .fp-tier-sub   { font-family:var(--ff-mono); font-size:0.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-60); }
         .fp-tier-badge {
           font-family:var(--ff-mono); font-size:0.64rem; letter-spacing:.18em;
           text-transform:uppercase; padding:.15rem .4rem;
@@ -102,17 +102,17 @@ export default function FlexoPrintingPage() {
 
         .fp-width-btn {
           padding:.45rem .9rem;
-          border:1px solid var(--line); background:var(--surface);
+          border:1px solid var(--bg-line); background:var(--bg-surface);
           font-family:var(--ff-mono); font-size:.7rem; letter-spacing:.1em;
-          color:var(--slate-60); cursor:pointer;
+          color:var(--ink-60); cursor:pointer;
           transition:border-color .15s ease, color .15s ease, background .15s ease, transform .15s cubic-bezier(.16,1,.3,1);
         }
-        .fp-width-btn:hover { border-color:var(--brand-teal); color:var(--slate); transform:translateY(-2px); }
+        .fp-width-btn:hover { border-color:var(--brand-teal); color:var(--ink); transform:translateY(-2px); }
         .fp-width-btn:active { transform:translateY(0) scale(0.96); }
         .fp-width-btn--active {
-          border-color:var(--slate) !important;
-          background:var(--slate) !important;
-          color:#fff !important;
+          border-color:var(--brand-teal) !important;
+          background:var(--brand-teal) !important;
+          color:#06110f !important;
         }
 
         .fp-gallery-thumb {
@@ -135,7 +135,7 @@ export default function FlexoPrintingPage() {
 
         .fp-kv { display:flex; flex-direction:column; gap:.25rem; }
         .fp-kv__label { font-family:var(--ff-mono); font-size:0.68rem; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,0.65); }
-        .fp-kv__value { font-family:var(--ff-display); font-size:1.45rem; color:var(--slate); line-height:1; }
+        .fp-kv__value { font-family:var(--ff-display); font-size:1.45rem; color:var(--ink); line-height:1; }
 
         /* ── Light mode: keep dark sections dark with white text ── */
         [data-theme="light"] .fp-dark { background: #0d1614 !important; }
@@ -234,16 +234,16 @@ export default function FlexoPrintingPage() {
       </section>
 
       {/* ── COLOUR TIER + WIDTH SELECTOR ── */}
-      <section style={{ background:"var(--canvas-bg)", borderTop:"1px solid var(--line)", padding:"4rem 0 5rem" }}>
+      <section style={{ background:"var(--bg-base)", borderTop:"1px solid var(--bg-line)", padding:"4rem 0 5rem" }}>
         <div className="wrap" style={{ display:"flex", flexDirection:"column", gap:"3rem" }}>
 
           {/* heading */}
           <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"space-between", flexWrap:"wrap", gap:"1rem" }}>
             <div>
-              <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--slate-60)", display:"block", marginBottom:".4rem" }}>
+              <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--ink-60)", display:"block", marginBottom:".4rem" }}>
                 {t("selectConfiguration")}
               </span>
-              <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.8rem,3vw,2.6rem)", color:"var(--slate)", lineHeight:.95 }}>
+              <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.8rem,3vw,2.6rem)", color:"var(--ink)", lineHeight:.95 }}>
                 {t("chooseColourAndWidth")}
               </h2>
             </div>
@@ -284,8 +284,8 @@ export default function FlexoPrintingPage() {
           {/* selected model key specs */}
           <div className="fp-kv-grid" data-reveal="scale" style={{
             display:"grid", gridTemplateColumns:"repeat(4,1fr)",
-            gap:"1px", background:"var(--line)",
-            border:"1px solid var(--line)",
+            gap:"1px", background:"var(--bg-line)",
+            border:"1px solid var(--bg-line)",
           }}>
             {[
               { label: t("model"),        value: singleModel.models[0] },
@@ -293,9 +293,9 @@ export default function FlexoPrintingPage() {
               { label: t("registration"), value: ks.reg },
               { label: t("driveSystemLabel"), value: driveSystemCopy[ks.drive] },
             ].map(kv => (
-              <div key={kv.label} style={{ background:"var(--surface)", padding:"1.4rem 1.6rem" }}>
-                <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.68rem", letterSpacing:".18em", textTransform:"uppercase", color:"var(--slate-60)", marginBottom:".4rem" }}>{kv.label}</div>
-                <div style={{ fontFamily:"var(--ff-display)", fontSize:"1.2rem", color:"var(--slate)", lineHeight:1 }}>{kv.value}</div>
+              <div key={kv.label} style={{ background:"var(--bg-surface)", padding:"1.4rem 1.6rem" }}>
+                <div style={{ fontFamily:"var(--ff-mono)", fontSize:"0.68rem", letterSpacing:".18em", textTransform:"uppercase", color:"var(--ink-60)", marginBottom:".4rem" }}>{kv.label}</div>
+                <div style={{ fontFamily:"var(--ff-display)", fontSize:"1.2rem", color:"var(--ink)", lineHeight:1 }}>{kv.value}</div>
               </div>
             ))}
           </div>
@@ -312,18 +312,18 @@ export default function FlexoPrintingPage() {
       </section>
 
       {/* ── ALL SERIES OVERVIEW ── */}
-      <section style={{ background:"var(--surface)", borderTop:"1px solid var(--line)", padding:"5rem 0" }}>
+      <section style={{ background:"var(--bg-surface)", borderTop:"1px solid var(--bg-line)", padding:"5rem 0" }}>
         <div className="wrap">
-          <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--slate-60)", display:"block", marginBottom:".6rem" }}>
+          <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--ink-60)", display:"block", marginBottom:".6rem" }}>
             {t("completeRange")}
           </span>
-          <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.8rem,3vw,2.6rem)", color:"var(--slate)", lineHeight:.95, marginBottom:"3rem" }}>
+          <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.8rem,3vw,2.6rem)", color:"var(--ink)", lineHeight:.95, marginBottom:"3rem" }}>
             {t("allSeriesConfigurations")}
           </h2>
 
           <div style={{ display:"flex", flexDirection:"column", gap:"3rem" }}>
             {families.map((f, fi) => (
-              <article key={f.slug} className="fp-series-row" data-reveal style={{ display:"grid", gridTemplateColumns:"280px 1fr", gap:"3rem", paddingBottom:"3rem", borderBottom:"1px solid var(--line)" }}>
+              <article key={f.slug} className="fp-series-row" data-reveal style={{ display:"grid", gridTemplateColumns:"280px 1fr", gap:"3rem", paddingBottom:"3rem", borderBottom:"1px solid var(--bg-line)" }}>
 
                 {/* left — machine image + tier info */}
                 <div style={{ display:"flex", flexDirection:"column", gap:"1.2rem" }}>
@@ -336,15 +336,15 @@ export default function FlexoPrintingPage() {
                   />
                   <div>
                     <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.66rem", letterSpacing:".2em", textTransform:"uppercase", color:"var(--brand-red)", display:"block", marginBottom:".3rem" }}>{f.series}</span>
-                    <h3 style={{ fontFamily:"var(--ff-display)", fontSize:"1.4rem", color:"var(--slate)", lineHeight:1, marginBottom:".5rem" }}>{f.name}</h3>
-                    <p style={{ fontFamily:"var(--ff-body)", fontSize:".88rem", color:"var(--slate-60)", lineHeight:1.6 }}>{f.tagline}</p>
+                    <h3 style={{ fontFamily:"var(--ff-display)", fontSize:"1.4rem", color:"var(--ink)", lineHeight:1, marginBottom:".5rem" }}>{f.name}</h3>
+                    <p style={{ fontFamily:"var(--ff-body)", fontSize:".88rem", color:"var(--ink-60)", lineHeight:1.6 }}>{f.tagline}</p>
                   </div>
                   <div style={{ display:"flex", flexWrap:"wrap", gap:".35rem" }}>
                     {f.models.map(m => (
                       <span key={m} style={{
                         fontFamily:"var(--ff-mono)", fontSize:"0.68rem", letterSpacing:".1em",
-                        padding:".25rem .55rem", border:"1px solid var(--line)",
-                        color:"var(--slate-60)", background:"var(--canvas-bg)",
+                        padding:".25rem .55rem", border:"1px solid var(--bg-line)",
+                        color:"var(--ink-60)", background:"var(--bg-base)",
                       }}>{m}</span>
                     ))}
                   </div>
@@ -394,11 +394,11 @@ export default function FlexoPrintingPage() {
 
       {/* ── CTA ── */}
       <section style={{
-        background:"var(--surface)", borderTop:"1px solid var(--line)",
+        background:"var(--bg-surface)", borderTop:"1px solid var(--bg-line)",
         padding:"clamp(2.5rem,5vw,4rem) clamp(1.25rem,4vw,3rem)",
         display:"flex", justifyContent:"space-between", alignItems:"center", gap:"2rem", flexWrap:"wrap",
       }} data-reveal>
-        <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.75rem,4vw,2.8rem)", color:"var(--slate)", lineHeight:.98 }}>
+        <h2 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(1.75rem,4vw,2.8rem)", color:"var(--ink)", lineHeight:.98 }}>
           {t("needHelpChoosing")}
         </h2>
         <AetherBtn><Link href="/inquiries">{t("talkToEngineer")}</Link></AetherBtn>

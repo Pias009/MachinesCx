@@ -5,17 +5,25 @@ import { getTranslations } from "next-intl/server";
 import AetherBtn from "@/components/AetherBtn";
 import { articleBySlug, renderNewsBody } from "@/lib/news";
 import { getLiveNews } from "@/lib/liveNews";
+import { pageMetadata, localePath } from "@/lib/seo";
+import { SITE_URL, BRAND } from "@/lib/products";
+import JsonLd from "@/components/JsonLd";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata({ params }: { params: { locale: string; slug: string } }) {
   const t = await getTranslations("newsArticlePage");
   const { articles } = await getLiveNews();
   const a = articleBySlug({ articles }, params.slug);
-  return {
-    title: a ? `${a.title} — Ashal Innomach` : t("metadataFallbackTitle"),
-    description: a?.excerpt,
-  };
+  if (!a) return { title: t("metadataFallbackTitle") };
+
+  return pageMetadata({
+    locale: params.locale,
+    path: `/news/${params.slug}`,
+    title: `${a.title} — Ashal Innomach`,
+    description: a.excerpt,
+    image: a.image,
+  });
 }
 
 function fmt(iso: string) {
@@ -24,7 +32,7 @@ function fmt(iso: string) {
   });
 }
 
-export default async function ArticlePage({ params }: { params: { slug: string } }) {
+export default async function ArticlePage({ params }: { params: { locale: string; slug: string } }) {
   const t = await getTranslations("newsArticlePage");
   const { articles } = await getLiveNews();
   const a = articleBySlug({ articles }, params.slug);
@@ -34,8 +42,34 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     .filter((r) => r.slug !== a.slug && r.tags.some((t) => a.tags.includes(t)))
     .slice(0, 3);
 
+  const url = `${SITE_URL}${localePath(params.locale, `/news/${params.slug}`)}`;
+
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "NewsArticle",
+          headline: a.title,
+          description: a.excerpt,
+          image: a.image ? `${SITE_URL}${a.image}` : undefined,
+          datePublished: a.date,
+          author: { "@type": "Organization", name: BRAND },
+          publisher: { "@type": "Organization", name: BRAND, logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.jpeg` } },
+          mainEntityOfPage: url,
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+            { "@type": "ListItem", position: 2, name: "News", item: `${SITE_URL}${localePath(params.locale, "/news")}` },
+            { "@type": "ListItem", position: 3, name: a.title, item: url },
+          ],
+        }}
+      />
       <div style={{ background: "var(--bg-base)", minHeight: "100vh" }}>
 
       {/* ── Hero ── */}

@@ -1,15 +1,19 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { getLiveNews } from "@/lib/liveNews";
+import { pageMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "News — Wenzhou Ashal Innomach Technology",
-  description: "Product launches, technical guides, and company updates from Ashal Innomach.",
-};
+export function generateMetadata({ params }: { params: { locale: string } }) {
+  return pageMetadata({
+    locale: params.locale,
+    path: "/news",
+    title: "News — Wenzhou Ashal Innomach Technology",
+    description: "Product launches, technical guides, and company updates from Ashal Innomach.",
+  });
+}
 
 function fmt(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", {

@@ -95,6 +95,7 @@ export default function SiteFooter() {
     { label: t("supportLinks.technical"), href: "/inquiries" },
     { label: t("supportLinks.contact"), href: "/inquiries" },
     { label: t("supportLinks.engineer"), href: "/inquiries" },
+    { label: t("supportLinks.faq"), href: "/faq" },
   ];
 
   const LEGAL_LINKS = [

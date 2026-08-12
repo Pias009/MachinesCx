@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import FlexoPrintingPage from "@/components/FlexoPrintingPage";
-import { categories, categoryBySlug, type CategorySlug } from "@/lib/products";
+import { categories, type CategorySlug } from "@/lib/products";
 import { getLiveCatalogue } from "@/lib/liveCatalogue";
+import { pageMetadata } from "@/lib/seo";
 import CategoryPageClient from "./CategoryPageClient";
 
 export const dynamic = "force-dynamic";
@@ -10,9 +11,18 @@ export function generateStaticParams() {
   return categories.map((c) => ({ category: c.slug }));
 }
 
-export function generateMetadata({ params }: { params: { category: string } }) {
-  const c = categoryBySlug(params.category);
-  return { title: c ? `${c.name} — Ashal Innomach` : "Catalogue" };
+export async function generateMetadata({ params }: { params: { locale: string; category: string } }) {
+  const { locale, category } = params;
+  const { categories: liveCategories } = await getLiveCatalogue();
+  const c = liveCategories.find((x) => x.slug === category);
+  if (!c) return { title: "Catalogue — Ashal Innomach" };
+
+  return pageMetadata({
+    locale,
+    path: `/products/${category}`,
+    title: `${c.name} — Ashal Innomach`,
+    description: c.blurb,
+  });
 }
 
 export default async function CategoryPage({ params }: { params: { category: string } }) {

@@ -1,4 +1,9 @@
 import dynamic from "next/dynamic";
+import { alternates } from "@/lib/seo";
+
+export function generateMetadata({ params }: { params: { locale: string } }) {
+  return { alternates: alternates(params.locale, "") };
+}
 
 const HeroSplash         = dynamic(() => import("@/components/HeroSplash"),         { ssr: true  });
 const AiAgentBanner      = dynamic(() => import("@/components/AiAgentBanner"),      { ssr: false });

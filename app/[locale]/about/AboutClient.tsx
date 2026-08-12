@@ -215,7 +215,6 @@ export default function AboutPage() {
   const atmosphereCopyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    document.title = t("pageTitle");
     const checkTheme = () => {
       const theme = document.documentElement.getAttribute("data-theme");
       setIsDark(theme !== "light");

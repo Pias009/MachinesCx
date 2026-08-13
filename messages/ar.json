@@ -1780,6 +1780,8 @@
     "askAboutStep": "اسأل الذكاء الاصطناعي عن هذه الخطوة",
     "askInstallStepContext": "لدي سؤال حول خطوة التركيب \"{step}\": {detail}",
     "askDeliveryStageContext": "لدي سؤال حول مرحلة التسليم \"{stage}\": {detail}",
+    "overviewHeading": "نظرة عامة",
+    "keySpecsHeading": "المواصفات الرئيسية والفئة",
     "fullSpecifications": "المواصفات الكاملة",
     "clickColumnToHighlight": "انقر على عمود لتمييزه",
     "compatibleMaterials": "المواد المتوافقة",

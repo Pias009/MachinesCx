@@ -3,6 +3,7 @@ node_modules/
 *.node
 data.zip
 SEO-GEO-AEO-Skill-main.zip
+seo-audits/
 # data/ — CMS content (data/*.json) must be committed; was previously ignored
 tsconfig.tsbuildinfo
 *.tsbuildinfo

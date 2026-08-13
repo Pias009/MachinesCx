@@ -1780,6 +1780,8 @@
     "askAboutStep": "इस चरण के बारे में AI से पूछें",
     "askInstallStepContext": "मुझे इंस्टॉलेशन चरण \"{step}\" के बारे में एक सवाल है: {detail}",
     "askDeliveryStageContext": "मुझे डिलीवरी चरण \"{stage}\" के बारे में एक सवाल है: {detail}",
+    "overviewHeading": "अवलोकन",
+    "keySpecsHeading": "मुख्य स्पेसिफिकेशन और श्रेणी",
     "fullSpecifications": "पूर्ण स्पेसिफिकेशन",
     "clickColumnToHighlight": "हाइलाइट करने के लिए कॉलम पर क्लिक करें",
     "compatibleMaterials": "संगत सामग्री",

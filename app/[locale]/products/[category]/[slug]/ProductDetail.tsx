@@ -15,7 +15,7 @@ import MachineParts from "@/components/MachineParts";
 import ProductStage3D from "@/components/ProductStage3D";
 import { Grain, PlusMark, SectionHead, SubHead } from "@/components/EditorialKit";
 import type { ProductFamily, Category, DeliveryPhase, SetupStep } from "@/lib/products";
-import { familyImage, familyImages, parseYouTubeId, stagePhotos } from "@/lib/products";
+import { familyImage, familyImages, parseYouTubeId, stagePhotos, BRAND } from "@/lib/products";
 
 const MachineDiagram = dynamic(() => import("@/components/MachineDiagram"), { ssr: false });
 
@@ -531,6 +531,14 @@ export default function ProductDetail({ family, category, related }: Props) {
     return [{ label: row.label, value: row.values[Math.min(activeModel, row.values.length - 1)] }];
   });
 
+  /* on-page description + tag chips — composed entirely from real family
+     data (tagline, category, materials, top specs), never invented copy.
+     Distinct from the hidden Product JSON-LD in page.tsx: this is visible
+     text/markup crawlers and buyers both read directly on the page. */
+  const overviewSentence = `${family.tagline} Part of the ${category.name.toLowerCase()} range from ${BRAND}.`;
+  const specTags = panelSpecs.slice(0, 4);
+  const keywordTags = [category.name, family.series, ...(family.materials ? family.materials.split(",").map(m => m.trim()) : [])];
+
   /* the model selector is only worth showing when picking a different
      model actually changes something the visitor can see — matching it
      against the same rows the panel displays (not the raw spec sheet)
@@ -884,6 +892,46 @@ export default function ProductDetail({ family, category, related }: Props) {
           {/* ── Product Details ── */}
           {activeTab === "details" && (
             <div className="pdv2-tabpane">
+
+              {/* ── Overview — a real, on-page description composed from
+                  actual family data (tagline + category + materials), not
+                  invented marketing copy. Visible to crawlers and buyers
+                  alike, unlike the hidden Product JSON-LD in page.tsx. ── */}
+              <SubHead title={t("overviewHeading")} />
+              <p className="max-w-[68ch] text-[1rem] leading-[1.75] text-[var(--ink-60)]" data-reveal>
+                {overviewSentence}
+                {family.materials && (
+                  <> {t("compatibleMaterials")}: {family.materials}.</>
+                )}
+              </p>
+
+              {/* ── Key specs & category tags — visible chip row so the
+                  page's own text (not just hidden schema) carries the
+                  category, series and headline spec keywords search
+                  engines and buyers both scan for. ── */}
+              {(keywordTags.length > 0 || specTags.length > 0) && (
+                <>
+                  <SubHead title={t("keySpecsHeading")} />
+                  <div className="flex flex-wrap gap-2" data-reveal>
+                    {keywordTags.map(tag => (
+                      <span
+                        key={tag}
+                        className="rounded-full border border-[var(--brand-teal)]/30 bg-[var(--brand-teal)]/8 px-3 py-1 font-mono text-[0.68rem] uppercase tracking-[0.08em] text-[var(--brand-teal)]"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    {specTags.map(s => (
+                      <span
+                        key={s.label}
+                        className="rounded-full border border-[var(--bg-line)] bg-[var(--bg-surface)] px-3 py-1 font-mono text-[0.68rem] uppercase tracking-[0.08em] text-[var(--ink-60)]"
+                      >
+                        {s.label}: {s.value}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              )}
 
               {/* circular diagram — key specs around machine image */}
               <MachineDiagram

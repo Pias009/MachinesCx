@@ -1884,6 +1884,8 @@
     "askAboutStep": "Ask AI about this step",
     "askInstallStepContext": "I have a question about the installation step \"{step}\": {detail}",
     "askDeliveryStageContext": "I have a question about the delivery stage \"{stage}\": {detail}",
+    "overviewHeading": "Overview",
+    "keySpecsHeading": "Key Specs & Category",
     "fullSpecifications": "Full Specifications",
     "clickColumnToHighlight": "Click a column to highlight",
     "compatibleMaterials": "Compatible materials",

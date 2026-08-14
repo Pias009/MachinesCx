@@ -16,7 +16,7 @@
 @tailwind utilities;
 
 :root {
-  /* ── brand palettjjjje ── */
+  /* ── brand palettjjjje mm── */
   --brand-teal:    #2bbfb3;           /* exact logo teal */
   --brand-teal-dk: #1fa39a;           /* hover / pressed */
   --brand-teal-dim: rgba(43,191,179,0.14);

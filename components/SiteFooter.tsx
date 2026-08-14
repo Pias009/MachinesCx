@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
@@ -8,6 +9,9 @@ import gsap from "gsap";
 import { BRAND } from "@/lib/products";
 
 gsap.registerPlugin(useGSAP);
+
+// WebGL canvas — client-only, same reasoning as HeroSplash's WaveBackground
+const FooterWaterReflection = dynamic(() => import("@/components/FooterWaterReflection"), { ssr: false });
 
 const PHONE_DISPLAY = "+86 159 8877 5831";
 const PHONE_TEL = "+8615988775831";
@@ -107,6 +111,7 @@ export default function SiteFooter() {
     <footer className="footer" ref={footerRef}>
       <div className="footer-bg-grid" aria-hidden="true" />
       <div className="footer-bg-glow" aria-hidden="true" />
+      <FooterWaterReflection />
       <div className="wrap" style={{ position: "relative", zIndex: 1 }}>
 
         {/* ── Main footer grid ── */}

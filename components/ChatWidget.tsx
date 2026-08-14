@@ -759,11 +759,12 @@ export default function ChatWidget() {
           position: fixed; bottom: 96px; right: 24px; z-index: 9200;
           width: min(460px, calc(100vw - 32px));
           height: min(680px, calc(100vh - 120px));
-          background: var(--bg-surface);
-          border: 1px solid var(--bg-line);
+          background: var(--glass-bg-raise);
+          border: 1px solid var(--glass-border);
           border-radius: 18px;
-          backdrop-filter: blur(20px) saturate(1.6);
-          box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+          -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat));
+                  backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat));
+          box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
           display: flex; flex-direction: column; overflow: hidden;
           font-family: var(--ff-body), system-ui, sans-serif;
           color-scheme: dark;

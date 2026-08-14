@@ -144,7 +144,9 @@ export default function ProductLeadCapture() {
       <style jsx>{`
         .plc-overlay {
           position: fixed; inset: 0; z-index: 9300;
-          background: rgba(4,10,9,0.6); backdrop-filter: blur(3px);
+          background: rgba(4,10,9,0.6);
+          -webkit-backdrop-filter: blur(3px);
+                  backdrop-filter: blur(3px);
           display: flex; align-items: center; justify-content: center;
           padding: 1.2rem;
           animation: plc-fade-in 0.2s ease both;

@@ -256,8 +256,10 @@ export default function MachineCatalogSection() {
         .mcs__cta {
           display: inline-flex; align-items: center; gap: .6rem;
           padding: .75rem 1.75rem;
-          background: transparent; color: var(--ink-60);
+          background: var(--glass-bg); color: var(--ink-60);
           border: 1px solid rgba(255,255,255,0.12);
+          -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
+                  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
           font-family: var(--ff-mono); font-size: .72rem;
           letter-spacing: .1em; text-transform: uppercase;
           text-decoration: none; white-space: nowrap;

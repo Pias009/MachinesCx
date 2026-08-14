@@ -638,11 +638,6 @@ export default function ScrollHome() {
         </div>
 
         <div className="sh-spacer" style={{ width: "50%" }} />
-
-        <div className="scroll-hint" style={{ zIndex: 10 }}>
-          <div className="scroll-hint__line" />
-          <span>scroll</span>
-        </div>
       </section>
 
       {/* ══════════════════════════════════════════════════
@@ -1070,7 +1065,9 @@ export default function ScrollHome() {
           width: clamp(220px, 20vw, 280px);
           display: flex; flex-direction: column; gap: 0.85rem;
           padding: 0.85rem 0.85rem 1rem;
-          background: rgba(255,255,255,0.02);
+          background: rgba(255,255,255,0.03);
+          -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
+                  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
           border: 1px solid rgba(255,255,255,0.08);
           border-radius: 12px;
           cursor: pointer;
@@ -1079,9 +1076,9 @@ export default function ScrollHome() {
         }
         .sh-card:hover {
           border-color: rgba(43,191,179,0.35);
-          background: rgba(255,255,255,0.04);
+          background: rgba(255,255,255,0.06);
           transform: translateY(-4px);
-          box-shadow: 0 16px 32px -16px rgba(0,0,0,0.6);
+          box-shadow: 0 16px 32px -16px rgba(0,0,0,0.6), inset 0 1px 0 var(--glass-highlight);
         }
         .sh-card:focus-visible {
           outline: 2px solid var(--brand-teal); outline-offset: 2px;
@@ -1145,7 +1142,6 @@ export default function ScrollHome() {
            see the comment there. Only the bits unique to this file's own
            style tag stay here. */
         @media (max-width: 768px) {
-          .scroll-hint { display: none !important; }
           .sh-sec h1 { font-size: clamp(2rem, 9vw, 3rem) !important; }
           .sh-sec h2 { font-size: clamp(1.7rem, 8vw, 2.8rem) !important; }
           .sh-sec p  { font-size: 0.88rem !important; max-width: 100% !important; }

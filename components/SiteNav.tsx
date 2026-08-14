@@ -81,20 +81,28 @@ export default function SiteNav() {
   return (
     <>
       <style suppressHydrationWarning>{`
-        /* ── Base bar ── */
+        /* ── Base bar ── liquid glass: translucent (not the old opaque
+           --bg-surface, which made the 20px blur invisible — nothing
+           showed through it) so page content actually reads, blurred and
+           saturated, behind the bar as it scrolls underneath. */
         .sn {
           position: fixed; top: 0; left: 0; right: 0; z-index: 200;
           height: 72px; width: 100%; overflow: hidden;
-          background: var(--bg-surface);
-          backdrop-filter: blur(20px) saturate(1.6);
-          border-bottom: 1px solid var(--bg-line);
+          background: var(--glass-bg);
+          -webkit-backdrop-filter: blur(var(--glass-blur-md)) saturate(var(--glass-sat));
+                  backdrop-filter: blur(var(--glass-blur-md)) saturate(var(--glass-sat));
+          border-bottom: 1px solid var(--glass-border);
+          box-shadow: inset 0 1px 0 var(--glass-highlight);
           transition: background 0.35s, border-color 0.35s, box-shadow 0.35s;
         }
-        /* scrolled — slightly more opaque */
+        /* scrolled — slightly more opaque + deeper blur, so the bar reads
+           as "settled" rather than just tinting darker */
         .sn--on {
-          background: var(--bg-raise);
-          border-color: var(--bg-line);
-          box-shadow: 0 4px 32px color-mix(in srgb, var(--bg-base) 60%, transparent);
+          background: var(--glass-bg-raise);
+          border-color: var(--glass-border);
+          -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat));
+                  backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat));
+          box-shadow: 0 4px 32px color-mix(in srgb, var(--bg-base) 60%, transparent), inset 0 1px 0 var(--glass-highlight);
         }
         /* Red top accent line */
         .sn::before {
@@ -234,30 +242,38 @@ export default function SiteNav() {
         @media (prefers-reduced-motion: reduce) {
           .sn__cta { transform: none !important; }
           .sn__cta::before { display: none; }
+          .sn__dd { animation: none; }
+          .sn__backdrop { animation: none; }
         }
 
-        /* ── Dropdown ── */
+        /* ── Dropdown ── liquid glass panel. Was rgba(10,14,26,0.97) — at
+           97% opacity the 24px blur behind it was doing almost nothing
+           visible; --glass-bg-raise keeps it readable (menu text/product
+           thumbnails need real contrast) while still showing genuine
+           depth through the blur, matching the nav bar's material. */
         .sn__dd {
           position: fixed; top: 72px;
           left: 50%; transform: translateX(-50%);
           width: clamp(300px, 54vw, 760px);
-          background: rgba(10,14,26,0.97);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: var(--glass-bg-raise);
+          border: 1px solid var(--glass-border);
           border-top: 2px solid var(--brand-red);
-          backdrop-filter: blur(24px);
-          box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+          -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat));
+                  backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat));
+          box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
           display: flex; z-index: 300;
-          animation: snDdIn 0.22s cubic-bezier(0.16,1,0.3,1) both;
+          animation: snDdIn 0.32s var(--ease-fluid) both;
         }
         @keyframes snDdIn {
-          from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
-          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+          from { opacity: 0; transform: translateX(-50%) translateY(-12px) scale(0.98); filter: blur(4px); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); filter: blur(0); }
         }
 
         .sn__backdrop {
           position: fixed; inset: 0; top: 72px; z-index: 199;
           background: rgba(0,0,0,0.55);
-          backdrop-filter: blur(2px);
+          -webkit-backdrop-filter: blur(2px);
+                  backdrop-filter: blur(2px);
           animation: snBdIn 0.25s ease both;
           pointer-events: none;
         }

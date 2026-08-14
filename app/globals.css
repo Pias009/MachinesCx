@@ -60,6 +60,28 @@
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in:  cubic-bezier(0.4, 0, 1, 1);
+
+  /* ── liquid glass — shared surface/motion tokens ──
+     One recipe for every frosted panel on the site (nav, dropdowns, chat,
+     lead-capture, etc.) instead of each component inventing its own blur
+     radius/opacity. Dark-mode values here; light-mode redefines below. */
+  --glass-blur-sm:  8px;
+  --glass-blur-md:  16px;
+  --glass-blur-lg:  28px;
+  --glass-sat:      1.5;                          /* saturate() boost so blurred color stays vivid, not washed out */
+  --glass-bg:       rgba(13,22,20,0.55);           /* --bg-surface at ~55% — translucent enough for blur to read */
+  --glass-bg-raise: rgba(18,33,32,0.62);           /* --bg-raise equivalent, for elevated/hover glass */
+  --glass-border:   rgba(255,255,255,0.12);
+  --glass-highlight: rgba(255,255,255,0.06);       /* faint top-edge sheen — the "light catching glass" cue */
+  --glass-shadow:   0 24px 64px -20px rgba(0,0,0,0.55);
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+
+  /* fluid-motion easing — a springier, more "liquid" settle than the
+     existing --ease-out (which stays for plain fades/reveals) */
+  --ease-fluid: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* =========================================================================
@@ -145,6 +167,51 @@
   --dark-bg:     #ffffff;
   --dark-bg2:    #ffffff;
   --dark-border: rgba(13,34,32,0.12);
+
+  /* liquid glass — light surfaces need less blur radius (busier white
+     backgrounds get muddy at 28px) and a white-tinted glass instead of
+     the dark-mode charcoal tint */
+  --glass-blur-sm:  6px;
+  --glass-blur-md:  12px;
+  --glass-blur-lg:  20px;
+  --glass-sat:      1.3;
+  --glass-bg:       rgba(255,255,255,0.6);
+  --glass-bg-raise: rgba(255,255,255,0.72);
+  --glass-border:   rgba(13,34,32,0.1);
+  --glass-highlight: rgba(255,255,255,0.5);
+  --glass-shadow:   0 20px 48px -18px rgba(13,34,32,0.22);
+}
+
+/* =========================================================================
+   LIQUID GLASS — shared surface utilities
+   One consistent frosted-glass recipe (token-driven, themes automatically
+   via --glass-* above) instead of every component hand-rolling its own
+   backdrop-filter/rgba combination. Apply directly as a class, or use the
+   tokens inline where a component's existing CSS is more specific than a
+   plain class can override.
+   ========================================================================= */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(var(--glass-blur-md)) saturate(var(--glass-sat));
+          backdrop-filter: blur(var(--glass-blur-md)) saturate(var(--glass-sat));
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+}
+.glass--sm { -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat)); backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat)); }
+.glass--lg { -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat)); backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat)); }
+.glass--raised { background: var(--glass-bg-raise); }
+
+/* fluid morph — a springier settle for glass panels appearing/moving,
+   distinct from the site's existing power3/power2 GSAP eases which read
+   as mechanical (fitting for machine-spec reveals) rather than liquid */
+@keyframes glassIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+.glass-in { animation: glassIn 0.45s var(--ease-fluid) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-in { animation: none; }
 }
 
 /* ── Light mode body ── */
@@ -164,15 +231,14 @@
 [data-theme="light"] .ts-stat__sub  { color: rgba(13,34,32,0.65) !important; }
 [data-theme="light"] .ts-stats      { border-color: rgba(43,191,179,0.2) !important; }
 [data-theme="light"] .ts-stat       { border-right-color: rgba(43,191,179,0.15) !important; }
-/* SiteNav — uses CSS variables, no overrides needed */
-[data-theme="light"] .sn            { background: var(--bg-surface); border-color: var(--bg-line); }
-[data-theme="light"] .sn--on        { background: var(--bg-raise); }
+/* SiteNav — .sn/.sn--on/.sn__dd read var(--glass-bg)/var(--glass-bg-raise)
+   directly now (both tokens flip to a white-tinted glass in light mode
+   automatically), so no background override is needed here any more. */
 [data-theme="light"] .sn__logo,
 [data-theme="light"] .sn__cat-btn,
 [data-theme="light"] .sn__link      { color: var(--ink) !important; }
 [data-theme="light"] .sn__cat-btn:hover,
 [data-theme="light"] .sn__link:hover { color: var(--brand-teal) !important; }
-[data-theme="light"] .sn__dd        { background: color-mix(in srgb, var(--bg-surface) 98%, transparent) !important; }
 [data-theme="light"] .sn__dd-series { color: var(--ink) !important; }
 [data-theme="light"] .marquee-track span { color: rgba(13,34,32,0.6) !important; }
 [data-theme="light"] .marquee-wrap  { background: #ffffff !important; }
@@ -799,6 +865,11 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   background: radial-gradient(circle, rgba(43,191,179,0.1) 0%, transparent 70%);
   filter: blur(30px);
 }
+/* FooterWaterReflection's <canvas> — the component sets its own inline
+   position/inset/opacity/blend-mode (all needed at the DOM node itself
+   for the WebGL context), this just pins it under the grid/glow layers
+   above and the content wrap (z-index:1) below. */
+.footer > canvas { z-index: 0; }
 /* live status dot next to "Certifications" — small always-on pulse to
    echo the "machine still running" feel used in the hero/nav elsewhere */
 .footer-live-dot {
@@ -901,15 +972,30 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .footer-contact-link:hover { color: #fff; }
 .footer-contact-link svg,
 .footer-contact-static svg { color: var(--brand-teal); flex-shrink: 0; }
-.footer-contact-static { font-size: .9rem; color: rgba(255,255,255,0.72); }
+.footer-contact-static { color: rgba(255,255,255,0.72); }
 
 .footer-main-grid { border-bottom: 1px solid rgba(255,255,255,0.06); }
 
-/* ── Certifications bar ── */
-.footer-certs { border-bottom: 1px solid rgba(255,255,255,0.06); }
+/* ── Certifications bar — glass pills float over the water shimmer ── */
+.footer-certs { border-bottom: 1px solid rgba(255,255,255,0.06); position: relative; z-index: 1; }
 .footer-certs__label { color: rgba(255,255,255,0.60); }
 .footer-certs__stats { color: rgba(255,255,255,0.60); }
-.footer-cert-badge { color: rgba(255,255,255,0.70); border: 1px solid rgba(255,255,255,0.12); }
+.footer-cert-badge {
+  color: rgba(255,255,255,0.70);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
+          backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
+  transition: background .18s, border-color .18s, transform .18s var(--ease-fluid);
+}
+.footer-cert-badge:hover {
+  background: var(--glass-bg-raise);
+  border-color: var(--brand-teal);
+  transform: translateY(-1px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer-cert-badge { transition: none; }
+}
 
 /* ── Bar ── */
 .footer-bar { border-top: 1px solid rgba(255,255,255,0.06); padding-block: 1.2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .5rem; }
@@ -1038,7 +1124,6 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 /* =======================  REDUCED MOTION  ======================= */
 @media (prefers-reduced-motion: reduce) {
   .marquee-track { animation: none; }
-  .scroll-hint__line { animation: none; }
   .mr-lens { display: none; }
   [data-reveal] { opacity: 1 !important; transform: none !important; clip-path: none !important; }
   [data-ts-hex], [data-ts-icon], [data-ts-table], [data-ts-row] {
@@ -1985,6 +2070,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   letter-spacing: 0.18em; text-transform: uppercase;
   background: rgba(43,191,179,0.12); border: 1px solid rgba(43,191,179,0.28);
   color: var(--brand-teal); padding: 0.3rem 0.7rem;
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
 }
 .pstage__corner {
@@ -2076,10 +2162,6 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   box-shadow: 0 1px 0 rgba(43,191,179,0.1) inset,
               0 32px 64px -24px rgba(0,0,0,0.55);
 }
-/* content stacks naturally; trust row is pinned to the card's
-   bottom edge so short spec lists don't leave a dead gap above it */
-.pdv2-trust-row { margin-top: auto; }
-
 /* model selector */
 .pdv2-model-strip {
   display: flex; align-items: flex-start; gap: 0.85rem; flex-wrap: wrap;
@@ -2217,9 +2299,11 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-back-btn:hover { border-color: rgba(43,191,179,0.35); color: var(--ink-60); transform: translateX(-3px); }
 .pdv2-back-btn:active { transform: translateX(-3px) scale(0.97); }
 
-/* trust row */
+/* trust row — pinned to the info-card's bottom edge (margin-top: auto)
+   so short spec lists don't leave a dead gap above it */
 .pdv2-trust-row {
   display: flex; gap: 1.75rem; flex-wrap: wrap;
+  margin-top: auto;
   padding-top: 1.25rem; border-top: 1px solid var(--bg-line);
 }
 .pdv2-trust-item {
@@ -2274,6 +2358,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 }
 .pdv2-pin__card {
   background: rgba(5,12,11,0.82);
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(43,191,179,0.3);
   padding: 0.4rem 0.7rem;
@@ -2378,6 +2463,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-part__icon {
   position: absolute; top: 0.5rem; right: 0.5rem;
   width: 40px; height: 40px; border-radius: 50%;
+  -webkit-backdrop-filter: blur(4px);
   background: rgba(5,12,11,0.75); backdrop-filter: blur(4px);
   border: 1.5px solid rgba(43,191,179,0.3);
   display: flex; align-items: center; justify-content: center;
@@ -2535,7 +2621,6 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
    model inside it; tapping a row highlights that model everywhere else
    on the page, same as clicking a table column header does above. ── */
 .pdv2-speccards { display: none; }
-.pdv2-table-wrap { overflow-x: visible; }
 @media (max-width: 700px) {
   .pdv2-table-wrap > .pdv2-table { display: none; }
   .pdv2-table-wrap { overflow-x: hidden; }
@@ -2862,6 +2947,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   display: flex; align-items: center; justify-content: center;
   padding: 1.5rem;
   background: rgba(4,10,10,.6);
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   animation: pdv2-rmodal-veil-in .25s ease both;
 }
@@ -3024,6 +3110,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   position: relative;
   flex-shrink: 0; width: 44px; height: 44px;
   border: 2px solid rgba(255,255,255,0.25);
+  -webkit-backdrop-filter: blur(4px);
   background: rgba(5,12,11,0.6); backdrop-filter: blur(4px);
   overflow: hidden; cursor: pointer; padding: 0;
   opacity: 0.7; transition: opacity 0.15s, border-color 0.15s;
@@ -3243,6 +3330,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   width: 2.25rem; height: 2.25rem;
   border: 1px solid rgba(255,255,255,0.3);
   background: rgba(8,14,13,0.55);
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   color: #fff; font-size: 1.1rem; line-height: 1;
   display: flex; align-items: center; justify-content: center;
@@ -3255,6 +3343,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   font-family: var(--ff-mono); font-size: 0.7rem; letter-spacing: 0.06em;
   padding: 0.35rem 0.7rem;
   background: rgba(8,14,13,0.55);
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(255,255,255,0.3);
   color: #fff;

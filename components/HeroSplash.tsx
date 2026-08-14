@@ -509,15 +509,18 @@ export default function HeroSplash() {
         .hs__btn-secondary {
           display: inline-flex; align-items: center; gap: .4rem;
           padding: .65rem 1.4rem;
-          background: transparent; color: var(--ink-60);
+          background: var(--glass-bg); color: var(--ink-60);
           border: 1px solid var(--ink-15);
+          -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
+                  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
           font-family: var(--ff-mono); font-size: .7rem;
           letter-spacing: .09em; text-transform: uppercase;
           text-decoration: none;
-          transition: border-color .18s, color .18s; white-space: nowrap;
+          transition: border-color .18s, color .18s, background .18s; white-space: nowrap;
         }
         .hs__btn-secondary:hover {
           border-color: var(--brand-red); color: var(--brand-red);
+          background: var(--glass-bg-raise);
         }
 
         /* ── ARCH of media cards, bottom half ── */
@@ -595,13 +598,22 @@ export default function HeroSplash() {
         .hs__node-card:hover .hs__node-img { transform: scale(1.08); }
         .hs__node-shade {
           position: absolute; inset: 0;
-          background: linear-gradient(to top, rgba(5,10,9,0.9) 0%, rgba(5,10,9,0.15) 45%, transparent 75%);
+          background: linear-gradient(to top, rgba(5,10,9,0.55) 0%, transparent 55%);
+          pointer-events: none;
         }
 
+        /* liquid glass caption strip — was a flat gradient scrim; a real
+           frosted panel reads as "glass floating over the photo" instead
+           of a dark fade, and still keeps the series/name legible over
+           any product image without hiding the photo itself. */
         .hs__node-meta {
           position: absolute; left: 0; right: 0; bottom: 0;
           padding: .7rem .8rem;
           text-align: left;
+          background: var(--glass-bg);
+          -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
+                  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
+          border-top: 1px solid var(--glass-highlight);
         }
         .hs__node-series {
           font-family: var(--ff-mono); font-size: .58rem;

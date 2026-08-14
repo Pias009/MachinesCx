@@ -738,7 +738,9 @@ export const chatStyles = `
     position: absolute; left: .6rem; bottom: .6rem; z-index: 1;
     display: inline-flex; align-items: center; gap: .4rem;
     font-family: var(--ff-mono); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
-    color: #fff; background: rgba(4,10,10,.6); backdrop-filter: blur(4px);
+    color: #fff; background: rgba(4,10,10,.6);
+    -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
     padding: .3rem .55rem; border-radius: 999px; border: 1px solid rgba(255,255,255,.15);
   }
   .ci-insight__live-dot {

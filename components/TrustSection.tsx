@@ -258,7 +258,6 @@ export default function TrustSection() {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const dossierRef  = useRef<HTMLDivElement>(null);
   const statsRef    = useRef<HTMLDivElement>(null);
-  const wiperRef    = useRef<HTMLDivElement>(null);
 
   const revealAll = () => {
     const els = [headlineRef.current, dossierRef.current, statsRef.current].filter(Boolean) as HTMLElement[];
@@ -267,7 +266,6 @@ export default function TrustSection() {
     cards.forEach(el => { el.style.opacity = "1"; el.style.transform = "none"; });
     const rows = dossierRef.current ? Array.from(dossierRef.current.querySelectorAll<HTMLElement>(".ts-desc, .ts-dossier__item")) : [];
     rows.forEach(el => { el.style.opacity = "1"; el.style.clipPath = "none"; });
-    if (wiperRef.current) wiperRef.current.style.display = "none";
   };
 
   // ScrollTrigger is a separate plugin bundle — load it lazily since this
@@ -305,32 +303,17 @@ export default function TrustSection() {
 
     if (reduced) {
       gsap.set([headlineRef.current, dossierRef.current, statsRef.current], { opacity: 1, clearProps: "all" });
-      if (wiperRef.current) wiperRef.current.style.display = "none";
       return;
     }
 
-    // Wiper: a bar drops down over the section's own top edge — as if
-    // overlapping in from above — then clears downward off the bottom
-    // before the headline/dossier/stats start their own reveal. One
-    // timeline, one ScrollTrigger for the whole sequence (was 4 separate
-    // instances all watching sectionRef).
-    const WIPER_CLEAR = 0.9;
     const tl = gsap.timeline({ scrollTrigger: trigger, delay: SECTION_ELEMENT_DELAY });
 
-    if (wiperRef.current) {
-      tl
-        .fromTo(wiperRef.current, { yPercent: -100 }, { yPercent: 0, duration: 0.4, ease: "power3.in" }, 0)
-        .to(wiperRef.current, { yPercent: 100, duration: 0.5, ease: "power3.out" }, 0.4)
-        .set(wiperRef.current, { display: "none" });
-    }
-
-    // Headline — skewed shear-in, settles flat. Waits for the wiper to
-    // clear before it starts moving.
+    // Headline — skewed shear-in, settles flat.
     if (headlineRef.current) {
       tl.fromTo(headlineRef.current,
         { opacity: 0, skewY: 6, y: 36 },
         { opacity: 1, skewY: 0, y: 0, duration: 0.9, ease: "expo.out" },
-        WIPER_CLEAR
+        0
       );
     }
 
@@ -345,7 +328,7 @@ export default function TrustSection() {
         duration: 0.55, ease: "power3.out",
         stagger: 0.12,
       },
-      WIPER_CLEAR + 0.15
+      0.15
     );
 
     // Stat cards — tilt up out of depth then overshoot-settle flat,
@@ -361,7 +344,7 @@ export default function TrustSection() {
         duration: 0.65, ease: "back.out(1.7)",
         stagger: 0.08,
       },
-      WIPER_CLEAR + 0.3
+      0.3
     );
   }, { scope: sectionRef, dependencies: [pluginReady] });
 
@@ -375,18 +358,6 @@ export default function TrustSection() {
           overflow: hidden;
           padding-top: clamp(5rem, 10vw, 9rem);
           padding-bottom: clamp(4rem, 8vw, 7rem);
-        }
-        /* Wiper — drops over the section's own top edge like an overlapping
-           panel, then clears down off the bottom before content reveals */
-        .ts__wiper {
-          position: absolute; inset: 0; z-index: 25;
-          background: #0d1614;
-          border-bottom: 2px solid var(--brand-teal);
-          transform: translateY(-100%);
-          pointer-events: none;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .ts__wiper { display: none; }
         }
         .ts__blob {
           position: absolute; border-radius: 50%; pointer-events: none;
@@ -638,8 +609,6 @@ export default function TrustSection() {
       `}</style>
 
       <section className="trust-section" aria-label={t("sectionAria")} ref={sectionRef}>
-        <div ref={wiperRef} className="ts__wiper" aria-hidden="true" />
-
         <div className="ts__blob ts__blob--1" aria-hidden="true" />
         <div className="ts__blob ts__blob--2" aria-hidden="true" />
 

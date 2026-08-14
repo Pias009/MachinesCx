@@ -75,16 +75,20 @@ export default function LanguageSwitcher() {
         .ls-dd {
           position: fixed;
           min-width: 150px;
-          background: rgba(10,14,26,0.97);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: var(--glass-bg-raise);
+          border: 1px solid var(--glass-border);
           border-top: 2px solid var(--brand-red);
-          backdrop-filter: blur(24px);
-          box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+          -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat));
+                  backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat));
+          box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
           z-index: 9200;
           padding: 0.35rem;
-          animation: lsDdIn 0.18s cubic-bezier(0.16,1,0.3,1) both;
+          animation: lsDdIn 0.24s var(--ease-fluid) both;
         }
-        @keyframes lsDdIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes lsDdIn { from { opacity: 0; transform: translateY(-6px) scale(0.98); filter: blur(3px); } to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
+        @media (prefers-reduced-motion: reduce) {
+          .ls-dd { animation: none; }
+        }
 
         .ls-opt {
           display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
@@ -105,11 +109,10 @@ export default function LanguageSwitcher() {
           color: #0d2220 !important;
         }
         [data-theme="light"] .ls-btn:hover { background: rgba(43,191,179,0.1) !important; border-color: var(--brand-teal) !important; color: #0d2220 !important; }
-        [data-theme="light"] .ls-dd {
-          background: rgba(255,255,255,0.98) !important;
-          border-color: rgba(13,34,32,0.1) !important;
-          border-top-color: var(--brand-red) !important;
-        }
+        /* .ls-dd background now comes from --glass-bg-raise directly (flips
+           to a white-tinted glass in light mode automatically) — only the
+           border-top accent needs a light-mode override, since var(--brand-red)
+           already resolves correctly via the teal remap. */
         [data-theme="light"] .ls-opt { color: rgba(13,34,32,0.75) !important; }
         [data-theme="light"] .ls-opt:hover { background: rgba(13,34,32,0.05) !important; color: #0d2220 !important; }
       `}</style>

@@ -190,7 +190,9 @@ export default function LineTemplateShowcase({
           position: absolute; top: .85rem; left: .85rem; z-index: 1;
           display: inline-flex; align-items: center; gap: .4rem;
           font-family: var(--ff-mono); font-size: .6rem; letter-spacing: .12em; text-transform: uppercase;
-          color: #fff; background: rgba(4,10,10,.6); backdrop-filter: blur(4px);
+          color: #fff; background: rgba(4,10,10,.6);
+          -webkit-backdrop-filter: blur(4px);
+                  backdrop-filter: blur(4px);
           padding: .3rem .6rem; border-radius: 999px; border: 1px solid rgba(255,255,255,.15);
         }
         .lts__stage-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand-teal); }

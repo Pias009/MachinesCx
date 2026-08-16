@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useCms } from "@/lib/useCms";
@@ -766,11 +767,14 @@ export default function HeroSplash() {
                     className="hs__node-card"
                     aria-label={f.name}
                   >
-                    <img
+                    <Image
                       src={familyImage(f)}
                       alt={f.name}
+                      fill
+                      sizes="(max-width: 900px) 21vw, 205px"
                       className="hs__node-img"
-                      loading="lazy"
+                      priority={i === 2}
+                      loading={i === 2 ? undefined : "lazy"}
                     />
                     <span className="hs__node-shade" aria-hidden="true" />
                     <span className="hs__node-meta">

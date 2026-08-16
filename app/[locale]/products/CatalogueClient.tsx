@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { familyImage } from "@/lib/products";
 import type { Category, ProductFamily } from "@/lib/products";
 import ProductStage3D from "@/components/ProductStage3D";
+import { useScrollReveal } from "@/lib/useScrollReveal";
 
 function SearchIcon() {
   return (
@@ -81,12 +82,15 @@ export default function CatalogueClient({
   const countFor = (slug: string | "all") =>
     slug === "all" ? families.length : families.filter((f) => f.category === slug).length;
 
+  const rootRef = useRef<HTMLDivElement>(null);
+  useScrollReveal(rootRef);
+
   return (
-    <>
+    <div ref={rootRef}>
       <header className="cat2-hero">
         <div className="cat2-hero__grid" aria-hidden="true" />
         <div className="wrap cat2-hero__inner">
-          <div className="cat2-hero__col">
+          <div className="cat2-hero__col" data-reveal="blur">
             <p className="cat2-crumb">
               <Link href="/">{t("breadcrumbHome")}</Link>
               <span>/</span>
@@ -192,7 +196,7 @@ export default function CatalogueClient({
           {grouped
             ? grouped.map(({ category, items }) => (
                 <div key={category.slug} className="cat2-group">
-                  <div className="cat2-group__head">
+                  <div className="cat2-group__head" data-reveal>
                     <h2 className="cat2-group__title">{category.name}</h2>
                     <p className="cat2-group__tag">{category.tagline}</p>
                     <Link href={`/products/${category.slug}`} className="cat2-group__link">
@@ -205,7 +209,7 @@ export default function CatalogueClient({
             : filtered.length > 0 && <FamilyGrid items={filtered} />}
         </div>
       </section>
-    </>
+    </div>
   );
 }
 

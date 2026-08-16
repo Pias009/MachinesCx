@@ -12,7 +12,6 @@ import { BRAND, SITE_URL } from "@/lib/products";
 import { routing, rtlLocales, type Locale } from "@/i18n/routing";
 
 const SiteFooter = dynamic(() => import("@/components/SiteFooter"), { ssr: false });
-const SectionAnimator = dynamic(() => import("@/components/SectionAnimator"), { ssr: false });
 const AppToaster = dynamic(() => import("@/components/AppToaster"), { ssr: false });
 const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
 const ProductionLineTeaser = dynamic(() => import("@/components/ProductionLineTeaser"), { ssr: false });
@@ -156,7 +155,6 @@ export default async function LocaleLayout({
       <body>
         <NextIntlClientProvider messages={messages}>
           <LoadingScreen />
-          <SectionAnimator />
           <SiteNav />
           <PageNav />
           <main>{children}</main>

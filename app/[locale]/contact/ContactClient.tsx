@@ -1,6 +1,8 @@
 "use client";
+import { useRef } from "react";
 import { useTranslations } from "next-intl";
 import TransitionLink from "@/components/TransitionLink";
+import { useScrollReveal } from "@/lib/useScrollReveal";
 
 const PHONE_DISPLAY = "+86 159 8877 5831";
 const PHONE_TEL = "+8615988775831";
@@ -34,6 +36,8 @@ const METHOD_ICONS = {
 
 export default function ContactPage() {
   const t = useTranslations("contact");
+  const rootRef = useRef<HTMLDivElement>(null);
+  useScrollReveal(rootRef);
 
   const CONTACT_METHODS = [
     { key: "call", label: t("methods.call"), value: PHONE_DISPLAY, href: `tel:${PHONE_TEL}`, icon: METHOD_ICONS.call },
@@ -185,9 +189,9 @@ export default function ContactPage() {
         }
       `}</style>
 
-      <div className="ct-page">
+      <div className="ct-page" ref={rootRef}>
         <div className="ct-wrap">
-          <div className="ct-header">
+          <div className="ct-header" data-reveal="blur">
             <div className="ct-eyebrow">{t("eyebrow")}</div>
             <h1 className="ct-h1">
               {t("titlePrefix")} <em>{t("titleEm")}</em>
@@ -206,6 +210,7 @@ export default function ContactPage() {
                   target={m.external ? "_blank" : undefined}
                   rel={m.external ? "noopener noreferrer" : undefined}
                   className="ct-card"
+                  data-reveal
                 >
                   <span className="ct-card__icon">{m.icon}</span>
                   <span className="ct-card__body">
@@ -214,7 +219,7 @@ export default function ContactPage() {
                   </span>
                 </a>
               ) : (
-                <div key={m.key} className="ct-card">
+                <div key={m.key} className="ct-card" data-reveal>
                   <span className="ct-card__icon">{m.icon}</span>
                   <span className="ct-card__body">
                     <span className="ct-card__label">{m.label}</span>
@@ -225,7 +230,7 @@ export default function ContactPage() {
             )}
           </div>
 
-          <TransitionLink href="/inquiries">
+          <TransitionLink href="/inquiries" data-reveal>
             <div className="ct-cta">
               <div className="ct-cta__icon">
                 <svg width="40" height="40" viewBox="0 0 32 32" fill="none">

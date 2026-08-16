@@ -35,10 +35,8 @@ export default function ConfiguratorCTA() {
   }, []);
 
   // Left copy swings in from depth (rotateY, as if turning to face the
-  // reader out of the Spline scene), the configurator panel rises after —
-  // this section has no other entrance since it opts out of the generic
-  // SectionAnimator via data-no-anim (its Spline bg makes a flat fade read
-  // as broken/late). Reverses on scroll back up via ScrollTrigger.
+  // reader out of the Spline scene), the configurator panel rises after.
+  // Reverses on scroll back up via ScrollTrigger.
   useGSAP(() => {
     if (!pluginReady) return;
     const trigger = { trigger: sectionRef.current, start: "top 75%", end: "bottom top", toggleActions: "play reverse play reverse" };

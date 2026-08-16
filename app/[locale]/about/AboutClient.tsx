@@ -7,6 +7,7 @@ import gsap from "gsap";
 import TransitionLink from "@/components/TransitionLink";
 import AboutAtmosphere from "@/components/AboutAtmosphere";
 import Image from "next/image";
+import { useScrollReveal } from "@/lib/useScrollReveal";
 
 gsap.registerPlugin(useGSAP);
 
@@ -213,6 +214,8 @@ export default function AboutPage() {
   const [isDark, setIsDark] = useState(true);
   const atmosphereSectionRef = useRef<HTMLElement>(null);
   const atmosphereCopyRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  useScrollReveal(rootRef);
 
   useEffect(() => {
     const checkTheme = () => {
@@ -256,7 +259,7 @@ export default function AboutPage() {
   const cardBg = isDark ? "#0f1420" : "#fff";
 
   return (
-    <div>
+    <div ref={rootRef}>
       <style suppressHydrationWarning>{`
         @keyframes aboutArrowBounce { 0%, 100% { transform: translateY(0); opacity: 0.6; } 50% { transform: translateY(10px); opacity: 1; } }
 
@@ -465,7 +468,7 @@ export default function AboutPage() {
         </section>
 
         {/* Charts — Data & Performance */}
-        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+        <section className="about-section" data-reveal style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
             <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("charts.kicker")}</span>
             <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2.5rem,5vw,4rem)" }}>{t("charts.title")}</h3>
@@ -480,7 +483,7 @@ export default function AboutPage() {
         </section>
 
         {/* Timeline + Story */}
-        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+        <section className="about-section" data-reveal style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,6rem)" }} className="about-story">
             <div>
               <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("story.kicker")}</span>
@@ -504,7 +507,7 @@ export default function AboutPage() {
         </section>
 
         {/* Machine Categories */}
-        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+        <section className="about-section" data-reveal style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
             <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("categories.kicker")}</span>
             <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2rem,4vw,3rem)" }}>{t("categories.title")}</h3>
@@ -528,7 +531,7 @@ export default function AboutPage() {
         </section>
 
         {/* Values */}
-        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+        <section className="about-section" data-reveal style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
             <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("values.kicker")}</span>
             <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2rem,4vw,3rem)" }}>{t("values.title")}</h3>
@@ -545,7 +548,7 @@ export default function AboutPage() {
         </section>
 
         {/* Materials */}
-        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+        <section className="about-section" data-reveal style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
             <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("materials.kicker")}</span>
             <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2rem,4vw,3rem)" }}>{t("materials.title")}</h3>
@@ -561,7 +564,7 @@ export default function AboutPage() {
         </section>
 
         {/* Specs */}
-        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+        <section className="about-section" data-reveal style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,6rem)" }} className="about-specs">
             {(t.raw("specs.groups") as { label: string; specs: [string, string][] }[]).map((s) => (
               <div key={s.label}>
@@ -579,7 +582,7 @@ export default function AboutPage() {
         </section>
 
         {/* Global */}
-        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+        <section className="about-section" data-reveal style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
             <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("global.kicker")}</span>
             <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "2rem" }}>{t("global.title")}</h3>
@@ -597,7 +600,7 @@ export default function AboutPage() {
         </section>
 
         {/* Support */}
-        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
+        <section className="about-section" data-reveal style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)", borderBottom: "1px solid " + border }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,6rem)" }} className="about-support">
             <div>
               <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("support.kicker")}</span>
@@ -618,7 +621,7 @@ export default function AboutPage() {
         </section>
 
         {/* Contact */}
-        <section className="about-section" style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)" }}>
+        <section className="about-section" data-reveal style={{ padding: "clamp(4rem,8vw,7rem) clamp(1.5rem,4vw,3rem)" }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(3rem,6vw,6rem)" }} className="about-contact">
             <div>
               <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--brand-red)", display: "block", marginBottom: "1rem" }}>{t("contact.kicker")}</span>

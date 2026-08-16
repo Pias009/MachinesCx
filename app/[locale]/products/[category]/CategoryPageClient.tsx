@@ -8,6 +8,7 @@ import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
 import type { Category, ProductFamily } from "@/lib/products";
 import { familyImage } from "@/lib/products";
+import { useScrollReveal } from "@/lib/useScrollReveal";
 
 /* ── per-category feature badges — icon + ordering only; the display
    label text is translated and pulled from the categoryPage.features.*
@@ -158,8 +159,11 @@ export default function CategoryPageClient({ category, families, allCategories }
     return () => obs.disconnect();
   }, []);
 
+  const rootRef = useRef<HTMLDivElement>(null);
+  useScrollReveal(rootRef);
+
   return (
-    <>
+    <div ref={rootRef}>
       {/* ── HERO ── */}
       <header className="ccp-hero">
         {/* engineering grid via ::before */}
@@ -182,7 +186,7 @@ export default function CategoryPageClient({ category, families, allCategories }
           </div>
         )}
 
-        <div className="ccp-hero__content">
+        <div className="ccp-hero__content" data-reveal="blur">
           {/* breadcrumb */}
           <nav className="ccp-crumb" aria-label={t("breadcrumbAria")}>
             <Link href="/">{t("breadcrumbHome")}</Link>
@@ -251,7 +255,7 @@ export default function CategoryPageClient({ category, families, allCategories }
       {/* ── PRODUCT GRID ── */}
       <section className="ccp-grid-section" aria-label={t("productCatalogueAria")}>
         <div className="ccp-grid-section__wrap">
-          <div className="ccp-grid-header">
+          <div className="ccp-grid-header" data-reveal>
             <h2>
               {families.length !== 1
                 ? t.rich("machinesInRange", { count: families.length, em: (chunks) => <em>{chunks}</em> })
@@ -336,7 +340,7 @@ export default function CategoryPageClient({ category, families, allCategories }
       </section>
 
       {/* ── CTA BAND ── */}
-      <section className="ccp-cta" aria-label={t("contactAria")}>
+      <section className="ccp-cta" aria-label={t("contactAria")} data-reveal>
         <div className="ccp-cta__inner">
           <div>
             <h2 className="ccp-cta__h2">{t.rich("ctaHeading", { em: (chunks) => <em>{chunks}</em> })}</h2>
@@ -347,6 +351,6 @@ export default function CategoryPageClient({ category, families, allCategories }
           </AetherBtn>
         </div>
       </section>
-    </>
+    </div>
   );
 }

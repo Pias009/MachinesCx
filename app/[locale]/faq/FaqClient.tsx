@@ -1,10 +1,13 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { FAQ_ITEMS } from "@/lib/faqData";
+import { useScrollReveal } from "@/lib/useScrollReveal";
 
 export default function FaqClient() {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  useScrollReveal(rootRef);
 
   return (
     <>
@@ -96,9 +99,9 @@ export default function FaqClient() {
         .fq-cta-link:hover { color: var(--ink); }
       `}</style>
 
-      <div className="fq-page">
+      <div className="fq-page" ref={rootRef}>
         <div className="fq-wrap">
-          <div className="fq-header">
+          <div className="fq-header" data-reveal="blur">
             <div className="fq-eyebrow">Frequently Asked</div>
             <h1 className="fq-h1">
               Questions, <em>answered.</em>
@@ -112,7 +115,7 @@ export default function FaqClient() {
             {FAQ_ITEMS.map((item, i) => {
               const open = openIdx === i;
               return (
-                <div className="fq-item" key={item.q} data-open={open}>
+                <div className="fq-item" key={item.q} data-open={open} data-reveal>
                   <button
                     type="button"
                     className="fq-q"
@@ -128,7 +131,7 @@ export default function FaqClient() {
             })}
           </div>
 
-          <div className="fq-cta">
+          <div className="fq-cta" data-reveal>
             <p>Didn't find what you're looking for?</p>
             <Link href="/contact" className="fq-cta-link">Contact our engineering team →</Link>
           </div>

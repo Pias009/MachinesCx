@@ -101,14 +101,10 @@ export default async function NewsIndexPage() {
           </div>
         </Link>
 
-        {/* ── Rest of articles ──
-             data-no-anim: the site-wide SectionAnimator auto-fades every
-             h1/h2/h3/p on scroll, but these cards render inside the
-             initial viewport and its ScrollTrigger doesn't reliably
-             reveal already-in-view elements on load — leaves titles and
-             excerpts stuck at opacity:0. Opt this grid out rather than
-             touch the shared animator every other page depends on. */}
-        <div data-no-anim style={{
+        {/* ── Rest of articles — no entrance animation on this grid;
+             this is a server component so it can't use the client-side
+             useScrollReveal hook without a bigger restructure. */}
+        <div style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit,minmax(clamp(240px,24vw,300px),1fr))",
           gap: "1.5rem",

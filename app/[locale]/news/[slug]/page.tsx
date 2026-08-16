@@ -186,13 +186,11 @@ export default async function ArticlePage({ params }: { params: { locale: string
         alignItems: "start",
       }}>
 
-        {/* body — data-no-anim: the site-wide SectionAnimator fades every
-             h1/h2/h3/p on scroll via generic tag selectors, but this
-             content is injected via dangerouslySetInnerHTML after the
-             animator has already scanned the DOM once, so its
-             ScrollTrigger never revisits these nodes — they stay stuck
-             at opacity:0 forever, hiding most of the article. */}
-        <div className="article-body" data-no-anim
+        {/* body — no entrance animation; this is a server component so
+             it can't use the client-side useScrollReveal hook without a
+             bigger restructure, and the content is injected via
+             dangerouslySetInnerHTML anyway. */}
+        <div className="article-body"
           dangerouslySetInnerHTML={{ __html: renderNewsBody(a.body) }}
         />
 
@@ -272,10 +270,8 @@ export default async function ArticlePage({ params }: { params: { locale: string
         }}>
           <div style={{ maxWidth: 1280, margin: "0 auto" }}>
             <span className="eyebrow" style={{ marginBottom: "0.75rem", color: "var(--brand-red)" }}>{t("relatedArticles")}</span>
-            {/* data-no-anim: see note on the news index page — the
-                site-wide SectionAnimator doesn't reliably reveal h3/p
-                elements already in the initial viewport. */}
-            <div data-no-anim style={{
+            {/* no entrance animation — see note on the news index page */}
+            <div style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))",
               gap: "1.5rem", marginTop: "1.5rem",

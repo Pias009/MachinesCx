@@ -1,7 +1,8 @@
 "use client";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
+import { useScrollReveal } from "@/lib/useScrollReveal";
 
 type SectionKey = "privacy" | "terms";
 
@@ -15,6 +16,8 @@ function useSectionList(t: (key: string) => string, prefix: SectionKey, count: n
 export default function LegalPage() {
   const t = useTranslations("legalPage");
   const [active, setActive] = useState<SectionKey>("privacy");
+  const rootRef = useRef<HTMLDivElement>(null);
+  useScrollReveal(rootRef);
 
   const privacySections = useSectionList(t, "privacy", 7);
   const termsSections = useSectionList(t, "terms", 7);
@@ -112,9 +115,9 @@ export default function LegalPage() {
         }
       `}</style>
 
-      <div className="lg-page">
+      <div className="lg-page" ref={rootRef}>
         <div className="lg-wrap">
-          <div className="lg-header">
+          <div className="lg-header" data-reveal="blur">
             <div className="lg-eyebrow">{t("eyebrow")}</div>
             <h1 className="lg-h1">
               {t("titlePrefix")} <em>{t("titleEm")}</em>
@@ -141,7 +144,7 @@ export default function LegalPage() {
             </Link>
           </nav>
 
-          <section id="privacy" className="lg-section">
+          <section id="privacy" className="lg-section" data-reveal>
             <h2 className="lg-section__title">{t("privacy.title")}</h2>
             <p className="lg-section__updated">{t("privacy.updated")}</p>
             {privacySections.map((s, i) => (
@@ -154,7 +157,7 @@ export default function LegalPage() {
 
           <hr className="lg-divider" />
 
-          <section id="terms" className="lg-section">
+          <section id="terms" className="lg-section" data-reveal>
             <h2 className="lg-section__title">{t("terms.title")}</h2>
             <p className="lg-section__updated">{t("terms.updated")}</p>
             {termsSections.map((s, i) => (

@@ -42,6 +42,8 @@ export default function WispBackground() {
     const gl = canvas.getContext("webgl");
     if (!gl) return;
 
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
     function resize() {
       if (!canvas) return;
       canvas.width = canvas.offsetWidth * Math.min(window.devicePixelRatio, 2);
@@ -77,15 +79,24 @@ export default function WispBackground() {
     const uTime = gl.getUniformLocation(prog, "u_time");
     const uRes = gl.getUniformLocation(prog, "u_resolution");
 
-    function frame(t: number) {
+    function draw(t: number) {
       gl!.uniform1f(uTime, t * 0.001);
       gl!.uniform2f(uRes, canvas!.width, canvas!.height);
       gl!.clearColor(0, 0, 0, 0);
       gl!.clear(gl!.COLOR_BUFFER_BIT);
       gl!.drawArrays(gl!.TRIANGLE_STRIP, 0, 4);
+    }
+
+    function frame(t: number) {
+      draw(t);
       rafRef.current = requestAnimationFrame(frame);
     }
-    rafRef.current = requestAnimationFrame(frame);
+
+    if (reduced) {
+      draw(0); // one still frame — no continuous rAF loop
+    } else {
+      rafRef.current = requestAnimationFrame(frame);
+    }
 
     return () => {
       cancelAnimationFrame(rafRef.current);

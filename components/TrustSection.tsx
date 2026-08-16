@@ -41,8 +41,12 @@ function pickColor(t: number) {
   const i = Math.floor(s);
   return PALETTE[i].clone().lerp(PALETTE[i+1], s-i);
 }
-// 22 000 particles across 7 dense overlapping lobes — fills the full viewport
-const COUNT = 8000;
+// Dense overlapping lobes fill the viewport at a fraction of the particle
+// count — the previous 8000-particle count re-ran an 8-call noise function
+// for every particle on every animation frame (~190k calls/frame), which
+// showed up as sustained main-thread blocking (huge Lighthouse TBT) for as
+// long as this section was mounted, not just once on mount.
+const COUNT = 2000;
 
 // 7 lobe centres spread wide so particles cover the whole background
 const LOBES = [

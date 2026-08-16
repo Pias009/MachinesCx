@@ -149,9 +149,12 @@ export default function ParticlePortfolio(){
           position: absolute;
           transform: translate(-50%, -50%);
           display: flex; flex-direction: column; align-items: center;
-          transition: left 0.9s cubic-bezier(0.16,1,0.3,1),
-                      top 0.9s cubic-bezier(0.16,1,0.3,1),
-                      opacity 0.6s ease;
+          /* left/top are fixed per node (from NODES) and never change after
+             mount, so they don't need a transition — only opacity animates
+             on step change. Transitioning left/top is a non-composited,
+             layout-triggering animation that Lighthouse flags even though
+             it never actually fires here. */
+          transition: opacity 0.6s ease;
           cursor: pointer;
           background: none; border: none; padding: 0;
         }

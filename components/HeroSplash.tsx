@@ -352,7 +352,7 @@ export default function HeroSplash() {
           color: #0d2220 !important;
         }
         [data-theme="light"] .hs__node-card {
-          background: #ffffff;
+          background: #eef1f0;
           border-color: rgba(13,34,32,0.10);
           box-shadow: 0 24px 60px -28px rgba(13,34,32,0.25);
         }
@@ -376,7 +376,11 @@ export default function HeroSplash() {
           border-color: rgba(13,34,32,0.18) !important;
         }
         .hs--light .hs__node-card {
-          background: #ffffff;
+          /* Product photos are studio shots on a near-white background —
+             a pure white card made them invisible (white-on-white). A
+             light neutral gray keeps the light-theme look while giving
+             every photo real contrast. */
+          background: #eef1f0;
           border-color: rgba(13,34,32,0.10);
           box-shadow: 0 24px 60px -28px rgba(13,34,32,0.25);
         }
@@ -593,7 +597,15 @@ export default function HeroSplash() {
         .hs__node-img {
           position: absolute; inset: 0;
           width: 100%; height: 100%;
-          object-fit: cover;
+          /* Product photos are studio shots on a near-white background with
+             generous padding around the machine — object-fit:cover cropped
+             into that padding at the card's small size (~60-80px on
+             mobile), so the machine's thin structural lines became nearly
+             invisible and the card read as a blank box. contain shows the
+             full machine against .hs__node-card's dark background instead,
+             which also gives the white-background photos real contrast. */
+          object-fit: contain;
+          padding: 6%;
           transition: transform .5s cubic-bezier(.2,.7,.2,1);
         }
         .hs__node-card:hover .hs__node-img { transform: scale(1.08); }

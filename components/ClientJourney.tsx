@@ -40,9 +40,20 @@ const STEP_ICONS: Record<(typeof STEP_IDS)[number], LucideIcon> = {
   aftersales: Headphones,
 };
 
-// ─── flat, solid, 4-color rotation (bold but disciplined — no gradients,
-// no pastel/candy tints) so 8 steps read as clean pairs, not a rainbow ───
-const STEP_COLORS = ["var(--brand-teal)", "var(--brand-amber)", "var(--brand-rose)", "var(--cj-blue)"];
+// ─── one distinct color per step (8 unique, not a 4-color repeat) —
+// still the brand family (teal/amber/rose/blue) extended with disciplined
+// siblings (violet/green/cyan/orange) so it reads as one system, not a
+// rainbow. Flat, solid — no gradients, no pastel/candy tints. ───
+const STEP_COLORS = [
+  "var(--brand-teal)",
+  "var(--brand-amber)",
+  "var(--brand-rose)",
+  "var(--cj-blue)",
+  "var(--cj-violet)",
+  "var(--cj-green)",
+  "var(--cj-cyan)",
+  "var(--cj-orange)",
+];
 
 type StepCopy = { label: string; tagline: string; desc: string; metric1v: string; metric1l: string; metric2v: string; metric2l: string };
 
@@ -173,7 +184,31 @@ export default function ClientJourney() {
     gsap.set(overlay, { opacity: 0 });
     gsap.set(card, { rotateY: 90, opacity: 0, transformPerspective: 800 });
     gsap.to(overlay, { opacity: 1, duration: 0.25, ease: "power1.out" });
-    gsap.to(card, { rotateY: 0, opacity: 1, duration: 0.45, ease: "power3.out", delay: 0.1 });
+    gsap.to(card, {
+      rotateY: 0, opacity: 1, duration: 0.45, ease: "power3.out", delay: 0.1,
+      onComplete: () => gsap.set(card, { transformPerspective: 1000 }),
+    });
+
+    // subtle pointer-driven 3D tilt on the open card, once the flip-in
+    // settles — reinforces the "physical card" feel from the flip without
+    // fighting it (only takes over after rotateY has resolved to 0)
+    const tiltX = gsap.quickTo(card, "rotateX", { duration: 0.4, ease: "power3.out" });
+    const tiltY = gsap.quickTo(card, "rotateY", { duration: 0.4, ease: "power3.out" });
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
+      const rect = card.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width - 0.5;
+      const py = (e.clientY - rect.top) / rect.height - 0.5;
+      tiltY(px * 6);
+      tiltX(py * -6);
+    };
+    const onLeave = () => { tiltX(0); tiltY(0); };
+    overlay.addEventListener("pointermove", onMove);
+    overlay.addEventListener("pointerleave", onLeave);
+    return () => {
+      overlay.removeEventListener("pointermove", onMove);
+      overlay.removeEventListener("pointerleave", onLeave);
+    };
   }, { dependencies: [openId] });
 
   // Escape closes the overlay, same as clicking the backdrop or the × button
@@ -235,6 +270,10 @@ export default function ClientJourney() {
           background: var(--bg-base);
           padding: clamp(5rem,8vw,7.5rem) 0;
           --cj-blue: #2563eb;
+          --cj-violet: #8b5cf6;
+          --cj-green: #16a34a;
+          --cj-cyan: #06b6d4;
+          --cj-orange: #ea580c;
           overflow: hidden;
         }
         /* ── section-level backdrop: two soft brand-color glows, no grid —
@@ -333,28 +372,34 @@ export default function ClientJourney() {
         .cj__ring-icon-pos {
           position: absolute;
           transform: translate(-50%, -50%);
-          width: 68px; height: 68px;
+          width: 84px; height: 84px;
         }
         .cj__ring-icon {
           width: 100%; height: 100%;
           display: flex; flex-direction: column; align-items: center; gap: .4rem;
           background: none; border: none; cursor: pointer;
+          perspective: 600px;
         }
         .cj__ring-icon-badge {
-          width: 68px; height: 68px;
-          border-radius: 18px;
+          width: 84px; height: 84px;
+          border-radius: 22px;
           background: linear-gradient(155deg, var(--step-color) 0%, color-mix(in srgb, var(--step-color) 70%, #000) 100%);
           display: flex; align-items: center; justify-content: center;
           box-shadow:
             0 1px 0 rgba(255,255,255,0.25) inset,
-            0 8px 18px -9px var(--step-color);
-          transition: transform 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s ease;
+            0 10px 22px -9px var(--step-color);
+          transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease;
+          transform-style: preserve-3d;
+          will-change: transform;
         }
-        .cj__ring-icon-badge svg { width: 26px; height: 26px; color: #fff; }
+        .cj__ring-icon-badge svg { width: 32px; height: 32px; color: #fff; }
         .cj__ring-icon:hover .cj__ring-icon-badge,
         .cj__ring-icon:focus-visible .cj__ring-icon-badge {
-          transform: scale(1.12) translateY(-2px);
-          box-shadow: 0 14px 28px -10px var(--step-color);
+          transform: rotateX(10deg) rotateY(-10deg) scale(1.14) translateY(-3px);
+          box-shadow: 0 18px 34px -10px var(--step-color);
+        }
+        .cj__ring-icon:active .cj__ring-icon-badge {
+          transform: rotateX(4deg) rotateY(-4deg) scale(1.05);
         }
         .cj__ring-icon:focus-visible .cj__ring-icon-badge { outline: 2px solid var(--step-color); outline-offset: 3px; }
         .cj__ring-icon-label {
@@ -368,10 +413,10 @@ export default function ClientJourney() {
         .cj__ring-icon--source-hidden { visibility: hidden; }
 
         @media (max-width: 640px) {
-          .cj__ring { width: min(340px, 88vw); }
-          .cj__ring-icon-pos { width: 52px; height: 52px; }
-          .cj__ring-icon-badge { width: 52px; height: 52px; border-radius: 14px; }
-          .cj__ring-icon-badge svg { width: 20px; height: 20px; }
+          .cj__ring { width: min(360px, 90vw); }
+          .cj__ring-icon-pos { width: 64px; height: 64px; }
+          .cj__ring-icon-badge { width: 64px; height: 64px; border-radius: 16px; }
+          .cj__ring-icon-badge svg { width: 24px; height: 24px; }
           .cj__ring-icon-label { font-size: .56rem; }
         }
 
@@ -402,16 +447,57 @@ export default function ClientJourney() {
           width: min(680px, 100%);
           max-height: 86vh;
           overflow-y: auto;
+          overflow-x: hidden;
+          isolation: isolate;
           display: flex;
           flex-direction: row;
           align-items: flex-start;
           gap: 1.5rem;
           padding: clamp(1.75rem, 3vw, 2.5rem);
-          background: var(--bg-surface);
+          background:
+            radial-gradient(circle at 85% -10%, color-mix(in srgb, var(--step-color) 22%, transparent) 0%, transparent 55%),
+            var(--bg-surface);
           border: 1px solid var(--step-color);
           border-radius: 20px;
           box-shadow: 0 30px 70px -20px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.2);
           transform-style: preserve-3d;
+        }
+        /* ── icon-themed animated backdrop: oversized ghost copies of the
+           step's own icon, tinted in its color, drifting slowly behind the
+           content — reinforces "which step is this" even from a glance at
+           the backdrop, not just the small badge ── */
+        .cj__overlay-motif {
+          position: absolute; inset: 0; z-index: -1;
+          overflow: hidden;
+          border-radius: inherit;
+          pointer-events: none;
+        }
+        .cj__overlay-motif svg {
+          position: absolute;
+          color: var(--step-color);
+          opacity: 0.16;
+        }
+        .cj__overlay-motif svg:nth-child(1) {
+          width: 240px; height: 240px;
+          top: -60px; right: -50px;
+          animation: cj-motif-drift-1 14s ease-in-out infinite;
+        }
+        .cj__overlay-motif svg:nth-child(2) {
+          width: 150px; height: 150px;
+          bottom: -30px; left: -30px;
+          opacity: 0.12;
+          animation: cj-motif-drift-2 18s ease-in-out infinite;
+        }
+        @keyframes cj-motif-drift-1 {
+          0%, 100% { transform: rotate(-8deg) translate(0, 0) scale(1); }
+          50% { transform: rotate(6deg) translate(-10px, 12px) scale(1.06); }
+        }
+        @keyframes cj-motif-drift-2 {
+          0%, 100% { transform: rotate(6deg) translate(0, 0) scale(1); }
+          50% { transform: rotate(-8deg) translate(8px, -10px) scale(1.08); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .cj__overlay-motif svg { animation: none !important; }
         }
         .cj__overlay-close {
           position: absolute; top: 1rem; right: 1rem;
@@ -658,6 +744,10 @@ export default function ClientJourney() {
                 <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
             </button>
+            <div className="cj__overlay-motif" aria-hidden="true">
+              <openStep.Icon strokeWidth={1} />
+              <openStep.Icon strokeWidth={1} />
+            </div>
             <div className="cj__badge">
               <openStep.Icon strokeWidth={1.75} aria-hidden="true" />
             </div>

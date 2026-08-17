@@ -436,11 +436,12 @@ export default function ClientJourney() {
           gap: 1.5rem;
           padding: clamp(1.75rem, 3vw, 2.5rem);
           background:
-            radial-gradient(circle at 85% -10%, color-mix(in srgb, var(--step-color) 22%, transparent) 0%, transparent 55%),
+            radial-gradient(circle at 85% -10%, color-mix(in srgb, var(--step-color) 30%, transparent) 0%, transparent 60%),
+            radial-gradient(circle at 5% 110%, color-mix(in srgb, var(--step-color) 16%, transparent) 0%, transparent 55%),
             var(--bg-surface);
-          border: 1px solid var(--step-color);
+          border: 2px solid var(--step-color);
           border-radius: 20px;
-          box-shadow: 0 30px 70px -20px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.2);
+          box-shadow: 0 30px 70px -20px rgba(0,0,0,0.55), 0 0 50px -18px var(--step-color), 0 0 0 1px rgba(0,0,0,0.2);
         }
         /* ── icon-themed animated backdrop: oversized ghost copies of the
            step's own icon, tinted in its color, drifting slowly behind the
@@ -526,8 +527,8 @@ export default function ClientJourney() {
           gap: .6rem;
           padding: .75rem .85rem;
           border-radius: 10px;
-          background: var(--bg-base);
-          border: 1px solid var(--bg-line);
+          background: color-mix(in srgb, var(--step-color) 8%, var(--bg-base));
+          border: 1px solid color-mix(in srgb, var(--step-color) 30%, transparent);
           color: var(--ink);
           text-align: left;
           text-decoration: none;
@@ -568,6 +569,7 @@ export default function ClientJourney() {
           width: 54px; height: 54px;
           border-radius: 14px;
           background: linear-gradient(155deg, var(--step-color) 0%, color-mix(in srgb, var(--step-color) 70%, #000) 100%);
+          border: 2px solid var(--step-color);
           display: flex; align-items: center; justify-content: center;
           box-shadow:
             0 1px 0 rgba(255,255,255,0.25) inset,
@@ -578,7 +580,7 @@ export default function ClientJourney() {
           position: absolute; inset: -6px;
           border-radius: 17px;
           border: 1px solid var(--step-color);
-          opacity: 0.25;
+          opacity: 0.6;
         }
         .cj__badge svg { width: 22px; height: 22px; color: #fff; }
 
@@ -600,7 +602,7 @@ export default function ClientJourney() {
         }
         .cj__metrics {
           display: flex; flex-wrap: wrap; gap: .4rem 1.2rem;
-          border-top: 1px solid var(--bg-line);
+          border-top: 2px solid color-mix(in srgb, var(--step-color) 40%, transparent);
           padding-top: .65rem;
           margin-top: auto;
         }
@@ -608,7 +610,7 @@ export default function ClientJourney() {
           display: flex; align-items: baseline; gap: .4rem;
           font-family: var(--ff-body); font-size: .75rem;
         }
-        .cj__metric-v { color: var(--ink); font-weight: 700; }
+        .cj__metric-v { color: var(--step-color); font-weight: 700; }
         .cj__metric-l { color: var(--ink-35); letter-spacing: .04em; text-transform: uppercase; }
 
         @media (max-width: 640px) {

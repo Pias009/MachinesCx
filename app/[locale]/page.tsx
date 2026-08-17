@@ -46,7 +46,10 @@ export default function Home() {
       <SectionReveal delay={80}><LazyTrustSection /></SectionReveal>
       <SectionReveal delay={80}><ParticlePortfolio /></SectionReveal>
       <SectionReveal delay={80}><FlexoStrip /></SectionReveal>
-      <SectionReveal delay={80}><PrintingShowcase /></SectionReveal>
+      {/* skip: this section's own internal reveal (below) is deliberately
+          fast/self-contained — stacking the outer section-push (0.7s) on
+          top of it made the whole thing feel slow to appear */}
+      <SectionReveal skip><PrintingShowcase /></SectionReveal>
       <SectionReveal delay={80}><MachineCatalogSection /></SectionReveal>
       <SectionReveal delay={80}><ConfiguratorCTA /></SectionReveal>
       <SectionReveal delay={80}><NewsStrip /></SectionReveal>

@@ -10,7 +10,6 @@ import { families as localFamilies } from "@/lib/products";
 import type { ProductFamily } from "@/lib/products";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { SECTION_ELEMENT_DELAY } from "@/components/SectionReveal";
 
 gsap.registerPlugin(useGSAP);
 
@@ -134,15 +133,22 @@ export default function PrintingShowcase() {
       return;
     }
 
-    const trigger = { trigger: sectionElRef.current, start: "top 70%", end: "bottom 20%", toggleActions: "play reverse play reverse" };
+    // Fires as soon as the section is ~20% into the viewport (was 70% — a
+    // scroll-triggered section shouldn't still be waiting to start once
+    // it's already substantially on-screen) and every internal delay/
+    // duration below is compressed to a fraction of the old timing — this
+    // used to take ~1.15s from trigger to fully settled (on top of a
+    // separate 0.7s outer section-push, since removed for this section);
+    // now the whole thing lands in well under 0.3s.
+    const trigger = { trigger: sectionElRef.current, start: "top 85%", end: "bottom 20%", toggleActions: "play reverse play reverse" };
 
     // One timeline, one ScrollTrigger for the whole entrance — was 5
     // separate ScrollTrigger instances all watching the same trigger.
     const tl = gsap.timeline({ scrollTrigger: trigger });
 
     // Brand label — masked rise (parent has overflow:hidden)
-    tl.fromTo(brandLabelRef.current, { y: "100%" }, { y: "0%", duration: 0.7, ease: "expo.out" }, SECTION_ELEMENT_DELAY);
-    tl.fromTo(counterRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, SECTION_ELEMENT_DELAY + 0.15);
+    tl.fromTo(brandLabelRef.current, { y: "100%" }, { y: "0%", duration: 0.22, ease: "power3.out" }, 0);
+    tl.fromTo(counterRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, 0.04);
 
     // Carousel — back-to-front settle: back role first, sides next, center
     // last with overshoot. Side items swing in with rotateY (left side from
@@ -153,24 +159,24 @@ export default function PrintingShowcase() {
       const isCenter = roleAttr === "center";
       const isBack = roleAttr === "back";
       const isLeft = roleAttr === "left";
-      const delay = isBack ? 0 : (isCenter ? 0.36 : 0.18);
+      const delay = isBack ? 0 : (isCenter ? 0.1 : 0.05);
       const fromRotateY = isCenter || isBack ? 0 : (isLeft ? 35 : -35);
       gsap.set(wrap, { transformPerspective: 1000 });
       tl.fromTo(wrap,
         { opacity: 0, scale: 0.85, filter: "blur(6px)", rotateY: fromRotateY, willChange: "filter, transform, opacity" },
         {
           opacity: 1, scale: 1, filter: "blur(0px)", rotateY: 0,
-          duration: isCenter ? 0.6 : 0.55,
+          duration: isCenter ? 0.22 : 0.18,
           ease: isCenter ? "back.out(1.2)" : "power2.out",
           clearProps: "willChange",
         },
-        SECTION_ELEMENT_DELAY + delay
+        delay
       );
     });
 
-    // Bottom info block + CTA — rise in after the carousel settles
-    tl.fromTo(infoBlockRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, SECTION_ELEMENT_DELAY + 0.55);
-    tl.fromTo(ctaBlockRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, SECTION_ELEMENT_DELAY + 0.65);
+    // Bottom info block + CTA — rise in right after the carousel settles
+    tl.fromTo(infoBlockRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.16, ease: "power2.out" }, 0.15);
+    tl.fromTo(ctaBlockRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.16, ease: "power2.out" }, 0.18);
     // Depends on `mounted`: this component renders `null` until mounted
     // becomes true (see the `if (!mounted) return null` below), so refs
     // aren't attached to real DOM nodes until that first true render —

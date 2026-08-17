@@ -104,68 +104,127 @@ export default function ClientJourney() {
   // form's message textarea), never sent on their behalf.
   const stepContext = (s: typeof STEPS[number]) =>
     t("agentContext", { step: s.label, tagline: s.tagline });
-  const closingRef = useRef(false);
+
+  // Animation phase, tracked outside React state so click handlers can
+  // read/guard it synchronously without waiting for a re-render. This
+  // replaces a boolean "closing" lock that was only ever cleared inside a
+  // GSAP onComplete callback — if that callback never fired (unmount
+  // mid-tween, a rapid click racing the animation), the lock stayed stuck
+  // forever and every icon became permanently unclickable. Every tween
+  // below now also gets a bounded setTimeout fallback that force-advances
+  // the phase even if GSAP's own callback is somehow skipped, and
+  // `overwrite: true` so a re-entrant click kills any in-flight tween on
+  // the same target instead of stacking a second one on top of it.
+  const phaseRef = useRef<"closed" | "opening" | "open" | "closing">("closed");
+  const failsafeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearFailsafe = () => {
+    if (failsafeRef.current) { clearTimeout(failsafeRef.current); failsafeRef.current = null; }
+  };
+  // any card the flip-out animation hid mid-flight and didn't get to
+  // restore — closeOverlay always un-hides this regardless of which id
+  // is "open" by the time it runs, so a fast open→close never leaves an
+  // icon stuck invisible on the ring.
+  const hiddenSourceIdRef = useRef<string | null>(null);
+
+  useEffect(() => () => clearFailsafe(), []);
 
   const openCard = (id: string) => {
-    if (closingRef.current) return;
+    // ignore clicks while a flip is already animating (opening/closing) or
+    // if this exact card is already open — prevents the double-click race
+    // that could desync the animation from React state
+    if (phaseRef.current !== "closed") return;
     const source = cardRefs.current[id];
-    if (source) {
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (!reduced) {
-        gsap.fromTo(
-          source,
-          { rotateY: 0, opacity: 1 },
-          {
-            rotateY: -90,
-            opacity: 0,
-            duration: 0.35,
-            ease: "power2.in",
-            transformPerspective: 800,
-            onComplete: () => {
-              gsap.set(source, { clearProps: "rotateY,opacity,transformPerspective" });
-              source.classList.add("cj__ring-icon--source-hidden");
-              setOpenId(id);
-            },
-          }
-        );
-        return;
-      }
-      source.classList.add("cj__ring-icon--source-hidden");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (source && !reduced) {
+      phaseRef.current = "opening";
+      clearFailsafe();
+      const finish = () => {
+        clearFailsafe();
+        if (phaseRef.current !== "opening") return; // already advanced (failsafe + onComplete both fired)
+        gsap.set(source, { clearProps: "rotateY,opacity,transformPerspective" });
+        source.classList.add("cj__ring-icon--source-hidden");
+        hiddenSourceIdRef.current = id;
+        phaseRef.current = "open";
+        setOpenId(id);
+      };
+      gsap.fromTo(
+        source,
+        { rotateY: 0, opacity: 1 },
+        {
+          rotateY: -90,
+          opacity: 0,
+          duration: 0.35,
+          ease: "power2.in",
+          transformPerspective: 800,
+          overwrite: true,
+          onComplete: finish,
+        }
+      );
+      // failsafe: force the open through even if onComplete never fires
+      failsafeRef.current = setTimeout(finish, 600);
+      return;
     }
+
+    if (source) {
+      source.classList.add("cj__ring-icon--source-hidden");
+      hiddenSourceIdRef.current = id;
+    }
+    phaseRef.current = "open";
     setOpenId(id);
   };
 
   const closeOverlay = useCallback(() => {
+    // ignore while already closing/closed, or mid-open (let the open finish
+    // first rather than fighting it — the failsafe above bounds that wait)
+    if (phaseRef.current === "closing" || phaseRef.current === "closed") return;
+
     const overlay = overlayRef.current;
     const card = overlayCardRef.current;
-    const source = openId ? cardRefs.current[openId] : null;
+    const hiddenId = hiddenSourceIdRef.current;
+    const source = hiddenId ? cardRefs.current[hiddenId] : null;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    if (!overlay || !card || reduced) {
+    const restoreSource = () => {
       if (source) source.classList.remove("cj__ring-icon--source-hidden");
+      hiddenSourceIdRef.current = null;
+    };
+
+    if (!overlay || !card || reduced) {
+      restoreSource();
+      phaseRef.current = "closed";
       setOpenId(null);
       return;
     }
 
-    closingRef.current = true;
+    phaseRef.current = "closing";
+    clearFailsafe();
+    const finish = () => {
+      clearFailsafe();
+      if (phaseRef.current !== "closing") return;
+      restoreSource();
+      phaseRef.current = "closed";
+      setOpenId(null);
+    };
     gsap.to(card, {
       rotateY: 90,
       opacity: 0,
       duration: 0.3,
       ease: "power2.in",
       transformPerspective: 800,
+      overwrite: true,
     });
     gsap.to(overlay, {
       opacity: 0,
       duration: 0.3,
       ease: "power1.in",
-      onComplete: () => {
-        if (source) source.classList.remove("cj__ring-icon--source-hidden");
-        setOpenId(null);
-        closingRef.current = false;
-      },
+      overwrite: true,
+      onComplete: finish,
     });
-  }, [openId]);
+    // failsafe: force the close through even if onComplete never fires
+    // (e.g. the overlay unmounts mid-tween)
+    failsafeRef.current = setTimeout(finish, 500);
+  }, []);
 
   // flip the overlay card in (rotateY 90 → 0) once it mounts
   useGSAP(() => {
@@ -183,9 +242,10 @@ export default function ClientJourney() {
 
     gsap.set(overlay, { opacity: 0 });
     gsap.set(card, { rotateY: 90, opacity: 0, transformPerspective: 800 });
-    gsap.to(overlay, { opacity: 1, duration: 0.25, ease: "power1.out" });
+    gsap.to(overlay, { opacity: 1, duration: 0.25, ease: "power1.out", overwrite: true });
     gsap.to(card, {
       rotateY: 0, opacity: 1, duration: 0.45, ease: "power3.out", delay: 0.1,
+      overwrite: true,
       onComplete: () => gsap.set(card, { transformPerspective: 1000 }),
     });
 

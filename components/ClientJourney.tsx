@@ -86,15 +86,17 @@ export default function ClientJourney() {
     };
   });
 
-  const cardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const ringRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const overlayCardRef = useRef<HTMLDivElement>(null);
 
-  // clicking a ring icon flips it away (rotateY + fade) from its position
-  // on the circle, then the same step reappears as a larger centered
-  // overlay flipping in — the other 7 icons are untouched. Closing
-  // reverses both.
+  // clicking a ring icon opens the same step as a larger centered overlay,
+  // which fades and scales in/out — previously this flipped the source
+  // icon away (rotateY across two separate elements handing off to each
+  // other) before the overlay appeared, which was both janky and prone to
+  // getting stuck if a GSAP callback didn't fire. A single fade+scale
+  // tween on one element is simpler, has nothing to desync, and reads as
+  // "the card is here" without a spinning transition.
   const [openId, setOpenId] = useState<string | null>(null);
   const openStep = STEPS.find((s) => s.id === openId) ?? null;
 
@@ -106,92 +108,34 @@ export default function ClientJourney() {
     t("agentContext", { step: s.label, tagline: s.tagline });
 
   // Animation phase, tracked outside React state so click handlers can
-  // read/guard it synchronously without waiting for a re-render. This
-  // replaces a boolean "closing" lock that was only ever cleared inside a
-  // GSAP onComplete callback — if that callback never fired (unmount
-  // mid-tween, a rapid click racing the animation), the lock stayed stuck
-  // forever and every icon became permanently unclickable. Every tween
-  // below now also gets a bounded setTimeout fallback that force-advances
-  // the phase even if GSAP's own callback is somehow skipped, and
-  // `overwrite: true` so a re-entrant click kills any in-flight tween on
-  // the same target instead of stacking a second one on top of it.
-  const phaseRef = useRef<"closed" | "opening" | "open" | "closing">("closed");
+  // read/guard it synchronously without waiting for a re-render — guards
+  // against a rapid double-click re-triggering close mid-close (or vice
+  // versa). Every tween gets a bounded setTimeout failsafe that
+  // force-advances the phase even if GSAP's onComplete is ever skipped
+  // (e.g. an interrupted tween), so the overlay can never get stuck open
+  // or stuck closing.
+  const phaseRef = useRef<"closed" | "open" | "closing">("closed");
   const failsafeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearFailsafe = () => {
     if (failsafeRef.current) { clearTimeout(failsafeRef.current); failsafeRef.current = null; }
   };
-  // any card the flip-out animation hid mid-flight and didn't get to
-  // restore — closeOverlay always un-hides this regardless of which id
-  // is "open" by the time it runs, so a fast open→close never leaves an
-  // icon stuck invisible on the ring.
-  const hiddenSourceIdRef = useRef<string | null>(null);
 
   useEffect(() => () => clearFailsafe(), []);
 
   const openCard = (id: string) => {
-    // ignore clicks while a flip is already animating (opening/closing) or
-    // if this exact card is already open — prevents the double-click race
-    // that could desync the animation from React state
     if (phaseRef.current !== "closed") return;
-    const source = cardRefs.current[id];
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (source && !reduced) {
-      phaseRef.current = "opening";
-      clearFailsafe();
-      const finish = () => {
-        clearFailsafe();
-        if (phaseRef.current !== "opening") return; // already advanced (failsafe + onComplete both fired)
-        gsap.set(source, { clearProps: "rotateY,opacity,transformPerspective" });
-        source.classList.add("cj__ring-icon--source-hidden");
-        hiddenSourceIdRef.current = id;
-        phaseRef.current = "open";
-        setOpenId(id);
-      };
-      gsap.fromTo(
-        source,
-        { rotateY: 0, opacity: 1 },
-        {
-          rotateY: -90,
-          opacity: 0,
-          duration: 0.35,
-          ease: "power2.in",
-          transformPerspective: 800,
-          overwrite: true,
-          onComplete: finish,
-        }
-      );
-      // failsafe: force the open through even if onComplete never fires
-      failsafeRef.current = setTimeout(finish, 600);
-      return;
-    }
-
-    if (source) {
-      source.classList.add("cj__ring-icon--source-hidden");
-      hiddenSourceIdRef.current = id;
-    }
     phaseRef.current = "open";
     setOpenId(id);
   };
 
   const closeOverlay = useCallback(() => {
-    // ignore while already closing/closed, or mid-open (let the open finish
-    // first rather than fighting it — the failsafe above bounds that wait)
-    if (phaseRef.current === "closing" || phaseRef.current === "closed") return;
+    if (phaseRef.current !== "open") return;
 
     const overlay = overlayRef.current;
     const card = overlayCardRef.current;
-    const hiddenId = hiddenSourceIdRef.current;
-    const source = hiddenId ? cardRefs.current[hiddenId] : null;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const restoreSource = () => {
-      if (source) source.classList.remove("cj__ring-icon--source-hidden");
-      hiddenSourceIdRef.current = null;
-    };
-
     if (!overlay || !card || reduced) {
-      restoreSource();
       phaseRef.current = "closed";
       setOpenId(null);
       return;
@@ -202,31 +146,30 @@ export default function ClientJourney() {
     const finish = () => {
       clearFailsafe();
       if (phaseRef.current !== "closing") return;
-      restoreSource();
       phaseRef.current = "closed";
       setOpenId(null);
     };
     gsap.to(card, {
-      rotateY: 90,
       opacity: 0,
-      duration: 0.3,
+      scale: 0.94,
+      y: 8,
+      duration: 0.2,
       ease: "power2.in",
-      transformPerspective: 800,
       overwrite: true,
     });
     gsap.to(overlay, {
       opacity: 0,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power1.in",
       overwrite: true,
       onComplete: finish,
     });
     // failsafe: force the close through even if onComplete never fires
     // (e.g. the overlay unmounts mid-tween)
-    failsafeRef.current = setTimeout(finish, 500);
+    failsafeRef.current = setTimeout(finish, 400);
   }, []);
 
-  // flip the overlay card in (rotateY 90 → 0) once it mounts
+  // fade + scale the overlay card in once it mounts
   useGSAP(() => {
     if (!openId) return;
     const overlay = overlayRef.current;
@@ -236,39 +179,17 @@ export default function ClientJourney() {
 
     if (reduced) {
       gsap.set(overlay, { opacity: 1 });
-      gsap.set(card, { rotateY: 0, opacity: 1 });
+      gsap.set(card, { opacity: 1, scale: 1, y: 0 });
       return;
     }
 
     gsap.set(overlay, { opacity: 0 });
-    gsap.set(card, { rotateY: 90, opacity: 0, transformPerspective: 800 });
-    gsap.to(overlay, { opacity: 1, duration: 0.25, ease: "power1.out", overwrite: true });
+    gsap.set(card, { opacity: 0, scale: 0.94, y: 8 });
+    gsap.to(overlay, { opacity: 1, duration: 0.2, ease: "power1.out", overwrite: true });
     gsap.to(card, {
-      rotateY: 0, opacity: 1, duration: 0.45, ease: "power3.out", delay: 0.1,
+      opacity: 1, scale: 1, y: 0, duration: 0.3, ease: "power3.out",
       overwrite: true,
-      onComplete: () => gsap.set(card, { transformPerspective: 1000 }),
     });
-
-    // subtle pointer-driven 3D tilt on the open card, once the flip-in
-    // settles — reinforces the "physical card" feel from the flip without
-    // fighting it (only takes over after rotateY has resolved to 0)
-    const tiltX = gsap.quickTo(card, "rotateX", { duration: 0.4, ease: "power3.out" });
-    const tiltY = gsap.quickTo(card, "rotateY", { duration: 0.4, ease: "power3.out" });
-    const onMove = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
-      const rect = card.getBoundingClientRect();
-      const px = (e.clientX - rect.left) / rect.width - 0.5;
-      const py = (e.clientY - rect.top) / rect.height - 0.5;
-      tiltY(px * 6);
-      tiltX(py * -6);
-    };
-    const onLeave = () => { tiltX(0); tiltY(0); };
-    overlay.addEventListener("pointermove", onMove);
-    overlay.addEventListener("pointerleave", onLeave);
-    return () => {
-      overlay.removeEventListener("pointermove", onMove);
-      overlay.removeEventListener("pointerleave", onLeave);
-    };
   }, { dependencies: [openId] });
 
   // Escape closes the overlay, same as clicking the backdrop or the × button
@@ -425,20 +346,27 @@ export default function ClientJourney() {
           color: var(--ink);
         }
         /* positioning wrapper — left/top set inline per icon (percent of
-           ring), plain CSS transform for centering only. Never touched by
-           GSAP, so the flip animation (applied to .cj__ring-icon-flip
-           inside) can freely own the transform property without fighting
-           this element's own centering translate. */
+           ring), plain CSS transform for centering only. */
         .cj__ring-icon-pos {
           position: absolute;
           transform: translate(-50%, -50%);
-          width: 84px; height: 84px;
+          width: 104px; height: 118px;
         }
         .cj__ring-icon {
           width: 100%; height: 100%;
-          display: flex; flex-direction: column; align-items: center; gap: .4rem;
-          background: none; border: none; cursor: pointer;
+          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .4rem;
+          padding: .6rem .4rem .55rem;
+          border-radius: 18px;
+          background: color-mix(in srgb, var(--step-color) 10%, transparent);
+          border: 1px solid color-mix(in srgb, var(--step-color) 35%, transparent);
+          cursor: pointer;
           perspective: 600px;
+          transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .cj__ring-icon:hover,
+        .cj__ring-icon:focus-visible {
+          background: color-mix(in srgb, var(--step-color) 18%, transparent);
+          border-color: var(--step-color);
         }
         .cj__ring-icon-badge {
           width: 84px; height: 84px;
@@ -467,14 +395,10 @@ export default function ClientJourney() {
           letter-spacing: .06em; text-transform: uppercase; color: var(--ink-60);
           white-space: nowrap;
         }
-        /* clicked icon flips away (rotateY) and fades — the enlarged
-           version reappears as a centered overlay, driven by GSAP, so this
-           just hides the source icon while that overlay is open */
-        .cj__ring-icon--source-hidden { visibility: hidden; }
-
         @media (max-width: 640px) {
           .cj__ring { width: min(360px, 90vw); }
-          .cj__ring-icon-pos { width: 64px; height: 64px; }
+          .cj__ring-icon-pos { width: 78px; height: 88px; }
+          .cj__ring-icon { padding: .4rem .3rem .4rem; border-radius: 14px; gap: .3rem; }
           .cj__ring-icon-badge { width: 64px; height: 64px; border-radius: 16px; }
           .cj__ring-icon-badge svg { width: 24px; height: 24px; }
           .cj__ring-icon-label { font-size: .56rem; }
@@ -489,10 +413,8 @@ export default function ClientJourney() {
         }
 
         /* ── expanded-card overlay — dimmed backdrop + a centered, larger
-           copy of the clicked card. GSAP flips it in with rotateY + scale
-           (perspective on the backdrop makes the 3D rotation read), and
-           flips the source card away with the same rotation before this
-           appears, so it feels like one card turning into the other. ── */
+           copy of the clicked card. GSAP fades + scales it in from a
+           slightly-smaller, slightly-lower resting state. ── */
         .cj__overlay {
           position: fixed; inset: 0; z-index: 200;
           display: flex; align-items: center; justify-content: center;
@@ -500,7 +422,6 @@ export default function ClientJourney() {
           background: rgba(4,8,7,0.7);
           -webkit-backdrop-filter: blur(6px);
           backdrop-filter: blur(6px);
-          perspective: 1400px;
         }
         .cj__overlay-card {
           position: relative;
@@ -520,7 +441,6 @@ export default function ClientJourney() {
           border: 1px solid var(--step-color);
           border-radius: 20px;
           box-shadow: 0 30px 70px -20px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.2);
-          transform-style: preserve-3d;
         }
         /* ── icon-themed animated backdrop: oversized ghost copies of the
            step's own icon, tinted in its color, drifting slowly behind the
@@ -755,7 +675,6 @@ export default function ClientJourney() {
                     <button
                       type="button"
                       className="cj__ring-icon"
-                      ref={(node) => { cardRefs.current[s.id] = node; }}
                       style={{ ["--step-color" as string]: s.color }}
                       onClick={() => openCard(s.id)}
                       aria-label={s.label}

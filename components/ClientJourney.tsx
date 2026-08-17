@@ -43,16 +43,27 @@ const STEP_ICONS: Record<(typeof STEP_IDS)[number], LucideIcon> = {
 // ─── one distinct color per step (8 unique, not a 4-color repeat) —
 // still the brand family (teal/amber/rose/blue) extended with disciplined
 // siblings (violet/green/cyan/orange) so it reads as one system, not a
-// rainbow. Flat, solid — no gradients, no pastel/candy tints. ───
+// rainbow. Flat, solid — no gradients, no pastel/candy tints.
+//
+// Plain hex values, not CSS var() references: the first 3 used to point at
+// global --brand-* tokens (fine anywhere) but the last 5 pointed at
+// --cj-blue/violet/green/cyan/orange, which were only ever defined on
+// .cj itself. The expanded overlay card renders as a JSX sibling of
+// .cj — not a descendant — so it never inherited those local variables;
+// var(--step-color) silently resolved to nothing for Manufacturing,
+// Delivery, Commissioning, Training and Aftersales, leaving every
+// color-dependent rule on the overlay a no-op for those 5 steps. Baking
+// the values in here means every consumer gets a real color regardless
+// of where in the DOM it renders. ───
 const STEP_COLORS = [
-  "var(--brand-teal)",
-  "var(--brand-amber)",
-  "var(--brand-rose)",
-  "var(--cj-blue)",
-  "var(--cj-violet)",
-  "var(--cj-green)",
-  "var(--cj-cyan)",
-  "var(--cj-orange)",
+  "#2bbfb3", // brand-teal
+  "#f59e0b", // brand-amber
+  "#e11d48", // brand-rose
+  "#2563eb", // blue
+  "#8b5cf6", // violet
+  "#16a34a", // green
+  "#06b6d4", // cyan
+  "#ea580c", // orange
 ];
 
 type StepCopy = { label: string; tagline: string; desc: string; metric1v: string; metric1l: string; metric2v: string; metric2l: string };
@@ -250,11 +261,6 @@ export default function ClientJourney() {
           position: relative;
           background: var(--bg-base);
           padding: clamp(5rem,8vw,7.5rem) 0;
-          --cj-blue: #2563eb;
-          --cj-violet: #8b5cf6;
-          --cj-green: #16a34a;
-          --cj-cyan: #06b6d4;
-          --cj-orange: #ea580c;
           overflow: hidden;
         }
         /* ── section-level backdrop: two soft brand-color glows, no grid —

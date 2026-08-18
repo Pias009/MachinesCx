@@ -71,6 +71,12 @@ export default async function LocaleLayout({
       className={`${bebas.variable} ${inter.variable} ${jetbrains.variable}`}
     >
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+          rel="stylesheet"
+        />
         {/* Apply saved theme before first paint — avoids a flash of the
             wrong theme (and pages "stuck" on light) that a useEffect-only
             correction in ThemeToggle can't prevent on a fresh document load */}

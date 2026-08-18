@@ -54,9 +54,12 @@
   --white:       #ffffff;
 
   /* ── fonts ── */
-  --ff-display: var(--font-bebas), "Arial Narrow", sans-serif;
-  --ff-body:    var(--font-inter), system-ui, sans-serif;
-  --ff-mono:    var(--font-jetbrains), "JetBrains Mono", "Courier New", monospace;
+  --font-bebas: "Bebas Neue", "Arial Narrow", sans-serif;
+  --font-inter: "Inter", system-ui, -apple-system, sans-serif;
+  --font-jetbrains: "JetBrains Mono", "Courier New", monospace;
+  --ff-display: var(--font-bebas);
+  --ff-body:    var(--font-inter);
+  --ff-mono:    var(--font-jetbrains);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in:  cubic-bezier(0.4, 0, 1, 1);

@@ -2,11 +2,11 @@ import Groq from "groq-sdk";
 import { categories, families } from "@/lib/products";
 import type { ChatMessageDoc } from "@/models/ChatSession";
 import type { LocalAnswer } from "@/lib/localAgent";
+import { geminiJsonCompletion } from "@/lib/gemini";
 
-const MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
-// Smaller/faster model kept as a same-provider fallback if the primary model
-// errors or is deprecated — avoids a full drop to OpenRouter for a transient issue.
-const FALLBACK_MODEL = "llama-3.1-8b-instant";
+const MODEL = process.env.GROQ_MODEL || "qwen/qwen3.6-27b";
+// Active fallback model if primary Groq model fails
+const FALLBACK_MODEL = "openai/gpt-oss-20b";
 
 function getClient(): Groq {
   const apiKey = process.env.GROQ_API_KEY;
@@ -20,35 +20,49 @@ interface GroqChatMsg {
 }
 
 /**
- * Low-level helper shared by ASHA's chat and order-review assistants: tries
- * the primary model then the fast fallback model, returns raw JSON text.
+ * Low-level helper shared by ASHA's chat, admin inquiry roadmaps, analytics insights,
+ * and order-review assistants: tries Gemini 3.6 Flash first, then falls back to Groq/OpenRouter.
  */
 export async function groqJsonCompletion(
   messages: GroqChatMsg[],
   opts: { maxTokens?: number; temperature?: number } = {},
 ): Promise<string> {
-  const client = getClient();
-  const modelsToTry = [MODEL, FALLBACK_MODEL].filter((m, i, arr) => arr.indexOf(m) === i);
-  let lastErr: unknown;
-
-  for (const model of modelsToTry) {
+  if (process.env.GEMINI_API_KEY) {
     try {
-      const completion = await client.chat.completions.create({
-        model,
-        messages,
-        temperature: opts.temperature ?? 0.4,
-        max_tokens: opts.maxTokens ?? 2048,
-        response_format: { type: "json_object" },
-      });
-      const raw = completion.choices?.[0]?.message?.content || "";
-      if (raw) return raw;
-    } catch (e) {
-      lastErr = e;
-      continue;
+      return await geminiJsonCompletion(messages, opts);
+    } catch (geminiErr) {
+      console.error("groqJsonCompletion: Gemini failed, falling back to Groq:", geminiErr);
     }
   }
-  throw new Error(`Groq exhausted all models — last error: ${String(lastErr)}`);
+
+  try {
+    const client = getClient();
+    const modelsToTry = [MODEL, FALLBACK_MODEL].filter((m, i, arr) => arr.indexOf(m) === i);
+    let lastErr: unknown;
+
+    for (const model of modelsToTry) {
+      try {
+        const completion = await client.chat.completions.create({
+          model,
+          messages,
+          temperature: opts.temperature ?? 0.4,
+          max_tokens: opts.maxTokens ?? 2048,
+          response_format: { type: "json_object" },
+        });
+        const raw = completion.choices?.[0]?.message?.content || "";
+        if (raw) return raw;
+      } catch (e) {
+        lastErr = e;
+        continue;
+      }
+    }
+  } catch (groqInitErr) {
+    console.error("groqJsonCompletion: Groq client init failed:", groqInitErr);
+  }
+
+  throw new Error("AI Completion service failed — exhausted all Gemini and Groq models.");
 }
+
 
 // Names + series only, no specs — a message naming any specific machine or
 // model number is already caught by lib/localAgent.ts's findMachines() and

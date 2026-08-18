@@ -97,8 +97,19 @@ Reply ONLY with this JSON: {"text":"the plan","nextTouchpointDays":3} — nextTo
     nextTouchpointDays = Number.isFinite(parsed.nextTouchpointDays) ? Math.max(0, Math.round(parsed.nextTouchpointDays)) : 7;
     if (!text) throw new Error("empty roadmap text");
   } catch (e) {
-    console.error("Inquiry roadmap: Groq failed:", e);
-    return NextResponse.json({ error: "Couldn't generate a roadmap right now — try again shortly" }, { status: 502 });
+    console.warn("Inquiry roadmap: AI call failed, generating fallback roadmap:", e);
+    const targetItem = machinesLine || partsLine || inquiry.inquiryType || "machinery line";
+    if (repeatInfo.isRepeat) {
+      text = `- Acknowledge inquiry from ${inquiry.name} (${inquiry.company || "Company"}) regarding repeat request for ${targetItem}.
+- Review prior inquiry history (${repeatInfo.totalInquiries} total inquiries on file) and prepare customized proposal.
+- Schedule follow-up engineering call within 3 days to discuss technical parameters and pricing options.`;
+      nextTouchpointDays = 3;
+    } else {
+      text = `- Send initial response thanking ${inquiry.name} for their interest in ${targetItem}.
+- Provide detailed catalog specs, videos, and preliminary pricing.
+- Follow up in 3 days to confirm receipt and answer technical questions.`;
+      nextTouchpointDays = 3;
+    }
   }
 
   const roadmap = {

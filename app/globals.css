@@ -472,9 +472,14 @@
 [data-theme="light"] .sn__cta                { color: #080e0d !important; }
 
 /* ── ThemeToggle + LanguageSwitcher stay legible ── */
-[data-theme="light"] .tt-btn           { color: #0d2220 !important; }
-[data-theme="light"] .ls-btn           { color: #0d2220 !important; background: rgba(13,34,32,0.08) !important; border-color: rgba(13,34,32,0.2) !important; }
-[data-theme="light"] .ls-btn:hover     { color: #0d2220 !important; background: rgba(43,191,179,0.1) !important; border-color: var(--brand-teal) !important; }
+[data-theme="light"] .tt-btn           { color: #0d2220 !important; background: transparent !important; border: none !important; }
+[data-theme="light"] .tt-btn:hover     { color: #0d2220 !important; background: rgba(43,191,179,0.12) !important; border: none !important; }
+[data-theme="light"] .ls-btn           { color: #0d2220 !important; background: transparent !important; border: none !important; }
+[data-theme="light"] .ls-btn:hover,
+[data-theme="light"] .ls--open .ls-btn { color: #0d2220 !important; background: rgba(43,191,179,0.12) !important; border: none !important; }
+[data-theme="light"] .ls-btn svg       { opacity: 0.95 !important; stroke: #0d2220 !important; }
+[data-theme="light"] .ls-opt--on       { color: var(--brand-teal) !important; }
+
 
 /* ── reset ──
    Wrapped in @layer base (not left unlayered) so Tailwind's utility

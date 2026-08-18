@@ -39,21 +39,22 @@ export default function ThemeToggle() {
       <style suppressHydrationWarning>{`
         .tt-btn {
           display: flex; align-items: center; justify-content: center;
-          width: 36px; height: 36px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.12);
+          width: 34px; height: 34px;
+          background: transparent;
+          border: none !important;
+          box-shadow: none !important;
+          border-radius: 6px;
           cursor: pointer; flex-shrink: 0;
-          transition: background .18s, border-color .18s;
+          transition: background .18s, color .18s;
           position: relative; overflow: hidden;
         }
         .tt-btn:hover {
           background: rgba(43,191,179,0.12);
-          border-color: var(--brand-teal);
         }
         .tt-icon {
           position: absolute;
           transition: opacity .25s ease, transform .3s ease;
-          color: rgba(255,255,255,0.75);
+          color: rgba(255,255,255,0.85);
           display: flex; align-items: center; justify-content: center;
         }
         .tt-icon--sun  { opacity: 0; transform: rotate(-90deg) scale(0.7); }
@@ -61,10 +62,13 @@ export default function ThemeToggle() {
         .tt-btn--light .tt-icon--sun  { opacity: 1; transform: rotate(0deg) scale(1); color: #0d2220; }
         .tt-btn--light .tt-icon--moon { opacity: 0; transform: rotate(90deg) scale(0.7); }
         .tt-btn--light {
-          background: rgba(43,191,179,0.12);
-          border-color: rgba(43,191,179,0.4);
+          background: transparent !important;
+          border: none !important;
         }
-        .tt-btn--light:hover { background: rgba(43,191,179,0.2); }
+        .tt-btn--light:hover {
+          background: rgba(43,191,179,0.12) !important;
+          border: none !important;
+        }
       `}</style>
 
       <button

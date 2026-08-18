@@ -56,33 +56,37 @@ export default function LanguageSwitcher() {
   return (
     <>
       <style suppressHydrationWarning>{`
-        .ls { position: relative; flex-shrink: 0; }
+        .ls { position: relative; flex-shrink: 0; margin-inline-start: 1.15rem; }
         .ls-btn {
           display: flex; align-items: center; justify-content: center; gap: 0.3rem;
-          height: 36px; padding: 0 0.65rem;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.12);
+          height: 34px; padding: 0 0.55rem;
+          background: transparent;
+          border: none !important;
+          box-shadow: none !important;
+          border-radius: 6px;
           cursor: pointer;
-          font-family: var(--ff-mono); font-size: 0.68rem;
+          font-family: var(--ff-mono); font-size: 0.72rem; font-weight: 600;
           letter-spacing: 0.06em; text-transform: uppercase;
-          color: rgba(255,255,255,0.82);
-          transition: background .18s, border-color .18s, color .18s;
+          color: rgba(255,255,255,0.85);
+          transition: background .18s, color .18s;
         }
-        .ls-btn:hover { background: rgba(43,191,179,0.12); border-color: var(--brand-teal); color: #fff; }
-        .ls-btn svg { width: 8px; height: 8px; flex-shrink: 0; transition: transform .2s ease; opacity: 0.7; }
+        .ls-btn:hover { background: rgba(43,191,179,0.12); color: #ffffff; border: none !important; }
+        .ls-btn svg { width: 9px; height: 9px; flex-shrink: 0; transition: transform .2s ease, opacity .2s ease; opacity: 0.85; stroke: currentColor; }
         .ls--open .ls-btn svg { transform: rotate(180deg); opacity: 1; }
+        .ls--open .ls-btn { background: rgba(43,191,179,0.12); border: none !important; }
 
         .ls-dd {
           position: fixed;
-          min-width: 150px;
+          min-width: 160px;
           background: var(--glass-bg-raise);
           border: 1px solid var(--glass-border);
-          border-top: 2px solid var(--brand-red);
+          border-top: 2px solid var(--brand-teal);
+          border-radius: 10px;
           -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat));
                   backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat));
-          box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+          box-shadow: 0 12px 32px rgba(0,0,0,0.35), inset 0 1px 0 var(--glass-highlight);
           z-index: 9200;
-          padding: 0.35rem;
+          padding: 0.4rem;
           animation: lsDdIn 0.24s var(--ease-fluid) both;
         }
         @keyframes lsDdIn { from { opacity: 0; transform: translateY(-6px) scale(0.98); filter: blur(3px); } to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
@@ -93,28 +97,42 @@ export default function LanguageSwitcher() {
         .ls-opt {
           display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
           width: 100%; padding: 0.55rem 0.75rem;
+          border-radius: 6px;
           background: none; border: none; cursor: pointer;
-          font-family: var(--ff-body); font-size: 0.85rem;
-          color: rgba(255,255,255,0.75); text-align: left;
+          font-family: var(--ff-body); font-size: 0.85rem; font-weight: 500;
+          color: rgba(255,255,255,0.85); text-align: left;
           transition: background 0.14s, color 0.14s;
         }
-        .ls-opt:hover { background: rgba(255,255,255,0.05); color: #fff; }
-        .ls-opt--on { color: var(--brand-teal); }
-        .ls-opt__check { width: 12px; height: 12px; flex-shrink: 0; opacity: 0; }
+        .ls-opt:hover { background: rgba(255,255,255,0.08); color: #ffffff; }
+        .ls-opt--on { color: var(--brand-teal) !important; font-weight: 600; }
+        .ls-opt__check { width: 14px; height: 14px; flex-shrink: 0; opacity: 0; stroke: currentColor; }
         .ls-opt--on .ls-opt__check { opacity: 1; }
 
         [data-theme="light"] .ls-btn {
-          background: rgba(13,34,32,0.08) !important;
-          border-color: rgba(13,34,32,0.2) !important;
+          background: transparent !important;
+          border: none !important;
           color: #0d2220 !important;
         }
-        [data-theme="light"] .ls-btn:hover { background: rgba(43,191,179,0.1) !important; border-color: var(--brand-teal) !important; color: #0d2220 !important; }
-        /* .ls-dd background now comes from --glass-bg-raise directly (flips
-           to a white-tinted glass in light mode automatically) — only the
-           border-top accent needs a light-mode override, since var(--brand-red)
-           already resolves correctly via the teal remap. */
-        [data-theme="light"] .ls-opt { color: rgba(13,34,32,0.75) !important; }
-        [data-theme="light"] .ls-opt:hover { background: rgba(13,34,32,0.05) !important; color: #0d2220 !important; }
+        [data-theme="light"] .ls-btn:hover,
+        [data-theme="light"] .ls--open .ls-btn {
+          background: rgba(43,191,179,0.12) !important;
+          border: none !important;
+          color: #0d2220 !important;
+        }
+        [data-theme="light"] .ls-btn svg {
+          opacity: 0.95 !important;
+          stroke: #0d2220 !important;
+        }
+
+        [data-theme="light"] .ls-dd {
+          background: #ffffff !important;
+          border-color: rgba(13,34,32,0.15) !important;
+          border-top: 2px solid var(--brand-teal) !important;
+          box-shadow: 0 12px 32px rgba(13,34,32,0.15) !important;
+        }
+        [data-theme="light"] .ls-opt { color: rgba(13,34,32,0.85) !important; }
+        [data-theme="light"] .ls-opt:hover { background: rgba(43,191,179,0.1) !important; color: #0d2220 !important; }
+        [data-theme="light"] .ls-opt--on { color: var(--brand-teal) !important; }
       `}</style>
 
       <div className={`ls${open ? " ls--open" : ""}`} ref={wrapRef}>

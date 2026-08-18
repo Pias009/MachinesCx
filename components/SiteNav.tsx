@@ -98,38 +98,38 @@ export default function SiteNav() {
            --bg-surface, which made the 20px blur invisible — nothing
            showed through it) so page content actually reads, blurred and
            saturated, behind the bar as it scrolls underneath. */
+        /* ── Base bar ── Floating liquid glass pill navbar ── */
         .sn {
-          position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-          height: 72px; width: 100%; overflow: hidden;
+          position: fixed; top: 14px; left: 50%;
+          transform: translateX(-50%);
+          z-index: 200;
+          height: 64px; width: min(1360px, 94vw);
+          border-radius: 9999px;
           background: var(--glass-bg);
-          -webkit-backdrop-filter: blur(var(--glass-blur-md)) saturate(var(--glass-sat));
-                  backdrop-filter: blur(var(--glass-blur-md)) saturate(var(--glass-sat));
-          border-bottom: 1px solid var(--glass-border);
-          box-shadow: inset 0 1px 0 var(--glass-highlight);
+          -webkit-backdrop-filter: blur(20px) saturate(1.6);
+                  backdrop-filter: blur(20px) saturate(1.6);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
           transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.35s, border-color 0.35s, box-shadow 0.35s;
         }
         .sn--hidden {
-          transform: translateY(-100%);
+          transform: translateX(-50%) translateY(-140%);
         }
-        /* scrolled — slightly more opaque + deeper blur, so the bar reads
-           as "settled" rather than just tinting darker */
         .sn--on {
           background: var(--glass-bg-raise);
-          border-color: var(--glass-border);
-          -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat));
-                  backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat));
-          box-shadow: 0 4px 32px color-mix(in srgb, var(--bg-base) 60%, transparent), inset 0 1px 0 var(--glass-highlight);
+          border-color: rgba(43, 191, 179, 0.38);
+          box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.25);
         }
-        /* Red top accent line */
+        /* Top brand accent line inside rounded container */
         .sn::before {
           content: '';
-          position: absolute; top: 0; left: 0; right: 0; height: 2px;
-          background: var(--brand-red);
+          position: absolute; top: 0; left: 24px; right: 24px; height: 2px;
+          background: linear-gradient(90deg, transparent, var(--brand-teal), transparent);
         }
 
         .sn__inner {
-          height: 72px; width: 100%; max-width: 1280px; margin-inline: auto;
-          padding: 0 clamp(1rem, 4vw, 2.5rem);
+          height: 64px; width: 100%; max-width: 1360px; margin-inline: auto;
+          padding: 0 clamp(1rem, 3vw, 2rem);
           display: flex; align-items: center; justify-content: space-between; gap: 1rem;
         }
 
@@ -267,15 +267,16 @@ export default function SiteNav() {
            thumbnails need real contrast) while still showing genuine
            depth through the blur, matching the nav bar's material. */
         .sn__dd {
-          position: fixed; top: 72px;
+          position: fixed; top: 86px;
           left: 50%; transform: translateX(-50%);
-          width: clamp(300px, 54vw, 760px);
+          width: clamp(320px, 58vw, 820px);
+          border-radius: 20px;
           background: var(--glass-bg-raise);
           border: 1px solid var(--glass-border);
-          border-top: 2px solid var(--brand-red);
+          border-top: 2px solid var(--brand-teal);
           -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat));
                   backdrop-filter: blur(var(--glass-blur-lg)) saturate(var(--glass-sat));
-          box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+          box-shadow: 0 20px 60px rgba(0,0,0,0.65), inset 0 1px 0 var(--glass-highlight);
           display: flex; z-index: 300;
           animation: snDdIn 0.32s var(--ease-fluid) both;
         }
@@ -285,12 +286,12 @@ export default function SiteNav() {
         }
 
         .sn__backdrop {
-          position: fixed; inset: 0; top: 72px; z-index: 199;
-          background: rgba(0,0,0,0.55);
-          -webkit-backdrop-filter: blur(2px);
-                  backdrop-filter: blur(2px);
+          position: fixed; inset: 0; top: 0; z-index: 199;
+          background: rgba(0,0,0,0.45);
+          -webkit-backdrop-filter: blur(3px);
+                  backdrop-filter: blur(3px);
           animation: snBdIn 0.25s ease both;
-          pointer-events: none;
+          pointer-events: auto;
         }
         @keyframes snBdIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -376,7 +377,7 @@ export default function SiteNav() {
           background: radial-gradient(ellipse at 50% 90%, rgba(43,191,179,0.12) 0%, transparent 65%);
         }
 
-        @media (max-width: 1480px) {
+        @media (max-width: 1560px) {
           .sn__link--hide { display: none; }
           .sn__divider    { display: none; }
         }
@@ -521,7 +522,7 @@ export default function SiteNav() {
           .sn__burger { display: flex; }
         }
 
-        /* ── Light mode — handled by CSS variables, no overrides needed ── */
+        /* ── Light mode overrides ── */
         [data-theme="light"] .sn__logo { color: var(--ink); }
         [data-theme="light"] .sn__cat-btn { color: var(--ink-60); }
         [data-theme="light"] .sn__cat-btn:hover,
@@ -529,6 +530,7 @@ export default function SiteNav() {
         [data-theme="light"] .sn__link { color: var(--ink-60); }
         [data-theme="light"] .sn__link:hover { color: var(--ink); }
         [data-theme="light"] .sn__divider { background: var(--ink-15); }
+        [data-theme="light"] .sn__burger span { background: #0d2220; }
 
         [data-theme="light"] .sn__dd {
           background: color-mix(in srgb, var(--bg-surface) 98%, transparent);

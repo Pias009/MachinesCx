@@ -5,7 +5,6 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages } from "next-intl/server";
 import "../globals.css";
 import SiteNav from "@/components/SiteNav";
-import PageNav from "@/components/PageNav";
 import LoadingScreen from "@/components/LoadingScreen";
 import { BRAND, SITE_URL } from "@/lib/products";
 import { routing, rtlLocales, type Locale } from "@/i18n/routing";
@@ -147,7 +146,6 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <LoadingScreen />
           <SiteNav />
-          <PageNav />
           <main>{children}</main>
           <SiteFooter />
           <ChatWidget />

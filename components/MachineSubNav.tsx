@@ -4,9 +4,9 @@ import TransitionLink from "@/components/TransitionLink";
 import { categories } from "@/lib/products";
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  "film-blowing": "/machines/abcde-2200.png",
-  "bag-making": "/machines/bag-1.png",
-  "recycling": "/machines/recycling-1.png",
+  "film-blowing": "/machines/abc-cx-series.png",
+  "bag-making": "/machines/f-pro-bottomseal.png",
+  "recycling": "/machines/cx-pelletizing.png",
   "printing": "/machines/flexo-1.png",
 };
 
@@ -18,9 +18,13 @@ export default function MachineSubNav() {
           position: relative;
           z-index: 100;
           width: 100%;
-          padding-top: 84px; /* clears fixed main nav */
-          padding-bottom: 0.5rem;
-          background: transparent;
+          padding-top: 98px; /* clears floating main nav header */
+          padding-bottom: 0.75rem;
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+          -webkit-backdrop-filter: none !important;
+                  backdrop-filter: none !important;
         }
 
         .msn__inner {
@@ -31,7 +35,7 @@ export default function MachineSubNav() {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: clamp(1.2rem, 3.5vw, 3rem);
+          gap: clamp(1.5rem, 4vw, 3.5rem);
           overflow-x: auto;
           scrollbar-width: none;
           -ms-overflow-style: none;
@@ -43,13 +47,14 @@ export default function MachineSubNav() {
         .msn__item {
           display: flex;
           align-items: center;
-          gap: 0.6rem;
-          padding: 0.3rem 0.5rem;
+          gap: 0.65rem;
+          padding: 0.25rem 0.5rem;
           text-decoration: none;
           white-space: nowrap;
           flex-shrink: 0;
-          background: none;
-          border: none;
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
           transition: opacity 0.2s ease, transform 0.2s ease;
         }
         .msn__item:hover {
@@ -58,24 +63,24 @@ export default function MachineSubNav() {
         }
 
         .msn__img-logo {
-          height: 32px;
-          width: 44px;
+          height: 34px;
+          width: 46px;
           object-fit: contain;
           flex-shrink: 0;
-          filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+          filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
           transition: transform 0.2s ease;
         }
         .msn__item:hover .msn__img-logo {
-          transform: scale(1.08);
+          transform: scale(1.1);
         }
 
         .msn__name {
           font-family: var(--ff-display);
-          font-size: 0.88rem;
+          font-size: 0.9rem;
           font-weight: 700;
-          letter-spacing: 0.03em;
+          letter-spacing: 0.04em;
           text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.88);
+          color: rgba(255, 255, 255, 0.9);
           transition: color 0.2s ease;
         }
         .msn__item:hover .msn__name {
@@ -83,7 +88,7 @@ export default function MachineSubNav() {
         }
 
         [data-theme="light"] .msn__name {
-          color: rgba(13, 34, 32, 0.85);
+          color: rgba(13, 34, 32, 0.88);
         }
         [data-theme="light"] .msn__item:hover .msn__name {
           color: var(--brand-teal);
@@ -99,16 +104,16 @@ export default function MachineSubNav() {
             padding: 0.4rem 1rem;
           }
           .msn__img-logo {
-            height: 26px;
-            width: 36px;
+            height: 28px;
+            width: 38px;
           }
           .msn__name {
-            font-size: 0.78rem;
+            font-size: 0.8rem;
           }
         }
       `}</style>
 
-      <div className="msn" aria-label="Machine Categories Bar">
+      <div className="msn" aria-label="Machine Categories Navigation">
         <div className="msn__inner">
           {categories.map((cat) => {
             const img = CATEGORY_IMAGES[cat.slug] ?? `/machines/${cat.slug}.png`;
@@ -121,9 +126,10 @@ export default function MachineSubNav() {
                 <Image
                   src={img}
                   alt={cat.name}
-                  width={44}
-                  height={32}
+                  width={46}
+                  height={34}
                   className="msn__img-logo"
+                  unoptimized
                 />
                 <span className="msn__name">
                   {cat.name.replace(" Machines", "").replace(" & Lab Lines", "")}

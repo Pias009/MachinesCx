@@ -5,9 +5,9 @@ import type { LocalAnswer } from "@/lib/localAgent";
 import { geminiJsonCompletion } from "@/lib/gemini";
 import { getBrainResponse, saveBrainResponse, hashMessages } from "@/lib/aiBrain";
 
-const MODEL = process.env.GROQ_MODEL || "qwen/qwen3.6-27b";
+const MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
 // Active fallback model if primary Groq model fails
-const FALLBACK_MODEL = "openai/gpt-oss-20b";
+const FALLBACK_MODEL = "llama-3.1-8b-instant";
 
 function getClient(): Groq {
   const apiKey = process.env.GROQ_API_KEY;

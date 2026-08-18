@@ -13,6 +13,7 @@ import { openAshaChat } from "@/components/ChatWidget";
 import CustomSections from "@/components/CustomSections";
 import MachineParts from "@/components/MachineParts";
 import ProductStage3D from "@/components/ProductStage3D";
+import MachineSeoSection from "@/components/MachineSeoSection";
 import { Grain, PlusMark, SectionHead, SubHead } from "@/components/EditorialKit";
 import type { ProductFamily, Category, DeliveryPhase, SetupStep } from "@/lib/products";
 import { familyImage, familyImages, parseYouTubeId, stagePhotos, BRAND } from "@/lib/products";
@@ -943,6 +944,9 @@ export default function ProductDetail({ family, category, related }: Props) {
                 family={family}
                 category={category.slug}
               />
+
+              {/* ── 700 to 1000 Word SEO / GEO / AEO Technical Deep-Dive & Overview ── */}
+              <MachineSeoSection seoData={family.seoData} machineName={family.name} />
 
               {/* machine breakdown — callout pins on the photo */}
               {callouts.length > 0 && (

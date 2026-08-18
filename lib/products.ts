@@ -95,6 +95,28 @@ export type CustomSection =
    needs one). Distinct from the older hardcoded "Part N" photo-crop
    breakdown, which stays as-is and uses fabricated crops of the main
    product shot rather than real per-part photography. ── */
+export interface SeoFaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface MachineSeoData {
+  wordCount: number;
+  overviewHeading: string;
+  metaTitle: string;
+  metaDescription: string;
+  focusKeywords: string[];
+  technicalArchitecture: string;
+  applicationsAndMaterials: string;
+  targetIndustries: string[];
+  engineeringFeatures: string;
+  keyInnovations: { title: string; description: string }[];
+  utilityRequirements: string;
+  maintenanceProtocol: string;
+  faqs: SeoFaqItem[];
+  commercialGuide: string;
+}
+
 export interface MachinePart {
   name: string;
   detail: string;
@@ -125,6 +147,7 @@ export interface ProductFamily {
   parts?: MachinePart[];              // real machine parts/components, admin-added
   radarImage?: string;                // dedicated center image for the radar chart spider web
   radarSpecs?: string[];              // spec labels to display on the radar chart
+  seoData?: MachineSeoData;           // 700-1000 word rich SEO/GEO/AEO data block
 }
 
 /** Extracts a YouTube video ID from a full URL or a bare 11-char ID. */

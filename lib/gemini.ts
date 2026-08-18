@@ -47,7 +47,7 @@ export async function geminiJsonCompletion(
     generationConfig: {
       responseMimeType: "application/json",
       temperature: opts.temperature ?? 0.4,
-      maxOutputTokens: opts.maxTokens ?? 2048,
+      maxOutputTokens: opts.maxTokens ?? 1024,
     },
   };
 

@@ -49,16 +49,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const familyEntries: MetadataRoute.Sitemap = families.map((f) => ({
     url: `${SITE_URL}/products/${f.category}/${f.slug}`,
     lastModified: now,
-    changeFrequency: "monthly",
-    priority: 0.6,
+    changeFrequency: "weekly",
+    priority: 0.9,
     alternates: { languages: languageAlternates(`/products/${f.category}/${f.slug}`) },
   }));
 
   const newsEntries: MetadataRoute.Sitemap = (newsData.articles as { slug: string }[]).map((a) => ({
     url: `${SITE_URL}/news/${a.slug}`,
     lastModified: now,
-    changeFrequency: "yearly",
-    priority: 0.4,
+    changeFrequency: "weekly",
+    priority: 0.8,
     alternates: { languages: languageAlternates(`/news/${a.slug}`) },
   }));
 

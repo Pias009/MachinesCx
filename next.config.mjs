@@ -9,12 +9,7 @@ const nextConfig = {
   compress: true,
   eslint: { ignoreDuringBuilds: true },
   experimental: {
-    // Inlines critical above-the-fold CSS per page and defers the rest —
-    // globals.css is a single 4k-line file shared site-wide (includes
-    // rules for pages like product-detail that aren't on the homepage),
-    // so this trims the render-blocking CSS PageSpeed flags without a
-    // manual per-route split.
-    optimizeCss: true,
+    optimizeCss: false,
   },
   images: {
     formats: ["image/avif", "image/webp"],

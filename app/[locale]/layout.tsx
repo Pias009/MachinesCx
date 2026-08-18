@@ -3,7 +3,6 @@ import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages } from "next-intl/server";
-import { Bebas_Neue, Inter, JetBrains_Mono } from "next/font/google";
 import "../globals.css";
 import SiteNav from "@/components/SiteNav";
 import PageNav from "@/components/PageNav";
@@ -19,23 +18,9 @@ const VisitorTracker = dynamic(() => import("@/components/VisitorTracker"), { ss
 const ProactiveNudge = dynamic(() => import("@/components/ProactiveNudge"), { ssr: false });
 const ProductLeadCapture = dynamic(() => import("@/components/ProductLeadCapture"), { ssr: false });
 
-const bebas = Bebas_Neue({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-bebas",
-  display: "swap",
-});
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-const jetbrains = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-jetbrains",
-  display: "swap",
-});
+const bebas = { variable: "font-bebas" };
+const inter = { variable: "font-inter" };
+const jetbrains = { variable: "font-jetbrains" };
 
 const title = `${BRAND} — Blown Film, Bag Making & Recycling Machinery`;
 const description = "Multi-layer blown-film lines, bag-making converters and recycling lines. From benchtop trials to 5-layer co-extrusion at 400 kg/h.";

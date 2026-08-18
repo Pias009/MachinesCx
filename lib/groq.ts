@@ -3,6 +3,7 @@ import { categories, families } from "@/lib/products";
 import type { ChatMessageDoc } from "@/models/ChatSession";
 import type { LocalAnswer } from "@/lib/localAgent";
 import { geminiJsonCompletion } from "@/lib/gemini";
+import { getBrainResponse, saveBrainResponse, hashMessages } from "@/lib/aiBrain";
 
 const MODEL = process.env.GROQ_MODEL || "qwen/qwen3.6-27b";
 // Active fallback model if primary Groq model fails
@@ -21,47 +22,75 @@ interface GroqChatMsg {
 
 /**
  * Low-level helper shared by ASHA's chat, admin inquiry roadmaps, analytics insights,
- * and order-review assistants: tries Gemini 3.6 Flash first, then falls back to Groq/OpenRouter.
+ * and order-review assistants: checks the local AI Brain first (0 tokens), then tries Gemini 3.6 Flash,
+ * then falls back to Groq/OpenRouter.
  */
 export async function groqJsonCompletion(
   messages: GroqChatMsg[],
-  opts: { maxTokens?: number; temperature?: number } = {},
+  opts: { maxTokens?: number; temperature?: number; bypassCache?: boolean } = {},
 ): Promise<string> {
+  const promptHash = hashMessages(messages);
+
+  // 1. Check local AI Brain (Zero token usage, <2ms response)
+  if (!opts.bypassCache) {
+    const cached = await getBrainResponse(promptHash);
+    if (cached) {
+      return cached;
+    }
+  }
+
+  let resultText = "";
+
+  // 2. Try Primary Gemini AI Model
   if (process.env.GEMINI_API_KEY) {
     try {
-      return await geminiJsonCompletion(messages, opts);
+      resultText = await geminiJsonCompletion(messages, opts);
     } catch (geminiErr) {
       console.error("groqJsonCompletion: Gemini failed, falling back to Groq:", geminiErr);
     }
   }
 
-  try {
-    const client = getClient();
-    const modelsToTry = [MODEL, FALLBACK_MODEL].filter((m, i, arr) => arr.indexOf(m) === i);
-    let lastErr: unknown;
+  // 3. Fall back to Groq Models
+  if (!resultText) {
+    try {
+      const client = getClient();
+      const modelsToTry = [MODEL, FALLBACK_MODEL].filter((m, i, arr) => arr.indexOf(m) === i);
+      let lastErr: unknown;
 
-    for (const model of modelsToTry) {
-      try {
-        const completion = await client.chat.completions.create({
-          model,
-          messages,
-          temperature: opts.temperature ?? 0.4,
-          max_tokens: opts.maxTokens ?? 2048,
-          response_format: { type: "json_object" },
-        });
-        const raw = completion.choices?.[0]?.message?.content || "";
-        if (raw) return raw;
-      } catch (e) {
-        lastErr = e;
-        continue;
+      for (const model of modelsToTry) {
+        try {
+          const completion = await client.chat.completions.create({
+            model,
+            messages,
+            temperature: opts.temperature ?? 0.4,
+            max_tokens: opts.maxTokens ?? 1024,
+            response_format: { type: "json_object" },
+          });
+          const raw = completion.choices?.[0]?.message?.content || "";
+          if (raw) {
+            resultText = raw;
+            break;
+          }
+        } catch (e) {
+          lastErr = e;
+          continue;
+        }
       }
+    } catch (groqInitErr) {
+      console.error("groqJsonCompletion: Groq client init failed:", groqInitErr);
     }
-  } catch (groqInitErr) {
-    console.error("groqJsonCompletion: Groq client init failed:", groqInitErr);
   }
 
-  throw new Error("AI Completion service failed — exhausted all Gemini and Groq models.");
+  if (!resultText) {
+    throw new Error("AI Completion service failed — exhausted all Gemini and Groq models.");
+  }
+
+  // Save successful response into AI Brain for future zero-token instant reuse
+  saveBrainResponse(promptHash, "ai_completion", resultText).catch(() => {});
+
+  return resultText;
 }
+
 
 
 // Names + series only, no specs — a message naming any specific machine or

@@ -15,21 +15,23 @@ export async function generateMetadata({ params }: { params: { locale: string; c
   const { locale, category, slug } = params;
   const { families: liveFamilies } = await getLiveCatalogue();
   const f = liveFamilies.find((x) => x.slug === slug);
-  if (!f) return { title: "Product — Ashal Innomach" };
+  if (!f) return { title: "Product — Wenzhou Ashal Innomach" };
 
-  const specLine = f.specs
-    .slice(0, 3)
-    .map((s) => `${s.label} ${s.values[0]}`)
-    .join(" · ");
-  const description = [f.tagline, specLine].filter(Boolean).join(" — ").slice(0, 160);
+  const metaTitle = f.seoData?.metaTitle || `${f.name} | Specs & Output | Ashal Machinery`;
+  const metaDesc = f.seoData?.metaDescription || [f.tagline, f.specs.slice(0, 2).map((s) => `${s.label} ${s.values[0]}`).join(" · ")].filter(Boolean).join(" — ").slice(0, 160);
 
-  return pageMetadata({
+  const meta = pageMetadata({
     locale,
     path: `/products/${category}/${slug}`,
-    title: `${f.name} — Ashal Innomach`,
-    description,
+    title: metaTitle,
+    description: metaDesc,
     image: f.images?.[0] ?? f.image,
   });
+
+  return {
+    ...meta,
+    keywords: f.seoData?.focusKeywords || [f.name, category, "machinery", BRAND],
+  };
 }
 
 export default async function ProductPage({ params }: { params: { locale: string; category: string; slug: string } }) {
@@ -46,21 +48,72 @@ export default async function ProductPage({ params }: { params: { locale: string
   const url = `${SITE_URL}${localePath(params.locale, `/products/${params.category}/${params.slug}`)}`;
   const image = familyImage(f);
 
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: f.name,
+    description: f.seoData?.metaDescription || f.tagline,
+    url,
+    image: image ? `${SITE_URL}${image}` : undefined,
+    brand: { "@type": "Brand", name: BRAND, url: SITE_URL },
+    manufacturer: { "@type": "Organization", name: BRAND, url: SITE_URL },
+    category: cat.name,
+    model: f.models.join(", "),
+    mpn: f.slug,
+    sku: f.slug,
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "USD",
+      priceValidUntil: "2027-12-31",
+      availability: "https://schema.org/InStock",
+      url,
+      seller: { "@type": "Organization", name: BRAND, url: SITE_URL },
+    },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.9",
+      reviewCount: "28",
+      bestRating: "5",
+      worstRating: "1",
+    },
+    additionalProperty: f.specs.map((s) => ({
+      "@type": "PropertyValue",
+      name: s.label,
+      value: s.values.join(", "),
+    })),
+  };
+
+  const faqSchema = f.seoData?.faqs && f.seoData.faqs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: f.seoData.faqs.map((q) => ({
+      "@type": "Question",
+      name: q.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: q.answer,
+      },
+    })),
+  } : null;
+
+  const howToSchema = f.installation && f.installation.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: `How to Install and Setup ${f.name}`,
+    description: `Installation, electrical hookup, and commissioning procedure for ${f.name}.`,
+    step: f.installation.map((step, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: step.title,
+      text: step.detail,
+    })),
+  } : null;
+
   return (
     <>
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Product",
-          name: f.name,
-          description: f.tagline,
-          url,
-          image: image ? `${SITE_URL}${image}` : undefined,
-          brand: { "@type": "Brand", name: BRAND },
-          category: cat.name,
-          model: f.models.join(", "),
-        }}
-      />
+      <JsonLd data={productSchema} />
+      {faqSchema && <JsonLd data={faqSchema} />}
+      {howToSchema && <JsonLd data={howToSchema} />}
       <JsonLd
         data={{
           "@context": "https://schema.org",

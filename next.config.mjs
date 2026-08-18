@@ -28,7 +28,7 @@ const nextConfig = {
   // production builds trades a slightly slower cold build for reliability;
   // dev mode is unaffected and keeps its own separate cache.
   webpack: (config, { dev }) => {
-    if (!dev) config.cache = false;
+    if (!dev) config.cache = { type: "memory" };
     return config;
   },
   async headers() {

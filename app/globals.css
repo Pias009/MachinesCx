@@ -54,7 +54,7 @@
   --white:       #ffffff;
 
   /* ── fonts ── */
-  --font-bebas: "Bebas Neue", "Arial Narrow", sans-serif;
+  --font-bebas: "Plus Jakarta Sans", "Outfit", "Bebas Neue", sans-serif;
   --font-inter: "Inter", system-ui, -apple-system, sans-serif;
   --font-jetbrains: "JetBrains Mono", "Courier New", monospace;
   --ff-display: var(--font-bebas);

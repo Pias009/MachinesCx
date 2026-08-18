@@ -25,6 +25,8 @@ export default function SiteNav() {
   const pathname = usePathname();
   const t = useTranslations("nav");
   const [scrolled,   setScrolled]   = useState(false);
+  const [navHidden,  setNavHidden]  = useState(false);
+  const lastScrollY                 = useRef(0);
   const [open,       setOpen]       = useState<string | null>(null);
   const [menuImg,    setMenuImg]    = useState<string>("");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -34,7 +36,18 @@ export default function SiteNav() {
   const [canScrollDown, setCanScrollDown] = useState(false);
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20);
+    const fn = () => {
+      const currY = window.scrollY;
+      setScrolled(currY > 20);
+
+      // Hide main navbar on scroll down, reveal on scroll up
+      if (currY > 120 && currY > lastScrollY.current + 6) {
+        setNavHidden(true);
+      } else if (currY < lastScrollY.current - 6) {
+        setNavHidden(false);
+      }
+      lastScrollY.current = currY;
+    };
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
@@ -93,7 +106,10 @@ export default function SiteNav() {
                   backdrop-filter: blur(var(--glass-blur-md)) saturate(var(--glass-sat));
           border-bottom: 1px solid var(--glass-border);
           box-shadow: inset 0 1px 0 var(--glass-highlight);
-          transition: background 0.35s, border-color 0.35s, box-shadow 0.35s;
+          transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.35s, border-color 0.35s, box-shadow 0.35s;
+        }
+        .sn--hidden {
+          transform: translateY(-100%);
         }
         /* scrolled — slightly more opaque + deeper blur, so the bar reads
            as "settled" rather than just tinting darker */
@@ -120,7 +136,8 @@ export default function SiteNav() {
         /* ── Logo ── */
         .sn__logo {
           font-family: var(--ff-display);
-          font-size: 1.55rem; letter-spacing: 0.05em;
+          font-size: 1.3rem; letter-spacing: 0.03em;
+          font-weight: 800;
           color: #fff; text-decoration: none;
           display: flex; align-items: center; gap: .65rem;
           flex: 0 0 auto;
@@ -152,18 +169,14 @@ export default function SiteNav() {
           .sn__logo-text { display: none; }
         }
 
-        /* ── Nav links — centered with equal space on both sides. No
-           min-width:0 here on purpose: this item must never shrink below
-           its content's natural width, or its overflowing children start
-           visually overlapping .sn__actions next to it instead of the
-           layout making room / wrapping. ── */
+        /* ── Nav links — centered with equal space on both sides. ── */
         .sn__links {
           display: flex; align-items: center;
           flex: 0 1 auto; margin: 0 auto; gap: 0;
         }
         /* ── Right actions ── */
         .sn__actions {
-          display: flex; align-items: center; gap: 0.9rem;
+          display: flex; align-items: center; gap: 0.8rem;
           flex: 0 0 auto; justify-content: flex-end;
         }
 
@@ -171,9 +184,10 @@ export default function SiteNav() {
         .sn__cat { position: relative; height: 72px; display: flex; align-items: center; }
         .sn__cat-btn {
           height: 72px; display: flex; align-items: center; gap: 0.3rem;
-          padding: 0 1.1rem;
-          font-family: var(--ff-display); font-size: 0.9rem;
-          letter-spacing: 0.06em; text-transform: uppercase;
+          padding: 0 0.75rem;
+          font-family: var(--ff-display); font-size: 0.82rem;
+          font-weight: 600;
+          letter-spacing: 0.03em; text-transform: uppercase;
           color: rgba(255,255,255,0.82); background: none; border: none;
           cursor: pointer; white-space: nowrap; text-decoration: none;
           transition: color 0.18s;
@@ -186,7 +200,7 @@ export default function SiteNav() {
 
         /* active underline */
         .sn__cat-bar {
-          position: absolute; bottom: 0; left: 1.1rem; right: 1.1rem;
+          position: absolute; bottom: 0; left: 0.75rem; right: 0.75rem;
           height: 2px; background: var(--brand-teal);
           transform: scaleX(0); transform-origin: left;
           transition: transform 0.22s ease;
@@ -196,9 +210,10 @@ export default function SiteNav() {
         /* plain links */
         .sn__link {
           height: 72px; display: flex; align-items: center;
-          padding: 0 1.1rem;
-          font-family: var(--ff-display); font-size: 0.9rem;
-          letter-spacing: 0.06em; text-transform: uppercase;
+          padding: 0 0.75rem;
+          font-family: var(--ff-display); font-size: 0.82rem;
+          font-weight: 600;
+          letter-spacing: 0.03em; text-transform: uppercase;
           color: rgba(255,255,255,0.82); text-decoration: none;
           transition: color 0.18s; white-space: nowrap;
         }
@@ -208,18 +223,18 @@ export default function SiteNav() {
         .sn__divider {
           width: 3px; height: 3px; border-radius: 50%;
           background: rgba(255,255,255,0.3);
-          flex-shrink: 0; margin: 0 0.4rem;
+          flex-shrink: 0; margin: 0 0.3rem;
         }
 
         /* ── CTA button ── */
         .sn__cta {
           position: relative; overflow: hidden;
           margin-inline-start: auto; flex-shrink: 0;
-          font-family: var(--ff-display); font-size: 0.95rem;
-          letter-spacing: 0.06em; text-transform: uppercase;
+          font-family: var(--ff-display); font-size: 0.82rem;
+          letter-spacing: 0.04em; text-transform: uppercase;
           color: #080e0d; text-decoration: none;
           background: var(--brand-teal);
-          padding: 0.65rem 1.6rem;
+          padding: 0.55rem 1.25rem;
           border: 1px solid var(--brand-teal);
           font-weight: 700;
           white-space: nowrap;
@@ -361,7 +376,7 @@ export default function SiteNav() {
           background: radial-gradient(ellipse at 50% 90%, rgba(43,191,179,0.12) 0%, transparent 65%);
         }
 
-        @media (max-width: 1380px) {
+        @media (max-width: 1480px) {
           .sn__link--hide { display: none; }
           .sn__divider    { display: none; }
         }
@@ -559,7 +574,7 @@ export default function SiteNav() {
         [data-theme="light"] .sn__mob-bd { background: color-mix(in srgb, var(--ink) 35%, transparent); }
       `}</style>
 
-      <nav className={`sn${scrolled ? " sn--on" : ""}`}>
+      <nav className={`sn${scrolled ? " sn--on" : ""}${navHidden ? " sn--hidden" : ""}`}>
         <div className="sn__inner">
 
           <TransitionLink href="/" className="sn__logo" aria-label={t("logoAria")}>

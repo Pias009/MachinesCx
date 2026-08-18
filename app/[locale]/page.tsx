@@ -5,6 +5,7 @@ export function generateMetadata({ params }: { params: { locale: string } }) {
   return { alternates: alternates(params.locale, "") };
 }
 
+import MachineSubNav from "@/components/MachineSubNav";
 const HeroSplash         = dynamic(() => import("@/components/HeroSplash"),         { ssr: true  });
 const AiAgentBanner      = dynamic(() => import("@/components/AiAgentBanner"),      { ssr: false });
 const ScrollHome         = dynamic(() => import("@/components/ScrollHome"),         { ssr: false });
@@ -22,6 +23,9 @@ const AudienceSection    = dynamic(() => import("@/components/AudienceSection"),
 export default function Home() {
   return (
     <>
+      {/* Secondary machine category top navbar */}
+      <MachineSubNav />
+
       {/* Splash hero */}
       <HeroSplash />
 

@@ -136,7 +136,7 @@ export default function SiteNav() {
         /* ── Logo ── */
         .sn__logo {
           font-family: var(--ff-display);
-          font-size: 1.3rem; letter-spacing: 0.03em;
+          font-size: 1.45rem; letter-spacing: 0.05em;
           font-weight: 800;
           color: #fff; text-decoration: none;
           display: flex; align-items: center; gap: .65rem;
@@ -176,16 +176,16 @@ export default function SiteNav() {
         }
         /* ── Right actions ── */
         .sn__actions {
-          display: flex; align-items: center; gap: 0.8rem;
+          display: flex; align-items: center; gap: 0.65rem;
           flex: 0 0 auto; justify-content: flex-end;
         }
 
         /* category dropdown trigger */
-        .sn__cat { position: relative; height: 72px; display: flex; align-items: center; }
+        .sn__cat { position: relative; height: 64px; display: flex; align-items: center; }
         .sn__cat-btn {
-          height: 72px; display: flex; align-items: center; gap: 0.3rem;
+          height: 64px; display: flex; align-items: center; gap: 0.3rem;
           padding: 0 0.75rem;
-          font-family: var(--ff-display); font-size: 0.82rem;
+          font-family: var(--ff-nav); font-size: 0.82rem;
           font-weight: 600;
           letter-spacing: 0.03em; text-transform: uppercase;
           color: rgba(255,255,255,0.82); background: none; border: none;
@@ -209,9 +209,9 @@ export default function SiteNav() {
 
         /* plain links */
         .sn__link {
-          height: 72px; display: flex; align-items: center;
+          height: 64px; display: flex; align-items: center;
           padding: 0 0.75rem;
-          font-family: var(--ff-display); font-size: 0.82rem;
+          font-family: var(--ff-nav); font-size: 0.82rem;
           font-weight: 600;
           letter-spacing: 0.03em; text-transform: uppercase;
           color: rgba(255,255,255,0.82); text-decoration: none;
@@ -230,7 +230,7 @@ export default function SiteNav() {
         .sn__cta {
           position: relative; overflow: hidden;
           margin-inline-start: auto; flex-shrink: 0;
-          font-family: var(--ff-display); font-size: 0.82rem;
+          font-family: var(--ff-nav); font-size: 0.82rem;
           letter-spacing: 0.04em; text-transform: uppercase;
           color: #080e0d; text-decoration: none;
           background: var(--brand-teal);
@@ -350,7 +350,7 @@ export default function SiteNav() {
         }
         .sn__dd-item:hover .sn__dd-thumb { transform: scale(1.1); }
         .sn__dd-series {
-          display: block; font-family: var(--ff-display);
+          display: block; font-family: var(--ff-nav);
           font-size: 1rem; color: #fff; line-height: 1.2;
           letter-spacing: 0.02em;
         }
@@ -443,7 +443,7 @@ export default function SiteNav() {
           background: rgba(43,191,179,0.04);
         }
         .sn__mob-logo {
-          font-family: var(--ff-display); font-size: 1.2rem;
+          font-family: var(--ff-nav); font-size: 1.2rem;
           letter-spacing: .05em; color: #fff; text-decoration: none;
         }
         .sn__mob-logo em { color: var(--brand-teal); font-style: normal; margin-right: .2em; }
@@ -472,7 +472,7 @@ export default function SiteNav() {
         .sn__mob-bd--open { display: block; }
 
         .sn__mobile-link {
-          font-family: var(--ff-display); font-size: 1.1rem;
+          font-family: var(--ff-nav); font-size: 1.1rem;
           letter-spacing: .04em; text-transform: uppercase;
           color: rgba(255,255,255,0.72); text-decoration: none;
           padding: .9rem 1.5rem;
@@ -500,7 +500,7 @@ export default function SiteNav() {
         .sn__mobile-cta {
           display: flex; align-items: center; justify-content: center;
           width: 100%;
-          font-family: var(--ff-display); font-size: 1rem;
+          font-family: var(--ff-nav); font-size: 1rem;
           letter-spacing: .06em; text-transform: uppercase;
           background: var(--brand-teal); color: #080e0d;
           font-weight: 700; padding: .9rem 1.5rem;

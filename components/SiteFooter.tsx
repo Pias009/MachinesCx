@@ -69,11 +69,33 @@ export default function SiteFooter() {
     const rows = gsap.utils.toArray<HTMLElement>(
       footerRef.current.querySelectorAll(".footer-reveal")
     );
-    gsap.set(rows, { opacity: 0, y: 24 });
-    gsap.to(rows, {
-      opacity: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.08,
-      scrollTrigger: { trigger: footerRef.current, start: "top 90%" },
-    });
+    if (!rows.length) return;
+
+    gsap.fromTo(
+      rows,
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: "power3.out",
+        stagger: 0.08,
+        scrollTrigger: {
+          trigger: footerRef.current,
+          start: "top 98%",
+          toggleActions: "play none none none",
+        },
+      }
+    );
+
+    // Refresh ScrollTrigger layout after mount to handle dynamic page heights (e.g. /inquiries)
+    const timer = setTimeout(() => {
+      import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
+        ScrollTrigger.refresh();
+      });
+    }, 150);
+
+    return () => clearTimeout(timer);
   }, { scope: footerRef, dependencies: [pluginReady] });
 
   if (pathname?.startsWith("/cx-ops-x7k9q2")) return null;

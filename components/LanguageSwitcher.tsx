@@ -56,7 +56,7 @@ export default function LanguageSwitcher() {
   return (
     <>
       <style suppressHydrationWarning>{`
-        .ls { position: relative; flex-shrink: 0; margin-inline-start: 1.15rem; }
+        .ls { position: relative; flex-shrink: 0; }
         .ls-btn {
           display: flex; align-items: center; justify-content: center; gap: 0.3rem;
           height: 34px; padding: 0 0.55rem;

@@ -40,6 +40,7 @@ export default function ThemeToggle() {
         .tt-btn {
           display: flex; align-items: center; justify-content: center;
           width: 34px; height: 34px;
+          margin-inline-end: 0.35rem;
           background: transparent;
           border: none !important;
           box-shadow: none !important;

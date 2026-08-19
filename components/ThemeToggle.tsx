@@ -38,38 +38,42 @@ export default function ThemeToggle() {
     <>
       <style suppressHydrationWarning>{`
         .tt-btn {
-          display: flex; align-items: center; justify-content: center;
-          width: 34px; height: 34px;
-          margin-inline-end: 0.35rem;
-          background: transparent;
-          border: none !important;
-          box-shadow: none !important;
-          border-radius: 6px;
+          display: inline-flex; align-items: center; justify-content: center;
+          width: 36px; height: 36px;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          border-radius: 10px;
           cursor: pointer; flex-shrink: 0;
-          transition: background .18s, color .18s;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
           position: relative; overflow: hidden;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 2px 6px rgba(0, 0, 0, 0.2);
         }
         .tt-btn:hover {
-          background: rgba(43,191,179,0.12);
+          background: rgba(43, 191, 179, 0.22);
+          border-color: rgba(43, 191, 179, 0.45);
+          box-shadow: 0 0 12px rgba(43, 191, 179, 0.3);
         }
         .tt-icon {
           position: absolute;
-          transition: opacity .25s ease, transform .3s ease;
-          color: rgba(255,255,255,0.85);
+          transition: opacity 0.25s ease, transform 0.3s ease;
+          color: rgba(255, 255, 255, 0.92);
           display: flex; align-items: center; justify-content: center;
         }
         .tt-icon--sun  { opacity: 0; transform: rotate(-90deg) scale(0.7); }
         .tt-icon--moon { opacity: 1; transform: rotate(0deg) scale(1); }
-        .tt-btn--light .tt-icon--sun  { opacity: 1; transform: rotate(0deg) scale(1); color: #0d2220; }
-        .tt-btn--light .tt-icon--moon { opacity: 0; transform: rotate(90deg) scale(0.7); }
-        .tt-btn--light {
-          background: transparent !important;
-          border: none !important;
+
+        /* Light mode */
+        [data-theme="light"] .tt-btn {
+          background: rgba(13, 34, 32, 0.06);
+          border: 1px solid rgba(13, 34, 32, 0.14);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        .tt-btn--light:hover {
-          background: rgba(43,191,179,0.12) !important;
-          border: none !important;
+        [data-theme="light"] .tt-btn:hover {
+          background: rgba(43, 191, 179, 0.18);
+          border-color: rgba(43, 191, 179, 0.45);
         }
+        [data-theme="light"] .tt-btn .tt-icon--sun  { opacity: 1; transform: rotate(0deg) scale(1); color: #0d2220; }
+        [data-theme="light"] .tt-btn .tt-icon--moon { opacity: 0; transform: rotate(90deg) scale(0.7); }
       `}</style>
 
       <button

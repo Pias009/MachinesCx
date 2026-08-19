@@ -1,10 +1,9 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { X, Sparkles, MapPin, Monitor, Clock, RefreshCw, Mail, Send, Trash2 } from "lucide-react";
+import { X, MapPin, Monitor, Clock, Mail, Send, Trash2 } from "lucide-react";
 import { formatDuration } from "@/lib/format";
 
 interface PageViewEntry { path: string; enteredAt: string; durationMs: number; }
-interface AiInsight { text: string; intentSignal: "high" | "medium" | "low"; generatedAt: string; basedOnPageCount: number; basedOnMessageCount: number; }
 interface HookDraft { subject: string; body: string; generatedAt: string; status: "pending" | "sent" | "dismissed" | "failed"; sentAt?: string; }
 interface SessionDetail {
   sessionId: string; ip: string; countryCode: string; region: string; city: string;
@@ -15,7 +14,6 @@ interface SessionDetail {
   referrer: string; source: string; landingPath: string; locale: string;
   totalDurationMs: number; chatOpened: boolean;
   firstSeen: string; lastSeen: string;
-  aiInsight: AiInsight | null;
 }
 interface ChatMsg { role: "user" | "assistant"; content: string; at: string; }
 interface DetailResponse {
@@ -34,16 +32,8 @@ function formatClock(iso: string) {
   return new Date(iso).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
-const INTENT_META = {
-  high: { label: "high intent", color: "#ff6b7d" },
-  medium: { label: "medium intent", color: "var(--brand-teal)" },
-  low: { label: "low intent", color: "var(--adm-text-faint)" },
-} as const;
-
 export default function SessionDetailPanel({ sessionId, onClose }: { sessionId: string; onClose: () => void }) {
   const [data, setData] = useState<DetailResponse | null>(null);
-  const [insightLoading, setInsightLoading] = useState(false);
-  const [insightError, setInsightError] = useState("");
   const [draftSubject, setDraftSubject] = useState("");
   const [draftBody, setDraftBody] = useState("");
   const [draftBusy, setDraftBusy] = useState<"send" | "dismiss" | null>(null);
@@ -62,7 +52,6 @@ export default function SessionDetailPanel({ sessionId, onClose }: { sessionId: 
 
   useEffect(() => {
     setData(null);
-    setInsightError("");
     setDraftError("");
     load();
   }, [load]);
@@ -86,27 +75,7 @@ export default function SessionDetailPanel({ sessionId, onClose }: { sessionId: 
     }
   }
 
-  async function generateInsight(force: boolean) {
-    setInsightLoading(true);
-    setInsightError("");
-    try {
-      const res = await fetch(`/api/admin/analytics/session/${encodeURIComponent(sessionId)}/insight`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ force }),
-      });
-      const j = await res.json();
-      if (!res.ok) { setInsightError(j.error || "Failed to generate insight"); return; }
-      setData(prev => prev ? { ...prev, session: { ...prev.session, aiInsight: j.insight } } : prev);
-    } catch {
-      setInsightError("Network error — try again");
-    } finally {
-      setInsightLoading(false);
-    }
-  }
-
   const s = data?.session;
-  const insight = s?.aiInsight;
   const hookDraft = data?.chat?.hookDraft;
 
   return (
@@ -123,29 +92,6 @@ export default function SessionDetailPanel({ sessionId, onClose }: { sessionId: 
           <div className="sdp-loading">loading session…</div>
         ) : (
           <div className="sdp-body">
-            {/* ── AI insight ── */}
-            <div className="sdp-section">
-              <div className="sdp-section__head"><Sparkles size={13} /> ai_insight</div>
-              {insight ? (
-                <div className="sdp-insight">
-                  <div className="sdp-insight__badge" style={{ color: INTENT_META[insight.intentSignal].color, borderColor: INTENT_META[insight.intentSignal].color }}>
-                    {INTENT_META[insight.intentSignal].label}
-                  </div>
-                  <p className="sdp-insight__text">{insight.text}</p>
-                  <button className="sdp-btn sdp-btn--ghost" onClick={() => generateInsight(true)} disabled={insightLoading}>
-                    <RefreshCw size={12} className={insightLoading ? "sdp-spin" : ""} /> {insightLoading ? "regenerating…" : "regenerate"}
-                  </button>
-                </div>
-              ) : (
-                <div className="sdp-insight">
-                  <p className="sdp-insight__empty">No insight generated yet.</p>
-                  <button className="sdp-btn" onClick={() => generateInsight(false)} disabled={insightLoading}>
-                    <Sparkles size={12} /> {insightLoading ? "analyzing…" : "generate insight"}
-                  </button>
-                </div>
-              )}
-              {insightError && <p className="sdp-insight__error">{insightError}</p>}
-            </div>
 
             {/* ── hook email draft ── (a "failed" draft has nothing worth
                 showing — subject/body are empty — so treat it like there's

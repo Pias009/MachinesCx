@@ -474,11 +474,11 @@
 [data-theme="light"] .sn__cta                { color: #080e0d !important; }
 
 /* ── ThemeToggle + LanguageSwitcher stay legible ── */
-[data-theme="light"] .tt-btn           { color: #0d2220 !important; background: transparent !important; border: none !important; }
-[data-theme="light"] .tt-btn:hover     { color: #0d2220 !important; background: rgba(43,191,179,0.12) !important; border: none !important; }
-[data-theme="light"] .ls-btn           { color: #0d2220 !important; background: transparent !important; border: none !important; }
+[data-theme="light"] .tt-btn           { color: #0d2220; }
+[data-theme="light"] .tt-btn:hover     { color: #0d2220; }
+[data-theme="light"] .ls-btn           { color: #0d2220; }
 [data-theme="light"] .ls-btn:hover,
-[data-theme="light"] .ls--open .ls-btn { color: #0d2220 !important; background: rgba(43,191,179,0.12) !important; border: none !important; }
+[data-theme="light"] .ls--open .ls-btn { color: #0d2220; }
 [data-theme="light"] .ls-btn svg       { opacity: 0.95 !important; stroke: #0d2220 !important; }
 [data-theme="light"] .ls-opt--on       { color: var(--brand-teal) !important; }
 

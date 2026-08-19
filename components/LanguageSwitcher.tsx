@@ -58,22 +58,26 @@ export default function LanguageSwitcher() {
       <style suppressHydrationWarning>{`
         .ls { position: relative; flex-shrink: 0; }
         .ls-btn {
-          display: flex; align-items: center; justify-content: center; gap: 0.3rem;
-          height: 34px; padding: 0 0.55rem;
-          background: transparent;
-          border: none !important;
-          box-shadow: none !important;
-          border-radius: 6px;
+          display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+          height: 36px; padding: 0 0.75rem;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          border-radius: 10px;
           cursor: pointer;
           font-family: var(--ff-mono); font-size: 0.72rem; font-weight: 600;
           letter-spacing: 0.06em; text-transform: uppercase;
-          color: rgba(255,255,255,0.85);
-          transition: background .18s, color .18s;
+          color: rgba(255,255,255,0.88);
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 2px 6px rgba(0, 0, 0, 0.2);
         }
-        .ls-btn:hover { background: rgba(43,191,179,0.12); color: #ffffff; border: none !important; }
+        .ls-btn:hover, .ls--open .ls-btn {
+          background: rgba(43,191,179,0.22);
+          border-color: rgba(43,191,179,0.45);
+          color: #ffffff;
+          box-shadow: 0 0 12px rgba(43,191,179,0.3);
+        }
         .ls-btn svg { width: 9px; height: 9px; flex-shrink: 0; transition: transform .2s ease, opacity .2s ease; opacity: 0.85; stroke: currentColor; }
         .ls--open .ls-btn svg { transform: rotate(180deg); opacity: 1; }
-        .ls--open .ls-btn { background: rgba(43,191,179,0.12); border: none !important; }
 
         .ls-dd {
           position: fixed;
@@ -109,19 +113,20 @@ export default function LanguageSwitcher() {
         .ls-opt--on .ls-opt__check { opacity: 1; }
 
         [data-theme="light"] .ls-btn {
-          background: transparent !important;
-          border: none !important;
-          color: #0d2220 !important;
+          background: rgba(13, 34, 32, 0.06);
+          border: 1px solid rgba(13, 34, 32, 0.14);
+          color: #0d2220;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0,0,0,0.05);
         }
         [data-theme="light"] .ls-btn:hover,
         [data-theme="light"] .ls--open .ls-btn {
-          background: rgba(43,191,179,0.12) !important;
-          border: none !important;
-          color: #0d2220 !important;
+          background: rgba(43,191,179,0.18);
+          border-color: rgba(43,191,179,0.45);
+          color: #0d2220;
         }
         [data-theme="light"] .ls-btn svg {
-          opacity: 0.95 !important;
-          stroke: #0d2220 !important;
+          opacity: 0.95;
+          stroke: #0d2220;
         }
 
         [data-theme="light"] .ls-dd {

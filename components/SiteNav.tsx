@@ -103,7 +103,7 @@ export default function SiteNav() {
           position: fixed; top: 14px; left: 50%;
           transform: translateX(-50%);
           z-index: 200;
-          height: 64px; width: min(1360px, 94vw);
+          height: 64px; width: min(1440px, 95vw);
           border-radius: 9999px;
           background: var(--glass-bg);
           -webkit-backdrop-filter: blur(20px) saturate(1.6);
@@ -128,9 +128,9 @@ export default function SiteNav() {
         }
 
         .sn__inner {
-          height: 64px; width: 100%; max-width: 1360px; margin-inline: auto;
-          padding: 0 clamp(1rem, 3vw, 2rem);
-          display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+          height: 64px; width: 100%; max-width: 1440px; margin-inline: auto;
+          padding: 0 clamp(0.75rem, 2vw, 1.5rem);
+          display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
         }
 
         /* ── Logo ── */
@@ -176,16 +176,16 @@ export default function SiteNav() {
         }
         /* ── Right actions ── */
         .sn__actions {
-          display: flex; align-items: center; gap: 0.65rem;
+          display: flex; align-items: center; gap: 0.5rem;
           flex: 0 0 auto; justify-content: flex-end;
         }
 
         /* category dropdown trigger */
         .sn__cat { position: relative; height: 64px; display: flex; align-items: center; }
         .sn__cat-btn {
-          height: 64px; display: flex; align-items: center; gap: 0.3rem;
-          padding: 0 0.75rem;
-          font-family: var(--ff-nav); font-size: 0.82rem;
+          height: 64px; display: flex; align-items: center; gap: 0.25rem;
+          padding: 0 0.55rem;
+          font-family: var(--ff-nav); font-size: 0.8rem;
           font-weight: 600;
           letter-spacing: 0.03em; text-transform: uppercase;
           color: rgba(255,255,255,0.82); background: none; border: none;
@@ -200,7 +200,7 @@ export default function SiteNav() {
 
         /* active underline */
         .sn__cat-bar {
-          position: absolute; bottom: 0; left: 0.75rem; right: 0.75rem;
+          position: absolute; bottom: 0; left: 0.55rem; right: 0.55rem;
           height: 2px; background: var(--brand-teal);
           transform: scaleX(0); transform-origin: left;
           transition: transform 0.22s ease;
@@ -210,8 +210,8 @@ export default function SiteNav() {
         /* plain links */
         .sn__link {
           height: 64px; display: flex; align-items: center;
-          padding: 0 0.75rem;
-          font-family: var(--ff-nav); font-size: 0.82rem;
+          padding: 0 0.55rem;
+          font-family: var(--ff-nav); font-size: 0.8rem;
           font-weight: 600;
           letter-spacing: 0.03em; text-transform: uppercase;
           color: rgba(255,255,255,0.82); text-decoration: none;
@@ -223,18 +223,19 @@ export default function SiteNav() {
         .sn__divider {
           width: 3px; height: 3px; border-radius: 50%;
           background: rgba(255,255,255,0.3);
-          flex-shrink: 0; margin: 0 0.3rem;
+          flex-shrink: 0; margin: 0 0.25rem;
         }
 
         /* ── CTA button ── */
         .sn__cta {
           position: relative; overflow: hidden;
           margin-inline-start: auto; flex-shrink: 0;
-          font-family: var(--ff-nav); font-size: 0.82rem;
+          font-family: var(--ff-nav); font-size: 0.8rem;
           letter-spacing: 0.04em; text-transform: uppercase;
           color: #080e0d; text-decoration: none;
           background: var(--brand-teal);
-          padding: 0.55rem 1.25rem;
+          padding: 0.5rem 1.1rem;
+          border-radius: 9999px;
           border: 1px solid var(--brand-teal);
           font-weight: 700;
           white-space: nowrap;
@@ -377,7 +378,7 @@ export default function SiteNav() {
           background: radial-gradient(ellipse at 50% 90%, rgba(43,191,179,0.12) 0%, transparent 65%);
         }
 
-        @media (max-width: 1560px) {
+        @media (max-width: 1680px) {
           .sn__link--hide { display: none; }
           .sn__divider    { display: none; }
         }
@@ -668,9 +669,12 @@ export default function SiteNav() {
           <TransitionLink href="/inquiries"  className="sn__mobile-link" onClick={() => setMobileOpen(false)}>{t("contact")}</TransitionLink>
         </div>
 
-        {/* Language + CTA pinned to bottom */}
+        {/* Language + Theme + CTA pinned to bottom */}
         <div style={{ padding:"1.25rem", borderTop:"1px solid var(--bg-line)", flexShrink:0, display:"flex", flexDirection:"column", gap:"0.85rem" }}>
-          <LanguageSwitcher />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
+            <LanguageSwitcher />
+            <ThemeToggle />
+          </div>
           <TransitionLink href="/inquiries" className="sn__mobile-cta" onClick={() => setMobileOpen(false)}>
             {t("getQuote")}
           </TransitionLink>

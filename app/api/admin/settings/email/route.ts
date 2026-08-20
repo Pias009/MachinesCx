@@ -34,12 +34,12 @@ export async function POST(req: NextRequest) {
   try {
     await sendEmail({
       to: newEmail,
-      subject: "Confirm your new Ashal Innomach admin email",
+      subject: "Confirm your new Ashal Innomech admin email",
       html: renderEmailLayout({
         preheader: "Confirm this address to finish changing your admin sign-in email",
         heading: "Confirm your new admin email",
         bodyHtml: `
-          <p style="margin:0 0 8px;">You (or someone with admin access) requested to change the sign-in email for the Ashal Innomach admin panel to this address.</p>
+          <p style="margin:0 0 8px;">You (or someone with admin access) requested to change the sign-in email for the Ashal Innomech admin panel to this address.</p>
           <p style="margin:0; font-size:13px; color:#5b6b68;">This link expires in 30 minutes. If you didn't request this, ignore this email — your admin login is unaffected until this link is used.</p>
         `,
         ctaLabel: "Confirm this email change",

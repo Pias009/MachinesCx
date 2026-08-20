@@ -15,12 +15,12 @@ export async function generateMetadata({ params }: { params: { locale: string; c
   const { locale, category } = params;
   const { categories: liveCategories } = await getLiveCatalogue();
   const c = liveCategories.find((x) => x.slug === category);
-  if (!c) return { title: "Catalogue — Ashal Innomach" };
+  if (!c) return { title: "Catalogue — Ashal Innomech" };
 
   return pageMetadata({
     locale,
     path: `/products/${category}`,
-    title: `${c.name} — Ashal Innomach`,
+    title: `${c.name} — Ashal Innomech`,
     description: c.blurb,
   });
 }

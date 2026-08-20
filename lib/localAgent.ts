@@ -396,7 +396,7 @@ export async function answerLocally(
   const isIdentity = IDENTITY_WORDS.some(w => msg.includes(w));
   if (isIdentity) {
     return {
-      text: "I'm ASHA, your AI sales assistant here at ASHAL INNOMACH. I know our entire catalogue inside out — specs, models, series, and pricing. Ask me to compare machines, recommend the right model for your output, pull up technical details, or start an inquiry. I'm built to get you the right machine, fast.",
+      text: "I'm ASHA, your AI sales assistant here at ASHAL INNOMECH. I know our entire catalogue inside out — specs, models, series, and pricing. Ask me to compare machines, recommend the right model for your output, pull up technical details, or start an inquiry. I'm built to get you the right machine, fast.",
       actions: [{ type: "quick_replies", options: categoryQuickReplies }],
     };
   }

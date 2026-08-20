@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: { locale: string; s
   return pageMetadata({
     locale: params.locale,
     path: `/news/${params.slug}`,
-    title: `${a.title} — Ashal Innomach`,
+    title: `${a.title} — Ashal Innomech`,
     description: a.excerpt,
     image: a.image,
   });

@@ -117,7 +117,7 @@ export default function AccountPage() {
                     <div className="acc-item__replies">
                       {inq.replies.map((r, i) => (
                         <div key={i} className="acc-reply">
-                          <div className="acc-reply__label">Reply from Ashal Innomach · {formatDate(r.sentAt)}</div>
+                          <div className="acc-reply__label">Reply from Ashal Innomech · {formatDate(r.sentAt)}</div>
                           <p className="acc-reply__text">{r.message}</p>
                         </div>
                       ))}

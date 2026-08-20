@@ -1,14 +1,14 @@
 {
   "nav": {
     "allProducts": "All Products",
-    "productionLine": "Production Lines",
+    "productionLine": "Lines",
     "news": "News",
     "about": "About",
     "contact": "Contact",
     "getQuote": "Get a Quote",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "logoAria": "Ashal Innomach — home"
+    "logoAria": "Ashal Innomech — home"
   },
   "pageNav": {
     "back": "Back",
@@ -65,7 +65,7 @@
     },
     "stats": "60+ Countries · 6 Continents · 18+ Machine Families",
     "copyright": "© {year} {brand}. All specifications subject to change without notice.",
-    "companyName": "Wenzhou Ashal Innomach Technology Co., Ltd."
+    "companyName": "Wenzhou Ashal Innomech Technology Co., Ltd."
   },
   "homeAgent": {
     "eyebrow": "AI Machine Assistant",
@@ -77,7 +77,7 @@
     "hint": "No forms. Just ask."
   },
   "heroSplash": {
-    "sectionAria": "Wenzhou Ashal Innomach — Hero",
+    "sectionAria": "Wenzhou Ashal Innomech — Hero",
     "archAria": "Featured machines",
     "statsAria": "Company highlights",
     "stat1v": "80+",
@@ -91,7 +91,7 @@
     "heroWords": [
       "WENZHOU",
       "ASHAL",
-      "INNOMACH",
+      "INNOMECH",
       "TECHNOLOGY"
     ],
     "hero1": {
@@ -654,7 +654,7 @@
       "cta": "Browse the catalogue"
     },
     "features": {
-      "sectionAria": "Why manufacturers choose Ashal Innomach",
+      "sectionAria": "Why manufacturers choose Ashal Innomech",
       "eyebrow": "Why manufacturers choose us",
       "items": [
         {
@@ -685,12 +685,12 @@
     }
   },
   "trustSection": {
-    "sectionAria": "Why trust Ashal Innomach",
+    "sectionAria": "Why trust Ashal Innomech",
     "kicker": "Why manufacturers choose us",
     "headlineLine1": "Engineered.",
     "headlineEm": "Proven.",
     "headlineLine3": "Supported.",
-    "descPrefix": "Wenzhou Asal Innomach Technology, trusted in",
+    "descPrefix": "Wenzhou Asal Innomech Technology, trusted in",
     "rollWords": [
       "Film Blowing.",
       "Bag Making.",
@@ -1079,12 +1079,12 @@
     "readArticle": "Read article →"
   },
   "about": {
-    "pageTitle": "About — Wenzhou Ashal Innomach Technology",
+    "pageTitle": "About — Wenzhou Ashal Innomech Technology",
     "hero": {
       "eyebrow": "Company Profile",
       "titleLine1": "Wenzhou Ashal",
-      "titleLine2": "Innomach Technology",
-      "imgAlt": "Ashal Innomach Technology headquarters building"
+      "titleLine2": "Innomech Technology",
+      "imgAlt": "Ashal Innomech Technology headquarters building"
     },
     "whoWeAre": {
       "kicker": "Who We Are",
@@ -1146,7 +1146,7 @@
     "story": {
       "kicker": "Our Story",
       "title": "From one line to a full machinery portfolio",
-      "p1": "Ashal Innomach started with a single-layer blown-film line and a small team of mechanical engineers who had spent the previous decade on the shop floors of Wenzhou's established machinery makers. The founding premise was simple: build fewer machine types, but build them better.",
+      "p1": "Ashal Innomech started with a single-layer blown-film line and a small team of mechanical engineers who had spent the previous decade on the shop floors of Wenzhou's established machinery makers. The founding premise was simple: build fewer machine types, but build them better.",
       "p2": "Today we produce eighteen machine families across blown film, bag making, and recycling. Every product is designed in-house, fabricated in our 12,000 m² Wenzhou facility, and tested before it ships."
     },
     "timeline": {
@@ -1371,7 +1371,7 @@
       "items": [
         [
           "Company",
-          "Wenzhou Ashal Innomach Technology"
+          "Wenzhou Ashal Innomech Technology"
         ],
         [
           "Location",
@@ -1916,7 +1916,7 @@
     "relatedMachines": "Related <em>Machines</em>",
     "viewAll": "View all →",
     "getInTouchAria": "Get in touch",
-    "newsletterText": "Be up to date with the latest<br></br>news about Ashal Innomach",
+    "newsletterText": "Be up to date with the latest<br></br>news about Ashal Innomech",
     "contact": "Contact",
     "needCustomConfig": "Need a <em>custom</em> configuration?",
     "dontKnowHowToSpecify": "Don't know how to specify your requirements?",
@@ -2124,7 +2124,7 @@
     "eyebrow": "Legal",
     "titlePrefix": "Privacy &",
     "titleEm": "Terms",
-    "sub": "How Wenzhou Ashal Innomach Technology Co., Ltd. collects, uses, and protects your data, and the terms that govern your use of our website and services.",
+    "sub": "How Wenzhou Ashal Innomech Technology Co., Ltd. collects, uses, and protects your data, and the terms that govern your use of our website and services.",
     "tabsAria": "Legal document sections",
     "privacy": {
       "tabLabel": "Privacy Policy",
@@ -2168,7 +2168,7 @@
       "sections": [
         {
           "heading": "1. Acceptance of Terms",
-          "body": "By accessing this website or submitting an inquiry to Wenzhou Ashal Innomach Technology Co., Ltd., you agree to be bound by these Terms & Conditions. If you do not agree, please discontinue use of the site."
+          "body": "By accessing this website or submitting an inquiry to Wenzhou Ashal Innomech Technology Co., Ltd., you agree to be bound by these Terms & Conditions. If you do not agree, please discontinue use of the site."
         },
         {
           "heading": "2. Quotations & Pricing",
@@ -2180,7 +2180,7 @@
         },
         {
           "heading": "4. Intellectual Property",
-          "body": "All content on this website — including machine designs, diagrams, product photography, and text — is the property of Wenzhou Ashal Innomach Technology Co., Ltd. and may not be reproduced, distributed, or used commercially without prior written consent."
+          "body": "All content on this website — including machine designs, diagrams, product photography, and text — is the property of Wenzhou Ashal Innomech Technology Co., Ltd. and may not be reproduced, distributed, or used commercially without prior written consent."
         },
         {
           "heading": "5. Warranty",
@@ -2188,7 +2188,7 @@
         },
         {
           "heading": "6. Limitation of Liability",
-          "body": "To the extent permitted by law, Wenzhou Ashal Innomach Technology Co., Ltd. shall not be liable for indirect, incidental, or consequential damages arising from the use of our website or products, beyond the remedies expressly stated in the applicable sales contract."
+          "body": "To the extent permitted by law, Wenzhou Ashal Innomech Technology Co., Ltd. shall not be liable for indirect, incidental, or consequential damages arising from the use of our website or products, beyond the remedies expressly stated in the applicable sales contract."
         },
         {
           "heading": "7. Governing Law",

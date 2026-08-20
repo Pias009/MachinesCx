@@ -147,7 +147,7 @@ export default function SiteFooter() {
                   <Image src="/logo.jpeg" alt={`${BRAND} logo`} width={48} height={48} />
                 </span>
                 <div>
-                  <div className="footer-brand">Ashal<span style={{ color: "var(--brand-red)" }}>·</span>Innomach</div>
+                  <div className="footer-brand">Ashal<span style={{ color: "var(--brand-red)" }}>·</span>Innomech</div>
                   <div className="footer-founded" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.65rem", letterSpacing: "0.1em", marginTop: "0.25rem" }}>{t("since")}</div>
                 </div>
               </div>

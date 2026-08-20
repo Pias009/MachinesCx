@@ -1,9 +1,9 @@
 // ---------------------------------------------------------------------------
-// Wenzhou Ashal Innomach Technology — product catalogue data
+// Wenzhou Ashal Innomech Technology — product catalogue data
 // Transcribed from the source spec deck. English only — all bilingual labels removed for international audience.
 // ---------------------------------------------------------------------------
 
-export const BRAND = "Wenzhou Ashal Innomach Technology";
+export const BRAND = "Wenzhou Ashal Innomech Technology";
 export const SITE_URL = "https://www.wzashal.com";
 
 export type CategorySlug = "film-blowing" | "bag-making" | "recycling" | "printing";

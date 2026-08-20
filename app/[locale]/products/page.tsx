@@ -8,7 +8,7 @@ export function generateMetadata({ params }: { params: { locale: string } }) {
   return pageMetadata({
     locale: params.locale,
     path: "/products",
-    title: "Full Catalogue — Ashal Innomach",
+    title: "Full Catalogue — Ashal Innomech",
     description: "Browse the full range: multi-layer blown-film lines, bag-making converters, recycling and pelletizing lines, and flexographic printing machines.",
   });
 }

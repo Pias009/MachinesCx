@@ -7,7 +7,7 @@ export function generateMetadata({ params }: { params: { locale: string } }) {
   return pageMetadata({
     locale: params.locale,
     path: "/contact",
-    title: "Contact — Wenzhou Ashal Innomach Technology",
+    title: "Contact — Wenzhou Ashal Innomech Technology",
     description: "Reach our engineering team directly by phone, WhatsApp, or email, or send an inquiry — based in Wenzhou, Zhejiang, China, with a 24-hour response time.",
   });
 }

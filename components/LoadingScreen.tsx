@@ -9,7 +9,7 @@ export default function LoadingScreen() {
   const [mounted, setMounted] = useState(false);
   const [gone,    setGone]    = useState(false);
   const [pct,     setPct]     = useState(0);
-  const [label,   setLabel]   = useState("Wenzhou Ashal Innomach Technology Co., Ltd.");
+  const [label,   setLabel]   = useState("Wenzhou Ashal Innomech Technology Co., Ltd.");
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -162,7 +162,7 @@ export default function LoadingScreen() {
               animation: "ls-rise 1.0s 0.75s cubic-bezier(0.22,1,0.36,1) both",
             }}
           >
-            Wenzhou Ashal Innomach
+            Wenzhou Ashal Innomech
           </div>
 
           {/* Subtitle */}

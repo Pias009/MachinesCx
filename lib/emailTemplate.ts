@@ -33,7 +33,7 @@ export function renderEmailLayout({ preheader, heading, bodyHtml, ctaLabel, ctaU
           <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%; background:#ffffff; border-radius:14px; overflow:hidden; border:1px solid ${BORDER};">
             <tr>
               <td style="background:${BRAND_TEAL}; padding:20px 32px;">
-                <img src="${LOGO_URL}" alt="Ashal Innomach" height="30" style="display:block; height:30px; width:auto; border:0;" />
+                <img src="${LOGO_URL}" alt="Ashal Innomech" height="30" style="display:block; height:30px; width:auto; border:0;" />
               </td>
             </tr>
             <tr>
@@ -52,7 +52,7 @@ export function renderEmailLayout({ preheader, heading, bodyHtml, ctaLabel, ctaU
             </tr>
             <tr>
               <td style="padding:18px 32px; border-top:1px solid ${BORDER}; background:#fafbfb;">
-                <p style="margin:0; font-size:12px; line-height:1.6; color:${INK_DIM};">Ashal Innomach — Blown Film, Bag Making &amp; Recycling Machinery</p>
+                <p style="margin:0; font-size:12px; line-height:1.6; color:${INK_DIM};">Ashal Innomech — Blown Film, Bag Making &amp; Recycling Machinery</p>
               </td>
             </tr>
           </table>

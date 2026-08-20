@@ -58,7 +58,7 @@ export async function maybeProcessLeadDrafts(): Promise<void> {
         .map((pv: PageViewEntry) => `${pv.path} (${formatDuration(pv.durationMs)})`)
         .join("\n");
 
-      const prompt = `You are writing a short, warm follow-up email FROM the ASHAL INNOMACH sales team TO a website visitor who gave their email during a chat with ASHA (the AI sales assistant). This is a real outreach email a human will review before sending — write it like a person, not a bot. No corporate filler, no "I hope this email finds you well."
+      const prompt = `You are writing a short, warm follow-up email FROM the ASHAL INNOMECH sales team TO a website visitor who gave their email during a chat with ASHA (the AI sales assistant). This is a real outreach email a human will review before sending — write it like a person, not a bot. No corporate filler, no "I hope this email finds you well."
 
 Visitor name: ${name || "unknown — use a generic friendly greeting, don't invent a name"}
 
@@ -68,7 +68,7 @@ ${pagesLines || "(none recorded)"}
 Their chat with ASHA:
 ${chatLines || "(no chat transcript)"}
 
-Write a short email (3-5 sentences body) that references something SPECIFIC from what they looked at or asked — not generic. Invite them to reply with questions or to schedule a quick call. Sign off as "The ASHAL INNOMACH Team". Do not invent specs, prices, or claims not supported by the context above.
+Write a short email (3-5 sentences body) that references something SPECIFIC from what they looked at or asked — not generic. Invite them to reply with questions or to schedule a quick call. Sign off as "The ASHAL INNOMECH Team". Do not invent specs, prices, or claims not supported by the context above.
 
 Reply ONLY with this JSON: {"subject":"short subject line","body":"the email body, plain text with \\n for paragraph breaks"}`;
 

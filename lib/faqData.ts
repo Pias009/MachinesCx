@@ -1,6 +1,6 @@
 export const FAQ_ITEMS = [
   {
-    q: "What machines does Ashal Innomach manufacture?",
+    q: "What machines does Ashal Innomech manufacture?",
     a: "We design and manufacture blown-film lines (mono- and multi-layer, up to five-layer co-extrusion at 400 kg/h), bag-making converters (heat-seal, bottom-seal, roll-bag and vest-bag types for PE and biodegradable PBAT film), recycling and pelletizing lines, and flexographic printing machines (2 to 8 colours, up to 350 m/min). See the full catalogue at /products.",
   },
   {
@@ -20,7 +20,7 @@ export const FAQ_ITEMS = [
     a: "Yes. Our Wenzhou manufacturing facility is ISO 9001 certified.",
   },
   {
-    q: "Where is Ashal Innomach based, and do you ship internationally?",
+    q: "Where is Ashal Innomech based, and do you ship internationally?",
     a: "We're based in Wenzhou, Zhejiang, China, and our machines run in 80+ countries across six continents. Export packing, ocean/air freight, and on-site installation are handled as part of every order.",
   },
   {

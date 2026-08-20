@@ -30,7 +30,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   try {
     await sendEmail({
       to: inquiry.email,
-      subject: `Re: your inquiry to Ashal Innomach`,
+      subject: `Re: your inquiry to Ashal Innomech`,
       html: renderEmailLayout({
         preheader: body.message.trim().slice(0, 120),
         heading: `Hi ${escapeHtml(inquiry.name)},`,

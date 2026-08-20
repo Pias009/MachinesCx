@@ -58,7 +58,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <div className="adm-brand">
           <div className="adm-brand__eyebrow">
             <span className="adm-brand__dot" />
-            Ashal Innomach
+            Ashal Innomech
           </div>
           <div className="adm-brand__title">Admin Panel</div>
         </div>

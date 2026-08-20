@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: { locale: string; c
   const { locale, category, slug } = params;
   const { families: liveFamilies } = await getLiveCatalogue();
   const f = liveFamilies.find((x) => x.slug === slug);
-  if (!f) return { title: "Product — Wenzhou Ashal Innomach" };
+  if (!f) return { title: "Product — Wenzhou Ashal Innomech" };
 
   const metaTitle = f.seoData?.metaTitle || `${f.name} | Specs & Output | Ashal Machinery`;
   const metaDesc = f.seoData?.metaDescription || [f.tagline, f.specs.slice(0, 2).map((s) => `${s.label} ${s.values[0]}`).join(" · ")].filter(Boolean).join(" — ").slice(0, 160);

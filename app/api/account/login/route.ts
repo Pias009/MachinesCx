@@ -39,12 +39,12 @@ export async function POST(req: NextRequest) {
       ).toString();
       await sendEmail({
         to: email,
-        subject: "Your Ashal Innomach account login link",
+        subject: "Your Ashal Innomech account login link",
         html: renderEmailLayout({
           preheader: "Click to view your inquiries and replies",
           heading: "Log in to your account",
           bodyHtml: `
-            <p style="margin:0 0 8px;">Click below to view your inquiry history and replies from Ashal Innomach.</p>
+            <p style="margin:0 0 8px;">Click below to view your inquiry history and replies from Ashal Innomech.</p>
             <p style="margin:0; font-size:13px; color:#5b6b68;">This link expires in 20 minutes. If you didn't request this, you can safely ignore this email.</p>
           `,
           ctaLabel: "View my inquiries",

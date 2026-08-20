@@ -6,10 +6,11 @@ import Image from "next/image";
 import TransitionLink from "@/components/TransitionLink";
 import ThemeToggle from "@/components/ThemeToggle";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import RollingNavMenu from "@/components/RollingNavMenu";
 import { categories, familiesByCategory } from "@/lib/products";
 
 // Static logo — no cycling, brand name is stable and trustworthy for B2B
-const LOGO_WORDS = ["ASHAL INNOMACH"];
+const LOGO_WORDS = ["ASHAL INNOMECH"];
 
 const FLEXO_IMGS: Record<string, string> = {
   "flexo-2c": "/machines/flexo-1.png",
@@ -288,10 +289,7 @@ export default function SiteNav() {
 
         .sn__backdrop {
           position: fixed; inset: 0; top: 0; z-index: 199;
-          background: rgba(0,0,0,0.45);
-          -webkit-backdrop-filter: blur(3px);
-                  backdrop-filter: blur(3px);
-          animation: snBdIn 0.25s ease both;
+          background: transparent;
           pointer-events: auto;
         }
         @keyframes snBdIn { from { opacity: 0; } to { opacity: 1; } }
@@ -534,9 +532,11 @@ export default function SiteNav() {
         [data-theme="light"] .sn__divider { background: var(--ink-15); }
         [data-theme="light"] .sn__burger span { background: #0d2220; }
 
+        html[data-theme="light"] .sn__dd,
         [data-theme="light"] .sn__dd {
-          background: color-mix(in srgb, var(--bg-surface) 98%, transparent);
-          border-color: var(--bg-line);
+          background: #ffffff !important;
+          border-color: rgba(13, 34, 32, 0.18) !important;
+          box-shadow: 0 20px 60px rgba(13, 34, 32, 0.15) !important;
         }
         [data-theme="light"] .sn__dd-item:hover,
         [data-theme="light"] .sn__dd-item--on { background: var(--brand-teal-dim); }
@@ -582,10 +582,10 @@ export default function SiteNav() {
         <div className="sn__inner">
 
           <TransitionLink href="/" className="sn__logo" aria-label={t("logoAria")}>
-            <Image src="/logo.jpeg" alt="Ashal Innomach" className="sn__logo-img" width={40} height={40} priority />
+            <Image src="/logo.jpeg" alt="Ashal Innomech" className="sn__logo-img" width={40} height={40} priority />
             <span className="sn__logo-text">
               <span className="sn__logo-word sn__logo-word--hold">
-                <em>ASHAL</em>{" INNOMACH"}
+                <em>ASHAL</em>{" INNOMECH"}
               </span>
             </span>
           </TransitionLink>
@@ -610,13 +610,11 @@ export default function SiteNav() {
 
             <span className="sn__divider" />
 
-            <TransitionLink href="/products" className="sn__link sn__link--hide">{t("allProducts")}</TransitionLink>
-            <TransitionLink href="/production-line" className="sn__link sn__link--hide">{t("productionLine")}</TransitionLink>
-            <TransitionLink href="/news"     className="sn__link sn__link--hide">{t("news")}</TransitionLink>
-            <TransitionLink href="/about"    className="sn__link sn__link--hide">{t("about")}</TransitionLink>
+            <TransitionLink href="/products" className="sn__link">{t("allProducts")}</TransitionLink>
           </div>
 
           <div className="sn__actions">
+            <RollingNavMenu />
             <LanguageSwitcher />
             <ThemeToggle />
             <TransitionLink href="/inquiries" className="sn__cta">{t("getQuote")}</TransitionLink>
@@ -647,7 +645,7 @@ export default function SiteNav() {
         {/* Header: logo + close */}
         <div className="sn__mob-header">
           <TransitionLink href="/" className="sn__mob-logo" onClick={() => setMobileOpen(false)}>
-            <em>ASHAL</em>{" INNOMACH"}
+            <em>ASHAL</em>{" INNOMECH"}
           </TransitionLink>
           <button className="sn__mob-close" aria-label={t("closeMenu")} onClick={() => setMobileOpen(false)}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">

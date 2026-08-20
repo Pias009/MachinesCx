@@ -518,9 +518,10 @@ export default function SiteNav() {
            collapsing into the mobile menu */
         @media (max-width: 1024px) {
           .sn__links  { display: none; }
-          .sn__cta    { display: none; }
-          .sn__actions .ls { display: none; }
           .sn__burger { display: flex; }
+        }
+        @media (max-width: 640px) {
+          .sn__cta    { display: none; }
         }
 
         /* ── Light mode overrides ── */

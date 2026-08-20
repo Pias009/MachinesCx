@@ -43,7 +43,9 @@ export default function LanguageSwitcher() {
   const toggle = () => {
     if (!open && btnRef.current) {
       const r = btnRef.current.getBoundingClientRect();
-      setDdPos({ top: r.bottom + 8, right: window.innerWidth - r.right });
+      const rightPos = window.innerWidth - r.right;
+      const safeRight = Math.max(12, Math.min(rightPos, window.innerWidth - 170));
+      setDdPos({ top: r.bottom + 8, right: safeRight });
     }
     setOpen(v => !v);
   };
@@ -112,32 +114,45 @@ export default function LanguageSwitcher() {
         .ls-opt__check { width: 14px; height: 14px; flex-shrink: 0; opacity: 0; stroke: currentColor; }
         .ls-opt--on .ls-opt__check { opacity: 1; }
 
+        /* Light mode overrides — high-contrast dark text */
         [data-theme="light"] .ls-btn {
-          background: rgba(13, 34, 32, 0.06);
-          border: 1px solid rgba(13, 34, 32, 0.14);
-          color: #0d2220;
+          background: rgba(13, 34, 32, 0.06) !important;
+          border: 1px solid rgba(13, 34, 32, 0.18) !important;
+          color: #0d2220 !important;
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0,0,0,0.05);
         }
         [data-theme="light"] .ls-btn:hover,
         [data-theme="light"] .ls--open .ls-btn {
-          background: rgba(43,191,179,0.18);
-          border-color: rgba(43,191,179,0.45);
-          color: #0d2220;
+          background: rgba(43,191,179,0.18) !important;
+          border-color: rgba(43,191,179,0.45) !important;
+          color: #0d2220 !important;
         }
         [data-theme="light"] .ls-btn svg {
-          opacity: 0.95;
-          stroke: #0d2220;
+          opacity: 0.95 !important;
+          stroke: #0d2220 !important;
         }
 
         [data-theme="light"] .ls-dd {
           background: #ffffff !important;
-          border-color: rgba(13,34,32,0.15) !important;
-          border-top: 2px solid var(--brand-teal) !important;
-          box-shadow: 0 12px 32px rgba(13,34,32,0.15) !important;
+          border: 1px solid rgba(13,34,32,0.18) !important;
+          border-top: 2px solid var(--brand-teal-dk) !important;
+          box-shadow: 0 12px 32px rgba(13,34,32,0.18) !important;
         }
-        [data-theme="light"] .ls-opt { color: rgba(13,34,32,0.85) !important; }
-        [data-theme="light"] .ls-opt:hover { background: rgba(43,191,179,0.1) !important; color: #0d2220 !important; }
-        [data-theme="light"] .ls-opt--on { color: var(--brand-teal) !important; }
+        [data-theme="light"] .ls-opt {
+          color: #0d2220 !important;
+          font-weight: 500 !important;
+        }
+        [data-theme="light"] .ls-opt:hover {
+          background: rgba(43,191,179,0.14) !important;
+          color: #0d2220 !important;
+        }
+        [data-theme="light"] .ls-opt--on {
+          color: #1fa39a !important;
+          font-weight: 700 !important;
+        }
+        [data-theme="light"] .ls-opt__check {
+          stroke: #1fa39a !important;
+        }
       `}</style>
 
       <div className={`ls${open ? " ls--open" : ""}`} ref={wrapRef}>

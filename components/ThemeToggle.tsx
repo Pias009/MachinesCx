@@ -32,7 +32,17 @@ export default function ThemeToggle() {
     }
   };
 
-  if (!mounted) return null;
+  if (!mounted) {
+    return (
+      <button className="tt-btn" aria-hidden="true" style={{ opacity: 0.5 }}>
+        <span className="tt-icon tt-icon--sun" style={{ opacity: 1, transform: "none" }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <circle cx="12" cy="12" r="5"/>
+          </svg>
+        </span>
+      </button>
+    );
+  }
 
   return (
     <>

@@ -13,8 +13,6 @@ import { SECTION_ELEMENT_DELAY } from "@/components/SectionReveal";
 
 gsap.registerPlugin(useGSAP);
 
-// model tagline ("tag") text comes from the flexoStrip.models translation
-// namespace, keyed by slug — everything else here is fixed catalogue data
 const FAMILY_BASE: Omit<ProductFamily, "tagline">[] = [
   { slug:"flexo-2c", category:"printing", series:"AI-2C · 2-colour", name:"AI-2C", models:["AI-2C-500"], materials:"PE, PP, PET, BOPP, Paper", images:["/machines/flexo-1.png"], specs:[
     { label:"Printing Colours",      values:["2"] },
@@ -46,6 +44,7 @@ interface FlexoModel {
   reg: string;
   img: string;
   tag: string;
+  categoryTag: string;
   hot?: boolean;
   flagship?: boolean;
 }
@@ -55,18 +54,29 @@ function findSpec(family: ProductFamily, label: string): string {
 }
 
 function buildModels(list: ProductFamily[]): FlexoModel[] {
-  return list.map(f => ({
-    slug: f.slug,
-    label: f.series.split("·")[0].trim(),
-    colours: parseInt(findSpec(f, "Printing Colours")) || 2,
-    speed:   (findSpec(f, "Max Mechanical Speed").match(/\d+/) || ["120"])[0],
-    reg:     findSpec(f, "Registration Accuracy") || "±0.2mm",
-    img:     f.images?.[0] ?? "/machines/flexo-1.png",
-    tag:     f.tagline ?? "",
-    hot:      f.slug === "flexo-4c",
-    flagship: f.slug === "flexo-8c",
-  }));
+  return list.map(f => {
+    let catTag = "All Series";
+    if (f.slug === "flexo-2c") catTag = "Entry Level";
+    else if (f.slug === "flexo-4c") catTag = "Mid-Range";
+    else if (f.slug === "flexo-6c") catTag = "High Speed";
+    else if (f.slug === "flexo-8c") catTag = "Flagship";
+
+    return {
+      slug: f.slug,
+      label: f.series.split("·")[0].trim(),
+      colours: parseInt(findSpec(f, "Printing Colours")) || 2,
+      speed:   (findSpec(f, "Max Mechanical Speed").match(/\d+/) || ["120"])[0],
+      reg:     findSpec(f, "Registration Accuracy") || "±0.2mm",
+      img:     f.images?.[0] ?? "/machines/flexo-1.png",
+      tag:     f.tagline ?? "",
+      categoryTag: catTag,
+      hot:      f.slug === "flexo-4c",
+      flagship: f.slug === "flexo-8c",
+    };
+  });
 }
+
+const CATEGORY_TABS = ["All Series", "Entry Level", "Mid-Range", "High Speed", "Flagship"];
 
 export default function FlexoStrip() {
   const t = useTranslations("flexoStrip");
@@ -77,6 +87,8 @@ export default function FlexoStrip() {
 
   const cms = useCms<{ items?: FlexoModel[] }>("flexo-strip", { items: DEFAULT_MODELS });
   const MODELS = cms.items && cms.items.length ? cms.items : DEFAULT_MODELS;
+
+  const [activeCategory, setActiveCategory] = useState<string>("All Series");
 
   const sectionRef = useRef<HTMLElement>(null);
   const eyebrowRef  = useRef<HTMLSpanElement>(null);
@@ -93,21 +105,51 @@ export default function FlexoStrip() {
   };
 
   const [pluginReady, setPluginReady] = useState(false);
-  const SplitTextRef = useRef<typeof import("gsap/SplitText").SplitText | null>(null);
+  const subtitleRef = useRef<HTMLSpanElement>(null);
+
   useEffect(() => {
     let cancelled = false;
-    Promise.all([import("gsap/ScrollTrigger"), import("gsap/SplitText")])
-      .then(([{ ScrollTrigger }, { SplitText }]) => {
+    import("gsap/ScrollTrigger")
+      .then(({ ScrollTrigger }) => {
         if (cancelled) return;
-        gsap.registerPlugin(ScrollTrigger, SplitText);
-        SplitTextRef.current = SplitText;
+        gsap.registerPlugin(ScrollTrigger);
         setPluginReady(true);
       })
       .catch(() => { if (!cancelled) revealAll(); });
-    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
+    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 2000);
     return () => { cancelled = true; clearTimeout(fallback); };
   }, []);
 
+  // Filter models based on category tab
+  const filteredModels = MODELS.filter((m) => {
+    if (activeCategory === "All Series") return true;
+    return m.categoryTag === activeCategory;
+  });
+
+  // Helper to split title into animated word and letter spans
+  const renderAnimatedTitle = (text: string) => {
+    const words = text.split(" ");
+    return words.map((word, wIdx) => (
+      <span key={wIdx} className="fls-title-word" style={{ display: "inline-block", whiteSpace: "nowrap", marginRight: "0.25em" }}>
+        {Array.from(word).map((char, cIdx) => (
+          <span
+            key={cIdx}
+            className="fls-title-char"
+            style={{
+              display: "inline-block",
+              backfaceVisibility: "hidden",
+              willChange: "transform, opacity, filter",
+              transformStyle: "preserve-3d",
+            }}
+          >
+            {char}
+          </span>
+        ))}
+      </span>
+    ));
+  };
+
+  // Initial scroll-triggered GSAP entrance
   useGSAP(() => {
     if (!pluginReady) return;
     const easeExp = "expo.out";
@@ -115,26 +157,61 @@ export default function FlexoStrip() {
       ({ trigger: target, start, end: "bottom top", toggleActions: "play reverse play reverse" });
 
     const headerTl = gsap.timeline({ scrollTrigger: revTrigger(sectionRef.current, "top 85%") });
-    headerTl.fromTo(eyebrowRef.current, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 1, ease: easeExp }, SECTION_ELEMENT_DELAY);
-    headerTl.fromTo(lineRef.current, { scaleX: 0, transformOrigin: "left center", opacity: 0 }, { scaleX: 1, opacity: 1, duration: 1.4, ease: easeExp }, SECTION_ELEMENT_DELAY + 0.2);
 
-    if (titleRef.current && SplitTextRef.current) {
-      const split = new SplitTextRef.current(titleRef.current, { type: "chars" });
-      headerTl.fromTo(split.chars,
-        { y: "110%", opacity: 0, rotateX: -50, transformOrigin: "0% 50% -20px" },
-        { y: "0%", opacity: 1, rotateX: 0, duration: 0.9, ease: easeExp, stagger: 0.022 },
+    // 1. Eyebrow glide in
+    headerTl.fromTo(eyebrowRef.current,
+      { opacity: 0, x: -30, filter: "blur(6px)" },
+      { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.8, ease: easeExp },
+      SECTION_ELEMENT_DELAY
+    );
+
+    // 2. Character-by-character 3D Rotate & Bounce reveal
+    const chars = titleRef.current?.querySelectorAll<HTMLElement>(".fls-title-char");
+    if (chars && chars.length) {
+      headerTl.fromTo(chars,
+        {
+          opacity: 0,
+          y: 65,
+          rotateX: -85,
+          rotateY: 35,
+          scale: 0.5,
+          filter: "blur(12px)",
+        },
+        {
+          opacity: 1,
+          y: 0,
+          rotateX: 0,
+          rotateY: 0,
+          scale: 1,
+          filter: "blur(0px)",
+          duration: 0.85,
+          ease: "back.out(1.5)",
+          stagger: 0.028,
+        },
         SECTION_ELEMENT_DELAY + 0.1
       );
     }
 
-    // grid cards reveal staggered, left-to-right — replaces the old
-    // single-photo clip-path wipe now that all 4 models render at once
+    // 3. Glowing line reveal
+    headerTl.fromTo(lineRef.current,
+      { scaleX: 0, transformOrigin: "left center", opacity: 0 },
+      { scaleX: 1, opacity: 1, duration: 1.2, ease: easeExp },
+      SECTION_ELEMENT_DELAY + 0.3
+    );
+
+    // 4. Subtitle fade up
+    headerTl.fromTo(subtitleRef.current,
+      { opacity: 0, y: 20, filter: "blur(8px)" },
+      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: easeExp },
+      SECTION_ELEMENT_DELAY + 0.4
+    );
+
     const cards = gridRef.current
       ? Array.from(gridRef.current.querySelectorAll<HTMLElement>(".fls-card"))
       : [];
-    gsap.fromTo(cards, { y: 40, opacity: 0 }, {
-      y: 0, opacity: 1, duration: 0.7, ease: easeExp, stagger: 0.1,
-      delay: SECTION_ELEMENT_DELAY + 0.15,
+    gsap.fromTo(cards, { y: 40, opacity: 0, scale: 0.96 }, {
+      y: 0, opacity: 1, scale: 1, duration: 0.75, ease: "power3.out", stagger: 0.08,
+      delay: SECTION_ELEMENT_DELAY + 0.2,
       scrollTrigger: revTrigger(gridRef.current, "top 85%"),
     });
 
@@ -144,26 +221,112 @@ export default function FlexoStrip() {
     });
   }, { scope: sectionRef, dependencies: [pluginReady] });
 
+  // Handle smooth GSAP animation when category changes
+  const handleCategorySelect = (category: string) => {
+    if (category === activeCategory) return;
+
+    if (!gridRef.current) {
+      setActiveCategory(category);
+      return;
+    }
+
+    const cards = Array.from(gridRef.current.querySelectorAll<HTMLElement>(".fls-card"));
+
+    // Animate out current cards
+    gsap.to(cards, {
+      opacity: 0,
+      y: -15,
+      scale: 0.95,
+      duration: 0.25,
+      stagger: 0.04,
+      ease: "power2.in",
+      onComplete: () => {
+        setActiveCategory(category);
+        // Animate in newly rendered cards on next tick
+        requestAnimationFrame(() => {
+          if (!gridRef.current) return;
+          const newCards = Array.from(gridRef.current.querySelectorAll<HTMLElement>(".fls-card"));
+          gsap.fromTo(
+            newCards,
+            { opacity: 0, y: 25, scale: 0.96 },
+            { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out", stagger: 0.06 }
+          );
+        });
+      },
+    });
+  };
+
   return (
     <section ref={sectionRef} className="fls-section" style={{
       background: "var(--bg-base)",
       borderTop: "1px solid var(--line)",
-      padding: "clamp(6rem,11vw,11rem) 0 clamp(5rem,9vw,9rem)",
+      padding: "clamp(5rem,9vw,9rem) 0 clamp(4.5rem,8vw,8rem)",
       overflow: "hidden",
       position: "relative",
     }}>
+      {/* Top accent bar */}
+      <div style={{
+        position: "absolute", top: 0, left: 0, right: 0, height: "3px",
+        background: "linear-gradient(90deg, var(--brand-teal) 0%, var(--brand-red) 100%)",
+      }} />
+
+      {/* Ambient background glow */}
+      <div aria-hidden style={{
+        position: "absolute", top: "-120px", left: "50%", transform: "translateX(-50%)",
+        width: "65%", height: "320px",
+        background: "radial-gradient(ellipse at 50% 0%, rgba(43,191,179,0.08) 0%, rgba(225,29,72,0.04) 60%, transparent 75%)",
+        pointerEvents: "none",
+      }} />
+
       <style suppressHydrationWarning>{`
         .fls-title-clip { overflow: hidden; }
 
-        /* ── 4-card grid: all models shown at once, no rotation. Each
-           card is its own bordered surface with a photo up top and a
-           specs panel that slides up from beneath the photo on hover
-           instead of showing by default — keeps the resting grid clean
-           and gives hover somewhere real to go. ── */
+        /* ── Category Filter Tabs Bar ── */
+        .fls-category-nav {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          margin-bottom: 2.2rem;
+          overflow-x: auto;
+          padding-bottom: 6px;
+          scrollbar-width: none;
+        }
+        .fls-category-nav::-webkit-scrollbar { display: none; }
+
+        .fls-cat-btn {
+          font-family: var(--ff-mono);
+          font-size: 0.74rem;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          padding: 0.5rem 1.1rem;
+          border-radius: 30px;
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          color: rgba(255, 255, 255, 0.7);
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fls-cat-btn:hover {
+          background: rgba(255, 255, 255, 0.09);
+          color: #ffffff;
+          border-color: rgba(255, 255, 255, 0.25);
+          transform: translateY(-1px);
+        }
+        .fls-cat-btn--active {
+          background: var(--brand-teal) !important;
+          border-color: var(--brand-teal) !important;
+          color: #0d2220 !important;
+          font-weight: 700;
+          box-shadow: 0 4px 18px rgba(43, 191, 179, 0.35);
+        }
+
+        /* ── Grid & Cards ── */
         .fls-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 1.25rem;
+          grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+          gap: 1.35rem;
         }
         .fls-card {
           position: relative;
@@ -174,69 +337,74 @@ export default function FlexoStrip() {
           background: var(--bg-surface);
           border: 1px solid var(--bg-line);
           cursor: pointer;
-          transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), border-color 0.3s ease, box-shadow 0.3s ease;
+          text-decoration: none;
+          transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                      border-color 0.3s ease,
+                      box-shadow 0.35s ease;
         }
         .fls-card:hover,
         .fls-card:focus-visible {
-          transform: translateY(-6px);
+          transform: translateY(-8px) scale(1.01);
           border-color: var(--brand-teal);
-          box-shadow: 0 24px 48px -20px rgba(43,191,179,0.35);
+          box-shadow: 0 20px 42px -15px rgba(43, 191, 179, 0.32),
+                      0 0 20px rgba(43, 191, 179, 0.1);
         }
         .fls-card:focus-visible { outline: 2px solid var(--brand-teal); outline-offset: 2px; }
 
         .fls-card__photo {
           position: relative;
           width: 100%;
-          height: clamp(180px, 20vw, 240px);
+          aspect-ratio: 16 / 10;
           background: #fafafa;
           overflow: hidden;
+          border-bottom: 1px solid var(--bg-line);
         }
         .fls-card__photo img {
           width: 100%; height: 100%; object-fit: cover;
           transition: transform .6s cubic-bezier(0.16,1,0.3,1);
         }
         .fls-card:hover .fls-card__photo img { transform: scale(1.08); }
+        
         .fls-card__badge {
           position: absolute; top: .75rem; left: .75rem; z-index: 2;
-          font-family: var(--ff-mono); font-size: 0.6rem; letter-spacing: .14em;
-          text-transform: uppercase; padding: .28rem .55rem; border-radius: 4px;
+          font-family: var(--ff-mono); font-size: 0.62rem; letter-spacing: .14em;
+          text-transform: uppercase; padding: .3rem .65rem; border-radius: 6px;
+          backdrop-filter: blur(8px);
         }
         .fls-card__badge--hot { background: var(--brand-teal); color: #0d2220; font-weight: 700; }
         .fls-card__badge--flagship { background: var(--ink); color: var(--bg-base); font-weight: 700; }
 
         .fls-card__body {
           position: relative;
-          padding: 1.1rem 1.25rem 1.25rem;
+          padding: 1.15rem 1.3rem 1.35rem;
           flex: 1 1 auto;
           display: flex;
           flex-direction: column;
         }
         .fls-card__num {
-          font-family: var(--ff-mono); font-size: 0.6rem; font-weight: 700;
-          letter-spacing: .1em; color: var(--brand-teal);
+          font-family: var(--ff-mono); font-size: 0.62rem; font-weight: 700;
+          letter-spacing: .12em; color: var(--brand-teal);
         }
         .fls-card__name {
           font-family: var(--ff-display); font-weight: 700;
-          font-size: clamp(1.1rem, 1.6vw, 1.35rem);
+          font-size: clamp(1.15rem, 1.6vw, 1.4rem);
           letter-spacing: -0.005em; color: var(--ink);
-          margin: .15rem 0 0;
+          margin: .2rem 0 0;
         }
         .fls-card__tag {
-          font-family: var(--ff-body); font-size: .78rem; line-height: 1.4;
-          color: var(--ink-60); margin: .3rem 0 0;
+          font-family: var(--ff-body); font-size: .8rem; line-height: 1.45;
+          color: var(--ink-60); margin: .35rem 0 0;
         }
 
-        /* specs panel — hidden by default (opacity/translate), revealed
-           on hover/focus by sliding up over the card body; base name/tag
-           fade out just enough to hand off focus to the numbers */
+        /* Specs panel reveal on hover */
         .fls-card__specs {
           position: absolute; inset: 0;
           display: flex; flex-direction: column; justify-content: center;
-          gap: .55rem;
-          padding: 1.1rem 1.25rem;
+          gap: .6rem;
+          padding: 1.15rem 1.3rem;
           background: var(--bg-raise);
           opacity: 0;
-          transform: translateY(12px);
+          transform: translateY(14px);
           transition: opacity .28s ease, transform .28s cubic-bezier(0.16,1,0.3,1);
           pointer-events: none;
         }
@@ -249,19 +417,19 @@ export default function FlexoStrip() {
           display: flex; align-items: baseline; justify-content: space-between;
           gap: .75rem;
           border-bottom: 1px solid var(--bg-line);
-          padding-bottom: .4rem;
+          padding-bottom: .45rem;
         }
         .fls-card__spec-label {
-          font-family: var(--ff-mono); font-size: 0.6rem; letter-spacing: .14em;
+          font-family: var(--ff-mono); font-size: 0.62rem; letter-spacing: .14em;
           text-transform: uppercase; color: var(--ink-35);
         }
         .fls-card__spec-value {
-          font-family: var(--ff-display); font-size: 1rem; color: var(--ink);
+          font-family: var(--ff-display); font-size: 1.05rem; color: var(--ink);
         }
-        .fls-card__spec-unit { font-family: var(--ff-body); font-size: .78rem; color: var(--ink-60); margin-left: .25rem; }
+        .fls-card__spec-unit { font-family: var(--ff-body); font-size: .8rem; color: var(--ink-60); margin-left: .25rem; }
 
         .fls-cta-row {
-          margin-top: 1.75rem;
+          margin-top: 2.2rem;
           display: flex; justify-content: center;
         }
         .fls-cta-row a {
@@ -269,65 +437,50 @@ export default function FlexoStrip() {
           font-family: var(--ff-mono); font-size: 0.8rem; font-weight: 700; letter-spacing: .1em;
           text-transform: uppercase; color: var(--brand-teal);
           text-decoration: none;
-          transition: gap .15s ease;
+          transition: gap .2s ease, color 0.2s ease;
         }
-        .fls-cta-row a:hover { gap: .7rem; }
+        .fls-cta-row a:hover { gap: .75rem; color: var(--brand-red); }
 
-        @media (max-width: 980px) {
-          .fls-grid { grid-template-columns: repeat(2, 1fr); }
+        /* Light Mode High Contrast Overrides */
+        [data-theme="light"] .fls-section {
+          background: var(--bg-base);
+          border-top-color: rgba(13, 34, 32, 0.08);
         }
-        @media (max-width: 560px) {
-          /* horizontal swipe row instead of stacking 4 full-width cards
-             vertically — keeps all machines reachable in one short scroll
-             gesture instead of a long vertical scroll */
-          .fls-grid {
-            display: flex;
-            grid-template-columns: unset;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 0.35rem;
-            margin-inline: calc(clamp(1.25rem, 4vw, 3rem) * -1);
-            padding-inline: clamp(1.25rem, 4vw, 3rem);
-            scrollbar-width: none;
-          }
-          .fls-grid::-webkit-scrollbar { display: none; }
-          .fls-card {
-            scroll-snap-align: start;
-            flex: 0 0 78%;
-            min-width: 78%;
-          }
+        [data-theme="light"] .fls-cat-btn {
+          background: rgba(13, 34, 32, 0.05);
+          border-color: rgba(13, 34, 32, 0.14);
+          color: #0d2220;
         }
+        [data-theme="light"] .fls-cat-btn:hover {
+          background: rgba(13, 34, 32, 0.12);
+          color: #0d2220;
+        }
+        [data-theme="light"] .fls-cat-btn--active {
+          background: var(--brand-teal) !important;
+          color: #0d2220 !important;
+        }
+        [data-theme="light"] .fls-card {
+          background: #ffffff;
+          border-color: rgba(13, 34, 32, 0.12);
+          box-shadow: 0 4px 16px rgba(13, 34, 32, 0.05);
+        }
+        [data-theme="light"] .fls-card:hover {
+          border-color: var(--brand-teal);
+          box-shadow: 0 16px 36px rgba(13, 34, 32, 0.12);
+        }
+
         @media (max-width: 640px) {
-          .fls-section { padding: clamp(2rem,6vw,3rem) 0 clamp(1.5rem,4vw,2.5rem) !important; }
-          .fls-header { margin-bottom: clamp(1rem,3vw,1.5rem) !important; }
-          .fls-title-clip h2 { font-size: clamp(1.8rem, 8vw, 2.6rem) !important; }
-          .fls-grid { gap: .75rem !important; }
-          .fls-card__photo { height: clamp(120px, 35vw, 180px) !important; }
-          .fls-card__body { padding: .75rem .9rem .85rem !important; }
-          .fls-card__name { font-size: clamp(0.95rem, 3.5vw, 1.15rem) !important; }
-          .fls-card__tag { font-size: .7rem !important; margin-top: .2rem !important; }
-          .fls-card__badge { font-size: .5rem !important; padding: .2rem .4rem !important; top: .5rem !important; left: .5rem !important; }
-          .fls-card__specs { padding: .75rem .9rem !important; gap: .4rem !important; }
-          .fls-card__spec-label { font-size: .5rem !important; }
-          .fls-card__spec-value { font-size: .85rem !important; }
-          .fls-cta-row { margin-top: 1.25rem !important; }
-          .fls-cta-row a { font-size: .7rem !important; }
-          .fls-strip { padding: .85rem 1rem !important; gap: 1rem !important; flex-direction: column !important; align-items: flex-start !important; }
-          .fls-strip > div { gap: 1rem !important; }
-          .fls-strip > div > div { gap: .15rem !important; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .fls-card, .fls-card__photo img, .fls-card__specs { transition: none; }
+          .fls-section { padding: clamp(2.5rem,6vw,3.5rem) 0 clamp(2rem,5vw,3rem) !important; }
+          .fls-grid { grid-template-columns: 1fr; gap: 1rem !important; }
         }
       `}</style>
 
       <div className="wrap" style={{ position: "relative", zIndex: 1 }}>
         {/* ── Header ── */}
-        <div className="fls-header" style={{ marginBottom: "clamp(2.5rem,5vw,4rem)" }}>
+        <div className="fls-header" style={{ marginBottom: "clamp(2rem,4vw,3rem)" }}>
           <span ref={eyebrowRef} style={{
             display: "inline-flex", alignItems: "center", gap: ".75rem",
-            fontFamily: "var(--ff-mono)", fontSize: "0.7rem",
+            fontFamily: "var(--ff-mono)", fontSize: "0.72rem",
             letterSpacing: ".22em", textTransform: "uppercase",
             color: "var(--brand-teal)", marginBottom: ".75rem",
             opacity: 0,
@@ -339,34 +492,50 @@ export default function FlexoStrip() {
           <div className="fls-title-clip">
             <h2 ref={titleRef} data-no-anim style={{
               fontFamily: "var(--ff-display)",
-              fontSize: "clamp(3rem,6vw,6rem)",
-              color: "var(--ink)", lineHeight: .88,
+              fontSize: "clamp(2.8rem,6vw,5.5rem)",
+              color: "var(--ink)", lineHeight: .95,
               letterSpacing: ".01em", margin: 0,
-              perspective: "600px",
+              perspective: "1000px",
             }}>
-              {t("title")}
+              {renderAnimatedTitle(t("title"))}
             </h2>
           </div>
 
           <div ref={lineRef} style={{
             height: "2px", width: "clamp(200px,40%,480px)",
-            background: "linear-gradient(to right, var(--brand-teal), var(--brand-teal-dim), transparent)",
+            background: "linear-gradient(to right, var(--brand-teal), var(--brand-red), transparent)",
             margin: ".7rem 0 .9rem", opacity: 0,
           }} />
 
-          <span style={{
+          <span ref={subtitleRef} style={{
             fontFamily: "var(--ff-display)",
             fontSize: "clamp(1.1rem,2vw,1.65rem)",
             color: "var(--ink-60)", display: "block",
+            opacity: 0,
           }}>
             {t("subtitle")}
           </span>
         </div>
 
-        {/* ── 4-card grid: every model visible at once, specs reveal on
-           hover/focus instead of one auto-rotating hero photo ── */}
+        {/* ── Category Filter Tabs ── */}
+        <div className="fls-category-nav" role="tablist" aria-label="Machine Series Categories">
+          {CATEGORY_TABS.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              role="tab"
+              aria-selected={activeCategory === cat}
+              className={`fls-cat-btn${activeCategory === cat ? " fls-cat-btn--active" : ""}`}
+              onClick={() => handleCategorySelect(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* ── Cards Grid ── */}
         <div className="fls-grid" ref={gridRef}>
-          {MODELS.map((m, i) => (
+          {filteredModels.map((m, i) => (
             <TransitionLink
               key={m.slug}
               href={`/products/printing/${m.slug}`}
@@ -431,3 +600,4 @@ export default function FlexoStrip() {
     </section>
   );
 }
+

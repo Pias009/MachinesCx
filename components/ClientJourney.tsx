@@ -360,53 +360,51 @@ export default function ClientJourney() {
         }
         .cj__ring-icon {
           width: 100%; height: 100%;
-          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .4rem;
-          padding: .6rem .4rem .55rem;
-          border-radius: 18px;
-          background: color-mix(in srgb, var(--step-color) 10%, transparent);
-          border: 1px solid color-mix(in srgb, var(--step-color) 35%, transparent);
+          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem;
+          padding: .4rem;
+          background: transparent;
+          border: none;
           cursor: pointer;
-          perspective: 600px;
-          transition: background 0.2s ease, border-color 0.2s ease;
+          transition: transform 0.25s ease;
+          outline: none;
         }
         .cj__ring-icon:hover,
         .cj__ring-icon:focus-visible {
-          background: color-mix(in srgb, var(--step-color) 18%, transparent);
-          border-color: var(--step-color);
+          transform: translateY(-3px);
         }
         .cj__ring-icon-badge {
-          width: 84px; height: 84px;
-          border-radius: 22px;
-          background: linear-gradient(155deg, var(--step-color) 0%, color-mix(in srgb, var(--step-color) 70%, #000) 100%);
+          width: 64px; height: 64px;
           display: flex; align-items: center; justify-content: center;
-          box-shadow:
-            0 1px 0 rgba(255,255,255,0.25) inset,
-            0 10px 22px -9px var(--step-color);
-          transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease;
-          transform-style: preserve-3d;
-          will-change: transform;
+          background: transparent;
+          border: none;
+          box-shadow: none;
+          transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), filter 0.25s ease;
         }
-        .cj__ring-icon-badge svg { width: 32px; height: 32px; color: #fff; }
-        .cj__ring-icon:hover .cj__ring-icon-badge,
-        .cj__ring-icon:focus-visible .cj__ring-icon-badge {
-          transform: rotateX(10deg) rotateY(-10deg) scale(1.14) translateY(-3px);
-          box-shadow: 0 18px 34px -10px var(--step-color);
+        .cj__ring-icon-badge svg {
+          width: 42px; height: 42px;
+          color: var(--step-color);
+          filter: drop-shadow(0 2px 8px color-mix(in srgb, var(--step-color) 40%, transparent));
+          transition: transform 0.25s ease, filter 0.25s ease;
         }
-        .cj__ring-icon:active .cj__ring-icon-badge {
-          transform: rotateX(4deg) rotateY(-4deg) scale(1.05);
+        .cj__ring-icon:hover .cj__ring-icon-badge svg,
+        .cj__ring-icon:focus-visible .cj__ring-icon-badge svg {
+          transform: scale(1.18);
+          filter: drop-shadow(0 0 14px var(--step-color));
         }
-        .cj__ring-icon:focus-visible .cj__ring-icon-badge { outline: 2px solid var(--step-color); outline-offset: 3px; }
         .cj__ring-icon-label {
-          font-family: var(--ff-mono); font-size: .62rem; font-weight: 700;
+          font-family: var(--ff-mono); font-size: .65rem; font-weight: 700;
           letter-spacing: .06em; text-transform: uppercase; color: var(--ink-60);
           white-space: nowrap;
+          transition: color 0.2s ease;
+        }
+        .cj__ring-icon:hover .cj__ring-icon-label {
+          color: var(--step-color);
         }
         @media (max-width: 640px) {
           .cj__ring { width: min(360px, 90vw); }
-          .cj__ring-icon-pos { width: 78px; height: 88px; }
-          .cj__ring-icon { padding: .4rem .3rem .4rem; border-radius: 14px; gap: .3rem; }
-          .cj__ring-icon-badge { width: 64px; height: 64px; border-radius: 16px; }
-          .cj__ring-icon-badge svg { width: 24px; height: 24px; }
+          .cj__ring-icon-pos { width: 78px; height: 78px; }
+          .cj__ring-icon-badge { width: 48px; height: 48px; }
+          .cj__ring-icon-badge svg { width: 32px; height: 32px; }
           .cj__ring-icon-label { font-size: .56rem; }
         }
 

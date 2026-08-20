@@ -146,9 +146,18 @@ export default function PrintingShowcase() {
     // separate ScrollTrigger instances all watching the same trigger.
     const tl = gsap.timeline({ scrollTrigger: trigger });
 
-    // Brand label — masked rise (parent has overflow:hidden)
-    tl.fromTo(brandLabelRef.current, { y: "100%" }, { y: "0%", duration: 0.22, ease: "power3.out" }, 0);
-    tl.fromTo(counterRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, 0.04);
+    // Brand label — 3D Character-by-Character GSAP reveal
+    const titleChars = brandLabelRef.current?.querySelectorAll<HTMLElement>(".ps-title-char");
+    if (titleChars && titleChars.length) {
+      tl.fromTo(titleChars,
+        { opacity: 0, y: 35, rotateX: -70, scale: 0.6, filter: "blur(8px)" },
+        { opacity: 1, y: 0, rotateX: 0, scale: 1, filter: "blur(0px)", duration: 0.5, ease: "back.out(1.4)", stagger: 0.02 },
+        0
+      );
+    } else {
+      tl.fromTo(brandLabelRef.current, { y: "100%" }, { y: "0%", duration: 0.22, ease: "power3.out" }, 0);
+    }
+    tl.fromTo(counterRef.current, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, 0.08);
 
     // Carousel — back-to-front settle: back role first, sides next, center
     // last with overshoot. Side items swing in with rotateY (left side from
@@ -517,9 +526,17 @@ export default function PrintingShowcase() {
               color:         "#fff",
               textAlign:     "center",
               margin:        0,
+              perspective:   "1000px",
             }}>
-              {t("titlePrefix")}{" "}
-              <span style={{ color: "var(--brand-teal)" }}>{t("titleEm")}</span>
+              {Array.from(t("titlePrefix")).map((char, i) => (
+                <span key={`p-${i}`} className="ps-title-char" style={{ display: "inline-block", transformStyle: "preserve-3d" }}>{char}</span>
+              ))}
+              {" "}
+              <span style={{ color: "var(--brand-teal)", display: "inline-block" }}>
+                {Array.from(t("titleEm")).map((char, i) => (
+                  <span key={`e-${i}`} className="ps-title-char" style={{ display: "inline-block", transformStyle: "preserve-3d" }}>{char}</span>
+                ))}
+              </span>
             </h2>
           </div>
 

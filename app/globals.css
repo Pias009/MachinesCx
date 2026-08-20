@@ -474,13 +474,15 @@
 [data-theme="light"] .sn__cta                { color: #080e0d !important; }
 
 /* ── ThemeToggle + LanguageSwitcher stay legible ── */
-[data-theme="light"] .tt-btn           { color: #0d2220; }
-[data-theme="light"] .tt-btn:hover     { color: #0d2220; }
-[data-theme="light"] .ls-btn           { color: #0d2220; }
+[data-theme="light"] .tt-btn           { color: #0d2220 !important; }
+[data-theme="light"] .tt-btn:hover     { color: #0d2220 !important; }
+[data-theme="light"] .ls-btn           { color: #0d2220 !important; }
 [data-theme="light"] .ls-btn:hover,
-[data-theme="light"] .ls--open .ls-btn { color: #0d2220; }
+[data-theme="light"] .ls--open .ls-btn { color: #0d2220 !important; }
 [data-theme="light"] .ls-btn svg       { opacity: 0.95 !important; stroke: #0d2220 !important; }
-[data-theme="light"] .ls-opt--on       { color: var(--brand-teal) !important; }
+[data-theme="light"] .ls-opt           { color: #0d2220 !important; font-weight: 500 !important; }
+[data-theme="light"] .ls-opt:hover     { color: #0d2220 !important; background: rgba(43,191,179,0.14) !important; }
+[data-theme="light"] .ls-opt--on       { color: #1fa39a !important; font-weight: 700 !important; }
 
 
 /* ── reset ──

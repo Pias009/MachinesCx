@@ -1148,8 +1148,17 @@ export default function ScrollHome() {
           .sh-stat-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
 
-        /* mobile carousel — hidden on desktop */
+        /* mobile carousel — hidden on desktop, shown on mobile */
         .sh-mob-carousel { display: none; }
+        @media (max-width: 768px) {
+          /* Show the dedicated mobile carousel */
+          .sh-mob-carousel { display: block; }
+          /* Hide the desktop card strip + arrow controls */
+          .sh-card-strip-wrap { display: none !important; }
+          /* Hide the 3-col spec/feature layout (mobile carousel handles it) */
+          .sh-3col { display: none !important; }
+          .sh-hot-head { display: none !important; }
+        }
         @media (max-width: 480px) {
           .sh-sec { padding: 1rem !important; }
           .sh-stat-grid { grid-template-columns: 1fr 1fr !important; }

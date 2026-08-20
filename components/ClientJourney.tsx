@@ -9,15 +9,12 @@ import { openAshaChat } from "@/components/ChatWidget";
 import {
   MessageSquare, FileText, ShoppingCart, Factory,
   Truck, Wrench, GraduationCap, Headphones,
-  Bot, HardHat,
+  Bot, HardHat, User, UserCheck, Send, CheckCircle2,
   type LucideIcon,
 } from "lucide-react";
 
 if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
 
-// ─── Step order — copy comes from the clientJourney.steps translation
-// namespace, keyed by id. Each step gets its own real icon instead of the
-// company logo repeated eight times. ─────────────────────────────
 const STEP_IDS = [
   "inquiry",
   "quotation",
@@ -40,21 +37,49 @@ const STEP_ICONS: Record<(typeof STEP_IDS)[number], LucideIcon> = {
   aftersales: Headphones,
 };
 
-// ─── one distinct color per step (8 unique, not a 4-color repeat) —
-// still the brand family (teal/amber/rose/blue) extended with disciplined
-// siblings (violet/green/cyan/orange) so it reads as one system, not a
-// rainbow. Flat, solid — no gradients, no pastel/candy tints.
-//
-// Plain hex values, not CSS var() references: the first 3 used to point at
-// global --brand-* tokens (fine anywhere) but the last 5 pointed at
-// --cj-blue/violet/green/cyan/orange, which were only ever defined on
-// .cj itself. The expanded overlay card renders as a JSX sibling of
-// .cj — not a descendant — so it never inherited those local variables;
-// var(--step-color) silently resolved to nothing for Manufacturing,
-// Delivery, Commissioning, Training and Aftersales, leaving every
-// color-dependent rule on the overlay a no-op for those 5 steps. Baking
-// the values in here means every consumer gets a real color regardless
-// of where in the DOM it renders. ───
+const STEP_ACTIONS: Record<(typeof STEP_IDS)[number], { actor: string; text: string; icon: LucideIcon }> = {
+  inquiry: {
+    actor: "Client Action",
+    text: "Client sends project specifications, capacity requirements, and CAD layout for custom machine consultation.",
+    icon: User,
+  },
+  quotation: {
+    actor: "Lead Engineer",
+    text: "Technical team analyzes engineering feasibility, calculates component costs, and issues a formal commercial proposal.",
+    icon: HardHat,
+  },
+  order: {
+    actor: "Sales & Finance",
+    text: "Contract terms finalized, purchase order approved, and manufacturing schedule registered in factory ERP.",
+    icon: UserCheck,
+  },
+  manufacturing: {
+    actor: "Factory Operations",
+    text: "High-precision CNC machining, robotic welding, electrical wiring, and strict quality control testing in progress.",
+    icon: Factory,
+  },
+  delivery: {
+    actor: "Logistics Specialist",
+    text: "Machinery is heavy-duty export packaged, loaded on heavy transport, and dispatched directly to client site.",
+    icon: Truck,
+  },
+  commissioning: {
+    actor: "On-Site Engineer",
+    text: "Certified engineers conduct physical positioning, power integration, calibration, and full trial production run.",
+    icon: Wrench,
+  },
+  training: {
+    actor: "Technical Instructor",
+    text: "Comprehensive hands-on operator training, safety protocols, and daily maintenance procedure certification.",
+    icon: GraduationCap,
+  },
+  aftersales: {
+    actor: "Dedicated Support",
+    text: "24/7 lifetime engineering support active, with preventive maintenance checks and priority spare parts dispatch.",
+    icon: Headphones,
+  },
+};
+
 const STEP_COLORS = [
   "#2bbfb3", // brand-teal
   "#f59e0b", // brand-amber
@@ -68,16 +93,69 @@ const STEP_COLORS = [
 
 type StepCopy = { label: string; tagline: string; desc: string; metric1v: string; metric1l: string; metric2v: string; metric2l: string };
 
-// evenly space `count` points around a circle, starting at 12 o'clock —
-// returns each point as a % offset from the ring center so the layout
-// scales with the container instead of using fixed pixel radii
-const RING_RADIUS_PCT = 42;
-function ringPosition(index: number, count: number) {
-  const angle = (index / count) * 2 * Math.PI - Math.PI / 2;
-  return {
-    left: `${50 + RING_RADIUS_PCT * Math.cos(angle)}%`,
-    top: `${50 + RING_RADIUS_PCT * Math.sin(angle)}%`,
-  };
+function rectPosition(index: number) {
+  const POSITIONS = [
+    { left: "26%", top: "0%" },   // 0: Inquiry (Top-Left)
+    { left: "74%", top: "0%" },   // 1: Quotation (Top-Right)
+    { left: "100%", top: "28%" }, // 2: Order (Right-Top)
+    { left: "100%", top: "72%" }, // 3: Manufacturing (Right-Bottom)
+    { left: "74%", top: "100%" }, // 4: Delivery (Bottom-Right)
+    { left: "26%", top: "100%" }, // 5: Commissioning (Bottom-Left)
+    { left: "0%", top: "72%" },   // 6: Training (Left-Bottom)
+    { left: "0%", top: "28%" },   // 7: Aftersales (Left-Top)
+  ];
+  return POSITIONS[index % POSITIONS.length];
+}
+
+function popupAlignment(index: number) {
+  switch (index) {
+    case 0: return "cj__popup--bottom-right";
+    case 1: return "cj__popup--bottom-left";
+    case 2: return "cj__popup--left-top";
+    case 3: return "cj__popup--left-bottom";
+    case 4: return "cj__popup--top-left";
+    case 5: return "cj__popup--top-right";
+    case 6: return "cj__popup--right-bottom";
+    case 7: return "cj__popup--right-top";
+    default: return "cj__popup--bottom-right";
+  }
+}
+
+// Total track perimeter for SVG <rect x="20" y="20" width="820" height="400" rx="20" />
+const TOTAL_P = 2405.66;
+// Fixed train beam length (does not stretch or extend)
+const TRAIN_FIXED_LEN = 95;
+// Exact stroke-dashoffset locations for 8 step nodes along the track
+const STEP_OFFSETS = [193, 587, 918, 1094, 1417, 1811, 2126, 2302];
+
+// Typewriter sub-component with completion callback
+function TypewriterText({ text, onComplete }: { text: string; onComplete?: () => void }) {
+  const [displayedText, setDisplayedText] = useState("");
+  const [isDone, setIsDone] = useState(false);
+
+  useEffect(() => {
+    setDisplayedText("");
+    setIsDone(false);
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      if (i <= text.length) {
+        setDisplayedText(text.slice(0, i));
+      } else {
+        setIsDone(true);
+        clearInterval(interval);
+        if (onComplete) onComplete();
+      }
+    }, 22);
+    return () => clearInterval(interval);
+  }, [text, onComplete]);
+
+  return (
+    <p className="cj__popup-text">
+      {displayedText}
+      {!isDone && <span className="cj__typing-cursor">|</span>}
+    </p>
+  );
 }
 
 export default function ClientJourney() {
@@ -94,6 +172,7 @@ export default function ClientJourney() {
       metrics: [{ v: c.metric1v, l: c.metric1l }, { v: c.metric2v, l: c.metric2l }],
       color: STEP_COLORS[i % STEP_COLORS.length],
       Icon: STEP_ICONS[id],
+      action: STEP_ACTIONS[id],
     };
   });
 
@@ -101,30 +180,90 @@ export default function ClientJourney() {
   const overlayRef = useRef<HTMLDivElement>(null);
   const overlayCardRef = useRef<HTMLDivElement>(null);
 
-  // clicking a ring icon opens the same step as a larger centered overlay,
-  // which fades and scales in/out — previously this flipped the source
-  // icon away (rotateY across two separate elements handing off to each
-  // other) before the overlay appeared, which was both janky and prone to
-  // getting stuck if a GSAP callback didn't fire. A single fade+scale
-  // tween on one element is simpler, has nothing to desync, and reads as
-  // "the card is here" without a spinning transition.
   const [openId, setOpenId] = useState<string | null>(null);
   const openStep = STEPS.find((s) => s.id === openId) ?? null;
 
-  // Shared context handed to whichever agent the visitor picks — names the
-  // step so they don't have to re-explain what they're asking about. Lands
-  // in an editable field on both paths (ASHA's input box, the human-engineer
-  // form's message textarea), never sent on their behalf.
+  // Train Movement State Engine
+  const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [trainOffset, setTrainOffset] = useState<number>(STEP_OFFSETS[0]);
+  const [isTravelling, setIsTravelling] = useState<boolean>(false);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+
+  const currentStepRef = useRef<number>(0);
+  const travelRafRef = useRef<number>(0);
+  const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Train Traveling Function: moves single fixed-length train from current logo to target logo
+  const goToStep = useCallback((targetIndex: number) => {
+    if (travelRafRef.current) cancelAnimationFrame(travelRafRef.current);
+    if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
+
+    const fromStep = currentStepRef.current;
+    const fromOffset = STEP_OFFSETS[fromStep];
+    let toOffset = STEP_OFFSETS[targetIndex];
+
+    if (toOffset <= fromOffset && targetIndex !== fromStep) {
+      toOffset += TOTAL_P; // Loop around rectangle
+    }
+
+    const startTime = performance.now();
+    const duration = 1200; // 1.2 seconds travel time between logos
+
+    setIsTravelling(true);
+
+    function animateTravel(now: number) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Smooth Easing (cubic ease-in-out)
+      const eased = progress < 0.5
+        ? 4 * progress * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+      // Current train head position
+      const rawOffset = fromOffset + (toOffset - fromOffset) * eased;
+      setTrainOffset(rawOffset % TOTAL_P);
+
+      if (progress < 1) {
+        travelRafRef.current = requestAnimationFrame(animateTravel);
+      } else {
+        // Train STOPPED at target logo!
+        setIsTravelling(false);
+        setTrainOffset(STEP_OFFSETS[targetIndex]);
+        currentStepRef.current = targetIndex;
+        setActiveIndex(targetIndex);
+      }
+    }
+
+    travelRafRef.current = requestAnimationFrame(animateTravel);
+  }, []);
+
+  // When Typewriter completes typing at the current stopped logo:
+  const handleTypewriterComplete = useCallback(() => {
+    if (isHovered || openId || isTravelling) return;
+
+    // Pause 1 second after text typing ends, then move train to next logo
+    nextTimerRef.current = setTimeout(() => {
+      if (!isHovered && !openId) {
+        const nextStep = (currentStepRef.current + 1) % STEPS.length;
+        goToStep(nextStep);
+      }
+    }, 1000);
+  }, [isHovered, openId, isTravelling, STEPS.length, goToStep]);
+
+  // Initial trigger
+  useEffect(() => {
+    currentStepRef.current = 0;
+    setTrainOffset(STEP_OFFSETS[0]);
+    return () => {
+      if (travelRafRef.current) cancelAnimationFrame(travelRafRef.current);
+      if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
+    };
+  }, []);
+
   const stepContext = (s: typeof STEPS[number]) =>
     t("agentContext", { step: s.label, tagline: s.tagline });
 
-  // Animation phase, tracked outside React state so click handlers can
-  // read/guard it synchronously without waiting for a re-render — guards
-  // against a rapid double-click re-triggering close mid-close (or vice
-  // versa). Every tween gets a bounded setTimeout failsafe that
-  // force-advances the phase even if GSAP's onComplete is ever skipped
-  // (e.g. an interrupted tween), so the overlay can never get stuck open
-  // or stuck closing.
   const phaseRef = useRef<"closed" | "open" | "closing">("closed");
   const failsafeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const clearFailsafe = () => {
@@ -175,12 +314,9 @@ export default function ClientJourney() {
       overwrite: true,
       onComplete: finish,
     });
-    // failsafe: force the close through even if onComplete never fires
-    // (e.g. the overlay unmounts mid-tween)
     failsafeRef.current = setTimeout(finish, 400);
   }, []);
 
-  // fade + scale the overlay card in once it mounts
   useGSAP(() => {
     if (!openId) return;
     const overlay = overlayRef.current;
@@ -203,7 +339,6 @@ export default function ClientJourney() {
     });
   }, { dependencies: [openId] });
 
-  // Escape closes the overlay, same as clicking the backdrop or the × button
   useEffect(() => {
     if (!openId) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") closeOverlay(); };
@@ -211,35 +346,19 @@ export default function ClientJourney() {
     return () => window.removeEventListener("keydown", onKey);
   }, [openId, closeOverlay]);
 
-  // one-time reveal when the ring enters view: every icon starts collapsed
-  // at the circle's center (scale 0, no opacity), then flies out to its
-  // resting position on the ring — staggered clockwise around the circle,
-  // not a generic fade. Runs once; icons stay in place after.
   useGSAP(() => {
     const el = ringRef.current;
     if (!el) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const icons = el.querySelectorAll<HTMLElement>(".cj__ring-icon");
+    const icons = el.querySelectorAll<HTMLElement>(".cj__ring-icon-pos");
     if (!icons.length) return;
 
     if (reduced) {
-      gsap.set(icons, { opacity: 1, scale: 1, x: 0, y: 0 });
+      gsap.set(icons, { opacity: 1, scale: 1 });
       return;
     }
 
-    // read each icon's authored (CSS-positioned) offset from the ring
-    // center before collapsing it, so the "fly out" animates back to
-    // exactly where the circular layout already placed it
-    const targets = Array.from(icons).map((icon) => {
-      const rect = icon.getBoundingClientRect();
-      const parentRect = el.getBoundingClientRect();
-      return {
-        x: rect.left + rect.width / 2 - (parentRect.left + parentRect.width / 2),
-        y: rect.top + rect.height / 2 - (parentRect.top + parentRect.height / 2),
-      };
-    });
-
-    gsap.set(icons, { opacity: 0, scale: 0.2, x: (i) => -targets[i].x, y: (i) => -targets[i].y });
+    gsap.set(icons, { opacity: 0, scale: 0.3 });
 
     ScrollTrigger.create({
       trigger: el,
@@ -247,12 +366,14 @@ export default function ClientJourney() {
       once: true,
       onEnter: () => {
         gsap.to(icons, {
-          opacity: 1, scale: 1, x: 0, y: 0,
-          duration: 0.8, ease: "back.out(1.4)", stagger: 0.09,
+          opacity: 1, scale: 1,
+          duration: 0.7, ease: "back.out(1.4)", stagger: 0.08,
         });
       },
     });
   }, { scope: ringRef });
+
+  const activeStep = STEPS[activeIndex];
 
   return (
     <>
@@ -263,10 +384,6 @@ export default function ClientJourney() {
           padding: clamp(5rem,8vw,7.5rem) 0;
           overflow: hidden;
         }
-        /* ── section-level backdrop: two soft brand-color glows, no grid —
-           a hairline grid overlay reads as generic "blueprint" filler unless
-           the surface is an actual canvas/map/measurement context, which
-           this isn't, so depth comes from color glow only ── */
         .cj__bg-glow {
           position: absolute; z-index: 0; pointer-events: none;
           top: -12%; right: -8%; width: 48%; aspect-ratio: 1;
@@ -315,97 +432,243 @@ export default function ClientJourney() {
           white-space: nowrap;
         }
 
-        /* ── ring: all 8 steps arranged in a circle, the section's main
-           visual. Each icon's left/top (% of the ring) is computed in JS
-           via ringPosition() and set inline, so the layout scales cleanly
-           with the responsive ring size instead of using fixed pixel
-           offsets. A thin circular guide-line sits behind the icons so the
-           ring shape reads even before/without hover. ── */
+        /* ── RECTANGULAR TRACK CONTAINER WITH TRAIN LIGHT ENGINE ── */
         .cj__ring-wrap {
           display: flex;
           justify-content: center;
-          padding-block: clamp(1rem, 3vw, 2rem);
+          padding-block: clamp(2rem, 4vw, 3.5rem);
         }
         .cj__ring {
           position: relative;
-          width: min(560px, 92vw);
-          aspect-ratio: 1;
+          width: min(860px, 88vw);
+          height: 440px;
         }
-        .cj__ring-guide {
-          position: absolute; inset: 8%;
-          border: 1px dashed var(--bg-line);
-          border-radius: 50%;
+
+        /* SVG Single Traveling Train Light */
+        .cj__track-svg {
+          position: absolute; inset: 0;
+          width: 100%; height: 100%;
+          overflow: visible;
+          pointer-events: none;
         }
+        .cj__track-bg {
+          stroke: var(--bg-line);
+          stroke-width: 1.5;
+          stroke-dasharray: 6 6;
+          fill: none;
+        }
+        .cj__track-pulse {
+          stroke: var(--active-color, var(--brand-teal));
+          stroke-width: 4;
+          fill: none;
+          stroke-linecap: round;
+          filter: drop-shadow(0 0 14px var(--active-color, var(--brand-teal)));
+          transition: stroke 0.3s ease;
+        }
+
         .cj__ring-center {
           position: absolute; inset: 0;
           display: flex; flex-direction: column; align-items: center; justify-content: center;
           text-align: center;
-          gap: .3rem;
+          gap: .35rem;
           pointer-events: none;
+        }
+        .cj__ring-center-value {
+          font-family: var(--ff-display); font-weight: 700; font-size: 1.3rem;
+          color: var(--ink);
         }
         .cj__ring-center-label {
           font-family: var(--ff-mono); font-size: .68rem; letter-spacing: .12em;
           text-transform: uppercase; color: var(--ink-35);
         }
-        .cj__ring-center-value {
-          font-family: var(--ff-display); font-weight: 700; font-size: 1.1rem;
-          color: var(--ink);
+        .cj__ring-center-live {
+          display: inline-flex; align-items: center; gap: .4rem;
+          padding: .25rem .75rem; border-radius: 999px;
+          background: color-mix(in srgb, var(--active-color) 12%, var(--bg-surface));
+          border: 1px solid color-mix(in srgb, var(--active-color) 35%, transparent);
+          font-family: var(--ff-mono); font-size: .62rem; font-weight: 700;
+          color: var(--active-color); text-transform: uppercase; letter-spacing: .08em;
+          margin-top: .3rem;
+          transition: border-color 0.3s ease, background 0.3s ease, color 0.3s ease;
         }
-        /* positioning wrapper — left/top set inline per icon (percent of
-           ring), plain CSS transform for centering only. */
+        .cj__live-dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: var(--active-color);
+          box-shadow: 0 0 8px var(--active-color);
+          animation: cjDotPulse 1.4s ease-in-out infinite alternate;
+        }
+        @keyframes cjDotPulse {
+          0% { transform: scale(0.8); opacity: 0.6; }
+          100% { transform: scale(1.3); opacity: 1; }
+        }
+
+        /* ── Step Logo Positioning ── */
         .cj__ring-icon-pos {
           position: absolute;
           transform: translate(-50%, -50%);
-          width: 104px; height: 118px;
+          width: 110px; height: 86px;
+          z-index: 10;
         }
+        .cj__ring-icon-pos--active {
+          z-index: 40;
+        }
+
         .cj__ring-icon {
           width: 100%; height: 100%;
-          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem;
-          padding: .4rem;
+          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .45rem;
+          padding: .3rem;
           background: transparent;
           border: none;
           cursor: pointer;
-          transition: transform 0.25s ease;
+          transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
           outline: none;
         }
-        .cj__ring-icon:hover,
-        .cj__ring-icon:focus-visible {
-          transform: translateY(-3px);
+        .cj__ring-icon-pos--active .cj__ring-icon,
+        .cj__ring-icon:hover {
+          transform: translateY(-4px);
         }
+
+        /* Logo Icon Glass Badge */
         .cj__ring-icon-badge {
-          width: 64px; height: 64px;
+          width: 56px; height: 56px;
+          border-radius: 14px;
+          background: color-mix(in srgb, var(--step-color) 12%, var(--bg-surface));
+          border: 1px solid color-mix(in srgb, var(--step-color) 35%, transparent);
           display: flex; align-items: center; justify-content: center;
-          background: transparent;
-          border: none;
-          box-shadow: none;
-          transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), filter 0.25s ease;
+          box-shadow: 0 4px 14px color-mix(in srgb, var(--step-color) 15%, transparent);
+          transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+          position: relative;
+          z-index: 1;
         }
         .cj__ring-icon-badge svg {
-          width: 42px; height: 42px;
+          width: 28px; height: 28px;
           color: var(--step-color);
-          filter: drop-shadow(0 2px 8px color-mix(in srgb, var(--step-color) 40%, transparent));
-          transition: transform 0.25s ease, filter 0.25s ease;
+          position: relative;
+          z-index: 2;
+          filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--step-color) 35%, transparent));
+          transition: transform 0.3s ease, filter 0.3s ease;
         }
-        .cj__ring-icon:hover .cj__ring-icon-badge svg,
-        .cj__ring-icon:focus-visible .cj__ring-icon-badge svg {
+
+        /* Active / Hover Pop-Up Animation on Logo */
+        .cj__ring-icon-pos--active .cj__ring-icon-badge,
+        .cj__ring-icon:hover .cj__ring-icon-badge {
           transform: scale(1.18);
-          filter: drop-shadow(0 0 14px var(--step-color));
+          background: color-mix(in srgb, var(--step-color) 25%, var(--bg-raise));
+          border-color: var(--step-color);
+          box-shadow: 0 12px 28px -4px color-mix(in srgb, var(--step-color) 45%, transparent), 0 0 20px -2px var(--step-color);
         }
+        .cj__ring-icon-pos--active .cj__ring-icon-badge svg,
+        .cj__ring-icon:hover .cj__ring-icon-badge svg {
+          transform: scale(1.12);
+          filter: drop-shadow(0 0 12px var(--step-color));
+        }
+
         .cj__ring-icon-label {
           font-family: var(--ff-mono); font-size: .65rem; font-weight: 700;
           letter-spacing: .06em; text-transform: uppercase; color: var(--ink-60);
           white-space: nowrap;
           transition: color 0.2s ease;
         }
+        .cj__ring-icon-pos--active .cj__ring-icon-label,
         .cj__ring-icon:hover .cj__ring-icon-label {
           color: var(--step-color);
         }
-        @media (max-width: 640px) {
-          .cj__ring { width: min(360px, 90vw); }
-          .cj__ring-icon-pos { width: 78px; height: 78px; }
-          .cj__ring-icon-badge { width: 48px; height: 48px; }
-          .cj__ring-icon-badge svg { width: 32px; height: 32px; }
+
+        /* ── POP-UP ACTION BOX (Renders when train STOPS on logo or on hover) ── */
+        .cj__popup {
+          position: absolute;
+          width: clamp(260px, 28vw, 320px);
+          padding: .85rem 1rem;
+          border-radius: 14px;
+          background: var(--bg-surface);
+          border: 1.5px solid var(--step-color);
+          box-shadow: 0 20px 40px -10px rgba(0,0,0,0.55), 0 0 28px -4px var(--step-color);
+          pointer-events: none;
+          z-index: 60;
+          animation: cjPopupIn 0.35s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        @keyframes cjPopupIn {
+          0% { opacity: 0; transform: scale(0.86) translateY(8px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Popup Alignment Variations around rectangle */
+        .cj__popup--bottom-right { top: 105%; left: 0; }
+        .cj__popup--bottom-left { top: 105%; right: 0; }
+        .cj__popup--top-right { bottom: 105%; left: 0; }
+        .cj__popup--top-left { bottom: 105%; right: 0; }
+        .cj__popup--left-top { top: 0; right: 105%; }
+        .cj__popup--left-bottom { bottom: 0; right: 105%; }
+        .cj__popup--right-top { top: 0; left: 105%; }
+        .cj__popup--right-bottom { bottom: 0; left: 105%; }
+
+        .cj__popup-head {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-bottom: .45rem;
+          padding-bottom: .35rem;
+          border-bottom: 1px dashed var(--bg-line);
+        }
+        .cj__popup-actor {
+          display: flex; align-items: center; gap: .45rem;
+          font-family: var(--ff-mono); font-size: .64rem; font-weight: 700;
+          letter-spacing: .08em; text-transform: uppercase; color: var(--step-color);
+        }
+        .cj__popup-actor svg {
+          width: 15px; height: 15px; color: var(--step-color);
+          animation: cjHumanPulse 1.2s ease-in-out infinite alternate;
+        }
+        @keyframes cjHumanPulse {
+          0% { transform: scale(0.9); }
+          100% { transform: scale(1.15); }
+        }
+        .cj__popup-step {
+          font-family: var(--ff-mono); font-size: .6rem; font-weight: 700;
+          color: var(--ink-35);
+        }
+        .cj__popup-text {
+          font-family: var(--ff-body); font-size: .8rem; line-height: 1.45;
+          color: var(--ink); margin: 0; font-weight: 500; min-height: 2.8em;
+        }
+        .cj__typing-cursor {
+          display: inline-block;
+          margin-left: 2px;
+          font-weight: 700;
+          color: var(--step-color);
+          animation: cjBlink 0.6s step-end infinite alternate;
+        }
+        @keyframes cjBlink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+
+        .cj__popup-bar {
+          width: 100%; height: 3px; border-radius: 999px;
+          background: color-mix(in srgb, var(--step-color) 20%, transparent);
+          margin-top: .6rem; overflow: hidden;
+        }
+        .cj__popup-bar-fill {
+          height: 100%; width: 100%;
+          background: var(--step-color);
+          animation: cjProgressRun 3.8s linear infinite;
+          transform-origin: left;
+        }
+        @keyframes cjProgressRun {
+          0% { transform: scaleX(0); }
+          100% { transform: scaleX(1); }
+        }
+
+        @media (max-width: 768px) {
+          .cj__ring { width: min(480px, 90vw); height: 360px; }
+          .cj__ring-icon-pos { width: 84px; height: 72px; }
+          .cj__ring-icon-badge { width: 46px; height: 46px; }
+          .cj__ring-icon-badge svg { width: 24px; height: 24px; }
           .cj__ring-icon-label { font-size: .56rem; }
+          .cj__popup { width: 230px; padding: .7rem .8rem; }
+          .cj__popup-text { font-size: .74rem; }
+        }
+        @media (max-width: 480px) {
+          .cj__ring { width: 92vw; height: 340px; }
+          .cj__popup { display: none; }
         }
 
         .cj__desc {
@@ -416,9 +679,7 @@ export default function ClientJourney() {
           border-top: 1px solid var(--bg-line);
         }
 
-        /* ── expanded-card overlay — dimmed backdrop + a centered, larger
-           copy of the clicked card. GSAP fades + scales it in from a
-           slightly-smaller, slightly-lower resting state. ── */
+        /* ── Overlay Modal ── */
         .cj__overlay {
           position: fixed; inset: 0; z-index: 200;
           display: flex; align-items: center; justify-content: center;
@@ -445,44 +706,7 @@ export default function ClientJourney() {
             var(--bg-surface);
           border: 2px solid var(--step-color);
           border-radius: 20px;
-          box-shadow: 0 30px 70px -20px rgba(0,0,0,0.55), 0 0 50px -18px var(--step-color), 0 0 0 1px rgba(0,0,0,0.2);
-        }
-        /* ── icon-themed animated backdrop: oversized ghost copies of the
-           step's own icon, tinted in its color, drifting slowly behind the
-           content — reinforces "which step is this" even from a glance at
-           the backdrop, not just the small badge ── */
-        .cj__overlay-motif {
-          position: absolute; inset: 0; z-index: -1;
-          overflow: hidden;
-          border-radius: inherit;
-          pointer-events: none;
-        }
-        .cj__overlay-motif svg {
-          position: absolute;
-          color: var(--step-color);
-          opacity: 0.16;
-        }
-        .cj__overlay-motif svg:nth-child(1) {
-          width: 240px; height: 240px;
-          top: -60px; right: -50px;
-          animation: cj-motif-drift-1 14s ease-in-out infinite;
-        }
-        .cj__overlay-motif svg:nth-child(2) {
-          width: 150px; height: 150px;
-          bottom: -30px; left: -30px;
-          opacity: 0.12;
-          animation: cj-motif-drift-2 18s ease-in-out infinite;
-        }
-        @keyframes cj-motif-drift-1 {
-          0%, 100% { transform: rotate(-8deg) translate(0, 0) scale(1); }
-          50% { transform: rotate(6deg) translate(-10px, 12px) scale(1.06); }
-        }
-        @keyframes cj-motif-drift-2 {
-          0%, 100% { transform: rotate(6deg) translate(0, 0) scale(1); }
-          50% { transform: rotate(-8deg) translate(8px, -10px) scale(1.08); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .cj__overlay-motif svg { animation: none !important; }
+          box-shadow: 0 30px 70px -20px rgba(0,0,0,0.55), 0 0 50px -18px var(--step-color);
         }
         .cj__overlay-close {
           position: absolute; top: 1rem; right: 1rem;
@@ -492,22 +716,46 @@ export default function ClientJourney() {
           background: var(--bg-raise);
           border: 1px solid var(--bg-line);
           color: var(--ink-60);
+          cursor: pointer;
           transition: color 0.15s ease, border-color 0.15s ease;
         }
         .cj__overlay-close:hover { color: var(--ink); border-color: var(--step-color); }
-        .cj__overlay-card .cj__badge {
-          width: 68px; height: 68px; border-radius: 18px;
+        .cj__badge {
+          position: relative;
+          flex: 0 0 auto;
+          width: 54px; height: 54px;
+          border-radius: 14px;
+          background: color-mix(in srgb, var(--step-color) 15%, var(--bg-raise));
+          border: 1.5px solid var(--step-color);
+          display: flex; align-items: center; justify-content: center;
+          color: var(--step-color);
         }
-        .cj__overlay-card .cj__badge svg { width: 28px; height: 28px; }
-        .cj__overlay-card .cj__label { font-size: 1.35rem; margin-top: .3rem; font-family: var(--ff-body); }
-        .cj__overlay-card .cj__tagline { font-size: .95rem; margin-top: .4rem; font-family: var(--ff-body); }
-        .cj__overlay-card .cj__desc { font-size: .92rem; }
+        .cj__badge svg { width: 26px; height: 26px; }
 
-        /* ── ask-an-agent — two equal paths handed off from this step's
-           own context, so the visitor doesn't retype what stage they're
-           asking about. Text answer (AI, instant) vs. a person (engineer,
-           async) are framed as different tools for different needs, not
-           a "fast vs slow" ranking. ── */
+        .cj__num {
+          font-family: var(--ff-body); font-weight: 700; font-size: .72rem;
+          letter-spacing: .08em; color: var(--step-color); display: block;
+        }
+        .cj__label {
+          font-family: var(--ff-body); font-weight: 700; font-size: 1.35rem;
+          color: var(--ink); margin: .15rem 0 0;
+        }
+        .cj__tagline {
+          font-family: var(--ff-body); font-size: .88rem; line-height: 1.5;
+          color: var(--ink-60); margin: .35rem 0 0;
+        }
+        .cj__metrics {
+          display: flex; flex-wrap: wrap; gap: .4rem 1.2rem;
+          border-top: 1px solid color-mix(in srgb, var(--step-color) 30%, transparent);
+          padding-top: .65rem; margin-top: .75rem;
+        }
+        .cj__metric {
+          display: flex; align-items: baseline; gap: .4rem;
+          font-family: var(--ff-body); font-size: .75rem;
+        }
+        .cj__metric-v { color: var(--step-color); font-weight: 700; }
+        .cj__metric-l { color: var(--ink-35); letter-spacing: .04em; text-transform: uppercase; }
+
         .cj__ask {
           margin-top: 1.25rem;
           padding-top: 1.1rem;
@@ -517,26 +765,17 @@ export default function ClientJourney() {
           display: block;
           font-family: var(--ff-mono); font-size: .68rem; font-weight: 600;
           letter-spacing: .12em; text-transform: uppercase;
-          color: var(--ink-35);
-          margin-bottom: .65rem;
+          color: var(--ink-35); margin-bottom: .65rem;
         }
         .cj__ask-btns {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: .65rem;
+          display: grid; grid-template-columns: 1fr 1fr; gap: .65rem;
         }
         .cj__ask-btn {
-          display: flex;
-          align-items: flex-start;
-          gap: .6rem;
-          padding: .75rem .85rem;
-          border-radius: 10px;
+          display: flex; align-items: flex-start; gap: .6rem;
+          padding: .75rem .85rem; border-radius: 10px;
           background: color-mix(in srgb, var(--step-color) 8%, var(--bg-base));
           border: 1px solid color-mix(in srgb, var(--step-color) 30%, transparent);
-          color: var(--ink);
-          text-align: left;
-          text-decoration: none;
-          cursor: pointer;
+          color: var(--ink); text-align: left; text-decoration: none; cursor: pointer;
           transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
         }
         .cj__ask-btn svg { flex: 0 0 auto; margin-top: .15rem; color: var(--step-color); }
@@ -546,80 +785,16 @@ export default function ClientJourney() {
           color: var(--ink-60);
         }
         .cj__ask-btn strong {
-          font-family: var(--ff-display); font-weight: 700; font-size: .88rem;
-          letter-spacing: -.005em; color: var(--ink);
+          font-family: var(--ff-display); font-weight: 700; font-size: .88rem; color: var(--ink);
         }
         .cj__ask-btn:hover {
-          border-color: var(--step-color);
-          background: var(--bg-surface);
-          transform: translateY(-2px);
+          border-color: var(--step-color); background: var(--bg-surface); transform: translateY(-2px);
         }
-        .cj__ask-btn:focus-visible { outline: 2px solid var(--step-color); outline-offset: 2px; }
-
-        @media (max-width: 480px) {
-          .cj__ask-btns { grid-template-columns: 1fr; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .cj__overlay, .cj__overlay-card { transition: none; }
-        }
-
-        /* larger, illustrated icon tile — layered ring + glow behind the
-           icon instead of a flat solid square, more like a badge of rank
-           than a plain color chip */
-        .cj__badge {
-          position: relative;
-          flex: 0 0 auto;
-          width: 54px; height: 54px;
-          border-radius: 14px;
-          background: linear-gradient(155deg, var(--step-color) 0%, color-mix(in srgb, var(--step-color) 70%, #000) 100%);
-          border: 2px solid var(--step-color);
-          display: flex; align-items: center; justify-content: center;
-          box-shadow:
-            0 1px 0 rgba(255,255,255,0.25) inset,
-            0 8px 18px -9px var(--step-color);
-        }
-        .cj__badge::before {
-          content: "";
-          position: absolute; inset: -6px;
-          border-radius: 17px;
-          border: 1px solid var(--step-color);
-          opacity: 0.6;
-        }
-        .cj__badge svg { width: 22px; height: 22px; color: #fff; }
-
-        .cj__num {
-          font-family: var(--ff-body); font-weight: 700; font-size: .72rem;
-          letter-spacing: .08em; color: var(--step-color);
-          display: block;
-        }
-        .cj__label {
-          font-family: var(--ff-body); font-weight: 700; font-size: 1.05rem;
-          letter-spacing: -.005em; color: var(--ink);
-          margin: .15rem 0 0;
-        }
-        .cj__tagline {
-          font-family: var(--ff-body); font-size: .88rem; line-height: 1.5;
-          color: var(--ink-60);
-          margin: .35rem 0 0;
-          flex: 1 1 auto;
-        }
-        .cj__metrics {
-          display: flex; flex-wrap: wrap; gap: .4rem 1.2rem;
-          border-top: 2px solid color-mix(in srgb, var(--step-color) 40%, transparent);
-          padding-top: .65rem;
-          margin-top: auto;
-        }
-        .cj__metric {
-          display: flex; align-items: baseline; gap: .4rem;
-          font-family: var(--ff-body); font-size: .75rem;
-        }
-        .cj__metric-v { color: var(--step-color); font-weight: 700; }
-        .cj__metric-l { color: var(--ink-35); letter-spacing: .04em; text-transform: uppercase; }
 
         @media (max-width: 640px) {
           .cj__footer { flex-direction: column; text-align: center; gap: 1rem; }
           .cj__head-meta { display: none; }
+          .cj__ask-btns { grid-template-columns: 1fr; }
         }
 
         .cj__footer {
@@ -630,30 +805,27 @@ export default function ClientJourney() {
           padding-top: clamp(1.5rem, 3vw, 2rem);
         }
         .cj__footer-text {
-          font-family: var(--ff-body); font-size: .9rem;
-          color: var(--ink-60);
+          font-family: var(--ff-body); font-size: .9rem; color: var(--ink-60);
         }
         .cj__footer-text strong { color: var(--ink); font-weight: 600; }
         .cj__cta {
           display: inline-flex; align-items: center; gap: .5rem;
-          padding: .75rem 1.6rem;
-          border-radius: 999px;
-          background: var(--brand-teal);
-          color: #0d2220;
+          padding: .75rem 1.6rem; border-radius: 999px;
+          background: var(--brand-teal); color: #0d2220;
           font-family: var(--ff-mono); font-weight: 700; font-size: .72rem;
-          letter-spacing: .06em; text-transform: uppercase;
-          text-decoration: none;
-          transition: background 0.15s ease, transform 0.15s cubic-bezier(0.16,1,0.3,1);
+          letter-spacing: .06em; text-transform: uppercase; text-decoration: none;
+          transition: background 0.15s ease, transform 0.15s ease;
         }
-        .cj__cta:hover { background: var(--brand-teal-dk); }
+        .cj__cta:hover { background: #1fa39a; }
         .cj__cta:active { transform: scale(0.97); }
-
-        @media (prefers-reduced-motion: reduce) {
-          .cj__badge, .cj__ring-icon-badge { transition: none; }
-        }
       `}</style>
 
-      <section className="cj" data-no-anim aria-label={t("sectionAria")}>
+      <section
+        className="cj"
+        data-no-anim
+        aria-label={t("sectionAria")}
+        style={{ ["--active-color" as string]: activeStep.color }}
+      >
         <div className="cj__bg-glow" aria-hidden="true" />
         <div className="cj__bg-glow--2" aria-hidden="true" />
         <div className="cj__wrap">
@@ -664,32 +836,102 @@ export default function ClientJourney() {
                 {t("titleLine1")} {t("titleLine2")} <em>{t("titleEm")}</em>
               </h2>
             </div>
-            <span className="cj__head-meta">{t("stepOfLabel", { num: "01", total: "08" })}</span>
+            <span className="cj__head-meta">{t("stepOfLabel", { num: activeStep.num, total: "08" })}</span>
           </div>
 
+          {/* RECTANGULAR TRACK WITH SINGLE TRAIN LIGHT ENGINE */}
           <div className="cj__ring-wrap">
             <div className="cj__ring" role="list" aria-label={t("stepsAria")} ref={ringRef}>
-              <div className="cj__ring-guide" aria-hidden="true" />
+
+              {/* SVG Single Traveling Train Light Beam */}
+              <svg className="cj__track-svg" viewBox="0 0 860 440" preserveAspectRatio="none">
+                <rect className="cj__track-bg" x="20" y="20" width="820" height="400" rx="20" />
+                <rect
+                  className="cj__track-pulse"
+                  x="20" y="20" width="820" height="400" rx="20"
+                  style={{
+                    strokeDasharray: `${TRAIN_FIXED_LEN} ${TOTAL_P - TRAIN_FIXED_LEN}`,
+                    strokeDashoffset: -trainOffset,
+                  }}
+                />
+              </svg>
+
+              {/* Central Status Display */}
               <div className="cj__ring-center" aria-hidden="true">
-                <span className="cj__ring-center-value">08</span>
-                <span className="cj__ring-center-label">{t("stepsAria")}</span>
+                <span className="cj__ring-center-value">08 STAGES</span>
+                <span className="cj__ring-center-label">Connected Client Journey</span>
+                <div className="cj__ring-center-live">
+                  <span className="cj__live-dot" />
+                  <span>Phase {activeStep.num}: {activeStep.label}</span>
+                </div>
               </div>
+
+              {/* 8 Step Nodes */}
               {STEPS.map((s, i) => {
-                const pos = ringPosition(i, STEPS.length);
+                const pos = rectPosition(i);
+                const isActive = i === activeIndex;
+                const HumanIcon = s.action.icon;
+                const popupAlignClass = popupAlignment(i);
+
                 return (
-                  <div className="cj__ring-icon-pos" role="listitem" key={s.id} style={{ left: pos.left, top: pos.top }}>
+                  <div
+                    className={`cj__ring-icon-pos ${isActive ? "cj__ring-icon-pos--active" : ""}`}
+                    role="listitem"
+                    key={s.id}
+                    style={{ left: pos.left, top: pos.top }}
+                  >
                     <button
                       type="button"
                       className="cj__ring-icon"
                       style={{ ["--step-color" as string]: s.color }}
-                      onClick={() => openCard(s.id)}
+                      onMouseEnter={() => {
+                        setIsHovered(true);
+                        goToStep(i);
+                      }}
+                      onMouseLeave={() => setIsHovered(false)}
+                      onClick={() => {
+                        goToStep(i);
+                        openCard(s.id);
+                      }}
+                      onFocus={() => {
+                        setIsHovered(true);
+                        goToStep(i);
+                      }}
+                      onBlur={() => setIsHovered(false)}
                       aria-label={s.label}
                     >
-                      <span className="cj__ring-icon-badge">
-                        <s.Icon strokeWidth={1.75} aria-hidden="true" />
-                      </span>
+                      <div className="cj__ring-icon-badge">
+                        <s.Icon strokeWidth={1.8} aria-hidden="true" />
+                      </div>
                       <span className="cj__ring-icon-label">{s.label}</span>
                     </button>
+
+                    {/* Pop-Up Action Box Renders When Train STOPS at Logo */}
+                    {isActive && !isTravelling && (
+                      <div
+                        className={`cj__popup ${popupAlignClass}`}
+                        style={{ ["--step-color" as string]: s.color }}
+                        key={`popup-${s.id}`}
+                      >
+                        <div className="cj__popup-head">
+                          <div className="cj__popup-actor">
+                            <HumanIcon strokeWidth={2} />
+                            <span>{s.action.actor}</span>
+                          </div>
+                          <span className="cj__popup-step">STEP {s.num}</span>
+                        </div>
+
+                        {/* Character Typewriter Text -> Calls handleTypewriterComplete when finished */}
+                        <TypewriterText
+                          text={s.action.text}
+                          onComplete={handleTypewriterComplete}
+                        />
+
+                        <div className="cj__popup-bar">
+                          <div className="cj__popup-bar-fill" />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -729,15 +971,11 @@ export default function ClientJourney() {
                 <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
             </button>
-            <div className="cj__overlay-motif" aria-hidden="true">
-              <openStep.Icon strokeWidth={1} />
-              <openStep.Icon strokeWidth={1} />
-            </div>
             <div className="cj__badge">
               <openStep.Icon strokeWidth={1.75} aria-hidden="true" />
             </div>
             <div className="cj__step-text">
-              <span className="cj__num">{openStep.num}</span>
+              <span className="cj__num">STEP {openStep.num}</span>
               <h3 className="cj__label">{openStep.label}</h3>
               <p className="cj__tagline">{openStep.tagline}</p>
               <div className="cj__metrics">

@@ -109,20 +109,27 @@ export default function FlexoStrip() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  const scrollToSlide = useCallback((idx: number) => {
+    const el = sliderRef.current;
+    if (!el) return;
+    const card = el.children[idx] as HTMLElement;
+    if (!card) return;
+    // Use scrollLeft instead of scrollIntoView to prevent the page from
+    // also scrolling vertically on mobile
+    el.scrollTo({ left: card.offsetLeft - el.offsetLeft, behavior: "smooth" });
+  }, []);
+
   // Auto-advance slider on mobile
   const startAutoSlide = useCallback((count: number) => {
     if (autoSlideTimer.current) clearInterval(autoSlideTimer.current);
     autoSlideTimer.current = setInterval(() => {
       setSliderIdx(prev => {
         const next = (prev + 1) % count;
-        if (sliderRef.current) {
-          const card = sliderRef.current.children[next] as HTMLElement;
-          card?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-        }
+        scrollToSlide(next);
         return next;
       });
     }, 3000);
-  }, []);
+  }, [scrollToSlide]);
 
   useEffect(() => {
     if (!isMobile) { if (autoSlideTimer.current) clearInterval(autoSlideTimer.current); return; }
@@ -463,8 +470,7 @@ export default function FlexoStrip() {
               aria-label={`Go to slide ${i + 1}`}
               onClick={() => {
                 setSliderIdx(i);
-                const card = sliderRef.current?.children[i] as HTMLElement;
-                card?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+                scrollToSlide(i);
               }}
             />
           ))}

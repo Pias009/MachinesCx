@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
-const DURATION = 1200;
+const DURATION = 800;
 
 export default function LoadingScreen() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -18,11 +18,10 @@ export default function LoadingScreen() {
     const start = Date.now();
     const iv = setInterval(() => {
       const p = Math.min((Date.now() - start) / DURATION, 1);
-      // cubic ease-out: feels heavy then coasts to finish
       const ease = 1 - Math.pow(1 - p, 3);
       setPct(Math.round(ease * 100));
       if (p >= 1) clearInterval(iv);
-    }, 30);
+    }, 16); // ~60fps
     return () => clearInterval(iv);
   }, []);
 
@@ -32,12 +31,12 @@ export default function LoadingScreen() {
       setLabel("Ready");
       const el = rootRef.current;
       if (el) {
-        el.style.transition = "opacity 0.4s cubic-bezier(0.4,0,0.2,1)";
+        el.style.transition = "opacity 0.3s cubic-bezier(0.4,0,0.2,1)";
         el.style.opacity    = "0";
         el.style.pointerEvents = "none";
       }
-      setTimeout(() => setGone(true), 420);
-    }, DURATION + 400);
+      setTimeout(() => setGone(true), 320);
+    }, DURATION + 200);
     return () => clearTimeout(t);
   }, []);
 

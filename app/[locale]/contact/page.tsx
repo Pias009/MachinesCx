@@ -3,6 +3,12 @@ import { SITE_URL, BRAND } from "@/lib/products";
 import JsonLd from "@/components/JsonLd";
 import ContactClient from "./ContactClient";
 
+import { routing } from "@/i18n/routing";
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
 export function generateMetadata({ params }: { params: { locale: string } }) {
   return pageMetadata({
     locale: params.locale,

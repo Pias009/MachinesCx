@@ -8,25 +8,28 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   eslint: { ignoreDuringBuilds: true },
+  // Strip console.* calls from production bundles — saves bytes & prevents leaking debug info
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
+  },
   experimental: {
-    optimizeCss: false,
+    optimizeCss: true,
+    // Pre-bundle these large libs so they aren't re-parsed on every page load
+    optimizePackageImports: ["gsap", "lucide-react", "next-intl"],
   },
   images: {
     formats: ["image/avif", "image/webp"],
+    // Serve images at extra-small sizes for mobile — reduces bytes on slow connections
+    deviceSizes: [390, 640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "img.youtube.com" },
-      { protocol: "https", hostname: "picsum.photos" }, // dummy-test-x9000 placeholder images only
+      { protocol: "https", hostname: "picsum.photos" },
     ],
   },
   generateBuildId: async () => `build-${Date.now()}`,
-  // Webpack's persistent filesystem cache has been intermittently
-  // corrupting `next build` in this environment (manifests/chunks read
-  // back as truncated/missing right after being written — "Cannot find
-  // module './NNNN.js'", "Unexpected end of JSON input" reading a
-  // manifest, etc.), unrelated to any application code. Disabling it for
-  // production builds trades a slightly slower cold build for reliability;
-  // dev mode is unaffected and keeps its own separate cache.
   webpack: (config, { dev }) => {
     if (!dev) config.cache = { type: "memory" };
     return config;

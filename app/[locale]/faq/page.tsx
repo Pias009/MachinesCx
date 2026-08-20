@@ -3,6 +3,12 @@ import { FAQ_ITEMS } from "@/lib/faqData";
 import JsonLd from "@/components/JsonLd";
 import FaqClient from "./FaqClient";
 
+import { routing } from "@/i18n/routing";
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
 export function generateMetadata({ params }: { params: { locale: string } }) {
   return pageMetadata({
     locale: params.locale,

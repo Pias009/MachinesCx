@@ -1,17 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
 import { useCms } from "@/lib/useCms";
 import type { ProductFamily } from "@/lib/products";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { SECTION_ELEMENT_DELAY } from "@/components/SectionReveal";
-
-gsap.registerPlugin(useGSAP);
 
 const FAMILY_BASE: Omit<ProductFamily, "tagline">[] = [
   { slug:"flexo-2c", category:"printing", series:"AI-2C · 2-colour", name:"AI-2C", models:["AI-2C-500"], materials:"PE, PP, PET, BOPP, Paper", images:["/machines/flexo-1.png"], specs:[
@@ -89,175 +84,60 @@ export default function FlexoStrip() {
   const MODELS = cms.items && cms.items.length ? cms.items : DEFAULT_MODELS;
 
   const [activeCategory, setActiveCategory] = useState<string>("All Series");
+  const sliderRef   = useRef<HTMLDivElement>(null);
+  const [sliderIdx, setSliderIdx] = useState(0);
+  const [isMobile, setIsMobile]   = useState(false);
+  const autoSlideTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const sectionRef = useRef<HTMLElement>(null);
-  const eyebrowRef  = useRef<HTMLSpanElement>(null);
-  const lineRef     = useRef<HTMLDivElement>(null);
-  const titleRef    = useRef<HTMLHeadingElement>(null);
-  const gridRef     = useRef<HTMLDivElement>(null);
-  const stripRef    = useRef<HTMLDivElement>(null);
-
-  const revealAll = () => {
-    [eyebrowRef, lineRef, gridRef, stripRef].forEach(r => {
-      if (r.current) { r.current.style.opacity = "1"; r.current.style.transform = "none"; }
-    });
-    if (titleRef.current) titleRef.current.style.opacity = "1";
-  };
-
-  const [pluginReady, setPluginReady] = useState(false);
-  const subtitleRef = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    import("gsap/ScrollTrigger")
-      .then(({ ScrollTrigger }) => {
-        if (cancelled) return;
-        gsap.registerPlugin(ScrollTrigger);
-        setPluginReady(true);
-      })
-      .catch(() => { if (!cancelled) revealAll(); });
-    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 2000);
-    return () => { cancelled = true; clearTimeout(fallback); };
-  }, []);
-
-  // Filter models based on category tab
+  // Filter models based on category tab — must be defined before any effect that uses it
   const filteredModels = MODELS.filter((m) => {
     if (activeCategory === "All Series") return true;
     return m.categoryTag === activeCategory;
   });
 
-  // Helper to split title into animated word and letter spans
-  const renderAnimatedTitle = (text: string) => {
-    const words = text.split(" ");
-    return words.map((word, wIdx) => (
-      <span key={wIdx} className="fls-title-word" style={{ display: "inline-block", whiteSpace: "nowrap", marginRight: "0.25em" }}>
-        {Array.from(word).map((char, cIdx) => (
-          <span
-            key={cIdx}
-            className="fls-title-char"
-            style={{
-              display: "inline-block",
-              backfaceVisibility: "hidden",
-              willChange: "transform, opacity, filter",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            {char}
-          </span>
-        ))}
-      </span>
-    ));
-  };
+  // Reset slider index when category changes
+  useEffect(() => {
+    setSliderIdx(0);
+    if (sliderRef.current) sliderRef.current.scrollLeft = 0;
+  }, [activeCategory]);
 
-  // Initial scroll-triggered GSAP entrance
-  useGSAP(() => {
-    if (!pluginReady) return;
-    const easeExp = "expo.out";
-    const revTrigger = (target: Element | null, start: string) =>
-      ({ trigger: target, start, end: "bottom top", toggleActions: "play reverse play reverse" });
+  // Mobile detection
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check, { passive: true });
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
-    const headerTl = gsap.timeline({ scrollTrigger: revTrigger(sectionRef.current, "top 85%") });
+  // Auto-advance slider on mobile
+  const startAutoSlide = useCallback((count: number) => {
+    if (autoSlideTimer.current) clearInterval(autoSlideTimer.current);
+    autoSlideTimer.current = setInterval(() => {
+      setSliderIdx(prev => {
+        const next = (prev + 1) % count;
+        if (sliderRef.current) {
+          const card = sliderRef.current.children[next] as HTMLElement;
+          card?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+        }
+        return next;
+      });
+    }, 3000);
+  }, []);
 
-    // 1. Eyebrow glide in
-    headerTl.fromTo(eyebrowRef.current,
-      { opacity: 0, x: -30, filter: "blur(6px)" },
-      { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.8, ease: easeExp },
-      SECTION_ELEMENT_DELAY
-    );
+  useEffect(() => {
+    if (!isMobile) { if (autoSlideTimer.current) clearInterval(autoSlideTimer.current); return; }
+    startAutoSlide(filteredModels.length);
+    return () => { if (autoSlideTimer.current) clearInterval(autoSlideTimer.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile, activeCategory, filteredModels.length]);
 
-    // 2. Character-by-character 3D Rotate & Bounce reveal
-    const chars = titleRef.current?.querySelectorAll<HTMLElement>(".fls-title-char");
-    if (chars && chars.length) {
-      headerTl.fromTo(chars,
-        {
-          opacity: 0,
-          y: 65,
-          rotateX: -85,
-          rotateY: 35,
-          scale: 0.5,
-          filter: "blur(12px)",
-        },
-        {
-          opacity: 1,
-          y: 0,
-          rotateX: 0,
-          rotateY: 0,
-          scale: 1,
-          filter: "blur(0px)",
-          duration: 0.85,
-          ease: "back.out(1.5)",
-          stagger: 0.028,
-        },
-        SECTION_ELEMENT_DELAY + 0.1
-      );
-    }
-
-    // 3. Glowing line reveal
-    headerTl.fromTo(lineRef.current,
-      { scaleX: 0, transformOrigin: "left center", opacity: 0 },
-      { scaleX: 1, opacity: 1, duration: 1.2, ease: easeExp },
-      SECTION_ELEMENT_DELAY + 0.3
-    );
-
-    // 4. Subtitle fade up
-    headerTl.fromTo(subtitleRef.current,
-      { opacity: 0, y: 20, filter: "blur(8px)" },
-      { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: easeExp },
-      SECTION_ELEMENT_DELAY + 0.4
-    );
-
-    const cards = gridRef.current
-      ? Array.from(gridRef.current.querySelectorAll<HTMLElement>(".fls-card"))
-      : [];
-    gsap.fromTo(cards, { y: 40, opacity: 0, scale: 0.96 }, {
-      y: 0, opacity: 1, scale: 1, duration: 0.75, ease: "power3.out", stagger: 0.08,
-      delay: SECTION_ELEMENT_DELAY + 0.2,
-      scrollTrigger: revTrigger(gridRef.current, "top 85%"),
-    });
-
-    gsap.fromTo(stripRef.current, { y: 36, opacity: 0 }, {
-      y: 0, opacity: 1, duration: 0.9, ease: easeExp, delay: SECTION_ELEMENT_DELAY,
-      scrollTrigger: revTrigger(stripRef.current, "top 90%"),
-    });
-  }, { scope: sectionRef, dependencies: [pluginReady] });
-
-  // Handle smooth GSAP animation when category changes
   const handleCategorySelect = (category: string) => {
     if (category === activeCategory) return;
-
-    if (!gridRef.current) {
-      setActiveCategory(category);
-      return;
-    }
-
-    const cards = Array.from(gridRef.current.querySelectorAll<HTMLElement>(".fls-card"));
-
-    // Animate out current cards
-    gsap.to(cards, {
-      opacity: 0,
-      y: -15,
-      scale: 0.95,
-      duration: 0.25,
-      stagger: 0.04,
-      ease: "power2.in",
-      onComplete: () => {
-        setActiveCategory(category);
-        // Animate in newly rendered cards on next tick
-        requestAnimationFrame(() => {
-          if (!gridRef.current) return;
-          const newCards = Array.from(gridRef.current.querySelectorAll<HTMLElement>(".fls-card"));
-          gsap.fromTo(
-            newCards,
-            { opacity: 0, y: 25, scale: 0.96 },
-            { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out", stagger: 0.06 }
-          );
-        });
-      },
-    });
+    setActiveCategory(category);
   };
 
   return (
-    <section ref={sectionRef} className="fls-section" style={{
+    <section className="fls-section" style={{
       background: "var(--bg-base)",
       borderTop: "1px solid var(--line)",
       padding: "clamp(5rem,9vw,9rem) 0 clamp(4.5rem,8vw,8rem)",
@@ -270,17 +150,7 @@ export default function FlexoStrip() {
         background: "linear-gradient(90deg, var(--brand-teal) 0%, var(--brand-red) 100%)",
       }} />
 
-      {/* Ambient background glow */}
-      <div aria-hidden style={{
-        position: "absolute", top: "-120px", left: "50%", transform: "translateX(-50%)",
-        width: "65%", height: "320px",
-        background: "radial-gradient(ellipse at 50% 0%, rgba(43,191,179,0.08) 0%, rgba(225,29,72,0.04) 60%, transparent 75%)",
-        pointerEvents: "none",
-      }} />
-
       <style suppressHydrationWarning>{`
-        .fls-title-clip { overflow: hidden; }
-
         /* ── Category Filter Tabs Bar ── */
         .fls-category-nav {
           display: flex;
@@ -306,13 +176,12 @@ export default function FlexoStrip() {
           color: rgba(255, 255, 255, 0.7);
           cursor: pointer;
           white-space: nowrap;
-          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: all 0.2s ease;
         }
         .fls-cat-btn:hover {
           background: rgba(255, 255, 255, 0.09);
           color: #ffffff;
           border-color: rgba(255, 255, 255, 0.25);
-          transform: translateY(-1px);
         }
         .fls-cat-btn--active {
           background: var(--brand-teal) !important;
@@ -322,7 +191,7 @@ export default function FlexoStrip() {
           box-shadow: 0 4px 18px rgba(43, 191, 179, 0.35);
         }
 
-        /* ── Grid & Cards ── */
+        /* ── Desktop Grid & Cards ── */
         .fls-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
@@ -338,19 +207,15 @@ export default function FlexoStrip() {
           border: 1px solid var(--bg-line);
           cursor: pointer;
           text-decoration: none;
-          transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-                      border-color 0.3s ease,
-                      box-shadow 0.35s ease;
+          transition: transform 0.3s cubic-bezier(0.16,1,0.3,1),
+                      border-color 0.25s ease,
+                      box-shadow 0.3s ease;
         }
-        .fls-card:hover,
-        .fls-card:focus-visible {
-          transform: translateY(-8px) scale(1.01);
+        .fls-card:hover {
+          transform: translateY(-6px) scale(1.01);
           border-color: var(--brand-teal);
-          box-shadow: 0 20px 42px -15px rgba(43, 191, 179, 0.32),
-                      0 0 20px rgba(43, 191, 179, 0.1);
+          box-shadow: 0 20px 42px -15px rgba(43,191,179,0.32);
         }
-        .fls-card:focus-visible { outline: 2px solid var(--brand-teal); outline-offset: 2px; }
-
         .fls-card__photo {
           position: relative;
           width: 100%;
@@ -361,10 +226,10 @@ export default function FlexoStrip() {
         }
         .fls-card__photo img {
           width: 100%; height: 100%; object-fit: cover;
-          transition: transform .6s cubic-bezier(0.16,1,0.3,1);
+          transition: transform .5s cubic-bezier(0.16,1,0.3,1);
         }
-        .fls-card:hover .fls-card__photo img { transform: scale(1.08); }
-        
+        .fls-card:hover .fls-card__photo img { transform: scale(1.07); }
+
         .fls-card__badge {
           position: absolute; top: .75rem; left: .75rem; z-index: 2;
           font-family: var(--ff-mono); font-size: 0.62rem; letter-spacing: .14em;
@@ -375,7 +240,6 @@ export default function FlexoStrip() {
         .fls-card__badge--flagship { background: var(--ink); color: var(--bg-base); font-weight: 700; }
 
         .fls-card__body {
-          position: relative;
           padding: 1.15rem 1.3rem 1.35rem;
           flex: 1 1 auto;
           display: flex;
@@ -387,46 +251,13 @@ export default function FlexoStrip() {
         }
         .fls-card__name {
           font-family: var(--ff-display); font-weight: 700;
-          font-size: clamp(1.15rem, 1.6vw, 1.4rem);
-          letter-spacing: -0.005em; color: var(--ink);
-          margin: .2rem 0 0;
+          font-size: clamp(1.15rem,1.6vw,1.4rem);
+          color: var(--ink); margin: .2rem 0 0;
         }
         .fls-card__tag {
-          font-family: var(--ff-body); font-size: .8rem; line-height: 1.45;
+          font-size: .8rem; line-height: 1.45;
           color: var(--ink-60); margin: .35rem 0 0;
         }
-
-        /* Specs panel reveal on hover */
-        .fls-card__specs {
-          position: absolute; inset: 0;
-          display: flex; flex-direction: column; justify-content: center;
-          gap: .6rem;
-          padding: 1.15rem 1.3rem;
-          background: var(--bg-raise);
-          opacity: 0;
-          transform: translateY(14px);
-          transition: opacity .28s ease, transform .28s cubic-bezier(0.16,1,0.3,1);
-          pointer-events: none;
-        }
-        .fls-card:hover .fls-card__specs,
-        .fls-card:focus-visible .fls-card__specs {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        .fls-card__spec-row {
-          display: flex; align-items: baseline; justify-content: space-between;
-          gap: .75rem;
-          border-bottom: 1px solid var(--bg-line);
-          padding-bottom: .45rem;
-        }
-        .fls-card__spec-label {
-          font-family: var(--ff-mono); font-size: 0.62rem; letter-spacing: .14em;
-          text-transform: uppercase; color: var(--ink-35);
-        }
-        .fls-card__spec-value {
-          font-family: var(--ff-display); font-size: 1.05rem; color: var(--ink);
-        }
-        .fls-card__spec-unit { font-family: var(--ff-body); font-size: .8rem; color: var(--ink-60); margin-left: .25rem; }
 
         .fls-cta-row {
           margin-top: 2.2rem;
@@ -441,18 +272,18 @@ export default function FlexoStrip() {
         }
         .fls-cta-row a:hover { gap: .75rem; color: var(--brand-red); }
 
-        /* Light Mode High Contrast Overrides */
+        /* Light Mode Overrides */
         [data-theme="light"] .fls-section {
           background: var(--bg-base);
-          border-top-color: rgba(13, 34, 32, 0.08);
+          border-top-color: rgba(13,34,32,0.08);
         }
         [data-theme="light"] .fls-cat-btn {
-          background: rgba(13, 34, 32, 0.05);
-          border-color: rgba(13, 34, 32, 0.14);
+          background: rgba(13,34,32,0.05);
+          border-color: rgba(13,34,32,0.14);
           color: #0d2220;
         }
         [data-theme="light"] .fls-cat-btn:hover {
-          background: rgba(13, 34, 32, 0.12);
+          background: rgba(13,34,32,0.12);
           color: #0d2220;
         }
         [data-theme="light"] .fls-cat-btn--active {
@@ -461,57 +292,90 @@ export default function FlexoStrip() {
         }
         [data-theme="light"] .fls-card {
           background: #ffffff;
-          border-color: rgba(13, 34, 32, 0.12);
-          box-shadow: 0 4px 16px rgba(13, 34, 32, 0.05);
+          border-color: rgba(13,34,32,0.12);
+          box-shadow: 0 4px 16px rgba(13,34,32,0.05);
         }
         [data-theme="light"] .fls-card:hover {
           border-color: var(--brand-teal);
-          box-shadow: 0 16px 36px rgba(13, 34, 32, 0.12);
+          box-shadow: 0 16px 36px rgba(13,34,32,0.12);
         }
 
         @media (max-width: 640px) {
           .fls-section { padding: clamp(2.5rem,6vw,3.5rem) 0 clamp(2rem,5vw,3rem) !important; }
-          .fls-grid { grid-template-columns: 1fr; gap: 1rem !important; }
+          .fls-grid { display: none !important; }
+          .fls-cta-row { margin-top: 1rem; }
+        }
+
+        /* Mobile horizontal slider */
+        .fls-slider { display: none; }
+        @media (max-width: 640px) {
+          .fls-slider {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 0 clamp(1rem,5vw,1.5rem) 1rem;
+            margin: 0 calc(-1 * clamp(1rem,5vw,1.5rem));
+          }
+          .fls-slider::-webkit-scrollbar { display: none; }
+          .fls-slider .fls-card {
+            flex: 0 0 80vw;
+            scroll-snap-align: center;
+            max-width: 320px;
+          }
+          .fls-slider-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 1rem;
+          }
+          .fls-slider-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            border: none; cursor: pointer; padding: 0;
+            transition: background 0.3s ease, transform 0.3s ease;
+          }
+          .fls-slider-dot--active {
+            background: var(--brand-teal);
+            transform: scale(1.4);
+          }
         }
       `}</style>
 
       <div className="wrap" style={{ position: "relative", zIndex: 1 }}>
         {/* ── Header ── */}
-        <div className="fls-header" style={{ marginBottom: "clamp(2rem,4vw,3rem)" }}>
-          <span ref={eyebrowRef} style={{
+        <div style={{ marginBottom: "clamp(2rem,4vw,3rem)" }}>
+          <span style={{
             display: "inline-flex", alignItems: "center", gap: ".75rem",
             fontFamily: "var(--ff-mono)", fontSize: "0.72rem",
             letterSpacing: ".22em", textTransform: "uppercase",
             color: "var(--brand-teal)", marginBottom: ".75rem",
-            opacity: 0,
           }}>
             <span style={{ width: "2rem", height: "1px", background: "var(--brand-teal)", display: "inline-block", flexShrink: 0 }} />
             {t("eyebrow")}
           </span>
 
-          <div className="fls-title-clip">
-            <h2 ref={titleRef} data-no-anim style={{
-              fontFamily: "var(--ff-display)",
-              fontSize: "clamp(2.8rem,6vw,5.5rem)",
-              color: "var(--ink)", lineHeight: .95,
-              letterSpacing: ".01em", margin: 0,
-              perspective: "1000px",
-            }}>
-              {renderAnimatedTitle(t("title"))}
-            </h2>
-          </div>
+          <h2 style={{
+            fontFamily: "var(--ff-display)",
+            fontSize: "clamp(2.8rem,6vw,5.5rem)",
+            color: "var(--ink)", lineHeight: .95,
+            letterSpacing: ".01em", margin: "0 0 .6rem",
+          }}>
+            {t("title")}
+          </h2>
 
-          <div ref={lineRef} style={{
+          <div style={{
             height: "2px", width: "clamp(200px,40%,480px)",
             background: "linear-gradient(to right, var(--brand-teal), var(--brand-red), transparent)",
-            margin: ".7rem 0 .9rem", opacity: 0,
+            margin: ".4rem 0 .8rem",
           }} />
 
-          <span ref={subtitleRef} style={{
+          <span style={{
             fontFamily: "var(--ff-display)",
             fontSize: "clamp(1.1rem,2vw,1.65rem)",
             color: "var(--ink-60)", display: "block",
-            opacity: 0,
           }}>
             {t("subtitle")}
           </span>
@@ -533,8 +397,8 @@ export default function FlexoStrip() {
           ))}
         </div>
 
-        {/* ── Cards Grid ── */}
-        <div className="fls-grid" ref={gridRef}>
+        {/* ── Desktop Cards Grid ── */}
+        <div className="fls-grid">
           {filteredModels.map((m, i) => (
             <TransitionLink
               key={m.slug}
@@ -546,29 +410,63 @@ export default function FlexoStrip() {
               <div className="fls-card__photo">
                 {m.hot && <span className="fls-card__badge fls-card__badge--hot">{t("hotBadge")}</span>}
                 {m.flagship && <span className="fls-card__badge fls-card__badge--flagship">{t("flagshipBadge")}</span>}
-                <Image src={m.img} alt={m.label} fill sizes="(max-width: 700px) 100vw, 33vw" loading="lazy" />
+                <Image src={m.img} alt={m.label} fill sizes="(max-width:700px) 100vw, 33vw" loading="lazy" />
               </div>
               <div className="fls-card__body">
                 <span className="fls-card__num">{String(i + 1).padStart(2, "0")}</span>
                 <h3 className="fls-card__name">{m.label}</h3>
                 <p className="fls-card__tag">{m.tag}</p>
-
-                <div className="fls-card__specs" aria-hidden="true">
-                  <div className="fls-card__spec-row">
-                    <span className="fls-card__spec-label">{t("speedLabel")}</span>
-                    <span className="fls-card__spec-value">{m.speed}<span className="fls-card__spec-unit">m/min</span></span>
-                  </div>
-                  <div className="fls-card__spec-row">
-                    <span className="fls-card__spec-label">{t("registrationLabel")}</span>
-                    <span className="fls-card__spec-value">{m.reg}</span>
-                  </div>
-                  <div className="fls-card__spec-row">
-                    <span className="fls-card__spec-label">AI · {t("colourLabel")}</span>
-                    <span className="fls-card__spec-value">{m.colours}</span>
-                  </div>
-                </div>
               </div>
             </TransitionLink>
+          ))}
+        </div>
+
+        {/* ── Mobile Horizontal Swipe Slider ── */}
+        <div
+          className="fls-slider"
+          ref={sliderRef}
+          onScroll={() => {
+            if (!sliderRef.current) return;
+            const el = sliderRef.current;
+            const idx = Math.round(el.scrollLeft / (el.scrollWidth / filteredModels.length));
+            setSliderIdx(idx);
+          }}
+        >
+          {filteredModels.map((m, i) => (
+            <TransitionLink
+              key={m.slug}
+              href={`/products/printing/${m.slug}`}
+              prefetch={false}
+              className="fls-card"
+              aria-label={`${m.label} — ${t("viewFullSpec")}`}
+            >
+              <div className="fls-card__photo">
+                {m.hot && <span className="fls-card__badge fls-card__badge--hot">{t("hotBadge")}</span>}
+                {m.flagship && <span className="fls-card__badge fls-card__badge--flagship">{t("flagshipBadge")}</span>}
+                <Image src={m.img} alt={m.label} fill sizes="80vw" loading="lazy" />
+              </div>
+              <div className="fls-card__body">
+                <span className="fls-card__num">{String(i + 1).padStart(2, "0")}</span>
+                <h3 className="fls-card__name">{m.label}</h3>
+                <p className="fls-card__tag">{m.tag}</p>
+              </div>
+            </TransitionLink>
+          ))}
+        </div>
+
+        {/* Slider dots — mobile only */}
+        <div className="fls-slider-dots">
+          {filteredModels.map((_, i) => (
+            <button
+              key={i}
+              className={`fls-slider-dot${i === sliderIdx ? " fls-slider-dot--active" : ""}`}
+              aria-label={`Go to slide ${i + 1}`}
+              onClick={() => {
+                setSliderIdx(i);
+                const card = sliderRef.current?.children[i] as HTMLElement;
+                card?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+              }}
+            />
           ))}
         </div>
 
@@ -577,14 +475,13 @@ export default function FlexoStrip() {
         </div>
 
         {/* ── Bottom spec strip ── */}
-        <div ref={stripRef} className="fls-strip" style={{
+        <div style={{
           marginTop: "clamp(2.5rem,5vw,4rem)", padding: "1.25rem 1.5rem",
           border: "1px solid var(--line)",
           borderTop: "2px solid var(--brand-teal)",
           borderRadius: "10px",
           display: "flex", alignItems: "center",
           justifyContent: "space-between", flexWrap: "wrap", gap: "1.5rem",
-          opacity: 0,
         }}>
           <div style={{ display: "flex", gap: "clamp(1.5rem,3vw,3rem)", flexWrap: "wrap" }}>
             {SPECS.map(kv => (
@@ -600,4 +497,3 @@ export default function FlexoStrip() {
     </section>
   );
 }
-

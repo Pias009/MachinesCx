@@ -137,37 +137,41 @@ export default function SiteNav() {
         /* ── Logo ── */
         .sn__logo {
           font-family: var(--ff-display);
-          font-size: 1.45rem; letter-spacing: 0.05em;
-          font-weight: 800;
+          font-size: 1.75rem; letter-spacing: 0.05em;
+          font-weight: 900;
           color: #fff; text-decoration: none;
-          display: flex; align-items: center; gap: .65rem;
+          display: flex; align-items: center; gap: .75rem;
           flex: 0 0 auto;
-          height: 44px;
+          height: 48px;
           position: relative;
           min-width: max-content;
           perspective: 400px;
         }
         .sn__logo-img {
-          height: 40px; width: auto; display: block;
-          border-radius: 6px; object-fit: contain;
+          height: 44px; width: auto; display: block;
+          border-radius: 8px; object-fit: contain;
           flex-shrink: 0;
         }
         .sn__logo-text {
           position: relative;
-          height: 32px; overflow: hidden;
+          height: 40px; overflow: hidden;
           display: flex; align-items: center;
+          font-size: 1.75rem; font-weight: 900;
+          letter-spacing: 0.04em;
         }
         .sn__logo-word {
           display: inline-flex; white-space: nowrap;
           transform-origin: 50% 0%;
           will-change: transform, opacity, filter;
+          font-weight: 900;
         }
-        .sn__logo-word em { color: var(--brand-red); font-style: normal; margin-right: 0.28em; }
+        .sn__logo-word em { color: var(--brand-red); font-style: normal; margin-right: 0.28em; font-weight: 900; }
 
         .sn__logo-word--hold { transform: translateY(0); opacity: 1; }
 
         @media(max-width:480px){
-          .sn__logo-text { display: none; }
+          .sn__logo-text { display: flex; font-size: 1.15rem; height: 36px; }
+          .sn__logo-img { height: 38px; }
         }
 
         /* ── Nav links — centered with equal space on both sides. ── */
@@ -514,10 +518,75 @@ export default function SiteNav() {
            1380px breakpoint above) — switch to the hamburger before that
            point is reached, not after, or content overlaps instead of
            collapsing into the mobile menu */
+        .sn__desktop-only {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+        }
+
         @media (max-width: 1024px) {
           .sn__links  { display: none; }
           .sn__burger { display: flex; }
+          .sn__desktop-only { display: none !important; }
+
+          .sn__logo {
+            position: relative;
+            display: flex;
+            align-items: center;
+            overflow: visible;
+          }
+
+          .sn__logo-img {
+            will-change: transform;
+            animation: mobileLogoRoll 7s cubic-bezier(0.45, 0, 0.15, 1) infinite;
+            border-radius: 8px;
+          }
+
+          .sn__logo-text {
+            display: flex !important;
+            align-items: center;
+            font-size: 1.25rem !important;
+            font-weight: 900 !important;
+            height: 38px;
+            will-change: opacity, transform;
+            animation: mobileLogoTextReveal 7s cubic-bezier(0.45, 0, 0.15, 1) infinite;
+          }
         }
+
+        @keyframes mobileLogoRoll {
+          0%, 28% {
+            transform: translateX(0) rotate(0deg);
+          }
+          48%, 62% {
+            transform: translateX(clamp(150px, 52vw, 230px)) rotate(540deg);
+          }
+          78%, 100% {
+            transform: translateX(0) rotate(0deg);
+          }
+        }
+
+        @keyframes mobileLogoTextReveal {
+          0%, 26% {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+          }
+          34%, 64% {
+            opacity: 0;
+            transform: translateX(-12px) scale(0.92);
+          }
+          76%, 100% {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .sn__logo-img,
+          .sn__logo-text {
+            animation: none !important;
+          }
+        }
+
         @media (max-width: 640px) {
           .sn__cta    { display: none; }
         }
@@ -614,8 +683,10 @@ export default function SiteNav() {
           </div>
 
           <div className="sn__actions">
-            <RollingNavMenu />
-            <LanguageSwitcher />
+            <div className="sn__desktop-only">
+              <RollingNavMenu />
+              <LanguageSwitcher />
+            </div>
             <ThemeToggle />
             <TransitionLink href="/inquiries" className="sn__cta">{t("getQuote")}</TransitionLink>
 

@@ -77,6 +77,9 @@ export default function PrintingShowcase() {
   const pageRef  = useRef<HTMLDivElement>(null);
   const dirRef   = useRef<"next" | "prev">("next");
   const prevActiveRef = useRef(0);
+  // Touch swipe support
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   // ── "Press Warm-Up" scroll-in — GSAP + ScrollTrigger, fires once ──
   // Animates a dedicated wrapper div per carousel item (never the role()-
@@ -286,6 +289,24 @@ export default function PrintingShowcase() {
     return () => window.removeEventListener("keydown", onKey);
   }, [navigate]);
 
+  // Touch swipe handlers
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    // Only treat as horizontal swipe if horizontal movement dominates
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      navigate(dx < 0 ? "next" : "prev");
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  }, [navigate]);
+
   const m    = MACHINES[active];
   const ease = "cubic-bezier(0.4,0,0.2,1)";
   const tr   = (props: string) => props.split(",").map(p => `${p.trim()} ${DURATION}ms ${ease}`).join(", ");
@@ -350,14 +371,19 @@ export default function PrintingShowcase() {
   if (!mounted) return null;
 
   return (
-    <section ref={sectionElRef} data-ps data-no-anim style={{
-      backgroundColor: "var(--bg-base)",
-      fontFamily:      "var(--ff-body)",
-      position:        "relative",
-      width:           "100%",
-      overflow:        "hidden",
-      borderTop:       "1px solid rgba(255,255,255,0.06)",
-    }}>
+    <section
+      ref={sectionElRef}
+      data-ps data-no-anim
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      style={{
+        backgroundColor: "var(--bg-base)",
+        fontFamily:      "var(--ff-body)",
+        position:        "relative",
+        width:           "100%",
+        overflow:        "hidden",
+        borderTop:       "1px solid rgba(255,255,255,0.06)",
+      }}>
       <div style={{ position: "relative", width: "100%", height: isMobile ? "52vh" : "100vh", overflow: "hidden" }}>
 
         {/* ── Accent floor glow behind machines ── */}
@@ -749,13 +775,13 @@ export default function PrintingShowcase() {
             <ArrowRight size={14} strokeWidth={2} />
           </TransitionLink>
 
-          {/* mobile: compact column cards / desktop: dot indicators */}
+          {/* mobile: swipe-hint dots / desktop: elongated dot indicators */}
           {isMobile ? (
             <div style={{
-              display: "flex", flexDirection: "column",
-              gap: "0.35rem", marginTop: "0.75rem",
+              display: "flex", justifyContent: "flex-end",
+              gap: "0.3rem", marginTop: "0.75rem", alignItems: "center",
             }}>
-              {MACHINES.map((mac, i) => (
+              {MACHINES.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => {
@@ -763,48 +789,15 @@ export default function PrintingShowcase() {
                     setAnimating(true); setActive(i);
                     setTimeout(() => setAnimating(false), DURATION);
                   }}
-                  className={`ps-col-card${i === active ? " ps-col-card--active" : ""}`}
+                  aria-label={`Go to machine ${i + 1}`}
                   style={{
-                    display: "flex", alignItems: "center", gap: "0.6rem",
-                    padding: "0.4rem 0.6rem",
-                    background: i === active ? "rgba(43,191,179,0.1)" : "rgba(255,255,255,0.03)",
-                    border: `1px solid ${i === active ? "rgba(43,191,179,0.4)" : "rgba(255,255,255,0.07)"}`,
-                    borderTop: `2px solid ${i === active ? "var(--brand-teal)" : "transparent"}`,
-                    cursor: "pointer", textAlign: "left",
-                    transition: `background ${DURATION}ms ${ease}, border-color ${DURATION}ms ${ease}`,
+                    width: i === active ? 22 : 7,
+                    height: 7, borderRadius: 4,
+                    background: i === active ? m.accent : "rgba(255,255,255,0.28)",
+                    border: "none", cursor: "pointer", padding: 0,
+                    transition: `width ${DURATION}ms ${ease}, background ${DURATION}ms ${ease}`,
                   }}
-                >
-                  <span className="ps-col-num" style={{
-                    fontFamily: "var(--ff-mono)", fontSize: "0.62rem",
-                    letterSpacing: "0.14em", textTransform: "uppercase",
-                    color: i === active ? "var(--brand-teal)" : "rgba(255,255,255,0.55)",
-                    display: "block", minWidth: 28,
-                    transition: `color ${DURATION}ms ${ease}`,
-                  }}>
-                    {String(i + 1).padStart(2,"0")}
-                  </span>
-                  <span style={{
-                    fontFamily: "var(--ff-display)", fontSize: "0.75rem",
-                    color: i === active ? "#fff" : "rgba(255,255,255,0.65)",
-                    letterSpacing: "0.02em", textTransform: "uppercase",
-                    transition: `color ${DURATION}ms ${ease}`,
-                  }}>
-                    {mac.model}
-                  </span>
-                  {mac.hot && (
-                    <span style={{
-                      width: 5, height: 5, borderRadius: "50%",
-                      background: "var(--brand-rose)", flexShrink: 0,
-                    }} aria-label={t("hotModel")} />
-                  )}
-                  <span style={{
-                    fontFamily: "var(--ff-mono)", fontSize: "0.62rem",
-                    color: "rgba(255,255,255,0.6)", letterSpacing: "0.1em",
-                    marginLeft: "auto", textTransform: "uppercase",
-                  }}>
-                    {mac.series.split(" ")[0]}
-                  </span>
-                </button>
+                />
               ))}
             </div>
           ) : (

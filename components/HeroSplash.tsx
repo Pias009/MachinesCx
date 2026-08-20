@@ -85,8 +85,6 @@ interface HeroCms {
 const localFamilies = (localProducts as { families: ProductFamily[] }).families;
 
 function familyImage(f: Pick<ProductFamily, "slug" | "image" | "images">): string {
-  if (f.images && f.images.length > 0) return f.images[0];
-  if (f.image) return f.image;
   return `/machines/${f.slug}.png`;
 }
 
@@ -579,95 +577,98 @@ export default function HeroSplash() {
 
         .hs__node-card {
           position: relative;
-          display: block;
+          display: flex;
+          flex-direction: column;
           aspect-ratio: 4 / 5;
           border-radius: 14px;
           overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.1);
-          background: #0d1614;
+          border: 1px solid rgba(255,255,255,0.18);
+          background: radial-gradient(circle at 50% 35%, rgba(43, 191, 179, 0.35) 0%, rgba(12, 22, 20, 0.98) 75%), #0d1614;
           box-shadow: 0 28px 60px -26px rgba(0,0,0,0.85);
           transition: transform .3s cubic-bezier(.2,.7,.2,1), box-shadow .3s, border-color .3s;
           text-decoration: none;
         }
         .hs__node-card:hover {
           transform: translateY(-8px) scale(1.03);
-          border-color: rgba(43,191,179,0.6);
-          box-shadow: 0 34px 70px -22px rgba(0,0,0,0.9), 0 0 40px -6px rgba(43,191,179,0.35);
+          border-color: rgba(43,191,179,0.7);
+          box-shadow: 0 34px 70px -22px rgba(0,0,0,0.9), 0 0 40px -6px rgba(43,191,179,0.45);
         }
+
+        .hs__node-img-wrap {
+          position: relative;
+          width: 100%;
+          flex: 1 1 auto;
+          min-height: 0;
+        }
+
         .hs__node-img {
-          position: absolute; inset: 0;
-          width: 100%; height: 100%;
-          /* Product photos are studio shots on a near-white background with
-             generous padding around the machine — object-fit:cover cropped
-             into that padding at the card's small size (~60-80px on
-             mobile), so the machine's thin structural lines became nearly
-             invisible and the card read as a blank box. contain shows the
-             full machine against .hs__node-card's dark background instead,
-             which also gives the white-background photos real contrast. */
           object-fit: contain;
           padding: 6%;
+          filter: drop-shadow(0 6px 14px rgba(0,0,0,0.7));
           transition: transform .5s cubic-bezier(.2,.7,.2,1);
         }
         .hs__node-card:hover .hs__node-img { transform: scale(1.08); }
-        .hs__node-shade {
-          position: absolute; inset: 0;
-          background: linear-gradient(to top, rgba(5,10,9,0.55) 0%, transparent 55%);
-          pointer-events: none;
-        }
 
-        /* liquid glass caption strip — was a flat gradient scrim; a real
-           frosted panel reads as "glass floating over the photo" instead
-           of a dark fade, and still keeps the series/name legible over
-           any product image without hiding the photo itself. */
+        /* liquid glass caption strip */
         .hs__node-meta {
-          position: absolute; left: 0; right: 0; bottom: 0;
-          padding: .7rem .8rem;
+          position: relative;
+          width: 100%;
+          flex: 0 0 auto;
+          padding: .45rem .6rem .55rem;
           text-align: left;
-          background: var(--glass-bg);
-          -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
-                  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
-          border-top: 1px solid var(--glass-highlight);
+          background: rgba(8, 14, 13, 0.92);
+          -webkit-backdrop-filter: blur(12px) saturate(1.5);
+                  backdrop-filter: blur(12px) saturate(1.5);
+          border-top: 1px solid rgba(255,255,255,0.12);
+          z-index: 3;
         }
         .hs__node-series {
-          font-family: var(--ff-mono); font-size: .58rem;
-          letter-spacing: .14em; text-transform: uppercase;
-          color: var(--brand-teal); margin-bottom: .2rem;
+          display: block;
+          font-family: var(--ff-mono); font-size: .55rem;
+          font-weight: 700;
+          letter-spacing: .08em; text-transform: uppercase;
+          color: var(--brand-teal);
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+          margin-bottom: .12rem;
         }
         .hs__node-name {
-          font-family: var(--ff-display); font-size: .8rem;
-          line-height: 1.15; color: #f8fafc;
-          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-          overflow: hidden;
+          display: block;
+          font-family: var(--ff-display); font-size: .74rem;
+          font-weight: 700;
+          line-height: 1.15; color: #ffffff;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
         @media(prefers-reduced-motion:reduce){
           .hs__canvas { display: none; }
         }
 
-        /* ── responsive: same half-circle arch, scaled down — the nodes
-           keep their absolute left/top % positions from the ARCH array
-           (set inline per-node), so the curve shape is identical to
-           desktop, just smaller ── */
+        /* ── responsive: same half-circle arch, scaled down ── */
         @media(max-width: 900px){
           .hs { min-height: auto; }
-          /* the dot/line network is dense relative to a narrow viewport and
-             clutters the headline — fade it down instead of showing it full
-             strength like on desktop, where it has room to breathe */
           .hs__canvas { opacity: .18; }
           .hs__arch {
-            min-height: clamp(220px, 62vw, 340px);
-            padding: 0 0.5rem 2rem;
+            min-height: clamp(260px, 75vw, 380px);
+            padding: 0 0.5rem 1.5rem;
+            margin-bottom: 0.5rem;
           }
-          /* smaller cards so the 8%/29%/50%/71%/92% arch positions don't
-             overlap on a narrow viewport — the base clamp() floor (118px)
-             is desktop-sized, so this needs !important to win over the
-             inline width set per-node from the ARCH array. ~21vw at the
-             apex (scale 1) matches the ~21% gap between arch positions,
-             so adjacent cards touch edge-to-edge instead of overlapping */
-          .hs__node { width: calc(21vw * var(--hs-node-scale, 1)) !important; }
-          .hs__node-meta { padding: .5rem .55rem; }
-          .hs__node-series { font-size: .5rem; }
-          .hs__node-name { font-size: .66rem; -webkit-line-clamp: 1; }
+          .hs__node { width: calc(22vw * var(--hs-node-scale, 1)) !important; }
+          .hs__node-meta { padding: .35rem .45rem .4rem; }
+          .hs__node-series { font-size: .46rem; margin-bottom: .05rem; }
+          .hs__node-name { font-size: .62rem; }
+
+          /* Elevate arch cards on mobile view so bottom dip cards stay fully inside viewport */
+          .hs__arch .hs__node:nth-child(2),
+          .hs__arch .hs__node:nth-child(6) {
+            top: 44% !important;
+          }
+          .hs__arch .hs__node:nth-child(3),
+          .hs__arch .hs__node:nth-child(5) {
+            top: 26% !important;
+          }
+          .hs__arch .hs__node:nth-child(4) {
+            top: 14% !important;
+          }
         }
         @media(max-width:640px){
           .hs__main { padding: clamp(5.5rem, 14vh, 7rem) 1.25rem 1.25rem; }
@@ -779,16 +780,17 @@ export default function HeroSplash() {
                     className="hs__node-card"
                     aria-label={f.name}
                   >
-                    <Image
-                      src={familyImage(f)}
-                      alt={f.name}
-                      fill
-                      sizes="(max-width: 900px) 21vw, 205px"
-                      className="hs__node-img"
-                      priority={i === 2}
-                      loading={i === 2 ? undefined : "lazy"}
-                    />
-                    <span className="hs__node-shade" aria-hidden="true" />
+                    <div className="hs__node-img-wrap">
+                      <Image
+                        src={familyImage(f)}
+                        alt={f.name}
+                        fill
+                        sizes="(max-width: 900px) 25vw, 220px"
+                        className="hs__node-img"
+                        priority={i === 2}
+                        loading={i === 2 ? undefined : "lazy"}
+                      />
+                    </div>
                     <span className="hs__node-meta">
                       <span className="hs__node-series">{f.series}</span>
                       <span className="hs__node-name">{f.name}</span>

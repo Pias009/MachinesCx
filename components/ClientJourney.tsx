@@ -95,14 +95,14 @@ type StepCopy = { label: string; tagline: string; desc: string; metric1v: string
 
 function rectPosition(index: number) {
   const POSITIONS = [
-    { left: "26%", top: "0%" },   // 0: Inquiry (Top-Left)
-    { left: "74%", top: "0%" },   // 1: Quotation (Top-Right)
-    { left: "100%", top: "28%" }, // 2: Order (Right-Top)
-    { left: "100%", top: "72%" }, // 3: Manufacturing (Right-Bottom)
-    { left: "74%", top: "100%" }, // 4: Delivery (Bottom-Right)
-    { left: "26%", top: "100%" }, // 5: Commissioning (Bottom-Left)
-    { left: "0%", top: "72%" },   // 6: Training (Left-Bottom)
-    { left: "0%", top: "28%" },   // 7: Aftersales (Left-Top)
+    { left: "26%", top: "4.5%" },   // 0: Inquiry (Top-Left)
+    { left: "74%", top: "4.5%" },   // 1: Quotation (Top-Right)
+    { left: "97.7%", top: "28%" },  // 2: Order (Right-Top)
+    { left: "97.7%", top: "72%" },  // 3: Manufacturing (Right-Bottom)
+    { left: "74%", top: "95.5%" },  // 4: Delivery (Bottom-Right)
+    { left: "26%", top: "95.5%" },  // 5: Commissioning (Bottom-Left)
+    { left: "2.3%", top: "72%" },   // 6: Training (Left-Bottom)
+    { left: "2.3%", top: "28%" },   // 7: Aftersales (Left-Top)
   ];
   return POSITIONS[index % POSITIONS.length];
 }
@@ -658,16 +658,25 @@ export default function ClientJourney() {
         }
 
         @media (max-width: 768px) {
-          .cj__ring { width: min(480px, 90vw); height: 360px; }
-          .cj__ring-icon-pos { width: 84px; height: 72px; }
-          .cj__ring-icon-badge { width: 46px; height: 46px; }
-          .cj__ring-icon-badge svg { width: 24px; height: 24px; }
-          .cj__ring-icon-label { font-size: .56rem; }
-          .cj__popup { width: 230px; padding: .7rem .8rem; }
-          .cj__popup-text { font-size: .74rem; }
+          .cj__wrap { padding-inline: 0.5rem; }
+          .cj__ring-wrap { padding-inline: 46px; padding-block: 1.5rem; }
+          .cj__ring { width: 100%; max-width: 480px; height: 350px; }
+          .cj__ring-icon-pos { width: 80px; height: 70px; }
+          .cj__ring-icon-badge { width: 44px; height: 44px; }
+          .cj__ring-icon-badge svg { width: 22px; height: 22px; }
+          .cj__ring-icon-label { font-size: .52rem; letter-spacing: 0.02em; }
+          .cj__popup { width: 220px; padding: .65rem .75rem; }
+          .cj__popup-text { font-size: .72rem; }
         }
         @media (max-width: 480px) {
-          .cj__ring { width: 92vw; height: 340px; }
+          .cj__ring-wrap { padding-inline: 38px; padding-block: 1rem; }
+          .cj__ring { width: 100%; height: 320px; }
+          .cj__ring-icon-pos { width: 72px; height: 64px; }
+          .cj__ring-icon-badge { width: 38px; height: 38px; border-radius: 10px; }
+          .cj__ring-icon-badge svg { width: 18px; height: 18px; }
+          .cj__ring-icon-label { font-size: .48rem; letter-spacing: 0; }
+          .cj__ring-center-value { font-size: 1.1rem; }
+          .cj__ring-center-label { font-size: .58rem; }
           .cj__popup { display: none; }
         }
 

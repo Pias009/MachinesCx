@@ -14,9 +14,11 @@ import CustomSections from "@/components/CustomSections";
 import MachineParts from "@/components/MachineParts";
 import ProductStage3D from "@/components/ProductStage3D";
 import MachineSeoSection from "@/components/MachineSeoSection";
+import VideoFacade from "@/components/VideoFacade";
 import { Grain, PlusMark, SectionHead, SubHead } from "@/components/EditorialKit";
 import type { ProductFamily, Category, DeliveryPhase, SetupStep } from "@/lib/products";
 import { familyImage, familyImages, parseYouTubeId, stagePhotos, BRAND } from "@/lib/products";
+import type { Article, MachineVideo } from "@/lib/machinesData";
 
 const MachineDiagram = dynamic(() => import("@/components/MachineDiagram"), { ssr: false });
 
@@ -24,6 +26,8 @@ interface Props {
   family: ProductFamily;
   category: Category;
   related: ProductFamily[];
+  relatedArticles?: Article[];
+  machineVideo?: MachineVideo;
 }
 
 /* ── fixed 3-stage delivery proof boxes — packing / freight / install.
@@ -366,6 +370,25 @@ function InquiryButton({ slug, name }: { slug: string; name: string }) {
   );
 }
 
+function DatasheetButton({ slug }: { slug: string }) {
+  return (
+    <a
+      href={`/api/datasheet/${slug}?print=1`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 rounded-xl border border-[var(--brand-teal)]/40 bg-[var(--brand-teal)]/10 px-4 py-2.5 font-mono text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[var(--brand-teal)] transition-all hover:bg-[var(--brand-teal)] hover:text-black"
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="12" y1="18" x2="12" y2="12" />
+        <polyline points="9 15 12 18 15 15" />
+      </svg>
+      <span>Download Datasheet (PDF)</span>
+    </a>
+  );
+}
+
 /* reveal-once-on-scroll flag, same pattern as the bar/hbar charts on the
    About page — used to gate animated fills so they grow into view instead
    of snapping to their final width on mount. */
@@ -459,7 +482,7 @@ function SpecCompareChart({
 const TABS = ["details", "sample", "packing"] as const;
 type TabKey = (typeof TABS)[number];
 
-export default function ProductDetail({ family, category, related }: Props) {
+export default function ProductDetail({ family, category, related, relatedArticles = [], machineVideo }: Props) {
   const t = useTranslations("productDetail");
   const [activeModel,  setActiveModel]  = useState(0);
   const [activeVideo,  setActiveVideo]  = useState(0);
@@ -675,6 +698,7 @@ export default function ProductDetail({ family, category, related }: Props) {
         )}
         <div className="flex flex-wrap items-center gap-4">
           <InquiryButton slug={family.slug} name={family.name} />
+          <DatasheetButton slug={family.slug} />
           <Link href={`/products/${category.slug}`} className="font-mono text-[0.7rem] uppercase tracking-[0.12em] text-white/60 underline decoration-transparent underline-offset-4 transition-colors hover:text-[var(--brand-teal)] hover:decoration-[var(--brand-teal)]">
             {t("backToCategory", { category: category.name })}
           </Link>
@@ -944,6 +968,9 @@ export default function ProductDetail({ family, category, related }: Props) {
                 family={family}
                 category={category.slug}
               />
+
+              {/* ── Factory Demonstration Video Façade ── */}
+              {machineVideo && <VideoFacade video={machineVideo} />}
 
               {/* ── 700 to 1000 Word SEO / GEO / AEO Technical Deep-Dive & Overview ── */}
               <MachineSeoSection seoData={family.seoData} machineName={family.name} />
@@ -1281,6 +1308,54 @@ export default function ProductDetail({ family, category, related }: Props) {
           </div>
         )}
       </section>
+
+      {/* ══════════════════════════════════════════════════
+          FEATURED TECHNICAL GUIDES & ENGINEERING INSIGHTS
+      ══════════════════════════════════════════════════ */}
+      {relatedArticles.length > 0 && (
+        <section className="border-t border-b border-[var(--bg-line)] bg-[var(--bg-surface)] py-16 sm:py-20" aria-label="Featured Technical Guides">
+          <div className="mx-auto max-w-[1280px] px-6 sm:px-10">
+            <SectionHead
+              eyebrow="Engineering Insights & Deep Dives"
+              title={
+                <>
+                  Featured <em className="text-[var(--brand-teal)] not-italic">Technical Guides</em> & Specs
+                </>
+              }
+            />
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-reveal>
+              {relatedArticles.map((art) => (
+                <Link
+                  key={art.slug}
+                  href={`/news/${art.slug}`}
+                  className="group flex flex-col rounded-xl border border-[var(--bg-line)] bg-[var(--bg-base)] p-6 transition-all duration-200 hover:-translate-y-1 hover:border-[var(--brand-teal)]/50 hover:shadow-xl"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[var(--brand-teal)] bg-[var(--brand-teal-glow)] px-2.5 py-1 rounded-md font-semibold">
+                      {art.category}
+                    </span>
+                    {art.readTime && (
+                      <span className="font-mono text-[0.65rem] text-[var(--ink-35)]">
+                        {art.readTime}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-display text-[1.15rem] leading-snug text-[var(--ink)] group-hover:text-[var(--brand-teal)] transition-colors mb-2 font-bold">
+                    {art.title}
+                  </h3>
+                  <p className="text-[0.85rem] text-[var(--ink-60)] leading-relaxed mb-6 flex-1 line-clamp-3">
+                    {art.summary || art.excerpt || art.metaDescription}
+                  </p>
+                  <div className="flex items-center gap-1 font-mono text-[0.72rem] uppercase tracking-[0.1em] text-[var(--brand-teal)] font-semibold group-hover:translate-x-1 transition-transform">
+                    <span>Read Engineering Guide</span>
+                    <span>→</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ══════════════════════════════════════════════════
           RELATED MACHINES

@@ -3,25 +3,33 @@ import FlexoPrintingPage from "@/components/FlexoPrintingPage";
 import { categories, type CategorySlug } from "@/lib/products";
 import { getLiveCatalogue } from "@/lib/liveCatalogue";
 import { pageMetadata } from "@/lib/seo";
+import { getMachineCategories, getMachineCategoryBySlug, getMachineProductsByCategory } from "@/lib/machinesData";
 import CategoryPageClient from "./CategoryPageClient";
 
 export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
-  return categories.map((c) => ({ category: c.slug }));
+  const legacyCatParams = categories.map((c) => ({ category: c.slug }));
+  const machineCatParams = getMachineCategories().map((c) => ({ category: c.slug }));
+  return [...legacyCatParams, ...machineCatParams];
 }
 
 export async function generateMetadata({ params }: { params: { locale: string; category: string } }) {
   const { locale, category } = params;
   const { categories: liveCategories } = await getLiveCatalogue();
   const c = liveCategories.find((x) => x.slug === category);
-  if (!c) return { title: "Catalogue — Ashal Innomech" };
+  const mCat = getMachineCategoryBySlug(category);
+
+  if (!c && !mCat) return { title: "Catalogue — Ashal Innomech" };
+
+  const title = mCat?.metaTitle || `${c?.name || mCat?.name} — Ashal Innomech`;
+  const description = mCat?.metaDescription || c?.blurb || "";
 
   return pageMetadata({
     locale,
     path: `/products/${category}`,
-    title: `${c.name} — Ashal Innomech`,
-    description: c.blurb,
+    title,
+    description,
   });
 }
 
@@ -29,15 +37,27 @@ export default async function CategoryPage({ params }: { params: { category: str
   const { categories: liveCategories, families: liveFamilies } = await getLiveCatalogue();
 
   const cat = liveCategories.find((c) => c.slug === params.category);
-  if (!cat) notFound();
+  const mCat = getMachineCategoryBySlug(params.category);
 
-  if (cat.slug === "printing") return <FlexoPrintingPage />;
+  if (!cat && !mCat) notFound();
 
-  const fams = liveFamilies.filter((f) => f.category === (cat.slug as CategorySlug));
+  if (params.category === "printing" || params.category === "flexo-printing-machines") {
+    return <FlexoPrintingPage />;
+  }
+
+  const fams = liveFamilies.filter((f) => f.category === (params.category as CategorySlug));
+
+  // Construct fallback Category object if only found in machines.json
+  const currentCategory = cat || {
+    slug: mCat!.slug as CategorySlug,
+    name: mCat!.name,
+    tagline: mCat!.metaTitle,
+    blurb: mCat!.metaDescription,
+  };
 
   return (
     <CategoryPageClient
-      category={cat}
+      category={currentCategory}
       families={fams}
       allCategories={liveCategories}
     />

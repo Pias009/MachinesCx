@@ -1,48 +1,111 @@
 import { notFound } from "next/navigation";
-import { families, SITE_URL, BRAND, familyImage, type CategorySlug } from "@/lib/products";
+import { families, SITE_URL, BRAND, familyImage, type CategorySlug, type ProductFamily, type Category } from "@/lib/products";
 import { getLiveCatalogue } from "@/lib/liveCatalogue";
 import { pageMetadata, localePath } from "@/lib/seo";
+import { getMachineProducts, getMachineProductBySlug, getMachineCategoryBySlug, getRelatedArticlesForMachine } from "@/lib/machinesData";
 import JsonLd from "@/components/JsonLd";
 import ProductDetail from "./ProductDetail";
 
 export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
-  return families.map((f) => ({ category: f.category, slug: f.slug }));
+  const legacyParams = families.map((f) => ({ category: f.category, slug: f.slug }));
+  const machineParams = getMachineProducts().map((p) => ({ category: p.category, slug: p.slug }));
+  return [...legacyParams, ...machineParams];
 }
 
 export async function generateMetadata({ params }: { params: { locale: string; category: string; slug: string } }) {
   const { locale, category, slug } = params;
   const { families: liveFamilies } = await getLiveCatalogue();
   const f = liveFamilies.find((x) => x.slug === slug);
-  if (!f) return { title: "Product — Wenzhou Ashal Innomech" };
+  const mProduct = getMachineProductBySlug(slug);
 
-  const metaTitle = f.seoData?.metaTitle || `${f.name} | Specs & Output | Ashal Machinery`;
-  const metaDesc = f.seoData?.metaDescription || [f.tagline, f.specs.slice(0, 2).map((s) => `${s.label} ${s.values[0]}`).join(" · ")].filter(Boolean).join(" — ").slice(0, 160);
+  if (!f && !mProduct) return { title: "Product — Wenzhou Ashal Innomech" };
+
+  const title = mProduct?.seoTitle || f?.seoData?.metaTitle || `${f?.name || mProduct?.name} | Specs & Output | Ashal Machinery`;
+  const description = mProduct?.metaDescription || f?.seoData?.metaDescription || [f?.tagline, f?.specs.slice(0, 2).map((s) => `${s.label} ${s.values[0]}`).join(" · ")].filter(Boolean).join(" — ").slice(0, 160);
 
   const meta = pageMetadata({
     locale,
     path: `/products/${category}/${slug}`,
-    title: metaTitle,
-    description: metaDesc,
-    image: f.images?.[0] ?? f.image,
+    title,
+    description,
+    image: f?.images?.[0] ?? f?.image,
   });
 
   return {
     ...meta,
-    keywords: f.seoData?.focusKeywords || [f.name, category, "machinery", BRAND],
+    keywords: f?.seoData?.focusKeywords || [
+      mProduct?.name || f?.name || "",
+      category,
+      "machinery",
+      BRAND,
+      "Wenzhou Ashal Innomach Technology Co., Ltd.",
+    ],
   };
 }
 
 export default async function ProductPage({ params }: { params: { locale: string; category: string; slug: string } }) {
-  const { categories, families: liveFamilies } = await getLiveCatalogue();
+  const { categories: liveCategories, families: liveFamilies } = await getLiveCatalogue();
 
-  const f   = liveFamilies.find((x) => x.slug === params.slug);
-  const cat = categories.find((c) => c.slug === params.category);
+  let f = liveFamilies.find((x) => x.slug === params.slug);
+  let cat = liveCategories.find((c) => c.slug === params.category);
+
+  const mProduct = getMachineProductBySlug(params.slug);
+  const mCat = getMachineCategoryBySlug(params.category);
+
+  if (!f && mProduct) {
+    // Map machine product from app/data/machines.json into ProductFamily format
+    const specRows = Object.entries(mProduct.specs).map(([label, val]) => ({
+      label,
+      values: [val],
+    }));
+
+    f = {
+      slug: mProduct.slug,
+      category: mProduct.category as CategorySlug,
+      series: mProduct.model,
+      name: mProduct.name,
+      tagline: mProduct.metaDescription,
+      models: [mProduct.model],
+      specs: specRows,
+      seoData: {
+        wordCount: 800,
+        overviewHeading: `Engineered Overview — ${mProduct.name}`,
+        metaTitle: mProduct.seoTitle,
+        metaDescription: mProduct.metaDescription,
+        focusKeywords: [mProduct.name, mProduct.model, mProduct.category, BRAND],
+        technicalArchitecture: `${mProduct.name} (Model: ${mProduct.model}) engineered by Wenzhou Ashal Innomach Technology Co., Ltd. Key features: ${mProduct.features.join("; ")}.`,
+        applicationsAndMaterials: Object.entries(mProduct.specs).map(([k, v]) => `${k}: ${v}`).join(", "),
+        targetIndustries: ["Plastic Packaging Manufacturing", "Industrial Extrusion & Converting"],
+        engineeringFeatures: mProduct.features.join(". "),
+        keyInnovations: mProduct.features.map((feat) => ({ title: "Key Feature", description: feat })),
+        utilityRequirements: mProduct.specs["Power Supply"] || "380V / 3PH / 50Hz",
+        maintenanceProtocol: "Standard factory maintenance protocol applies.",
+        faqs: (mProduct.faqs && mProduct.faqs.length > 0) ? mProduct.faqs : [
+          {
+            question: `What are the key specs of ${mProduct.name}?`,
+            answer: Object.entries(mProduct.specs).map(([k, v]) => `${k}: ${v}`).join(", "),
+          },
+        ],
+        commercialGuide: "Contact Wenzhou Ashal Innomach Technology Co., Ltd. for factory-direct quotes and commissioning support.",
+      },
+    };
+  }
+
+  if (!cat && mCat) {
+    cat = {
+      slug: mCat.slug as CategorySlug,
+      name: mCat.name,
+      tagline: mCat.metaTitle,
+      blurb: mCat.metaDescription,
+    };
+  }
+
   if (!f || !cat) notFound();
 
   const related = liveFamilies
-    .filter((r) => r.category === (f.category as CategorySlug) && r.slug !== f.slug)
+    .filter((r) => r.category === (f!.category as CategorySlug) && r.slug !== f!.slug)
     .slice(0, 4);
 
   const url = `${SITE_URL}${localePath(params.locale, `/products/${params.category}/${params.slug}`)}`;
@@ -56,15 +119,25 @@ export default async function ProductPage({ params }: { params: { locale: string
     url,
     image: image ? `${SITE_URL}${image}` : undefined,
     brand: { "@type": "Brand", name: BRAND, url: SITE_URL },
-    manufacturer: { "@type": "Organization", name: BRAND, url: SITE_URL },
+    manufacturer: {
+      "@type": "Organization",
+      name: "Wenzhou Ashal Innomach Technology Co., Ltd.",
+      url: SITE_URL,
+      email: "ashal@ashalinnomech.com",
+      telephone: "+86 159 8877 5831",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Wenzhou, Zhejiang",
+        addressCountry: "China",
+      },
+    },
     category: cat.name,
     model: f.models.join(", "),
     mpn: f.slug,
     sku: f.slug,
     offers: {
-      "@type": "AggregateOffer",
+      "@type": "Offer",
       priceCurrency: "USD",
-      priceValidUntil: "2027-12-31",
       availability: "https://schema.org/InStock",
       url,
       seller: { "@type": "Organization", name: BRAND, url: SITE_URL },
@@ -96,24 +169,31 @@ export default async function ProductPage({ params }: { params: { locale: string
     })),
   } : null;
 
-  const howToSchema = f.installation && f.installation.length > 0 ? {
+  const machineVideo = mProduct?.video;
+  const videoSchema = machineVideo ? {
     "@context": "https://schema.org",
-    "@type": "HowTo",
-    name: `How to Install and Setup ${f.name}`,
-    description: `Installation, electrical hookup, and commissioning procedure for ${f.name}.`,
-    step: f.installation.map((step, i) => ({
-      "@type": "HowToStep",
-      position: i + 1,
-      name: step.title,
-      text: step.detail,
-    })),
+    "@type": "VideoObject",
+    name: machineVideo.title,
+    description: machineVideo.description,
+    thumbnailUrl: machineVideo.thumbnailUrl,
+    uploadDate: machineVideo.uploadDate,
+    duration: machineVideo.duration,
+    contentUrl: `https://www.youtube.com/watch?v=${machineVideo.youtubeId}`,
+    embedUrl: `https://www.youtube-nocookie.com/embed/${machineVideo.youtubeId}`,
+    publisher: {
+      "@type": "Organization",
+      name: "Wenzhou Ashal Innomach Technology Co., Ltd.",
+      url: SITE_URL,
+    },
   } : null;
+
+  const relatedArticles = getRelatedArticlesForMachine(params.slug);
 
   return (
     <>
       <JsonLd data={productSchema} />
       {faqSchema && <JsonLd data={faqSchema} />}
-      {howToSchema && <JsonLd data={howToSchema} />}
+      {videoSchema && <JsonLd data={videoSchema} />}
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -125,7 +205,7 @@ export default async function ProductPage({ params }: { params: { locale: string
           ],
         }}
       />
-      <ProductDetail family={f} category={cat} related={related} />
+      <ProductDetail family={f} category={cat} related={related} relatedArticles={relatedArticles} machineVideo={machineVideo} />
     </>
   );
 }

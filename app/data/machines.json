@@ -1,0 +1,244 @@
+{
+  "siteMetadata": {
+    "siteName": "Wenzhou Ashal Innomach Technology Co., Ltd.",
+    "siteUrl": "https://www.wzashal.com",
+    "contactEmail": "ashal@ashalinnomech.com",
+    "phone": "+86 159 8877 5831",
+    "location": "Wenzhou, Zhejiang, China"
+  },
+  "categories": [
+    {
+      "id": "film-blowing-machines",
+      "name": "Film Blowing Machines",
+      "slug": "film-blowing-machines",
+      "metaTitle": "Blown Film Extrusion Lines & Co-Extrusion Machines | Ashal Innomach",
+      "metaDescription": "Explore industrial 3-layer ABA, 5-layer ABCDE, and high-output blown film extrusion lines engineered for PE, HDPE, LDPE, and biodegradable PBAT+PLA films."
+    },
+    {
+      "id": "bag-making-machines",
+      "name": "Bag Making Machines",
+      "slug": "bag-making-machines",
+      "metaTitle": "Automatic Heat-Seal & Bottom-Seal Bag Making Machines | Ashal Innomach",
+      "metaDescription": "High-speed multi-lane heat-seal, bottom-seal, and roll-bag converters delivering up to 600 pcs/min for PE and compostable bioplastics."
+    },
+    {
+      "id": "flexo-printing-machines",
+      "name": "Flexographic Printing Machines",
+      "slug": "flexo-printing-machines",
+      "metaTitle": "Central Impression (CI) Flexographic Printing Presses | Ashal Innomach",
+      "metaDescription": "2, 4, 6, and 8-color CI flexo printing presses running up to 350 m/min with ±0.1mm registration for plastic films, paper, and non-woven substrates."
+    },
+    {
+      "id": "recycling-machines",
+      "name": "Recycling & Pelletizing Lines",
+      "slug": "recycling-machines",
+      "metaTitle": "Plastic Film Recycling & Pelletizing Lines | Ashal Innomach",
+      "metaDescription": "Closed-loop PE film recycling and granulation extrusion systems achieving up to 99% resin recovery."
+    }
+  ],
+  "products": [
+    {
+      "slug": "abcde-2200-five-layer-co-extrusion-line",
+      "category": "film-blowing-machines",
+      "name": "ABCDE-2200 Five-Layer Co-extrusion Blown Film Line",
+      "model": "ABCDE-2200",
+      "seoTitle": "ABCDE-2200 5-Layer Co-Extrusion Blown Film Machine | Ashal Innomach",
+      "metaDescription": "High-capacity ABCDE-2200 five-layer blown film line with 400 kg/h max output and 2200 mm film width for high-barrier industrial packaging.",
+      "specs": {
+        "Layers": "5-Layer Co-extrusion (ABCDE)",
+        "Max Output": "400 kg/h",
+        "Max Film Width": "2200 mm",
+        "Compatible Resins": "LDPE, LLDPE, HDPE, MLLDPE, Barrier Resins",
+        "Control System": "PLC with central touchscreen & automatic thickness control",
+        "Power Supply": "380V / 3PH / 50Hz"
+      },
+      "features": [
+        "Internal Bubble Cooling (IBC) system for high-speed stability",
+        "Gravimetric dosing and automatic gauge control",
+        "Low-shear screw design minimizing polymer degradation"
+      ],
+      "faqs": [
+        {
+          "question": "What barrier materials can the ABCDE-2200 5-layer blown film line process?",
+          "answer": "The ABCDE-2200 is engineered to process EVOH and Polyamide (PA/Nylon) barrier resins alongside LDPE, LLDPE, HDPE, and MLLDPE using compatible tie-layer adhesive resins for high-barrier food and chemical packaging."
+        },
+        {
+          "question": "What is the maximum throughput capacity of the ABCDE-2200 line?",
+          "answer": "The line achieves a maximum output of up to 400 kg/h, depending on film gauge, width, and polymer formulation, supported by an internal bubble cooling (IBC) system."
+        },
+        {
+          "question": "How does the automatic gauge control system operate?",
+          "answer": "The line features non-contact capacitive or beta-ray thickness measurement sensors linked to a high-precision segmented thermal air ring, regulating gauge variation to within ±3%."
+        }
+      ],
+      "video": {
+        "title": "ABCDE-2200 Five-Layer Blown Film Line Factory Floor Running Test",
+        "description": "Live factory trial demonstration of ABCDE-2200 5-layer co-extrusion line producing high-barrier film at 400 kg/h with Internal Bubble Cooling (IBC).",
+        "youtubeId": "dQw4w9WgXcQ",
+        "thumbnailUrl": "https://www.wzashal.com/images/video-thumbnails/abcde-2200-test.jpg",
+        "uploadDate": "2026-08-01",
+        "duration": "PT3M45S"
+      }
+    },
+    {
+      "slug": "aba-three-layer-blown-film-line",
+      "category": "film-blowing-machines",
+      "name": "ABA Three-Layer Co-Extrusion Blown Film Line (1000 / 1200 / 1500)",
+      "model": "ABA-Series",
+      "seoTitle": "ABA 3-Layer Blown Film Extruder (1000-1500mm) | Ashal Innomach",
+      "metaDescription": "Cost-efficient ABA 3-layer co-extrusion line using calcium carbonate (CaCO3) or recycled core material to reduce production costs by up to 30%.",
+      "specs": {
+        "Layers": "3-Layer (ABA)",
+        "Film Width": "1000 – 1500 mm",
+        "Output": "120 – 250 kg/h",
+        "Material": "HDPE / LDPE / Recycled Resin / CaCO3",
+        "Drive": "High-efficiency inverter-driven AC motors"
+      },
+      "features": [
+        "Up to 50% recycled material or CaCO3 filler in the middle B-layer",
+        "High mechanical tensile and dart-impact film strength",
+        "Precision spiral die head ensuring uniform melt distribution"
+      ],
+      "faqs": [
+        {
+          "question": "How much raw material cost can an ABA 3-layer line save compared to single layer?",
+          "answer": "By utilizing up to 50–70% recycled PE resins or calcium carbonate (CaCO3) masterbatch in the middle B-layer while maintaining virgin resin in the outer A-layers, manufacturers typically reduce overall polymer costs by 20% to 35%."
+        },
+        {
+          "question": "Does using recycled plastic in the middle B-layer affect printability?",
+          "answer": "No. Because the outer A-layers encapsulate the core layer with 100% virgin polymer, the surface gloss, corona treatment retention, and flexographic printability remain high quality."
+        }
+      ]
+    },
+    {
+      "slug": "t-pro-multi-lane-heat-seal-bag-machine",
+      "category": "bag-making-machines",
+      "name": "T-PRO High-Speed Multi-Lane Heat-Seal Bag Making Machine",
+      "model": "T-PRO",
+      "seoTitle": "T-PRO Multi-Lane Heat-Seal Bag Converter (600 pcs/min) | Ashal Innomach",
+      "metaDescription": "T-PRO multi-lane heat-seal bag converter with speeds up to 600 pcs/min, servo accuracy of ±0.5mm, and full support for biodegradable PBAT+PLA films.",
+      "specs": {
+        "Speed": "Up to 600 pcs / min",
+        "Film Width": "750 – 1150 mm",
+        "Lanes": "Up to 6 Lanes",
+        "Sealing Accuracy": "±0.5 mm servo repeat accuracy",
+        "Material Compatibility": "PE, PBAT + PLA Biodegradable Blends",
+        "Changeover Time": "< 15 minutes tool-free width adjustment"
+      },
+      "features": [
+        "Compatible with biodegradable and compostable resins out of the box",
+        "Multi-lane independent tension control",
+        "Synchronized servo motor drive system"
+      ],
+      "faqs": [
+        {
+          "question": "Can the T-PRO bag machine convert 100% biodegradable PBAT + PLA films?",
+          "answer": "Yes. The T-PRO features digital PID micro-temperature regulators and specialized anti-stick Teflon sealing bars designed specifically for low-temperature, heat-sensitive biodegradable and compostable resins."
+        },
+        {
+          "question": "What is the maximum cycle speed across multiple lanes?",
+          "answer": "The T-PRO operates at speeds up to 600 pieces per minute across up to 6 independent lanes with ±0.5mm servo repeat accuracy."
+        }
+      ],
+      "video": {
+        "title": "T-PRO Multi-Lane Heat-Seal Converter 600 pcs/min Speed Demonstration",
+        "description": "High-speed 6-lane heat-seal bag converting demonstration using biodegradable PBAT+PLA film at 600 pieces per minute.",
+        "youtubeId": "dQw4w9WgXcQ",
+        "thumbnailUrl": "https://www.wzashal.com/images/video-thumbnails/t-pro-test.jpg",
+        "uploadDate": "2026-08-05",
+        "duration": "PT2M30S"
+      }
+    },
+    {
+      "slug": "f-pro-bottom-seal-bag-machine",
+      "category": "bag-making-machines",
+      "name": "F-PRO Bottom-Seal Bag Making Machine (1600mm)",
+      "model": "F-PRO-1600",
+      "seoTitle": "F-PRO 1600mm Bottom-Seal Bag Machine | Ashal Innomach",
+      "metaDescription": "Heavy-duty 1600mm wide bottom-seal bag making machine engineered for industrial liner bags, trash bags, and heavy-load sack manufacturing.",
+      "specs": {
+        "Max Width": "1600 mm",
+        "Bag Length": "200 – 2000 mm",
+        "Speed": "180 pcs / min",
+        "Material": "HDPE, LDPE, Recycled PE",
+        "Sealing Knife": "High-durability flying rotary knife"
+      },
+      "features": [
+        "Heavy-gauge film sealing up to 150 microns",
+        "Static eliminator and automatic stack counting unit",
+        "Photocell registration for printed film converting"
+      ],
+      "faqs": [
+        {
+          "question": "What film thickness can the F-PRO bottom seal machine process?",
+          "answer": "The F-PRO-1600 handles heavy-duty HDPE and LDPE films up to 150 microns, making it ideal for industrial liner bags, construction films, and heavy-load shipping sacks."
+        }
+      ]
+    },
+    {
+      "slug": "ai-6c-high-speed-ci-flexo-press",
+      "category": "flexo-printing-machines",
+      "name": "AI-6C High-Speed CI Flexographic Printing Press (6-Colour)",
+      "model": "AI-6C",
+      "seoTitle": "AI-6C 6-Color CI Flexo Printing Machine (260 m/min) | Ashal Innomach",
+      "metaDescription": "Central impression AI-6C 6-colour flexo printing press running at 260 m/min with ±0.1mm registration on plastic films, BOPP, and paper.",
+      "specs": {
+        "Colors": "6 Colors",
+        "Max Printing Speed": "260 m / min",
+        "Registration Precision": "±0.1 mm",
+        "Printing Width": "600 – 1600 mm",
+        "Anilox Roller": "Ceramic laser-engraved 200–600 LPI",
+        "Substrates": "PE, PP, PET, BOPP, Paper, Non-woven"
+      },
+      "features": [
+        "Central Impression (CI) drum eliminating film stretching during high-speed printing",
+        "Enclosed doctor blade chamber for clean inking",
+        "Automatic video web inspection system"
+      ],
+      "faqs": [
+        {
+          "question": "Why is a Central Impression (CI) drum superior for printing extensible plastic films?",
+          "answer": "The single high-precision central steel drum locks the film against its surface during all 6 color stations, preventing film elongation and maintaining color registration within ±0.1mm at speeds up to 260 m/min."
+        },
+        {
+          "question": "What substrates are compatible with the AI-6C flexo press?",
+          "answer": "The AI-6C handles LDPE, HDPE, BOPP, PET, CPP, breathable films, barrier laminates, kraft paper, and non-woven fabrics."
+        }
+      ],
+      "video": {
+        "title": "AI-6C Central Impression Flexographic Press 260 m/min Registration Test",
+        "description": "Precision ±0.1mm color registration test on thin LDPE packaging film at 260 meters per minute.",
+        "youtubeId": "dQw4w9WgXcQ",
+        "thumbnailUrl": "https://www.wzashal.com/images/video-thumbnails/ai-6c-test.jpg",
+        "uploadDate": "2026-08-10",
+        "duration": "PT4M12S"
+      }
+    },
+    {
+      "slug": "cx-closed-loop-recycling-pelletizing-line",
+      "category": "recycling-machines",
+      "name": "CX Closed-Loop Plastic Film Recycling & Pelletizing Line",
+      "model": "CX-Pelletizer",
+      "seoTitle": "CX Plastic Film Recycling & Pelletizing Line (99% Recovery) | Ashal Innomach",
+      "metaDescription": "Integrated cutter-compactor recycling extruder line for PE and PP scrap film with 99% resin recovery and vacuum degassing.",
+      "specs": {
+        "Resin Recovery Rate": "99%",
+        "Throughput Capacity": "150 – 500 kg/h",
+        "Degassing System": "Dual-zone high vacuum venting",
+        "Pelletizing Method": "Water-ring die face cutting",
+        "Suitable Scrap": "Blown film edge trim, bag cutoffs, printed film waste"
+      },
+      "features": [
+        "Direct feeding from film roll or scrap scrap without pre-shredding",
+        "Dual-piston non-stop hydraulic screen changer",
+        "High-density uniform pellet output ready for re-extrusion"
+      ],
+      "faqs": [
+        {
+          "question": "Can printed scrap film be recycled without pre-washing?",
+          "answer": "Yes. The CX line integrates dual-zone high-vacuum degassing to remove volatile printing ink vapors and moisture, producing bubble-free, high-density granules ready for immediate re-extrusion."
+        }
+      ]
+    }
+  ]
+}

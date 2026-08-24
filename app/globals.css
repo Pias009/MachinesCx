@@ -1055,14 +1055,14 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 }
 @media(max-width:500px){
   .footer-shortcuts { grid-template-columns: repeat(2, 1fr); }
-  .footer-main-grid { grid-template-columns: 1fr !important; row-gap: 1.25rem !important; }
+  .footer-main-grid { grid-template-columns: 1fr !important; row-gap: 1.5rem !important; }
 
-  /* Brand block: text on the left, QR codes on the right */
-  .footer-brand-block { flex-direction: row !important; align-items: flex-start; justify-content: space-between; gap: 1rem !important; }
-  .footer-brand-text { flex: 1; min-width: 0; }
+  /* Brand block: text on top, QR codes below */
+  .footer-brand-block { flex-direction: column !important; align-items: flex-start; justify-content: flex-start; gap: 1.25rem !important; }
+  .footer-brand-text { width: 100%; min-width: 0; }
   .footer-brand-text p { max-width: none !important; }
-  .footer-qr-row { flex-shrink: 0; gap: 0.6rem !important; }
-  .footer-qr-row img { width: 64px !important; height: 64px !important; }
+  .footer-qr-row { flex-shrink: 0; gap: 1rem !important; justify-content: flex-start; margin-top: 0.5rem; }
+  .footer-qr-row img { width: 72px !important; height: 72px !important; }
 
   /* Products / Company / Support become tap-to-expand accordions —
      closed by default, just the heading + chevron until tapped */

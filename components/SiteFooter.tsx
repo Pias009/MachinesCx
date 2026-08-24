@@ -22,7 +22,7 @@ const EMAIL = "ashal@ashalinnomech.com";
    (see .footer-col-toggle / .footer-col-body display rules) so this
    component renders identically to before at desktop widths */
 function FooterColumn({ title, links }: { title: string; links: { label: string; href: string }[] }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   return (
     <div className="footer-col">
       <button
@@ -62,41 +62,81 @@ export default function SiteFooter() {
     return () => { cancelled = true; };
   }, []);
 
+  // IntersectionObserver safety fallback: if footer enters viewport at all, ensure footer-reveal is visible
+  useEffect(() => {
+    const el = footerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const rows = el.querySelectorAll<HTMLElement>(".footer-reveal");
+            rows.forEach((r) => {
+              r.style.opacity = "1";
+              r.style.transform = "none";
+            });
+          }
+        });
+      },
+      { threshold: 0.01 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [pathname]);
+
   useGSAP(() => {
     if (!pluginReady || !footerRef.current) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const rows = gsap.utils.toArray<HTMLElement>(
       footerRef.current.querySelectorAll(".footer-reveal")
     );
     if (!rows.length) return;
 
-    gsap.fromTo(
-      rows,
-      { opacity: 0, y: 20 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
-        ease: "power3.out",
-        stagger: 0.08,
-        scrollTrigger: {
-          trigger: footerRef.current,
-          start: "top 98%",
-          toggleActions: "play none none none",
-        },
-      }
-    );
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      gsap.set(rows, { opacity: 1, y: 0 });
+      return;
+    }
 
-    // Refresh ScrollTrigger layout after mount to handle dynamic page heights (e.g. /inquiries)
+    gsap.set(rows, { opacity: 0, y: 20 });
+
+    const anim = gsap.to(rows, {
+      opacity: 1,
+      y: 0,
+      duration: 0.6,
+      ease: "power3.out",
+      stagger: 0.08,
+      scrollTrigger: {
+        trigger: footerRef.current,
+        start: "top 98%",
+        toggleActions: "play none none none",
+        onEnter: () => {
+          gsap.to(rows, { opacity: 1, y: 0, overwrite: "auto" });
+        },
+      },
+    });
+
     const timer = setTimeout(() => {
       import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
         ScrollTrigger.refresh();
       });
-    }, 150);
 
-    return () => clearTimeout(timer);
-  }, { scope: footerRef, dependencies: [pluginReady] });
+      // Safety check: force reveal if elements are still opacity 0
+      rows.forEach((r) => {
+        const comp = window.getComputedStyle(r).opacity;
+        if (comp === "0") {
+          gsap.to(r, { opacity: 1, y: 0, duration: 0.3, overwrite: "auto" });
+        }
+      });
+    }, 350);
+
+    return () => {
+      clearTimeout(timer);
+      if (anim.scrollTrigger) anim.scrollTrigger.kill();
+      anim.kill();
+    };
+  }, { scope: footerRef, dependencies: [pluginReady, pathname] });
 
   if (pathname?.startsWith("/cx-ops-x7k9q2")) return null;
 

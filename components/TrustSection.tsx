@@ -415,6 +415,10 @@ export default function TrustSection() {
           font-size: clamp(2.6rem, 5.2vw, 5rem);
           line-height: .95; letter-spacing: -.01em;
           color: #f8fafc; text-wrap: balance; margin: 0;
+          text-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.3),
+            0 3px 6px rgba(0, 0, 0, 0.4),
+            0 8px 24px rgba(0, 0, 0, 0.6);
         }
         .ts-headline em{
           font-style:normal;
@@ -422,6 +426,7 @@ export default function TrustSection() {
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
+          filter: drop-shadow(0 4px 14px rgba(245, 158, 11, 0.45));
         }
         .ts-dossier {
           display: flex; flex-direction: column;

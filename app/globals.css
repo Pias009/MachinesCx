@@ -557,28 +557,102 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .marquee-track .dot { color: var(--brand-red); padding-inline: 0; }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-/* =======================  BTN ======================= */
+/* =========================================================================
+   3D TYPOGRAPHY & TEXT STYLES
+   Adds physical depth, subtle drop-shadows, and luminous emboss effects
+   to headlines, titles, and key badges across all sections.
+   ========================================================================= */
+.text-3d, .title-3d {
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.45);
+  letter-spacing: -0.01em;
+}
+
+.text-3d-emboss {
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5),
+    0 -1px 0 rgba(0, 0, 0, 0.6),
+    0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.text-3d-teal {
+  background: linear-gradient(135deg, #00E5A3 0%, #2BBFB3 50%, #007A5A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 14px rgba(0, 229, 163, 0.45));
+}
+
+.text-3d-amber {
+  background: linear-gradient(135deg, #FFC107 0%, #FF9800 60%, #E65100 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 14px rgba(255, 152, 0, 0.45));
+}
+
+/* =========================================================================
+   3D TACTILE BUTTONS & PILL CONTROLS
+   Creates physical 3D depth, inset top highlights, and press depth
+   ========================================================================= */
 .btn {
-  display: inline-flex; align-items: center; gap: 0.5rem;
+  display: inline-flex; align-items: center; gap: 0.55rem;
   font-family: var(--ff-mono); font-size: 0.78rem; letter-spacing: 0.08em;
-  text-transform: uppercase; padding: 0.85rem 1.5rem;
-  transition: background .2s var(--ease-out), color .2s var(--ease-out),
-              border-color .2s var(--ease-out), transform .16s var(--ease-out),
-              box-shadow .2s var(--ease-out);
+  text-transform: uppercase; padding: 0.85rem 1.65rem;
+  border-radius: 9999px;
+  position: relative; overflow: hidden;
+  box-shadow:
+    0 10px 24px -6px rgba(43, 191, 179, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .btn--hot {
-  background: var(--brand-red); color: #fff; font-weight: 600;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.14) inset, 0 8px 20px -14px rgba(43,191,179,0);
+  background: linear-gradient(145deg, #2BBFB3 0%, #1FA39A 60%, #007A5A 100%);
+  color: #fff; font-weight: 700;
+  box-shadow:
+    0 12px 28px -6px rgba(43, 191, 179, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.25);
 }
 .btn--hot:hover {
-  background: var(--brand-teal-dk); color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.16) inset, 0 14px 30px -12px rgba(43,191,179,0.55);
+  background: linear-gradient(145deg, #00E5A3 0%, #2BBFB3 60%, #1FA39A 100%);
+  color: #fff;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow:
+    0 18px 36px -8px rgba(0, 229, 163, 0.6),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.3);
 }
-.btn--hot:active { transform: translateY(0) scale(0.97); transition-duration: .08s; }
-.btn--ghost { border: 1px solid var(--bg-line); color: var(--ink-35); }
-.btn--ghost:hover { border-color: var(--brand-red); color: var(--brand-red); transform: translateY(-2px); }
-.btn--ghost:active { transform: translateY(0) scale(0.97); transition-duration: .08s; }
+.btn--hot:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow:
+    0 4px 12px -4px rgba(43, 191, 179, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  transition-duration: .08s;
+}
+
+.btn--ghost {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 8px 20px -6px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.btn--ghost:hover {
+  border-color: var(--brand-teal);
+  color: var(--brand-teal);
+  background: rgba(43, 191, 179, 0.12);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow:
+    0 14px 28px -8px rgba(43, 191, 179, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.btn--ghost:active { transform: translateY(1px) scale(0.97); transition-duration: .08s; }
 
 /* =======================  AETHER BUTTON ======================= */
 .aether-btn {
@@ -591,33 +665,40 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   overflow: hidden;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.85rem 1.5rem;
-  background: var(--brand-teal);
+  gap: 0.55rem;
+  padding: 0.85rem 1.65rem;
+  border-radius: 9999px;
+  background: linear-gradient(145deg, #00E5A3 0%, #2BBFB3 60%, #007A5A 100%);
   border: none;
   cursor: pointer;
   font-family: var(--ff-mono);
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 800;
   color: #ffffff;
   white-space: nowrap;
   text-decoration: none;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.14) inset, 0 8px 20px -14px rgba(43,191,179,0);
-  transition: background .2s var(--ease-out), transform .16s var(--ease-out), box-shadow .2s var(--ease-out);
+  box-shadow:
+    0 12px 28px -6px rgba(0, 229, 163, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+  transition: all .25s var(--ease-out);
 }
 .aether-btn > a::before,
 .aether-btn > button::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 48%, transparent 66%);
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.45) 48%, transparent 66%);
   transform: translateX(-120%);
 }
 .aether-btn > a:hover,
 .aether-btn > button:hover {
-  background: var(--brand-teal-dk);
-  transform: translateY(-2px);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.16) inset, 0 14px 32px -12px rgba(43,191,179,0.55);
+  background: linear-gradient(145deg, #00FFB7 0%, #00E5A3 60%, #1FA39A 100%);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow:
+    0 18px 36px -8px rgba(0, 229, 163, 0.65),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.3);
 }
 .aether-btn > a:hover::before,
 .aether-btn > button:hover::before {
@@ -625,14 +706,61 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 }
 .aether-btn > a:active,
 .aether-btn > button:active {
-  transform: translateY(0) scale(0.97);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.1) inset, 0 6px 16px -10px rgba(43,191,179,0.4);
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 4px 14px -4px rgba(43,191,179,0.4), inset 0 2px 4px rgba(0,0,0,0.3);
   transition-duration: .08s;
 }
 @keyframes aether-shine { to { transform: translateX(120%); } }
+
+/* =========================================================================
+   3D FLOATING BACKGROUND ELEMENTS & ORBS
+   Adds animated 3D spheres, luminous glows, and tactile pill badges
+   ========================================================================= */
+.bg-3d-container {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;
+}
+.bg-3d-orb {
+  position: absolute; border-radius: 50%; filter: blur(50px); opacity: 0.32;
+  animation: float3d 14s ease-in-out infinite alternate;
+}
+.bg-3d-orb--teal {
+  width: 450px; height: 450px;
+  background: radial-gradient(circle, #2BBFB3 0%, rgba(43, 191, 179, 0) 70%);
+}
+.bg-3d-orb--amber {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, #FF9E2A 0%, rgba(255, 158, 42, 0) 70%);
+  animation-delay: -7s;
+}
+.bg-3d-orb--rose {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, #E11D48 0%, rgba(225, 29, 72, 0) 70%);
+  animation-delay: -3.5s;
+}
+@keyframes float3d {
+  0% { transform: translateY(0) rotate(0deg) scale(1); }
+  100% { transform: translateY(-45px) rotate(20deg) scale(1.12); }
+}
+
+.bg-3d-pill-badge {
+  position: absolute; padding: 0.55rem 1.35rem; border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.5);
+  font-family: var(--ff-mono); font-size: 0.75rem; font-weight: 700;
+  color: rgba(255,255,255,0.95);
+  animation: floatBadge 9s ease-in-out infinite alternate;
+}
+@keyframes floatBadge {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-16px) scale(1.04); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .aether-btn > a, .aether-btn > button, .btn--hot, .btn--ghost { transform: none !important; }
   .aether-btn > a::before, .aether-btn > button::before { display: none; }
+  .bg-3d-orb, .bg-3d-pill-badge { animation: none !important; }
 }
 
 /* =======================  CATALOGUE PAGES (/products)  =======================

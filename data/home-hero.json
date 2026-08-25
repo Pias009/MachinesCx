@@ -9,9 +9,10 @@
   "secondaryHref": "/inquiries",
   "featured": [
     { "slug": "abcde-2200" },
-    { "slug": "abc-multilayer-small" },
+    { "slug": "t-pro-heatseal" },
+    { "slug": "flexo-6c" },
+    { "slug": "cx-pelletizing" },
     { "slug": "abc-multilayer-large" },
-    { "slug": "abc-cx-series" },
     { "slug": "aba-1000-1500" }
   ]
 }

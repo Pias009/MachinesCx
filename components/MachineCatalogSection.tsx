@@ -319,141 +319,155 @@ export default function MachineCatalogSection() {
           color: var(--brand-teal);
         }
 
-        /* ── Grid ── */
+        /* ── Vision Pro / Apple 3D Clay Bento Cards Grid ── */
         .mcs__grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-          gap: 1px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.06);
-        }
-        [data-theme="light"] .mcs__grid {
-          background: rgba(0,0,0,0.07);
-          border-color: rgba(0,0,0,0.07);
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          gap: 1.5rem;
+          background: transparent !important;
+          border: none !important;
+          perspective: 1400px;
         }
 
         /* ── Machine card ── */
         .mcs-card {
-          background: var(--bg-base);
-          display: flex; flex-direction: column;
-          justify-content: space-between;
-          padding: 1.5rem;
-          min-height: 180px;
-          text-decoration: none;
+          border-radius: 28px;
+          padding: 2rem 1.75rem;
+          min-height: 300px;
           position: relative;
           overflow: hidden;
-          transition: background .18s, transform .25s cubic-bezier(0.16,1,0.3,1);
+          text-decoration: none;
+          display: flex; flex-direction: column; justify-content: space-between;
+          box-shadow: 0 20px 45px -15px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.4);
+          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+          transform-style: preserve-3d;
         }
-        .mcs-card:hover { transform: translateY(-4px); }
 
-        /* machine image — bottom-right, partially visible */
+        .mcs-card:hover {
+          transform: translateY(-8px) rotateX(4deg) scale(1.02);
+          box-shadow: 0 32px 65px -18px rgba(0,0,0,0.32), inset 0 1px 2px rgba(255,255,255,0.6);
+        }
+
+        /* Vision Pro Asymmetric Bento Themes */
+        .mcs-card--film-blowing {
+          background: linear-gradient(155deg, #024D3C 0%, #007A5A 60%, #012B21 100%);
+          color: #ffffff;
+        }
+        .mcs-card--bag-making {
+          background: linear-gradient(145deg, #FFAE42 0%, #FF7626 60%, #D94B00 100%);
+          color: #ffffff;
+        }
+        .mcs-card--recycling {
+          background: linear-gradient(145deg, #FFFFFF 0%, #F5F3EC 100%);
+          color: #121A24;
+          box-shadow: 0 20px 45px -15px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.9);
+        }
+        .mcs-card--printing {
+          background: linear-gradient(145deg, #E62E5C 0%, #A8133C 60%, #5E051E 100%);
+          color: #ffffff;
+        }
+
+        /* Ambient Wave Lighting Inside Cards */
+        .mcs-card__scrim {
+          position: absolute; inset: 0; pointer-events: none;
+          background: radial-gradient(circle at 85% 15%, rgba(255,255,255,0.25) 0%, transparent 60%);
+        }
+        .mcs-card--recycling .mcs-card__scrim {
+          background: radial-gradient(circle at 85% 15%, rgba(0,122,90,0.08) 0%, transparent 60%);
+        }
+
+        /* Machine image background */
         .mcs-card__bg {
           position: absolute;
-          bottom: -8%; right: -4%;
-          width: 65%; height: 90%;
+          bottom: -5%; right: -2%;
+          width: 62%; height: 78%;
           pointer-events: none;
+          z-index: 1;
         }
         .mcs-card__bg img {
           width: 100%; height: 100%;
           object-fit: contain;
           object-position: right bottom;
-          filter: blur(1.5px) saturate(0.7);
-          opacity: 0.22;
-          transition: opacity .3s, transform .4s cubic-bezier(0.16,1,0.3,1);
-          transform: scale(1);
+          opacity: 0.88;
+          filter: drop-shadow(0 12px 24px rgba(0,0,0,0.25));
+          transition: transform .4s cubic-bezier(0.16,1,0.3,1);
         }
         .mcs-card:hover .mcs-card__bg img {
-          opacity: 0.38;
-          transform: scale(1.04);
+          transform: scale(1.08) translateY(-4px);
         }
-        [data-theme="light"] .mcs-card__bg img {
-          filter: blur(1.5px) saturate(0.5);
-          opacity: 0.18;
-        }
-        [data-theme="light"] .mcs-card:hover .mcs-card__bg img { opacity: 0.3; }
-
-        /* left-side fade so image doesn't clash with text */
-        .mcs-card__scrim {
-          position: absolute; inset: 0;
-          background: linear-gradient(
-            to right,
-            var(--bg-base) 30%,
-            transparent 75%
-          );
-          pointer-events: none;
-        }
-        [data-theme="light"] .mcs-card__scrim {
-          background: linear-gradient(
-            to right,
-            #fff 30%,
-            transparent 75%
-          );
-        }
-
-        /* color-coded top accent line */
-        .mcs-card::after {
-          content: "";
-          position: absolute; top: 0; left: 0; right: 0;
-          height: 2px;
-          background: var(--brand-teal);
-          transform: scaleX(0);
-          transform-origin: left;
-          transition: transform .22s cubic-bezier(0.16,1,0.3,1);
-        }
-        .mcs-card:hover::after { transform: scaleX(1); }
-        .mcs-card--film-blowing::after { background: #2bbfb3; }
-        .mcs-card--bag-making::after { background: #f59e0b; }
-        .mcs-card--recycling::after { background: #22c55e; }
-        .mcs-card--printing::after { background: #e11d48; }
-        [data-theme="light"] .mcs-card { background: #fff; }
 
         .mcs-card__cat {
-          font-family: var(--ff-mono); font-size: 0.68rem;
-          letter-spacing: .14em; text-transform: uppercase;
-          margin-bottom: .4rem;
-          display: inline-flex; align-items: center; gap: .45rem;
+          font-family: var(--ff-mono); font-size: 0.7rem;
+          letter-spacing: .12em; text-transform: uppercase;
+          margin-bottom: .6rem;
+          display: inline-flex; align-items: center; gap: .5rem;
+          padding: 0.35rem 0.85rem; border-radius: 9999px;
+          background: rgba(255,255,255,0.18);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          color: #ffffff; font-weight: 700;
+          width: fit-content;
+        }
+        .mcs-card--recycling .mcs-card__cat {
+          background: rgba(0,0,0,0.06); color: #121A24;
         }
         .mcs-card__cat-dot {
-          width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+          width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: currentColor;
         }
         .mcs-card__series {
-          font-family: var(--ff-mono); font-size: 0.7rem;
-          letter-spacing: .1em; text-transform: uppercase;
-          color: var(--brand-red);
+          font-family: var(--ff-mono); font-size: 0.75rem;
+          letter-spacing: .12em; text-transform: uppercase;
+          font-weight: 800; opacity: 0.9;
           margin-bottom: .35rem;
         }
         .mcs-card__name {
-          font-family: var(--ff-display); font-size: 1.05rem;
-          line-height: 1.1; color: var(--ink);
-          letter-spacing: -.01em;
+          font-family: var(--ff-display); font-size: 1.45rem;
+          line-height: 1.15; font-weight: 800;
+          letter-spacing: -.01em; max-width: 85%;
         }
 
         .mcs-card__bottom {
           display: flex; align-items: flex-end;
           justify-content: space-between; gap: .5rem;
-          margin-top: 1.25rem;
+          margin-top: 1.75rem; position: relative; z-index: 2;
         }
         .mcs-card__stat {
-          font-family: var(--ff-display); font-size: 1.6rem;
-          line-height: 1; color: var(--ink); letter-spacing: -.02em;
+          font-family: var(--ff-display); font-size: 1.85rem;
+          line-height: 1; font-weight: 900; letter-spacing: -.02em;
         }
         .mcs-card__stat-label {
-          font-family: var(--ff-mono); font-size: 0.66rem;
+          font-family: var(--ff-mono); font-size: 0.68rem;
           letter-spacing: .1em; text-transform: uppercase;
-          color: var(--ink-60); display: block; margin-top: .15rem;
+          opacity: 0.8; display: block; margin-top: .25rem; font-weight: 600;
         }
-        .mcs-card__arrow {
-          width: 30px; height: 30px;
-          border: 1px solid rgba(255,255,255,0.1);
-          display: flex; align-items: center; justify-content: center;
-          color: var(--ink-60); flex-shrink: 0;
-          transition: background .18s, border-color .18s, color .18s;
+
+        /* Tactile 3D Floating Pill Buttons */
+        .mcs-card__pill-btn {
+          display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem;
+          padding: 0.65rem 1.35rem;
+          border-radius: 9999px;
+          font-family: var(--ff-mono); font-size: 0.75rem; font-weight: 800;
+          letter-spacing: 0.04em; text-transform: uppercase;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 0 10px 22px -6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4);
+          cursor: pointer;
         }
-        [data-theme="light"] .mcs-card__arrow { border-color: rgba(0,0,0,0.12); }
-        .mcs-card:hover .mcs-card__arrow {
-          background: var(--brand-teal);
-          border-color: var(--brand-teal);
-          color: #fff;
+        .mcs-card--film-blowing .mcs-card__pill-btn {
+          background: #ffffff; color: #024836;
+        }
+        .mcs-card--bag-making .mcs-card__pill-btn {
+          background: #ffffff; color: #D64500;
+        }
+        .mcs-card--recycling .mcs-card__pill-btn {
+          background: #007A5A; color: #ffffff;
+          box-shadow: 0 10px 22px -6px rgba(0, 122, 90, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+        .mcs-card--printing .mcs-card__pill-btn {
+          background: #ffffff; color: #9E1038;
+        }
+        .mcs-card:hover .mcs-card__pill-btn {
+          transform: translateY(-2px) scale(1.04);
+          box-shadow: 0 14px 28px -6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.6);
         }
 
         /* ── Footer ── */
@@ -492,12 +506,6 @@ export default function MachineCatalogSection() {
         .mcs-card {
           animation: mcs-fade-in .32s cubic-bezier(0.16,1,0.3,1) both;
         }
-        /* The very first paint's cards are owned entirely by the one-time
-           GSAP "Batch Load" entrance (see the effect above) — this class
-           opts them out of the CSS mount-fade so the two never fight over
-           opacity. Every later tab-filter re-render mounts fresh card
-           elements without this class, so they keep using the CSS fade
-           exactly as before. */
         .mcs-card--gsap-entrance {
           animation: none;
         }
@@ -507,46 +515,19 @@ export default function MachineCatalogSection() {
 
         /* ── Responsive ── */
         @media(max-width:900px) {
-          .mcs__grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+          .mcs__grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
         }
         @media(max-width:640px) {
           .mcs { padding: clamp(1.75rem,5vw,2.75rem) 0; }
           .mcs__header { flex-direction: column; align-items: flex-start; gap: 1rem; margin-bottom: clamp(1.25rem,3vw,2rem); }
           .mcs__title { font-size: clamp(2.5rem,9vw,3.5rem); }
-          .mcs__grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-          .mcs-card { padding: 1.1rem; min-height: 150px; }
-          .mcs-card__name { font-size: .92rem; }
-          .mcs-card__stat { font-size: 1.25rem; }
-        }
-        @media(max-width:480px) {
-          .mcs__grid { grid-template-columns: repeat(3, 1fr); }
-          .mcs-card { padding: .6rem; min-height: 118px; }
-          .mcs-card__cat { gap: .3rem; margin-bottom: .25rem; }
-          .mcs-card__cat-label { display: none; }
-          .mcs-card__series { font-size: .5rem; margin-bottom: .2rem; }
-          .mcs-card__name { font-size: .68rem; line-height: 1.15; }
-          .mcs-card__bottom { margin-top: .6rem; gap: .25rem; }
-          .mcs-card__stat { font-size: .9rem; }
-          .mcs-card__stat-label { font-size: .48rem; margin-top: .1rem; }
-          .mcs-card__arrow { width: 20px; height: 20px; }
-          .mcs-card__arrow svg { width: 10px; height: 10px; }
-          .mcs-card__bg { width: 55%; height: 75%; }
+          .mcs__grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+          .mcs-card { padding: 1.4rem; min-height: 240px; border-radius: 20px; }
+          .mcs-card__name { font-size: 1.15rem; }
+          .mcs-card__stat { font-size: 1.4rem; }
         }
 
-        /* ── Light mode ── */
-        [data-theme="light"] .mcs { background: #f5f8f8; }
-        [data-theme="light"] .mcs__title { color: #0d2220; }
-        [data-theme="light"] .mcs__sub   { color: rgba(13,34,32,0.7); }
-        [data-theme="light"] .mcs__badge { color: var(--brand-red); }
-        [data-theme="light"] .mcs__tab   { color: rgba(13,34,32,0.7); }
-        [data-theme="light"] .mcs__tab:hover { color: #0d2220; }
-        [data-theme="light"] .mcs-card__name { color: #0d2220; }
-        [data-theme="light"] .mcs-card__stat { color: #0d2220; }
-        [data-theme="light"] .mcs-card__stat-label { color: rgba(13,34,32,0.7); }
-
-        /* ── Press-plate shutter — blue/red bordered frame with the
-           company mark centered, covers the section on scroll-in and
-           wipes away from the bottom up before the grid reveals ── */
+        /* ── Press-plate shutter ── */
         .mcs__shutter {
           position: absolute; inset: 0; z-index: 30;
           background: var(--bg-base);
@@ -571,22 +552,11 @@ export default function MachineCatalogSection() {
           .mcs__shutter { display: none; }
         }
 
-        /* ── 3D card feel: real perspective tilt on hover, not just a
-           flat lift, plus a light sheen that sweeps to sell depth ── */
-        .mcs__grid { perspective: 1400px; }
-        .mcs-card {
-          transform-style: preserve-3d;
-          transition: background .18s, transform .35s cubic-bezier(0.16,1,0.3,1), box-shadow .35s;
-        }
-        .mcs-card:hover {
-          transform: translateY(-6px) rotateX(6deg) rotateY(-4deg) scale(1.015);
-          box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
-        }
         .mcs-card__top, .mcs-card__bottom { transform: translateZ(24px); }
         .mcs-card::before {
           content: "";
           position: absolute; inset: 0;
-          background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.06) 50%, transparent 60%);
+          background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.08) 50%, transparent 60%);
           transform: translateX(-100%);
           transition: transform .6s ease;
           pointer-events: none;
@@ -659,7 +629,6 @@ export default function MachineCatalogSection() {
           <div ref={gridRef} className="mcs__grid" role="tabpanel">
             {filtered.map((fam, i) => {
               const spec = KEY_SPECS[fam.slug];
-              const col = CAT_COLORS[fam.category];
               return (
                 <TransitionLink
                   key={fam.slug}
@@ -668,19 +637,19 @@ export default function MachineCatalogSection() {
                   className={`mcs-card mcs-card--${fam.category}${isFirstTabRef.current ? " mcs-card--gsap-entrance" : ""}`}
                   style={{ animationDelay: `${Math.min(i, 15) * 28}ms` }}
                 >
+                  <div className="mcs-card__scrim" aria-hidden="true" />
                   <div className="mcs-card__bg" aria-hidden="true">
                     <Image src={familyImage(fam)} alt="" fill sizes="(max-width: 900px) 65vw, 320px" loading="lazy" />
                   </div>
-                  <div className="mcs-card__scrim" aria-hidden="true" />
-                  <div className="mcs-card__top" style={{ position: "relative", zIndex: 1 }}>
+                  <div className="mcs-card__top" style={{ position: "relative", zIndex: 2 }}>
                     <div className="mcs-card__cat">
-                      <span className="mcs-card__cat-dot" style={{ background: col?.accent }} />
-                      <span className="mcs-card__cat-label">{CAT_LABELS[fam.category]}</span>
+                      <span className="mcs-card__cat-dot" />
+                      <span>{CAT_LABELS[fam.category]}</span>
                     </div>
-                    <div className="mcs-card__series" style={{ color: col?.accent }}>{fam.series}</div>
+                    <div className="mcs-card__series">{fam.series}</div>
                     <div className="mcs-card__name">{fam.name.split("—")[0].trim()}</div>
                   </div>
-                  <div className="mcs-card__bottom" style={{ position: "relative", zIndex: 1 }}>
+                  <div className="mcs-card__bottom">
                     {spec ? (
                       <div>
                         <div className="mcs-card__stat">{spec.stat}</div>
@@ -689,11 +658,10 @@ export default function MachineCatalogSection() {
                     ) : (
                       <div />
                     )}
-                    <div className="mcs-card__arrow" aria-hidden="true"
-                      style={{ borderColor: col ? `${col.accent}44` : undefined }}
-                    >
-                      <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <div className="mcs-card__pill-btn">
+                      <span>View</span>
+                      <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
                   </div>

@@ -10,6 +10,7 @@ export type FieldKind =
   | "number"
   | "boolean"
   | "select"      // options[]
+  | "productSelect" // product model dropdown selector
   | "image"       // path string + local upload button + preview
   | "images"      // string[] — unlimited photos, upload as many as you like
   | "stringlist"  // string[] (one per line)
@@ -136,6 +137,7 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
           { key: "name", label: "Name", kind: "text" },
           { key: "tagline", label: "Tagline", kind: "text" },
           { key: "blurb", label: "Blurb", kind: "textarea" },
+          { key: "image", label: "Category Cover Image / Icon", kind: "image", hint: "Upload a cover photo or icon for this category card" },
         ],
       },
     ],
@@ -157,12 +159,17 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
     collections: [
       {
         key: "featured",
-        label: "Featured machines (arch cards)",
-        titleKeys: ["slug"],
+        label: "Circle Hero Machine Models (Arch Cards)",
+        singular: "Hero Machine Card",
+        titleKeys: ["customName", "slug"],
         canAdd: true,
-        template: { slug: "" },
+        template: { slug: "abcde-2200", customImage: "", customSeries: "", customName: "", customHref: "" },
         fields: [
-          { key: "slug", label: "Product slug", kind: "text", hint: "must match a machine slug from the Products section — its photo, series and name are pulled in automatically. Up to 5 are shown along the arch." },
+          { key: "slug", label: "Machine Model / Product", kind: "productSelect", hint: "Select a machine model from your catalogue, or type its slug." },
+          { key: "customImage", label: "Custom Machine Image (optional photo upload)", kind: "image", hint: "Upload a custom circle machine image or transparent PNG — leave empty to use the machine's primary photo." },
+          { key: "customSeries", label: "Series label override (optional)", kind: "text", hint: "e.g. ABCDE · 5-layer — leave empty to use default product series" },
+          { key: "customName", label: "Model name override (optional)", kind: "text", hint: "e.g. ABCDE-2200 Five-Layer — leave empty to use default product name" },
+          { key: "customHref", label: "Link URL override (optional)", kind: "text", hint: "e.g. /products/film-blowing/abcde-2200 — leave empty to link to product page" },
         ],
       },
     ],

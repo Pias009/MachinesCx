@@ -212,7 +212,7 @@ export default function SessionDetailPanel({ sessionId, onClose }: { sessionId: 
         @keyframes sdp-fade-in { from { opacity: 0; } to { opacity: 1; } }
         .sdp-panel {
           width: min(480px, 100vw); height: 100vh; overflow-y: auto;
-          background: var(--adm-surface); border-left: 1px solid var(--adm-border);
+          background: #121B2D; border-left: 1px solid var(--adm-border);
           font-family: var(--ff-mono, monospace);
           animation: sdp-slide-in 0.22s cubic-bezier(0.22,1,0.36,1) both;
         }
@@ -220,7 +220,7 @@ export default function SessionDetailPanel({ sessionId, onClose }: { sessionId: 
         .sdp-head {
           display: flex; align-items: center; justify-content: space-between;
           padding: 1rem 1.2rem; border-bottom: 1px solid var(--adm-border);
-          position: sticky; top: 0; background: var(--adm-surface); z-index: 1;
+          position: sticky; top: 0; background: #0C1424; z-index: 1;
         }
         .sdp-head__title { font-size: 0.95rem; font-weight: 700; color: var(--adm-text); }
         .sdp-close { background: none; border: none; color: var(--adm-text-faint); cursor: pointer; padding: 0.2rem; }
@@ -230,11 +230,11 @@ export default function SessionDetailPanel({ sessionId, onClose }: { sessionId: 
 
         .sdp-section__head {
           display: flex; align-items: center; gap: 0.4rem;
-          font-size: 0.75rem; color: var(--brand-teal); margin-bottom: 0.6rem; letter-spacing: 0.02em;
+          font-size: 0.75rem; color: var(--adm-mint); margin-bottom: 0.6rem; letter-spacing: 0.02em;
         }
         .sdp-empty { color: var(--adm-text-faint); font-size: 0.78rem; }
 
-        .sdp-insight { background: rgba(43,191,179,0.05); border: 1px solid var(--adm-border); border-radius: 10px; padding: 0.85rem; }
+        .sdp-insight { background: rgba(0,210,148,0.08); border: 1px solid var(--adm-border); border-radius: 10px; padding: 0.85rem; }
         .sdp-insight__badge {
           display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
           letter-spacing: 0.06em; padding: 0.15rem 0.5rem; border-radius: 999px; border: 1px solid; margin-bottom: 0.55rem;
@@ -243,16 +243,16 @@ export default function SessionDetailPanel({ sessionId, onClose }: { sessionId: 
         .sdp-insight__empty { font-size: 0.8rem; color: var(--adm-text-faint); margin: 0 0 0.7rem; }
         .sdp-insight__error { font-size: 0.75rem; color: #ff6b7d; margin: 0.5rem 0 0; }
 
-        .sdp-draft { background: rgba(43,191,179,0.05); border: 1px solid var(--adm-border); border-radius: 10px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.4rem; }
+        .sdp-draft { background: rgba(0,210,148,0.08); border: 1px solid var(--adm-border); border-radius: 10px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.4rem; }
         .sdp-draft__status {
           align-self: flex-start; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
           letter-spacing: 0.06em; padding: 0.15rem 0.5rem; border-radius: 999px; margin-bottom: 0.3rem;
         }
-        .sdp-draft__status--sent { color: var(--brand-teal); background: rgba(43,191,179,0.14); }
+        .sdp-draft__status--sent { color: var(--adm-mint); background: rgba(0,210,148,0.15); }
         .sdp-draft__status--dismissed { color: var(--adm-text-faint); background: rgba(255,255,255,0.05); }
         .sdp-draft__label { font-size: 0.65rem; color: var(--adm-text-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.3rem; }
         .sdp-draft__subject, .sdp-draft__body {
-          font-family: inherit; font-size: 0.8rem; color: var(--adm-text); background: var(--adm-bg);
+          font-family: inherit; font-size: 0.8rem; color: var(--adm-text); background: #162338;
           border: 1px solid var(--adm-border); border-radius: 7px; padding: 0.5rem 0.6rem; resize: vertical;
         }
         .sdp-draft__subject:disabled, .sdp-draft__body:disabled { opacity: 0.7; }
@@ -261,12 +261,12 @@ export default function SessionDetailPanel({ sessionId, onClose }: { sessionId: 
         .sdp-btn {
           display: inline-flex; align-items: center; gap: 0.35rem;
           font-family: inherit; font-size: 0.72rem; font-weight: 600;
-          background: var(--brand-teal); color: #04211e; border: none;
+          background: var(--adm-mint); color: #061814; border: none;
           border-radius: 7px; padding: 0.4rem 0.7rem; cursor: pointer;
         }
         .sdp-btn:disabled { opacity: 0.6; cursor: default; }
         .sdp-btn--ghost { background: transparent; color: var(--adm-text-faint); border: 1px solid var(--adm-border); }
-        .sdp-btn--ghost:hover:not(:disabled) { color: var(--brand-teal); border-color: var(--brand-teal); }
+        .sdp-btn--ghost:hover:not(:disabled) { color: var(--adm-mint); border-color: var(--adm-mint); }
         .sdp-spin { animation: sdp-spin 0.8s linear infinite; }
         @keyframes sdp-spin { to { transform: rotate(360deg); } }
 
@@ -275,7 +275,7 @@ export default function SessionDetailPanel({ sessionId, onClose }: { sessionId: 
         .sdp-kv > div > span:first-child { color: var(--adm-text-faint); flex-shrink: 0; }
         .sdp-kv > div > span:last-child { color: var(--adm-text-dim); text-align: right; }
         .sdp-kv__truncate { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .sdp-kv a { color: var(--brand-teal); text-decoration: none; }
+        .sdp-kv a { color: var(--adm-mint); text-decoration: none; }
         .sdp-kv a:hover { text-decoration: underline; }
 
         .sdp-journey { display: flex; flex-direction: column; }
@@ -283,19 +283,19 @@ export default function SessionDetailPanel({ sessionId, onClose }: { sessionId: 
           display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 0.5rem;
           padding: 0.35rem 0; font-size: 0.75rem; border-left: 1px solid var(--adm-border); padding-left: 0.7rem; margin-left: 3px;
         }
-        .sdp-journey-row--longest { border-left-color: var(--brand-teal); }
+        .sdp-journey-row--longest { border-left-color: var(--adm-mint); }
         .sdp-journey-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--adm-text-faint); margin-left: -0.95rem; flex-shrink: 0; }
-        .sdp-journey-row--longest .sdp-journey-dot { background: var(--brand-teal); }
+        .sdp-journey-row--longest .sdp-journey-dot { background: var(--adm-mint); }
         .sdp-journey-time { color: var(--adm-text-faint); }
         .sdp-journey-path { color: var(--adm-text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .sdp-journey-row--longest .sdp-journey-path { color: var(--adm-text); font-weight: 600; }
         .sdp-journey-dur { color: var(--adm-text-faint); white-space: nowrap; }
-        .sdp-journey-row--longest .sdp-journey-dur { color: var(--brand-teal); }
+        .sdp-journey-row--longest .sdp-journey-dur { color: var(--adm-mint); }
 
         .sdp-contact { font-size: 0.76rem; color: var(--adm-text-dim); margin: -0.3rem 0 0.6rem; }
         .sdp-chat { display: flex; flex-direction: column; gap: 0.5rem; max-height: 320px; overflow-y: auto; }
         .sdp-chat-row { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.76rem; padding: 0.4rem 0.55rem; border-radius: 8px; }
-        .sdp-chat-row--user { background: rgba(43,191,179,0.08); }
+        .sdp-chat-row--user { background: rgba(0,210,148,0.12); }
         .sdp-chat-row--assistant { background: rgba(255,255,255,0.03); }
         .sdp-chat-role { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--adm-text-faint); }
         .sdp-chat-text { color: var(--adm-text-dim); line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }

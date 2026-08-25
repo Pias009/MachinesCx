@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages } from "next-intl/server";
@@ -9,13 +9,13 @@ import LoadingScreen from "@/components/LoadingScreen";
 import { BRAND, SITE_URL } from "@/lib/products";
 import { routing, rtlLocales, type Locale } from "@/i18n/routing";
 
-const SiteFooter = dynamic(() => import("@/components/SiteFooter"), { ssr: false });
-const AppToaster = dynamic(() => import("@/components/AppToaster"), { ssr: false });
-const ChatWidget = dynamic(() => import("@/components/ChatWidget"), { ssr: false });
-const ProductionLineTeaser = dynamic(() => import("@/components/ProductionLineTeaser"), { ssr: false });
-const VisitorTracker = dynamic(() => import("@/components/VisitorTracker"), { ssr: false });
-const ProactiveNudge = dynamic(() => import("@/components/ProactiveNudge"), { ssr: false });
-const ProductLeadCapture = dynamic(() => import("@/components/ProductLeadCapture"), { ssr: false });
+const SiteFooter = nextDynamic(() => import("@/components/SiteFooter"), { ssr: false });
+const AppToaster = nextDynamic(() => import("@/components/AppToaster"), { ssr: false });
+const ChatWidget = nextDynamic(() => import("@/components/ChatWidget"), { ssr: false });
+const ProductionLineTeaser = nextDynamic(() => import("@/components/ProductionLineTeaser"), { ssr: false });
+const VisitorTracker = nextDynamic(() => import("@/components/VisitorTracker"), { ssr: false });
+const ProactiveNudge = nextDynamic(() => import("@/components/ProactiveNudge"), { ssr: false });
+const ProductLeadCapture = nextDynamic(() => import("@/components/ProductLeadCapture"), { ssr: false });
 
 const bebas = { variable: "font-bebas" };
 const inter = { variable: "font-inter" };
@@ -43,6 +43,8 @@ export const metadata: Metadata = {
     images: ["/logo.jpeg"],
   },
 };
+
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

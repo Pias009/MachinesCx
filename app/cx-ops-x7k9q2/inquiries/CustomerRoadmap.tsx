@@ -95,10 +95,10 @@ export default function CustomerRoadmap({
     }
   }
 
-  const labelStyle: React.CSSProperties = { fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 700, color: "var(--brand-teal)", marginBottom: "0.6rem", display: "flex", alignItems: "center", gap: "0.4rem" };
+  const labelStyle: React.CSSProperties = { fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 700, color: "var(--adm-mint)", marginBottom: "0.6rem", display: "flex", alignItems: "center", gap: "0.4rem" };
 
   return (
-    <div style={{ borderRadius: 12, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", padding: "1.1rem 1.2rem" }}>
+    <div style={{ borderRadius: 14, background: "#162338", border: "1px solid rgba(255,255,255,0.08)", padding: "1.2rem 1.3rem" }}>
       <div style={labelStyle}><Users size={14} /> Customer relationship</div>
 
       {/* repeat-customer badge — computed instantly, no fetch */}

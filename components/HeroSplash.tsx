@@ -58,17 +58,61 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }`;
 
-/* ── 5 media nodes distributed along the arch ──
-   left  → horizontal position (%) across the section
-   top   → vertical offset (%) — apex (center) is highest, edges dip down
-   scale → depth: apex biggest, edges smaller                        */
-const ARCH = [
-  { left: 8,  top: 58, scale: 0.74 },
-  { left: 29, top: 34, scale: 0.88 },
-  { left: 50, top: 22, scale: 1.0  },
-  { left: 71, top: 34, scale: 0.88 },
-  { left: 92, top: 58, scale: 0.74 },
-] as const;
+interface ArchPos {
+  left: number;
+  top: number;
+  scale: number;
+  opacity: number;
+}
+
+/* ── 7 Trajectory Slots along the Arch Curve:
+   Index 0: Exit slot off bottom-left circle end (hidden, scale: 0.35, opacity: 0)
+   Index 1: Slot 0 (visible far-left, scale: 0.74, opacity: 1)
+   Index 2: Slot 1 (visible mid-left, scale: 0.88, opacity: 1)
+   Index 3: Slot 2 (visible center apex, scale: 1.0, opacity: 1)
+   Index 4: Slot 3 (visible mid-right, scale: 0.88, opacity: 1)
+   Index 5: Slot 4 (visible far-right, scale: 0.74, opacity: 1)
+   Index 6: Entry slot off bottom-right line (hidden, scale: 0.35, opacity: 0) ── */
+const TRAJECTORY: ArchPos[] = [
+  { left: -6,  top: 92, scale: 0.35, opacity: 0 },
+  { left: 8,   top: 58, scale: 0.74, opacity: 1 },
+  { left: 29,  top: 34, scale: 0.88, opacity: 1 },
+  { left: 50,  top: 22, scale: 1.0,  opacity: 1 },
+  { left: 71,  top: 34, scale: 0.88, opacity: 1 },
+  { left: 92,  top: 58, scale: 0.74, opacity: 1 },
+  { left: 106, top: 92, scale: 0.35, opacity: 0 },
+];
+
+function getTrajectoryPos(cardIndex: number, step: number, totalNodes: number): ArchPos {
+  if (totalNodes <= 0) return TRAJECTORY[3];
+  if (totalNodes <= 5) {
+    const t = totalNodes > 1 ? cardIndex / (totalNodes - 1) : 0.5;
+    const left = 8 + t * 84;
+    const distFromCenter = Math.abs(t - 0.5) * 2;
+    const top = 22 + Math.pow(distFromCenter, 2) * 36;
+    const scale = 1.0 - Math.pow(distFromCenter, 2) * 0.26;
+    return { left, top, scale, opacity: 1 };
+  }
+
+  let rel = (cardIndex - step) % totalNodes;
+  if (rel < 0) rel += totalNodes;
+
+  if (rel === 0) return TRAJECTORY[1];
+  if (rel === 1) return TRAJECTORY[2];
+  if (rel === 2) return TRAJECTORY[3];
+  if (rel === 3) return TRAJECTORY[4];
+  if (rel === 4) return TRAJECTORY[5];
+  if (rel === totalNodes - 1) return TRAJECTORY[0];
+  return TRAJECTORY[6];
+}
+
+interface HeroFeaturedItem {
+  slug: string;
+  customImage?: string;
+  customSeries?: string;
+  customName?: string;
+  customHref?: string;
+}
 
 interface HeroCms {
   eyebrow: string;
@@ -79,12 +123,30 @@ interface HeroCms {
   primaryHref: string;
   secondaryLabel: string;
   secondaryHref: string;
-  featured: { slug: string }[];
+  featured: HeroFeaturedItem[];
+}
+
+interface CategoryItem {
+  slug: string;
+  name: string;
+}
+
+interface ResolvedHeroNode {
+  key: string;
+  slug: string;
+  category: string;
+  categoryName: string;
+  series: string;
+  name: string;
+  image: string;
+  href: string;
 }
 
 const localFamilies = (localProducts as { families: ProductFamily[] }).families;
 
-function familyImage(f: Pick<ProductFamily, "slug" | "image" | "images">): string {
+function getFamilyImage(f: Pick<ProductFamily, "slug" | "image" | "images">): string {
+  if (f.images && f.images.length > 0 && f.images[0]?.trim()) return f.images[0];
+  if (f.image && f.image.trim()) return f.image;
   return `/machines/${f.slug}.png`;
 }
 
@@ -92,8 +154,12 @@ export default function HeroSplash() {
   const archRef   = useRef<HTMLDivElement>(null);
   const shapesRef = useRef<HTMLDivElement>(null);
   const [isLight, setIsLight] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [step, setStep] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const check = () =>
       setIsLight(document.documentElement.getAttribute("data-theme") === "light");
     check();
@@ -105,21 +171,82 @@ export default function HeroSplash() {
   const t = useTranslations("heroSplash");
   const locale = useLocale();
   const localHero = HERO_BY_LOCALE[locale] ?? localHeroEn;
-  const hero = useCms<HeroCms>("home-hero", localHero as HeroCms);
-  const products = useCms<{ families: ProductFamily[] }>("products", localProducts as { families: ProductFamily[] });
-  const families = products.families ?? localFamilies;
+  const hero = useCms<HeroCms>("home-hero", localHero as unknown as HeroCms);
+  const products = useCms<{ categories?: CategoryItem[]; families: ProductFamily[] }>("products", localProducts as any);
+  const categories: CategoryItem[] = products.categories ?? (localProducts.categories as CategoryItem[]);
+  const families: ProductFamily[] = products.families ?? localFamilies;
 
-  /* Resolve admin-picked featured slugs → real machine data.
-     Falls back to the first machines with photos if none are configured. */
-  const nodes: ProductFamily[] = (() => {
+  /* Resolve admin-configured machines for the hero arch section */
+  const nodes: ResolvedHeroNode[] = (() => {
+    const localBySlug = new Map(localFamilies.map((f) => [f.slug, f]));
     const bySlug = new Map(families.map((f) => [f.slug, f]));
-    const picked = (hero.featured ?? [])
-      .map((x) => bySlug.get(x.slug))
-      .filter((f): f is ProductFamily => !!f)
-      .slice(0, 5);
-    if (picked.length) return picked;
-    return families.slice(0, 5);
+    const cmsItems = hero.featured ?? [];
+
+    if (cmsItems.length > 0) {
+      return cmsItems.map((item, idx) => {
+        const family = bySlug.get(item.slug) ?? localBySlug.get(item.slug);
+        const image = item.customImage?.trim()
+          ? item.customImage
+          : family
+          ? getFamilyImage(family)
+          : `/machines/${item.slug || "abcde-2200"}.png`;
+
+        const category = family?.category || "film-blowing";
+        const categoryName = categories.find((c) => c.slug === category)?.name || category;
+        const series = item.customSeries?.trim() || family?.series || "SERIES";
+        const name = item.customName?.trim() || family?.name || item.slug || "Machine";
+        const href = item.customHref?.trim() || (family ? `/products/${category}/${family.slug}` : "/products");
+
+        return {
+          key: `${item.slug}-${idx}`,
+          slug: item.slug || `node-${idx}`,
+          category,
+          categoryName,
+          series,
+          name,
+          image,
+          href,
+        };
+      });
+    }
+
+    const categoriesOrder = ["film-blowing", "bag-making", "printing", "recycling", "film-blowing"];
+    const representativeFamilies: ProductFamily[] = [];
+    const usedSlugs = new Set<string>();
+
+    for (const catSlug of categoriesOrder) {
+      const match = families.find((f) => f.category === catSlug && !usedSlugs.has(f.slug));
+      if (match) {
+        usedSlugs.add(match.slug);
+        representativeFamilies.push(match);
+      }
+    }
+
+    return representativeFamilies.map((f, idx) => ({
+      key: `${f.slug}-rep-${idx}`,
+      slug: f.slug,
+      category: f.category,
+      categoryName: categories.find((c) => c.slug === f.category)?.name || f.category,
+      series: f.series,
+      name: f.name,
+      image: getFamilyImage(f),
+      href: `/products/${f.category}/${f.slug}`,
+    }));
   })();
+
+  /* Step-and-pause arch trajectory loop:
+     Cards sit anchored at 5 arch slots for 2.35s, then advance 1 step along
+     the arch trajectory over 0.85s. Cards entering emerge from bottom-right,
+     cards exiting fade out into bottom-left. */
+  useEffect(() => {
+    if (isPaused || nodes.length <= 5) return;
+
+    const timer = setInterval(() => {
+      setStep((prev) => prev + 1);
+    }, 3200);
+
+    return () => clearInterval(timer);
+  }, [isPaused, nodes.length]);
 
   /* GSAP: reveal media cards left → right, fading in one after another */
   useEffect(() => {
@@ -135,15 +262,15 @@ export default function HeroSplash() {
       if (cancelled || !root) return;
       const cards = Array.from(root.querySelectorAll<HTMLElement>(".hs__node-inner"));
       ctx = gsap.context(() => {
-        gsap.set(cards, { opacity: 0, x: -80, y: 24 });
+        gsap.set(cards, { opacity: 0, scale: 0.7, y: 35 });
         gsap.to(cards, {
           opacity: 1,
-          x: 0,
+          scale: 1,
           y: 0,
-          duration: 0.9,
-          ease: "power3.out",
-          stagger: 0.16,
-          delay: 0.4,
+          duration: 1.0,
+          ease: "back.out(1.4)",
+          stagger: 0.12,
+          delay: 0.3,
         });
       }, root);
     })();
@@ -429,11 +556,16 @@ export default function HeroSplash() {
           margin: 0 0 1.5rem;
           text-wrap: balance;
           opacity: 1; animation: hs-rise .9s cubic-bezier(.2,.7,.2,1) .12s both;
+          text-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.4),
+            0 3px 6px rgba(0, 0, 0, 0.4),
+            0 10px 28px rgba(0, 0, 0, 0.6);
         }
         .hs__h1 em {
           font-style: normal;
           color: var(--brand-teal);
           display: block;
+          filter: drop-shadow(0 6px 18px rgba(43,191,179,0.45));
         }
 
         .hs__desc {
@@ -550,14 +682,33 @@ export default function HeroSplash() {
           pointer-events: none;
           overflow: visible;
         }
+        .hs__arch-line path {
+          animation: hsArchFlow 12s linear infinite;
+        }
+        @keyframes hsArchFlow {
+          from { stroke-dashoffset: 0; }
+          to { stroke-dashoffset: -120; }
+        }
 
-        /* each media node, positioned along the curve.
-           x/y offset is applied to .hs__node-inner by GSAP so the
-           translate(-50%) centering on .hs__node stays intact */
+        /* each media node, positioned along the curve. */
         .hs__node {
           position: absolute;
           transform: translateX(-50%);
           width: clamp(118px, 14vw, 205px);
+          transition: left 0.85s cubic-bezier(0.25, 1, 0.5, 1),
+                      top 0.85s cubic-bezier(0.25, 1, 0.5, 1),
+                      width 0.85s cubic-bezier(0.25, 1, 0.5, 1),
+                      opacity 0.85s cubic-bezier(0.25, 1, 0.5, 1);
+          will-change: left, top, width, opacity;
+        }
+
+        .hs__node-inner {
+          animation: hsFloat 4.2s ease-in-out infinite alternate;
+          animation-delay: var(--float-delay, 0s);
+        }
+        @keyframes hsFloat {
+          0% { transform: translateY(0px); }
+          100% { transform: translateY(-7px); }
         }
 
         /* mouse-tracked tilt layer — its own transform property so it
@@ -681,7 +832,7 @@ export default function HeroSplash() {
         }
       `}</style>
 
-      <section className={`hs${isLight ? " hs--light" : ""}`} aria-label={t("sectionAria")}>
+      <section className={`hs${mounted && isLight ? " hs--light" : ""}`} aria-label={t("sectionAria")}>
 
         {/* Decorative floating shapes */}
         <div className="hs__shape hs__shape--1" aria-hidden="true" />
@@ -689,7 +840,7 @@ export default function HeroSplash() {
         <div className="hs__shape hs__shape--3" aria-hidden="true" />
 
         {/* 3D background — dark wave scene in light mode, original teal wisp in dark mode */}
-        {isLight ? <WaveBackground /> : <WispBackground />}
+        {mounted && isLight ? <WaveBackground /> : <WispBackground />}
 
         {/* bottom fade */}
         <div className="hs__fade" aria-hidden="true" />
@@ -734,7 +885,13 @@ export default function HeroSplash() {
         </div>
 
         {/* ── ARCH of 5 video/media cards ── */}
-        <div className="hs__arch" ref={archRef} aria-label={t("archAria")}>
+        <div
+          className="hs__arch"
+          ref={archRef}
+          aria-label={t("archAria")}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
           {/* curved guide line */}
           <svg
             className="hs__arch-line"
@@ -761,34 +918,40 @@ export default function HeroSplash() {
           </svg>
 
           {nodes.map((f, i) => {
-            const pos = ARCH[i];
+            const pos = getTrajectoryPos(i, step, nodes.length);
+            const isUnoptimized = f.image.startsWith("http") || f.image.startsWith("/uploads");
             return (
               <div
-                key={f.slug}
+                key={f.key}
                 className="hs__node"
                 style={{
                   left: `${pos.left}%`,
                   top: `${pos.top}%`,
                   width: `calc(clamp(118px, 14vw, 205px) * ${pos.scale})`,
+                  opacity: pos.opacity,
                   "--hs-node-scale": pos.scale,
+                  "--float-delay": `${(i * 0.45) % 3}s`,
+                  zIndex: Math.round(pos.scale * 100),
+                  pointerEvents: pos.opacity === 0 ? "none" : "auto",
                 } as React.CSSProperties}
               >
                 <div className="hs__node-inner">
                   <div className="hs__node-tilt">
                   <Link
-                    href={`/products/${f.category}/${f.slug}`}
+                    href={f.href}
                     className="hs__node-card"
                     aria-label={f.name}
                   >
                     <div className="hs__node-img-wrap">
                       <Image
-                        src={familyImage(f)}
+                        src={f.image}
                         alt={f.name}
                         fill
                         sizes="(max-width: 900px) 25vw, 220px"
                         className="hs__node-img"
                         priority={i === 2}
                         loading={i === 2 ? undefined : "lazy"}
+                        unoptimized={isUnoptimized}
                       />
                     </div>
                     <span className="hs__node-meta">

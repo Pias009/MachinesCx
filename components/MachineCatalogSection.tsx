@@ -470,6 +470,43 @@ export default function MachineCatalogSection() {
           box-shadow: 0 14px 28px -6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.6);
         }
 
+        /* ── Light Mode Overrides for Product Cards ── */
+        [data-theme="light"] .mcs-card {
+          background: #ffffff !important;
+          border: 1px solid rgba(13,34,32,0.12) !important;
+          color: #0d2220 !important;
+          box-shadow: 0 10px 30px -10px rgba(13,34,32,0.08), 0 2px 6px -1px rgba(13,34,32,0.04) !important;
+        }
+        [data-theme="light"] .mcs-card:hover {
+          border-color: var(--brand-teal) !important;
+          box-shadow: 0 20px 45px -12px rgba(43,191,179,0.25) !important;
+        }
+        [data-theme="light"] .mcs-card__cat {
+          background: rgba(13,34,32,0.07) !important;
+          color: #0d2220 !important;
+        }
+        [data-theme="light"] .mcs-card__series {
+          color: rgba(13,34,32,0.75) !important;
+        }
+        [data-theme="light"] .mcs-card__name {
+          color: #0d2220 !important;
+        }
+        [data-theme="light"] .mcs-card__stat {
+          color: #0d2220 !important;
+        }
+        [data-theme="light"] .mcs-card__stat-label {
+          color: rgba(13,34,32,0.65) !important;
+        }
+        [data-theme="light"] .mcs-card__pill-btn {
+          background: #0d2220 !important;
+          color: #ffffff !important;
+          box-shadow: 0 6px 16px rgba(13,34,32,0.2) !important;
+        }
+        [data-theme="light"] .mcs-card--film-blowing .mcs-card__pill-btn { background: #024836 !important; color: #ffffff !important; }
+        [data-theme="light"] .mcs-card--bag-making .mcs-card__pill-btn { background: #D64500 !important; color: #ffffff !important; }
+        [data-theme="light"] .mcs-card--recycling .mcs-card__pill-btn { background: #007A5A !important; color: #ffffff !important; }
+        [data-theme="light"] .mcs-card--printing .mcs-card__pill-btn { background: #9E1038 !important; color: #ffffff !important; }
+
         /* ── Footer ── */
         .mcs__footer {
           margin-top: 2rem;

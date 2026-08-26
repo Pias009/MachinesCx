@@ -177,7 +177,7 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
   {
     slug: "machine-catalog",
     title: "Home · Machine Catalogue",
-    description: "“Every machine. Find your perfect fit.” grid — headline and the stat shown on every machine card.",
+    description: "“Every machine. Find your perfect fit.” grid — headline, overlay stats, and optional custom photo override. (Main product photos & galleries are managed under CMS Content Schemas -> Products -> 📸 Photos).",
     rootFields: [
       { key: "headline1", label: "Headline line 1", kind: "text" },
       { key: "headline2", label: "Headline line 2 (teal)", kind: "text" },
@@ -185,12 +185,16 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
     collections: [
       {
         key: "items",
-        label: "Card stats",
+        label: "Card stats & image overrides",
+        singular: "machine stat card",
         titleKeys: ["slug"],
+        canAdd: true,
+        template: { slug: "", stat: "", label: "", customImage: "" },
         fields: [
-          { key: "slug", label: "Product slug", kind: "text" },
+          { key: "slug", label: "Product Model / Machine", kind: "productSelect", hint: "Select product model from all catalogue machines or enter slug" },
           { key: "stat", label: "Stat (big value)", kind: "text" },
           { key: "label", label: "Stat label", kind: "text" },
+          { key: "customImage", label: "Custom machine photo (optional override)", kind: "image", hint: "Upload a custom machine photo for this card — leave empty to automatically use the primary product photo from the main 'Products' section." },
         ],
       },
     ],
@@ -209,7 +213,7 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
         fields: [
           { key: "stage", label: "Stage name", kind: "text" },
           { key: "name", label: "Machine name", kind: "text" },
-          { key: "slug", label: "Product slug (link)", kind: "text" },
+          { key: "slug", label: "Product Model (link)", kind: "productSelect", hint: "Select product model from all catalogue machines" },
           { key: "cat", label: "Category route", kind: "select", options: CAT_OPTIONS },
           { key: "img", label: "Machine image (transparent PNG)", kind: "image" },
           { key: "role", label: "Role in the line", kind: "textarea" },
@@ -230,7 +234,7 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
         canAdd: true,
         template: { slug: "new-press", label: "AI-XX", colours: 2, speed: "120", reg: "±0.2mm", img: "", tag: "", hot: false, flagship: false },
         fields: [
-          { key: "slug", label: "Product slug (link target)", kind: "text", hint: "links the card to /products/printing#<slug>" },
+          { key: "slug", label: "Product Model (link target)", kind: "productSelect", hint: "Select product model from all catalogue machines" },
           { key: "label", label: "Model label", kind: "text" },
           { key: "colours", label: "Colours", kind: "number" },
           { key: "speed", label: "Speed (m/min)", kind: "text" },
@@ -274,9 +278,21 @@ export const SECTION_SCHEMAS: SectionSchema[] = [
       {
         key: "items",
         label: "Featured machines",
+        singular: "featured machine",
         titleKeys: ["slug"],
+        canAdd: true,
+        template: {
+          slug: "",
+          specs: [
+            { label: "Speed", value: "300 pcs/min" },
+            { label: "Material", value: "PE · PBAT+PLA" }
+          ],
+          features: [
+            { head: "High Precision", body: "Servo-driven repeat accuracy." }
+          ]
+        },
         fields: [
-          { key: "slug", label: "Product slug", kind: "text" },
+          { key: "slug", label: "Product Model / Machine", kind: "productSelect", hint: "Select a machine from all products in your catalogue" },
           { key: "specs", label: "Spec rows", kind: "kvlist" },
           { key: "features", label: "Feature bullets", kind: "features" },
         ],

@@ -41,8 +41,16 @@ export async function sendEmail(opts: {
   attachments?: EmailAttachment[];
 }) {
   const resend = client();
+  
+  // Resend requires verified custom domains OR onboarding@resend.dev.
+  // Consumer domains (@gmail.com, @yahoo.com) cannot be verified in Resend.
+  let fromSender = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+  if (fromSender.includes("@gmail.com") || fromSender.includes("@yahoo.com") || fromSender.includes("@hotmail.com")) {
+    fromSender = "onboarding@resend.dev";
+  }
+
   const { error } = await resend.emails.send({
-    from: FROM,
+    from: fromSender,
     to: opts.to,
     subject: opts.subject,
     html: opts.html,

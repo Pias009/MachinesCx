@@ -296,10 +296,6 @@
 [data-theme="light"] .mcs-card__stat   { color: #0d2220 !important; }
 [data-theme="light"] .mcs-card__stat-label { color: rgba(13,34,32,0.65) !important; }
 [data-theme="light"] .mcs-card__pill-btn { background: #0d2220 !important; color: #ffffff !important; box-shadow: 0 6px 16px rgba(13,34,32,0.2) !important; }
-[data-theme="light"] .mcs-card--film-blowing .mcs-card__pill-btn { background: #024836 !important; color: #ffffff !important; }
-[data-theme="light"] .mcs-card--bag-making .mcs-card__pill-btn { background: #D64500 !important; color: #ffffff !important; }
-[data-theme="light"] .mcs-card--recycling .mcs-card__pill-btn { background: #007A5A !important; color: #ffffff !important; }
-[data-theme="light"] .mcs-card--printing .mcs-card__pill-btn { background: #9E1038 !important; color: #ffffff !important; }
 [data-theme="light"] .mcs-stat__num   { color: #0d2220 !important; }
 [data-theme="light"] .mcs-stat__label { color: rgba(13,34,32,0.7) !important; }
 [data-theme="light"] .mcs-stat__unit  { color: rgba(13,34,32,0.65) !important; }
@@ -666,63 +662,156 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 }
 .btn--ghost:active { transform: translateY(1px) scale(0.97); transition-duration: .08s; }
 
-/* =======================  AETHER BUTTON ======================= */
+/* =======================  AETHER & GLASS BUTTONS ======================= */
 .aether-btn {
   display: inline-flex;
   align-items: stretch;
 }
 .aether-btn > a,
-.aether-btn > button {
+.aether-btn > button,
+.btn-primary-mint {
   position: relative;
   overflow: hidden;
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  padding: 0.85rem 1.65rem;
+  padding: 0.8rem 1.75rem;
   border-radius: 9999px;
-  background: linear-gradient(145deg, #00E5A3 0%, #2BBFB3 60%, #007A5A 100%);
-  border: none;
+  background: linear-gradient(135deg, #00D294 0%, #00B880 100%);
+  border: 1px solid rgba(0, 210, 148, 0.4);
   cursor: pointer;
-  font-family: var(--ff-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-weight: 800;
-  color: #ffffff;
+  font-family: var(--ff-body);
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
+  font-weight: 700;
+  color: #04211e;
   white-space: nowrap;
   text-decoration: none;
   box-shadow:
-    0 12px 28px -6px rgba(0, 229, 163, 0.45),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+    0 10px 28px -6px rgba(0, 210, 148, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
   transition: all .25s var(--ease-out);
 }
 .aether-btn > a::before,
-.aether-btn > button::before {
+.aether-btn > button::before,
+.btn-primary-mint::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.45) 48%, transparent 66%);
   transform: translateX(-120%);
 }
 .aether-btn > a:hover,
-.aether-btn > button:hover {
-  background: linear-gradient(145deg, #00FFB7 0%, #00E5A3 60%, #1FA39A 100%);
-  transform: translateY(-3px) scale(1.02);
+.aether-btn > button:hover,
+.btn-primary-mint:hover {
+  background: linear-gradient(135deg, #00E8A4 0%, #00C48C 100%);
+  transform: translateY(-2px) scale(1.02);
   box-shadow:
-    0 18px 36px -8px rgba(0, 229, 163, 0.65),
-    inset 0 1px 2px rgba(255, 255, 255, 0.8),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+    0 16px 36px -6px rgba(0, 229, 163, 0.65),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 .aether-btn > a:hover::before,
-.aether-btn > button:hover::before {
+.aether-btn > button:hover::before,
+.btn-primary-mint:hover::before {
   animation: aether-shine 0.9s var(--ease-out);
 }
 .aether-btn > a:active,
-.aether-btn > button:active {
+.aether-btn > button:active,
+.btn-primary-mint:active {
   transform: translateY(1px) scale(0.97);
   box-shadow: 0 4px 14px -4px rgba(43,191,179,0.4), inset 0 2px 4px rgba(0,0,0,0.3);
   transition-duration: .08s;
 }
 @keyframes aether-shine { to { transform: translateX(120%); } }
+
+/* Secondary Translucent Apple-Style Dark Glass Button */
+.btn-secondary-glass {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.8rem 1.75rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-family: var(--ff-body);
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.25s var(--ease-out);
+}
+.btn-secondary-glass:hover {
+  border-color: rgba(0, 210, 148, 0.6);
+  color: #00D294;
+  background: rgba(0, 210, 148, 0.1);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(0, 210, 148, 0.2);
+}
+.btn-secondary-glass:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+/* Light mode overrides for secondary glass button */
+[data-theme="light"] .btn-secondary-glass,
+.hs--light .btn-secondary-glass {
+  background: rgba(13, 34, 32, 0.06) !important;
+  color: #0d2220 !important;
+  border: 1px solid rgba(13, 34, 32, 0.18) !important;
+  box-shadow: 0 6px 16px rgba(13, 34, 32, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+}
+[data-theme="light"] .btn-secondary-glass:hover,
+.hs--light .btn-secondary-glass:hover {
+  background: rgba(13, 34, 32, 0.12) !important;
+  color: #0d2220 !important;
+  border-color: #00A876 !important;
+  box-shadow: 0 10px 24px rgba(0, 168, 118, 0.2) !important;
+}
+
+/* Glowing Light-Up Alert Badge for New Machines */
+.new-machine-alert-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.22rem 0.65rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #2dd4bf 100%);
+  color: #ffffff !important;
+  font-family: var(--ff-mono, monospace);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 0 14px rgba(45, 212, 191, 0.85), 0 0 28px rgba(20, 184, 166, 0.5);
+  animation: alertPulse 2s infinite ease-in-out;
+  line-height: 1;
+}
+
+.new-machine-alert-badge::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px #ffffff;
+}
+
+@keyframes alertPulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(45, 212, 191, 0.7), 0 0 20px rgba(20, 184, 166, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(45, 212, 191, 1), 0 0 35px rgba(20, 184, 166, 0.75);
+    transform: scale(1.05);
+  }
+}
 
 /* =========================================================================
    3D FLOATING BACKGROUND ELEMENTS & ORBS

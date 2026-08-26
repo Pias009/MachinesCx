@@ -14,7 +14,8 @@ import localData from "@/data/products.json";
 const localFamilies = (localData as { families: ProductFamily[] }).families;
 
 /* helpers that work with both local and live CMS product data */
-function familyImage(f: Pick<ProductFamily, "slug" | "image" | "images">): string {
+function familyImage(f: Pick<ProductFamily, "slug" | "image" | "images">, customImage?: string): string {
+  if (customImage && customImage.trim()) return customImage;
   if (f.images && f.images.length > 0) return f.images[0];
   if (f.image) return f.image;
   return `/machines/${f.slug}.png`;
@@ -37,7 +38,7 @@ const CAT_ICONS: Record<string, string> = {
 interface CatalogCms {
   headline1: string;
   headline2: string;
-  items: { slug: string; stat: string; label: string }[];
+  items: { slug: string; stat: string; label: string; customImage?: string }[];
 }
 
 export default function MachineCatalogSection() {
@@ -60,6 +61,10 @@ export default function MachineCatalogSection() {
     cms.items && cms.items.length
       ? Object.fromEntries(cms.items.map(i => [i.slug, { stat: i.stat, label: i.label }]))
       : DEFAULT_KEY_SPECS;
+  const CUSTOM_IMAGES: Record<string, string> =
+    cms.items && cms.items.length
+      ? Object.fromEntries(cms.items.map(i => [i.slug, i.customImage || ""]))
+      : {};
   const [activeTab, setActiveTab] = useState<string>("all");
   // true only while showing the tab state active on first paint — used to
   // opt those cards out of the CSS mount-fade in favor of the GSAP entrance.
@@ -348,22 +353,19 @@ export default function MachineCatalogSection() {
           box-shadow: 0 32px 65px -18px rgba(0,0,0,0.32), inset 0 1px 2px rgba(255,255,255,0.6);
         }
 
-        /* Vision Pro Asymmetric Bento Themes */
-        .mcs-card--film-blowing {
-          background: linear-gradient(155deg, #024D3C 0%, #007A5A 60%, #012B21 100%);
+        /* Bento Neutral Glass Theme — No heavy category colors */
+        .mcs-card {
+          background: rgba(15, 25, 38, 0.75);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           color: #ffffff;
         }
-        .mcs-card--bag-making {
-          background: linear-gradient(145deg, #FFAE42 0%, #FF7626 60%, #D94B00 100%);
-          color: #ffffff;
-        }
-        .mcs-card--recycling {
-          background: linear-gradient(145deg, #FFFFFF 0%, #F5F3EC 100%);
-          color: #121A24;
-          box-shadow: 0 20px 45px -15px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.9);
-        }
+        .mcs-card--film-blowing,
+        .mcs-card--bag-making,
+        .mcs-card--recycling,
         .mcs-card--printing {
-          background: linear-gradient(145deg, #E62E5C 0%, #A8133C 60%, #5E051E 100%);
+          background: rgba(15, 25, 38, 0.75);
           color: #ffffff;
         }
 
@@ -449,21 +451,9 @@ export default function MachineCatalogSection() {
           font-family: var(--ff-mono); font-size: 0.75rem; font-weight: 800;
           letter-spacing: 0.04em; text-transform: uppercase;
           transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          background: #ffffff; color: #0b1523;
           box-shadow: 0 10px 22px -6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4);
           cursor: pointer;
-        }
-        .mcs-card--film-blowing .mcs-card__pill-btn {
-          background: #ffffff; color: #024836;
-        }
-        .mcs-card--bag-making .mcs-card__pill-btn {
-          background: #ffffff; color: #D64500;
-        }
-        .mcs-card--recycling .mcs-card__pill-btn {
-          background: #007A5A; color: #ffffff;
-          box-shadow: 0 10px 22px -6px rgba(0, 122, 90, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
-        }
-        .mcs-card--printing .mcs-card__pill-btn {
-          background: #ffffff; color: #9E1038;
         }
         .mcs-card:hover .mcs-card__pill-btn {
           transform: translateY(-2px) scale(1.04);
@@ -502,10 +492,6 @@ export default function MachineCatalogSection() {
           color: #ffffff !important;
           box-shadow: 0 6px 16px rgba(13,34,32,0.2) !important;
         }
-        [data-theme="light"] .mcs-card--film-blowing .mcs-card__pill-btn { background: #024836 !important; color: #ffffff !important; }
-        [data-theme="light"] .mcs-card--bag-making .mcs-card__pill-btn { background: #D64500 !important; color: #ffffff !important; }
-        [data-theme="light"] .mcs-card--recycling .mcs-card__pill-btn { background: #007A5A !important; color: #ffffff !important; }
-        [data-theme="light"] .mcs-card--printing .mcs-card__pill-btn { background: #9E1038 !important; color: #ffffff !important; }
 
         /* ── Footer ── */
         .mcs__footer {
@@ -676,12 +662,17 @@ export default function MachineCatalogSection() {
                 >
                   <div className="mcs-card__scrim" aria-hidden="true" />
                   <div className="mcs-card__bg" aria-hidden="true">
-                    <Image src={familyImage(fam)} alt="" fill sizes="(max-width: 900px) 65vw, 320px" loading="lazy" />
+                    <Image src={familyImage(fam, CUSTOM_IMAGES[fam.slug])} alt="" fill sizes="(max-width: 900px) 65vw, 320px" loading="lazy" />
                   </div>
                   <div className="mcs-card__top" style={{ position: "relative", zIndex: 2 }}>
-                    <div className="mcs-card__cat">
-                      <span className="mcs-card__cat-dot" />
-                      <span>{CAT_LABELS[fam.category]}</span>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
+                      <div className="mcs-card__cat">
+                        <span className="mcs-card__cat-dot" />
+                        <span>{CAT_LABELS[fam.category]}</span>
+                      </div>
+                      {(fam as any).isNew && (
+                        <span className="new-machine-alert-badge">⚡ NEW</span>
+                      )}
                     </div>
                     <div className="mcs-card__series">{fam.series}</div>
                     <div className="mcs-card__name">{fam.name.split("—")[0].trim()}</div>

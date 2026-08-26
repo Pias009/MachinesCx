@@ -46,7 +46,13 @@ export default function ScrollHome() {
     cmsBags.items && cmsBags.items.length
       ? Object.fromEntries(cmsBags.items.map(({ slug, ...rest }) => [slug, rest]))
       : defaultProductData;
-  const CARDS = CARD_SLUGS.map((slug) => ({ slug, name: t(`cards.${slug}`) }));
+  const CARDS = cmsBags.items && cmsBags.items.length
+    ? cmsBags.items.map((item) => {
+        const hasTranslation = t.has(`cards.${item.slug}`);
+        const fallbackName = hasTranslation ? t(`cards.${item.slug}`) : item.slug.toUpperCase();
+        return { slug: item.slug, name: fallbackName };
+      })
+    : CARD_SLUGS.map((slug) => ({ slug, name: t(`cards.${slug}`) }));
   const machineRef   = useRef<HTMLDivElement>(null);
   const sec1Ref      = useRef<HTMLElement>(null);
   const sec1AnchorRef = useRef<HTMLDivElement>(null);
@@ -620,14 +626,7 @@ export default function ScrollHome() {
             <AetherBtn><TransitionLink href="/products/bag-making">
               {t("hero1.ctaPrimary")}
             </TransitionLink></AetherBtn>
-            <TransitionLink href="/inquiries" style={{
-              display: "inline-flex", alignItems: "center", gap: "0.5rem",
-              fontFamily: "var(--ff-mono)", fontSize: "0.78rem", letterSpacing: "0.08em",
-              textTransform: "uppercase", padding: "0.85rem 1.5rem",
-              border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.78)",
-              transition: "border-color 0.2s, color 0.2s",
-              textDecoration: "none",
-            }}>
+            <TransitionLink href="/inquiries" className="btn-secondary-glass">
               {t("hero1.ctaSecondary")}
             </TransitionLink>
           </div>
@@ -812,10 +811,18 @@ export default function ScrollHome() {
           <div style={{ padding: "1.25rem 1.25rem 2rem" }}>
             {/* Name */}
             <div style={{
-              fontFamily: "var(--ff-mono)", fontSize: "0.64rem",
-              letterSpacing: "0.2em", textTransform: "uppercase",
-              color: "var(--brand-teal)", marginBottom: "0.3rem",
-            }}>{t("hot.hotMachine")}</div>
+              display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem",
+              marginBottom: "0.3rem",
+            }}>
+              <span style={{
+                fontFamily: "var(--ff-mono)", fontSize: "0.64rem",
+                letterSpacing: "0.2em", textTransform: "uppercase",
+                color: "var(--brand-teal)",
+              }}>{t("hot.hotMachine")}</span>
+              {Boolean((PRODUCT_DATA[mobileCard.slug] as any)?.isNew || cmsBags.items?.[0]?.slug === mobileCard.slug) && (
+                <span className="new-machine-alert-badge">⚡ JUST ADDED</span>
+              )}
+            </div>
             <div style={{
               fontFamily: "var(--ff-display)", fontSize: "clamp(1.5rem, 6vw, 2rem)",
               color: "#fff", lineHeight: 1.1, marginBottom: "1.25rem",

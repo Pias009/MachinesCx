@@ -1,0 +1,65 @@
+{
+  "users": [
+    {
+      "id": "usr-super-1",
+      "email": "admin@ashalinnomech.com",
+      "name": "Super Admin",
+      "role": "super_admin",
+      "status": "active",
+      "createdAt": "2026-08-26T07:02:19.888Z",
+      "tempPassword": "pias900###"
+    },
+    {
+      "id": "usr-mt9rgxj5",
+      "email": "fitony506@gmail.com",
+      "name": "pias",
+      "role": "machine_manager",
+      "status": "invited",
+      "tempPassword": "CX-TMP-E97A9657",
+      "createdAt": "2026-08-26T07:17:13.025Z"
+    }
+  ],
+  "invitations": [
+    {
+      "id": "inv-mt9rgxj5",
+      "email": "fitony506@gmail.com",
+      "name": "pias",
+      "role": "machine_manager",
+      "tempPassword": "CX-TMP-E97A9657",
+      "token": "mag_44534ea70350bd9d951ee76c7f2a0dbe",
+      "status": "pending",
+      "createdAt": "2026-08-26T07:17:13.025Z",
+      "expiresAt": "2026-09-02T07:17:13.025Z"
+    }
+  ],
+  "auditLog": [
+    {
+      "id": "aud-mt9rgxj6-czyy",
+      "timestamp": "2026-08-26T07:17:13.026Z",
+      "actor": "Super Admin",
+      "action": "GMAIL_MAGIC_LINK_CREATED",
+      "details": "Created magic link invitation for fitony506@gmail.com with role 'machine_manager' and temporary password"
+    },
+    {
+      "id": "aud-mt9r70zg-iy14",
+      "timestamp": "2026-08-26T07:09:30.940Z",
+      "actor": "Super Admin",
+      "action": "TEMP_PASSWORD_RESET",
+      "details": "Reset password for user admin@ashalinnomech.com"
+    },
+    {
+      "id": "aud-mt9r6zjm-i1ry",
+      "timestamp": "2026-08-26T07:09:29.074Z",
+      "actor": "Super Admin",
+      "action": "TEMP_PASSWORD_RESET",
+      "details": "Reset password for user admin@ashalinnomech.com"
+    },
+    {
+      "id": "aud-init",
+      "timestamp": "2026-08-26T07:02:19.888Z",
+      "actor": "System",
+      "action": "SYSTEM_INITIALIZED",
+      "details": "Default Super Admin account created with full security scope"
+    }
+  ]
+}

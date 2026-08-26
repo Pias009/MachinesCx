@@ -469,12 +469,16 @@ export default function HeroSplash() {
         [data-theme="light"] .hs__h1 em { color: var(--brand-teal) !important; }
         [data-theme="light"] .hs__desc { color: rgba(13,34,32,0.72) !important; }
         [data-theme="light"] .hs__btn-secondary {
-          color: rgba(13,34,32,0.72) !important;
+          background: rgba(13, 34, 32, 0.06) !important;
+          color: #0d2220 !important;
           border-color: rgba(13,34,32,0.18) !important;
+          box-shadow: 0 6px 16px rgba(13,34,32,0.08) !important;
         }
         [data-theme="light"] .hs__btn-secondary:hover {
-          border-color: var(--brand-teal) !important;
+          background: rgba(13, 34, 32, 0.12) !important;
+          border-color: #00A876 !important;
           color: #0d2220 !important;
+          box-shadow: 0 10px 24px rgba(0, 168, 118, 0.2) !important;
         }
         [data-theme="light"] .hs__node-card {
           background: #eef1f0;
@@ -497,8 +501,16 @@ export default function HeroSplash() {
         .hs--light .hs__desc { color: rgba(13,34,32,0.72) !important; }
         .hs--light .hs__eyebrow { color: var(--brand-teal) !important; }
         .hs--light .hs__btn-secondary {
-          color: rgba(13,34,32,0.72) !important;
+          background: rgba(13, 34, 32, 0.06) !important;
+          color: #0d2220 !important;
           border-color: rgba(13,34,32,0.18) !important;
+          box-shadow: 0 6px 16px rgba(13,34,32,0.08) !important;
+        }
+        .hs--light .hs__btn-secondary:hover {
+          background: rgba(13, 34, 32, 0.12) !important;
+          border-color: #00A876 !important;
+          color: #0d2220 !important;
+          box-shadow: 0 10px 24px rgba(0, 168, 118, 0.2) !important;
         }
         .hs--light .hs__node-card {
           /* Product photos are studio shots on a near-white background —
@@ -629,33 +641,40 @@ export default function HeroSplash() {
         }
 
         .hs__btn-primary {
-          display: inline-flex; align-items: center; gap: .4rem;
-          padding: .65rem 1.4rem;
-          background: var(--brand-red); color: #fff;
-          font-family: var(--ff-mono); font-size: .7rem;
-          letter-spacing: .09em; text-transform: uppercase; font-weight: 600;
-          text-decoration: none; border: 1px solid var(--brand-red);
-          transition: background .18s, box-shadow .18s; white-space: nowrap;
+          display: inline-flex; align-items: center; gap: .55rem;
+          padding: .8rem 1.75rem;
+          border-radius: 9999px;
+          background: linear-gradient(135deg, #00D294 0%, #00B880 100%);
+          color: #04211e;
+          font-family: var(--ff-body); font-size: .92rem;
+          letter-spacing: .02em; font-weight: 700;
+          text-decoration: none; border: 1px solid rgba(0, 210, 148, 0.4);
+          box-shadow: 0 10px 28px -6px rgba(0,210,148,0.45), inset 0 1px 1px rgba(255,255,255,0.5);
+          transition: all .25s cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap;
         }
         .hs__btn-primary:hover {
-          background: #1fa39a;
-          box-shadow: 0 4px 20px rgba(43,191,179,0.45);
+          background: linear-gradient(135deg, #00E8A4 0%, #00C48C 100%);
+          transform: translateY(-2px) scale(1.02);
+          box-shadow: 0 16px 36px -6px rgba(0,210,148,0.65), inset 0 1px 2px rgba(255,255,255,0.8);
         }
         .hs__btn-secondary {
-          display: inline-flex; align-items: center; gap: .4rem;
-          padding: .65rem 1.4rem;
-          background: var(--glass-bg); color: var(--ink-60);
-          border: 1px solid var(--ink-15);
-          -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
-                  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
-          font-family: var(--ff-mono); font-size: .7rem;
-          letter-spacing: .09em; text-transform: uppercase;
+          display: inline-flex; align-items: center; gap: .55rem;
+          padding: .8rem 1.75rem;
+          border-radius: 9999px;
+          background: rgba(255, 255, 255, 0.06); color: #ffffff;
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+          font-family: var(--ff-body); font-size: .92rem;
+          letter-spacing: .02em; font-weight: 600;
           text-decoration: none;
-          transition: border-color .18s, color .18s, background .18s; white-space: nowrap;
+          box-shadow: 0 8px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
+          transition: all .25s cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap;
         }
         .hs__btn-secondary:hover {
-          border-color: var(--brand-red); color: var(--brand-red);
-          background: var(--glass-bg-raise);
+          border-color: rgba(0, 210, 148, 0.6); color: #00D294;
+          background: rgba(0, 210, 148, 0.1);
+          transform: translateY(-2px) scale(1.02);
+          box-shadow: 0 12px 28px rgba(0, 210, 148, 0.2);
         }
 
         /* ── ARCH of media cards, bottom half ── */

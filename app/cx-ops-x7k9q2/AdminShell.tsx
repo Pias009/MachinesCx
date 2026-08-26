@@ -172,13 +172,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             Shortcuts & Pipeline
           </div>
           <div className="adm-side__group-items">
-            <Link href={`/${ADMIN_PATH}/inquiries`} className="adm-side__item">
+            <Link href={`/${ADMIN_PATH}/settings`} className="adm-side__item">
               <span className="adm-side__bullet" style={{ background: "#00D294" }} />
-              Inquiry Pipeline
+              Roles & Privacy Access
             </Link>
-            <Link href={`/${ADMIN_PATH}/analytics`} className="adm-side__item">
+            <Link href={`/${ADMIN_PATH}/inquiries`} className="adm-side__item">
               <span className="adm-side__bullet" style={{ background: "#3b82f6" }} />
-              Live Telemetry
+              Inquiry Pipeline
             </Link>
             <Link href={`/${ADMIN_PATH}/s/products`} className="adm-side__item">
               <span className="adm-side__bullet" style={{ background: "#f5c451" }} />
@@ -217,15 +217,15 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <div className="adm-side__user">
           <div className="adm-side__user-info">
             <div className="adm-side__user-avatar" style={{ position: "relative" }}>
-              OC
+              AD
               <span style={{
                 position: "absolute", bottom: -1, right: -1, width: 8, height: 8, borderRadius: "50%",
                 background: "#00E5A3", border: "1px solid #121b2d"
               }} />
             </div>
             <div>
-              <div className="adm-side__user-name">Oscar Carol</div>
-              <div className="adm-side__user-role">Operations Lead</div>
+              <div className="adm-side__user-name">Admin</div>
+              <div className="adm-side__user-role">System Operator</div>
             </div>
           </div>
           <div style={{ display: "flex", gap: "0.3rem" }}>

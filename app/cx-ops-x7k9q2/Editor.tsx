@@ -321,9 +321,21 @@ function StepsEditor({ value, onChange }: { value: Step[]; onChange: (v: Step[])
 }
 
 // ── product model dropdown selector for hero section ──────
-function ProductSelectField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+// ── product model dropdown selector with automatic catalogue data filling ──────
+function ProductSelectField({
+  value,
+  onChange,
+  onItemChange,
+  item,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onItemChange?: (key: string, v: unknown) => void;
+  item?: Item;
+}) {
   const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
   const [products, setProducts] = useState<{ slug: string; name: string; series: string; category: string }[]>([]);
+  const [rawFamilies, setRawFamilies] = useState<any[]>([]);
 
   useEffect(() => {
     let alive = true;
@@ -335,6 +347,7 @@ function ProductSelectField({ value, onChange }: { value: string; onChange: (v: 
             setCategories(j.categories.map((c: any) => ({ slug: c.slug, name: c.name || c.slug })));
           }
           if (Array.isArray(j.families)) {
+            setRawFamilies(j.families);
             setProducts(j.families.map((f: any) => ({
               slug: f.slug ?? "",
               name: f.name || f.slug || "",
@@ -348,6 +361,58 @@ function ProductSelectField({ value, onChange }: { value: string; onChange: (v: 
     return () => { alive = false; };
   }, []);
 
+  const handleAutoFill = (selectedSlug: string) => {
+    if (!selectedSlug || !onItemChange || !item || !rawFamilies.length) return;
+    const f = rawFamilies.find((p: any) => p.slug === selectedSlug);
+    if (!f) return;
+
+    // 1. Primary photo
+    const photo = f.images?.[0] || f.gallery?.[0]?.src || f.radarImage || "";
+    if (photo) {
+      if ("customImage" in item) onItemChange("customImage", photo);
+      if ("img" in item) onItemChange("img", photo);
+      if ("src" in item) onItemChange("src", photo);
+    }
+
+    // 2. Main stat & stat label (for machine-catalog cards)
+    if ("stat" in item || "label" in item) {
+      const topSpec = f.specs?.find((s: any) => /output|speed|width|capacity/i.test(s.label)) || f.specs?.[0];
+      if (topSpec) {
+        const statVal = Array.isArray(topSpec.values) ? topSpec.values[0] : String(topSpec.values || "");
+        if ("stat" in item) onItemChange("stat", statVal);
+        if ("label" in item) onItemChange("label", topSpec.label || "Max Output");
+      }
+    }
+
+    // 3. Hero custom fields
+    if ("customSeries" in item && f.series) onItemChange("customSeries", f.series);
+    if ("customName" in item && f.name) onItemChange("customName", f.name);
+    if ("customHref" in item) onItemChange("customHref", `/products/${f.category}/${f.slug}`);
+
+    // 4. Scrollhome specs & features
+    if ("specs" in item && Array.isArray(f.specs)) {
+      const specRows = f.specs.slice(0, 7).map((s: any) => ({
+        label: s.label,
+        value: Array.isArray(s.values) ? s.values.join(" / ") : String(s.values || "")
+      }));
+      onItemChange("specs", specRows);
+    }
+
+    if ("features" in item) {
+      const featureRows = [
+        { head: f.series || "High Performance", body: f.tagline || `${f.name} engineered by Ashal Innomech.` },
+        { head: "Precision Control", body: `Compatible with ${f.materials || "PE, PP & biodegradable resins"}.` },
+        { head: "High Efficiency", body: "Optimized for continuous factory floor operations." },
+      ];
+      onItemChange("features", featureRows);
+    }
+  };
+
+  const handleSelectChange = (newSlug: string) => {
+    onChange(newSlug);
+    handleAutoFill(newSlug);
+  };
+
   const defaultCats = [
     { slug: "film-blowing", name: "Film Blowing Machines" },
     { slug: "bag-making", name: "Bag Making Machines" },
@@ -360,11 +425,11 @@ function ProductSelectField({ value, onChange }: { value: string; onChange: (v: 
   const uncategorized = products.filter(p => !knownCatSlugs.has(p.category));
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
       <select
         style={{ ...inputStyle, appearance: "auto", fontWeight: 500 }}
         value={value ?? ""}
-        onChange={e => onChange(e.target.value)}
+        onChange={e => handleSelectChange(e.target.value)}
       >
         <option value="" style={{ color: "#aaa", background: "#111" }}>-- Select machine model from catalogue --</option>
         {activeCategories.map(cat => {
@@ -390,16 +455,40 @@ function ProductSelectField({ value, onChange }: { value: string; onChange: (v: 
           </optgroup>
         )}
       </select>
-      <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+
+      <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
         <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.8rem", color: "rgba(255,255,255,0.4)" }}>
           Or enter model slug directly:
         </span>
         <input
-          style={{ ...inputStyle, padding: "0.4rem 0.7rem", fontSize: "0.88rem", flex: 1 }}
+          style={{ ...inputStyle, padding: "0.4rem 0.7rem", fontSize: "0.88rem", flex: 1, minWidth: 140 }}
           value={value ?? ""}
-          placeholder="e.g. abcde-2200"
-          onChange={e => onChange(e.target.value)}
+          placeholder="e.g. s-standard"
+          onChange={e => handleSelectChange(e.target.value)}
         />
+        {value && onItemChange && (
+          <button
+            type="button"
+            onClick={() => handleAutoFill(value)}
+            style={{
+              padding: "0.35rem 0.75rem",
+              borderRadius: "0.375rem",
+              background: "rgba(13, 148, 136, 0.18)",
+              border: "1px solid rgba(13, 148, 136, 0.4)",
+              color: "#5eead4",
+              fontSize: "0.8rem",
+              fontWeight: 600,
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.35rem",
+              transition: "all 0.15s ease",
+            }}
+            title="Automatically populate image, stat values, and spec rows from the main catalogue product data"
+          >
+            ⚡ Auto-fill data from catalogue
+          </button>
+        )}
       </div>
     </div>
   );
@@ -435,7 +524,14 @@ function FieldControl({ field, value, item, onChange, onItemChange }: {
         </select>
       );
     case "productSelect":
-      return <ProductSelectField value={(value as string) ?? ""} onChange={onChange} />;
+      return (
+        <ProductSelectField
+          value={(value as string) ?? ""}
+          onChange={onChange}
+          onItemChange={onItemChange}
+          item={item}
+        />
+      );
     case "image":
       return <ImageField value={(value as string) ?? ""} onChange={onChange} />;
     case "images":
@@ -1177,6 +1273,7 @@ function validateSectionData(data: Json, schema: SectionSchema): ValidationWarni
 }
 
 // ── product editor modal ──────────────────────────────────
+// ── product editor modal (centered with live image & data preview) ──────────────
 function ProductEditorModal({ item, index, collection, onClose, onSave, onFieldChange, onFieldItemChange }: {
   item: Item;
   index: number;
@@ -1198,51 +1295,178 @@ function ProductEditorModal({ item, index, collection, onClose, onSave, onFieldC
     onFieldItemChange(key, v);
   }, [onFieldItemChange]);
 
+  const imgUrl = String(
+    item.customImage ||
+    item.img ||
+    item.src ||
+    item.image ||
+    (Array.isArray(item.images) ? item.images[0] : "") ||
+    ""
+  );
+
+  const titleText = String(item.name || item.series || item.label || item.slug || `Item #${index + 1}`);
+  const statVal = item.stat ? String(item.stat) : (item.speed ? `${item.speed} m/min` : "");
+  const statLabel = item.label ? String(item.label) : (item.stat ? "Max Rating" : "");
+  const specsArr = Array.isArray(item.specs) ? item.specs : [];
+  const featuresArr = Array.isArray(item.features) ? item.features : [];
+
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 9998,
-      display: "flex", flexDirection: "column",
-      background: "var(--adm-bg)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "1.5rem",
+      background: "rgba(3, 8, 16, 0.82)",
+      backdropFilter: "blur(12px)",
+      WebkitBackdropFilter: "blur(12px)",
+    }} onClick={() => {
+      if (dirty && !confirm("You have unsaved changes. Discard?")) return;
+      onClose();
     }}>
-      {/* modal header */}
       <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "1rem 1.5rem", borderBottom: "1px solid var(--adm-border)",
-        background: "var(--adm-surface)", flexShrink: 0,
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <button type="button" onClick={() => {
-            if (dirty && !confirm("You have unsaved changes. Discard?")) return;
-            onClose();
-          }} style={{
-            ...iconBtn, padding: "0.6rem",
-          }}>← Back</button>
-          <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.3rem", color: "#fff", margin: 0 }}>
-            Edit: {String(item.name ?? item.series ?? `#${index + 1}`)}
-          </h2>
-          {dirty && <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.8rem", color: "#f5c451" }}>● Unsaved</span>}
-        </div>
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          <button type="button" onClick={onClose} style={{
-            ...btnBase, background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.7)",
-          }}>Close</button>
-          <button type="button" onClick={() => { setDirty(false); onSave(); }} style={{
-            ...btnBase, background: "var(--brand-teal)", color: "#04211e",
-          }}>
-            <CheckCircle2 size={14} /> Save product
-          </button>
-        </div>
-      </div>
+        width: "100%", maxWidth: 1180, maxHeight: "90vh",
+        display: "flex", flexDirection: "column",
+        background: "#0d1522",
+        border: "1px solid rgba(43, 191, 179, 0.35)",
+        borderRadius: 24,
+        boxShadow: "0 30px 90px rgba(0,0,0,0.9), 0 0 50px rgba(43, 191, 179, 0.15)",
+        overflow: "hidden",
+      }} onClick={e => e.stopPropagation()}>
 
-      {/* modal body */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "1.5rem" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <ItemFieldsPanel
-            collection={collection}
-            item={item}
-            onFieldChange={handleChange}
-            onFieldItemChange={handleItemChange}
-          />
+        {/* Modal Header */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "1.1rem 1.75rem", borderBottom: "1px solid rgba(255,255,255,0.08)",
+          background: "rgba(255,255,255,0.02)", flexShrink: 0,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
+            <button type="button" onClick={() => {
+              if (dirty && !confirm("You have unsaved changes. Discard?")) return;
+              onClose();
+            }} style={{ ...iconBtn, padding: "0.5rem 0.85rem", fontSize: "0.88rem" }}>← Back</button>
+            <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.35rem", color: "#fff", margin: 0 }}>
+              Edit: {titleText}
+            </h2>
+            {dirty && <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.82rem", color: "#f5c451", fontWeight: 600 }}>● Unsaved</span>}
+          </div>
+          <div style={{ display: "flex", gap: "0.6rem" }}>
+            <button type="button" onClick={onClose} style={{
+              ...btnBase, background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.7)",
+            }}>Close</button>
+            <button type="button" onClick={() => { setDirty(false); onSave(); }} style={{
+              ...btnBase, background: "var(--brand-teal)", color: "#04211e", fontWeight: 700,
+            }}>
+              <CheckCircle2 size={16} /> Save product
+            </button>
+          </div>
+        </div>
+
+        {/* Modal Body with 2-Column Split View */}
+        <div style={{
+          display: "grid", gridTemplateColumns: "1fr 380px", flex: 1, overflow: "hidden",
+        }}>
+          {/* Left Column: Form Controls */}
+          <div style={{ overflowY: "auto", padding: "1.75rem", borderRight: "1px solid rgba(255,255,255,0.08)" }}>
+            <ItemFieldsPanel
+              collection={collection}
+              item={item}
+              onFieldChange={handleChange}
+              onFieldItemChange={handleItemChange}
+            />
+          </div>
+
+          {/* Right Column: Centered Live Product & Image Preview Box */}
+          <div style={{ overflowY: "auto", padding: "1.5rem", background: "rgba(0,0,0,0.25)", display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{
+                fontSize: "0.72rem", fontWeight: 800, color: "var(--brand-teal)",
+                letterSpacing: "0.1em", textTransform: "uppercase",
+                display: "inline-flex", alignItems: "center", gap: "0.35rem"
+              }}>
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#2dd4bf", boxShadow: "0 0 10px #2dd4bf" }} />
+                Live Card Preview
+              </span>
+              {Boolean(item.isNew) && (
+                <span className="new-machine-alert-badge">⚡ NEW</span>
+              )}
+            </div>
+
+            {/* Product Image Card Preview */}
+            <div style={{
+              background: "#162338", border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 18, overflow: "hidden", padding: "1.25rem",
+              boxShadow: "0 12px 30px rgba(0,0,0,0.5)",
+              display: "flex", flexDirection: "column", gap: "1rem",
+            }}>
+              {Boolean(imgUrl) ? (
+                <div style={{
+                  position: "relative", width: "100%", height: 210, borderRadius: 14,
+                  overflow: "hidden", background: "radial-gradient(circle, rgba(13,148,136,0.15) 0%, rgba(0,0,0,0.4) 100%)",
+                  border: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", padding: "0.5rem"
+                }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imgUrl}
+                    alt={titleText}
+                    style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.6))" }}
+                  />
+                </div>
+              ) : (
+                <div style={{
+                  width: "100%", height: 180, borderRadius: 14, background: "rgba(255,255,255,0.03)",
+                  border: "1px dashed rgba(255,255,255,0.15)", display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.35)", fontSize: "0.85rem", gap: "0.5rem"
+                }}>
+                  <Camera size={28} />
+                  <span>No Machine Image Set</span>
+                </div>
+              )}
+
+              <div>
+                <div style={{ fontFamily: "var(--ff-mono)", fontSize: "0.68rem", color: "var(--brand-teal)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.2rem" }}>
+                  {String(item.category || item.series || "MACHINE MODEL")}
+                </div>
+                <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.25rem", color: "#fff", margin: "0 0 0.5rem", lineHeight: 1.25 }}>
+                  {titleText}
+                </h4>
+                {Boolean(statVal) && (
+                  <div style={{ display: "inline-flex", flexDirection: "column", background: "rgba(13,148,136,0.15)", border: "1px solid rgba(13,148,136,0.3)", padding: "0.4rem 0.8rem", borderRadius: 10, marginTop: "0.4rem" }}>
+                    <span style={{ fontSize: "1.1rem", fontWeight: 800, color: "#5eead4", lineHeight: 1.1 }}>{statVal}</span>
+                    {statLabel && <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{statLabel}</span>}
+                  </div>
+                )}
+              </div>
+
+              {/* Spec Rows Preview */}
+              {specsArr.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem", background: "rgba(0,0,0,0.3)", padding: "0.85rem", borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.2rem" }}>
+                    Technical Specifications
+                  </div>
+                  {specsArr.slice(0, 5).map((s: any, idx: number) => (
+                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", borderBottom: idx < specsArr.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", paddingBottom: "0.2rem" }}>
+                      <span style={{ color: "rgba(255,255,255,0.5)" }}>{s.label}</span>
+                      <strong style={{ color: "#fff" }}>{Array.isArray(s.values) ? s.values.join(" / ") : String(s.value || s.values || "")}</strong>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Features Preview */}
+              {featuresArr.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                  <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                    Key Highlights
+                  </div>
+                  {featuresArr.slice(0, 3).map((f: any, idx: number) => (
+                    <div key={idx} style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.75)", background: "rgba(255,255,255,0.03)", padding: "0.5rem 0.7rem", borderRadius: 8 }}>
+                      <strong style={{ color: "#5eead4", display: "block", marginBottom: "0.1rem" }}>{f.head}</strong>
+                      <span>{f.body}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1538,9 +1762,10 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
                   <button type="button" style={smallBtn} onClick={() => {
                     const template = JSON.parse(JSON.stringify(col.template ?? {}));
                     if (isFamilies && activeCategory) template.category = activeCategory;
+                    template.isNew = true;
                     mutate(d => {
-                      const newItems = [...allItems, template];
-                      const newIdx = newItems.length - 1;
+                      const newItems = [template, ...allItems];
+                      const newIdx = 0;
                       setTimeout(() => setModalItem({ item: template, index: newIdx, collection: col }), 50);
                       return { ...d, [col.key]: newItems };
                     });

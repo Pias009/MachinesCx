@@ -328,8 +328,7 @@ export default function CategoryPageClient({ category, families, allCategories }
                       <span />
                     )}
                     <span className="ccp-card__cta">
-                      {t("viewDetails")}
-                      <span className="ccp-card__cta-arrow" aria-hidden="true">→</span>
+                      <span className="ccp-card__cta-arrow" aria-hidden="true" style={{ fontSize: "1rem" }}>→</span>
                     </span>
                   </div>
                 </Link>

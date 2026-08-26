@@ -20,7 +20,9 @@ export async function middleware(req: NextRequest) {
     // the admin cookie — so it also has to bypass the session check here.
     if (
       pathname === `/${ADMIN_PATH}/login` ||
+      pathname === `/${ADMIN_PATH}/invite` ||
       pathname === "/api/admin/login" ||
+      pathname === "/api/admin/invite/verify" ||
       pathname === "/api/admin/settings/email/confirm"
     ) {
       return NextResponse.next();

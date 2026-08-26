@@ -451,13 +451,10 @@ export default function MachineCatalogSection() {
           font-family: var(--ff-mono); font-size: 0.75rem; font-weight: 800;
           letter-spacing: 0.04em; text-transform: uppercase;
           transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-          background: #ffffff; color: #0b1523;
-          box-shadow: 0 10px 22px -6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4);
-          cursor: pointer;
         }
-        .mcs-card:hover .mcs-card__pill-btn {
-          transform: translateY(-2px) scale(1.04);
-          box-shadow: 0 14px 28px -6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.6);
+        .mcs-card:hover .mcs-card__arrow-icon {
+          transform: translateX(4px);
+          opacity: 1 !important;
         }
 
         /* ── Light Mode Overrides for Product Cards ── */
@@ -670,9 +667,16 @@ export default function MachineCatalogSection() {
                         <span className="mcs-card__cat-dot" />
                         <span>{CAT_LABELS[fam.category]}</span>
                       </div>
-                      {(fam as any).isNew && (
-                        <span className="new-machine-alert-badge">⚡ NEW</span>
-                      )}
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                        {(fam as any).isNew && (
+                          <span className="new-machine-alert-badge">⚡ NEW</span>
+                        )}
+                        <span className="mcs-card__arrow-icon" aria-hidden="true" style={{ opacity: 0.7, color: "var(--brand-teal)", transition: "transform 0.25s ease, opacity 0.25s ease" }}>
+                          <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
+                            <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </span>
+                      </div>
                     </div>
                     <div className="mcs-card__series">{fam.series}</div>
                     <div className="mcs-card__name">{fam.name.split("—")[0].trim()}</div>
@@ -686,12 +690,6 @@ export default function MachineCatalogSection() {
                     ) : (
                       <div />
                     )}
-                    <div className="mcs-card__pill-btn">
-                      <span>View</span>
-                      <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
                   </div>
                 </TransitionLink>
               );

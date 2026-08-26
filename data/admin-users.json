@@ -14,9 +14,9 @@
       "email": "fitony506@gmail.com",
       "name": "pias",
       "role": "machine_manager",
-      "status": "invited",
-      "tempPassword": "CX-TMP-E97A9657",
-      "createdAt": "2026-08-26T07:17:13.025Z"
+      "status": "active",
+      "createdAt": "2026-08-26T07:17:13.025Z",
+      "lastLoginAt": "2026-08-26T07:23:20.420Z"
     }
   ],
   "invitations": [
@@ -27,12 +27,19 @@
       "role": "machine_manager",
       "tempPassword": "CX-TMP-E97A9657",
       "token": "mag_44534ea70350bd9d951ee76c7f2a0dbe",
-      "status": "pending",
+      "status": "accepted",
       "createdAt": "2026-08-26T07:17:13.025Z",
       "expiresAt": "2026-09-02T07:17:13.025Z"
     }
   ],
   "auditLog": [
+    {
+      "id": "aud-mt9rot0m-wdxt",
+      "timestamp": "2026-08-26T07:23:20.422Z",
+      "actor": "fitony506@gmail.com",
+      "action": "INVITATION_ACCEPTED",
+      "details": "Accepted invitation and initialized secure password for role machine_manager"
+    },
     {
       "id": "aud-mt9rgxj6-czyy",
       "timestamp": "2026-08-26T07:17:13.026Z",

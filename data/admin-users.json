@@ -8,31 +8,24 @@
       "status": "active",
       "createdAt": "2026-08-26T07:02:19.888Z",
       "tempPassword": "pias900###"
+    }
+  ],
+  "invitations": [],
+  "auditLog": [
+    {
+      "id": "aud-mt9s9kb4-1hha",
+      "timestamp": "2026-08-26T07:39:28.912Z",
+      "actor": "Super Admin",
+      "action": "USER_REVOKED",
+      "details": "Revoked access for fitony506@gmail.com"
     },
     {
-      "id": "usr-mt9rgxj5",
-      "email": "fitony506@gmail.com",
-      "name": "pias",
-      "role": "machine_manager",
-      "status": "active",
-      "createdAt": "2026-08-26T07:17:13.025Z",
-      "lastLoginAt": "2026-08-26T07:23:20.420Z"
-    }
-  ],
-  "invitations": [
-    {
-      "id": "inv-mt9rgxj5",
-      "email": "fitony506@gmail.com",
-      "name": "pias",
-      "role": "machine_manager",
-      "tempPassword": "CX-TMP-E97A9657",
-      "token": "mag_44534ea70350bd9d951ee76c7f2a0dbe",
-      "status": "accepted",
-      "createdAt": "2026-08-26T07:17:13.025Z",
-      "expiresAt": "2026-09-02T07:17:13.025Z"
-    }
-  ],
-  "auditLog": [
+      "id": "aud-mt9s9k4b-imut",
+      "timestamp": "2026-08-26T07:39:28.667Z",
+      "actor": "fitony506@gmail.com",
+      "action": "INVITATION_ACCEPTED",
+      "details": "Accepted invitation and initialized secure password for role machine_manager"
+    },
     {
       "id": "aud-mt9rot0m-wdxt",
       "timestamp": "2026-08-26T07:23:20.422Z",

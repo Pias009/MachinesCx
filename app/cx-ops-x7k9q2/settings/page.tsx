@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   KeyRound, Mail, ShieldCheck, Loader2, CheckCircle2, AlertCircle,
-  UserPlus, Users, Copy, Lock, RefreshCw, Trash2, Eye, EyeOff, ShieldAlert, Sparkles
+  UserPlus, Users, Copy, Lock, RefreshCw, Trash2, Eye, EyeOff, ShieldAlert, Sparkles, ExternalLink
 } from "lucide-react";
 import AdminShell from "../AdminShell";
 import { AdminRole, AdminUser, MagicLinkInvitation, SecurityAuditItem } from "@/lib/adminRoles";
@@ -61,6 +61,7 @@ function GmailMagicLinkCard({ onInviteSuccess }: { onInviteSuccess: () => void }
   const [msg, setMsg] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
   const [generatedLinkData, setGeneratedLinkData] = useState<{ magicLink: string; tempPassword: string; email: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copiedOnlyLink, setCopiedOnlyLink] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -104,6 +105,13 @@ function GmailMagicLinkCard({ onInviteSuccess }: { onInviteSuccess: () => void }
     setTimeout(() => setCopied(false), 2000);
   }
 
+  function copyLinkOnly() {
+    if (!generatedLinkData) return;
+    navigator.clipboard.writeText(generatedLinkData.magicLink);
+    setCopiedOnlyLink(true);
+    setTimeout(() => setCopiedOnlyLink(false), 2000);
+  }
+
   const [showLinkPass, setShowLinkPass] = useState(false);
 
   return (
@@ -124,39 +132,57 @@ function GmailMagicLinkCard({ onInviteSuccess }: { onInviteSuccess: () => void }
 
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         <div>
-          <span style={labelStyle}>Recipient Gmail / Email Address</span>
+          <label style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.7)", display: "block", marginBottom: "0.35rem" }}>
+            Gmail / Member Email Address
+          </label>
           <input
-            style={inputStyle}
             type="email"
-            placeholder="e.g. editor.ashal@gmail.com"
+            required
+            placeholder="member@gmail.com"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            required
+            style={{
+              width: "100%", padding: "0.65rem 0.85rem", borderRadius: 10,
+              background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.12)",
+              color: "#fff", outline: "none", fontSize: "0.9rem"
+            }}
           />
         </div>
 
         <div>
-          <span style={labelStyle}>Full Name (Optional)</span>
+          <label style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.7)", display: "block", marginBottom: "0.35rem" }}>
+            Full Name / Label (Optional)
+          </label>
           <input
-            style={inputStyle}
             type="text"
-            placeholder="e.g. Sarah Jenkins"
+            placeholder="e.g. Sarah Content Manager"
             value={name}
             onChange={e => setName(e.target.value)}
+            style={{
+              width: "100%", padding: "0.65rem 0.85rem", borderRadius: 10,
+              background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.12)",
+              color: "#fff", outline: "none", fontSize: "0.9rem"
+            }}
           />
         </div>
 
         <div>
-          <span style={labelStyle}>Assign System Role</span>
+          <label style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.7)", display: "block", marginBottom: "0.35rem" }}>
+            Assigned CMS Role
+          </label>
           <select
-            style={{ ...inputStyle, appearance: "auto" }}
             value={role}
             onChange={e => setRole(e.target.value as AdminRole)}
+            style={{
+              width: "100%", padding: "0.65rem 0.85rem", borderRadius: 10,
+              background: "#0d1b2a", border: "1px solid rgba(255,255,255,0.12)",
+              color: "#fff", outline: "none", fontSize: "0.9rem"
+            }}
           >
-            <option value="content_editor" style={{ background: "#09090b", color: "#fff" }}>Content Editor (CMS & Products)</option>
-            <option value="machine_manager" style={{ background: "#09090b", color: "#fff" }}>Machine Manager (Specs & Catalogue)</option>
-            <option value="analytics_viewer" style={{ background: "#09090b", color: "#fff" }}>Analytics & Inquiry Viewer (Read-only)</option>
-            <option value="super_admin" style={{ background: "#09090b", color: "#fff" }}>Super Admin (Full System Access)</option>
+            <option value="content_editor">Content Editor (Manage Products & Specs)</option>
+            <option value="machine_manager">Machine Manager (Catalogue & Models)</option>
+            <option value="analytics_viewer">Analytics Viewer (Read-only Telemetry)</option>
+            <option value="super_admin">Super Admin (Full Platform Control)</option>
           </select>
         </div>
 
@@ -176,7 +202,7 @@ function GmailMagicLinkCard({ onInviteSuccess }: { onInviteSuccess: () => void }
             ⚡ Magic Link Ready to Send
           </div>
           <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.75)", wordBreak: "break-all" }}>
-            <strong>Magic Link:</strong> <span style={{ color: "#fff", fontFamily: "var(--ff-mono)" }}>{generatedLinkData.magicLink}</span>
+            <strong>Magic Link:</strong> <a href={generatedLinkData.magicLink} target="_blank" rel="noopener noreferrer" style={{ color: "#5eead4", fontFamily: "var(--ff-mono)", textDecoration: "underline" }}>{generatedLinkData.magicLink}</a>
           </div>
           <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.75)", display: "flex", alignItems: "center", gap: "0.4rem" }}>
             <strong>Temporary Password:</strong>
@@ -191,18 +217,32 @@ function GmailMagicLinkCard({ onInviteSuccess }: { onInviteSuccess: () => void }
               {showLinkPass ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
           </div>
-          <button
-            type="button"
-            onClick={copyToClipboard}
-            style={{
-              padding: "0.5rem 0.85rem", borderRadius: 8, background: "#0d9488", border: "none",
-              color: "#fff", fontWeight: 700, fontSize: "0.82rem", cursor: "pointer",
-              display: "inline-flex", alignItems: "center", gap: "0.4rem", alignSelf: "flex-start", marginTop: "0.2rem"
-            }}
-          >
-            {copied ? <CheckCircle2 size={14} /> : <Copy size={14} />}
-            {copied ? "Copied to Clipboard!" : "Copy Invitation Link & Temp Pass"}
-          </button>
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.3rem" }}>
+            <button
+              type="button"
+              onClick={copyLinkOnly}
+              style={{
+                padding: "0.5rem 0.85rem", borderRadius: 8, background: "#0d9488", border: "none",
+                color: "#fff", fontWeight: 700, fontSize: "0.82rem", cursor: "pointer",
+                display: "inline-flex", alignItems: "center", gap: "0.4rem"
+              }}
+            >
+              {copiedOnlyLink ? <CheckCircle2 size={14} /> : <Copy size={14} />}
+              {copiedOnlyLink ? "URL Copied!" : "Copy Link URL Only"}
+            </button>
+            <a
+              href={generatedLinkData.magicLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                padding: "0.5rem 0.85rem", borderRadius: 8, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)",
+                color: "#fff", fontWeight: 700, fontSize: "0.82rem", cursor: "pointer", textDecoration: "none",
+                display: "inline-flex", alignItems: "center", gap: "0.4rem"
+              }}
+            >
+              <ExternalLink size={14} /> Open Invitation Page
+            </a>
+          </div>
         </div>
       )}
 
@@ -240,7 +280,7 @@ function UserRoleManagementTable({ users, invitations, onRefresh }: { users: Adm
       const res = await fetch("/api/admin/roles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "revoke_user", userId }),
+        body: JSON.stringify({ action: "revoke_user", userId, email }),
       });
       if (res.ok) onRefresh();
       else {

@@ -889,7 +889,7 @@ export default function HeroSplash() {
           padding: .78rem 1.8rem .78rem 1.4rem;
           border-radius: 4px;
           background: rgba(6, 20, 18, 0.92);
-          color: #2BBFB3;
+          color: #2BBFB3 !important;
           font-family: var(--ff-mono); font-size: .76rem;
           letter-spacing: .14em; font-weight: 700; text-transform: uppercase;
           text-decoration: none;
@@ -900,11 +900,13 @@ export default function HeroSplash() {
           white-space: nowrap;
           -webkit-backdrop-filter: blur(12px);
           backdrop-filter: blur(12px);
+          z-index: 1;
         }
         .hs__btn-primary span {
           position: relative;
-          z-index: 2;
-          color: inherit;
+          z-index: 10 !important;
+          color: inherit !important;
+          transition: color .2s ease;
         }
         /* fill sweep from left on hover */
         .hs__btn-primary::before {
@@ -915,7 +917,7 @@ export default function HeroSplash() {
           transform: scaleX(0);
           transform-origin: left;
           transition: transform .35s cubic-bezier(0.16,1,0.3,1);
-          z-index: 1;
+          z-index: 2;
         }
         .hs__btn-primary:hover::before { transform: scaleX(1); }
         .hs__btn-primary:hover {
@@ -926,19 +928,23 @@ export default function HeroSplash() {
         }
         .hs__btn-primary:hover span {
           color: #041a18 !important;
+          opacity: 1 !important;
+          visibility: visible !important;
         }
         .hs__btn-primary::after {
           content: "›";
           position: relative;
-          z-index: 2;
+          z-index: 10 !important;
           font-size: 1.1em;
           line-height: 1;
-          color: inherit;
+          color: inherit !important;
           transition: transform .2s ease, color .2s ease;
         }
         .hs__btn-primary:hover::after {
           transform: translateX(4px);
           color: #041a18 !important;
+          opacity: 1 !important;
+          visibility: visible !important;
         }
 
         /* ─────────────────────────────────────────────────────────────────
@@ -950,30 +956,35 @@ export default function HeroSplash() {
           padding: .78rem 1.8rem;
           border-radius: 4px;
           background: transparent;
-          color: rgba(255,255,255,0.75);
+          color: rgba(255,255,255,0.85) !important;
           border: 1px dashed rgba(43,191,179,0.45);
           font-family: var(--ff-mono); font-size: .76rem;
           letter-spacing: .14em; font-weight: 600; text-transform: uppercase;
           text-decoration: none;
           transition: all .25s ease;
           white-space: nowrap;
+          z-index: 1;
         }
         .hs__btn-secondary span {
           position: relative;
-          z-index: 2;
-          color: inherit;
+          z-index: 10 !important;
+          color: inherit !important;
+          transition: color .2s ease;
         }
         .hs__btn-secondary::before,
         .hs__btn-secondary::after { content: none; }
         .hs__btn-secondary:hover {
-          background: rgba(43,191,179,0.12);
-          border-color: rgba(43,191,179,0.8);
-          border-style: solid;
+          background: rgba(43,191,179,0.15) !important;
+          border-color: rgba(43,191,179,0.85) !important;
+          border-style: solid !important;
           color: #ffffff !important;
           transform: translateY(-2px);
+          box-shadow: 0 4px 16px rgba(43,191,179,0.2);
         }
         .hs__btn-secondary:hover span {
           color: #ffffff !important;
+          opacity: 1 !important;
+          visibility: visible !important;
         }
 
 

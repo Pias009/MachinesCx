@@ -7,11 +7,183 @@
       "role": "super_admin",
       "status": "active",
       "createdAt": "2026-08-26T07:02:19.888Z",
-      "tempPassword": "pias900###"
+      "tempPassword": "pias900###",
+      "lastLoginAt": "2026-08-27T18:15:29.199Z"
+    },
+    {
+      "id": "usr-editor-1",
+      "email": "editor@ashalinnomech.com",
+      "name": "Content Editor",
+      "role": "content_editor",
+      "status": "active",
+      "tempPassword": "editor123",
+      "createdAt": "2026-08-27T18:14:27.063Z",
+      "lastLoginAt": "2026-08-27T18:14:32.879Z"
+    },
+    {
+      "id": "usr-machine-1",
+      "email": "machine@ashalinnomech.com",
+      "name": "Machine Manager",
+      "role": "machine_manager",
+      "status": "active",
+      "tempPassword": "machine123",
+      "createdAt": "2026-08-27T18:14:27.063Z",
+      "lastLoginAt": "2026-08-27T18:14:33.245Z"
+    },
+    {
+      "id": "usr-analytics-1",
+      "email": "analytics@ashalinnomech.com",
+      "name": "Analytics Viewer",
+      "role": "analytics_viewer",
+      "status": "active",
+      "tempPassword": "viewer123",
+      "createdAt": "2026-08-27T18:14:27.063Z",
+      "lastLoginAt": "2026-08-27T18:14:33.593Z"
+    },
+    {
+      "id": "usr-mtbufc8i",
+      "email": "cms.lead@ashalinnomech.com",
+      "name": "Sarah Content Lead",
+      "role": "content_editor",
+      "status": "active",
+      "tempPassword": "CX-TMP-47C8317D",
+      "createdAt": "2026-08-27T18:15:29.970Z",
+      "lastLoginAt": "2026-08-27T18:15:32.785Z"
+    },
+    {
+      "id": "usr-mtbufd82",
+      "email": "factory.lead@ashalinnomech.com",
+      "name": "Alex Factory Manager",
+      "role": "machine_manager",
+      "status": "active",
+      "tempPassword": "CX-TMP-62D41E55",
+      "createdAt": "2026-08-27T18:15:31.250Z",
+      "lastLoginAt": "2026-08-27T18:15:33.194Z"
+    },
+    {
+      "id": "usr-mtbufdx1",
+      "email": "ops.analyst@ashalinnomech.com",
+      "name": "Marcus Data Analyst",
+      "role": "analytics_viewer",
+      "status": "active",
+      "tempPassword": "CX-TMP-B8B87CCE",
+      "createdAt": "2026-08-27T18:15:32.149Z",
+      "lastLoginAt": "2026-08-27T18:15:33.537Z"
     }
   ],
-  "invitations": [],
+  "invitations": [
+    {
+      "id": "inv-mtbufdx1",
+      "email": "ops.analyst@ashalinnomech.com",
+      "name": "Marcus Data Analyst",
+      "role": "analytics_viewer",
+      "tempPassword": "CX-TMP-B8B87CCE",
+      "token": "mag_f6bdfd08ef6e0a49010a22c83ff0c7f7",
+      "status": "pending",
+      "createdAt": "2026-08-27T18:15:32.149Z",
+      "expiresAt": "2026-09-03T18:15:32.149Z"
+    },
+    {
+      "id": "inv-mtbufd82",
+      "email": "factory.lead@ashalinnomech.com",
+      "name": "Alex Factory Manager",
+      "role": "machine_manager",
+      "tempPassword": "CX-TMP-62D41E55",
+      "token": "mag_b6ae29738a8d18018fe2a1925378a7dd",
+      "status": "pending",
+      "createdAt": "2026-08-27T18:15:31.250Z",
+      "expiresAt": "2026-09-03T18:15:31.250Z"
+    },
+    {
+      "id": "inv-mtbufc8i",
+      "email": "cms.lead@ashalinnomech.com",
+      "name": "Sarah Content Lead",
+      "role": "content_editor",
+      "tempPassword": "CX-TMP-47C8317D",
+      "token": "mag_38fa2262ee83b8ab5949fe9a9577cd70",
+      "status": "pending",
+      "createdAt": "2026-08-27T18:15:29.970Z",
+      "expiresAt": "2026-09-03T18:15:29.970Z"
+    }
+  ],
   "auditLog": [
+    {
+      "id": "aud-mtbufezl-77y9",
+      "timestamp": "2026-08-27T18:15:33.537Z",
+      "actor": "Marcus Data Analyst",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'analytics_viewer'"
+    },
+    {
+      "id": "aud-mtbufeq2-cjh4",
+      "timestamp": "2026-08-27T18:15:33.194Z",
+      "actor": "Alex Factory Manager",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'machine_manager'"
+    },
+    {
+      "id": "aud-mtbufeeq-2d4r",
+      "timestamp": "2026-08-27T18:15:32.786Z",
+      "actor": "Sarah Content Lead",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'content_editor'"
+    },
+    {
+      "id": "aud-mtbufe6a-7w8n",
+      "timestamp": "2026-08-27T18:15:32.482Z",
+      "actor": "Super Admin",
+      "action": "GMAIL_MAGIC_LINK_CREATED",
+      "details": "Created magic link invitation for ops.analyst@ashalinnomech.com with role 'analytics_viewer' and temporary password"
+    },
+    {
+      "id": "aud-mtbufdux-xf19",
+      "timestamp": "2026-08-27T18:15:32.073Z",
+      "actor": "Super Admin",
+      "action": "GMAIL_MAGIC_LINK_CREATED",
+      "details": "Created magic link invitation for factory.lead@ashalinnomech.com with role 'machine_manager' and temporary password"
+    },
+    {
+      "id": "aud-mtbufd52-dlf2",
+      "timestamp": "2026-08-27T18:15:31.142Z",
+      "actor": "Super Admin",
+      "action": "GMAIL_MAGIC_LINK_CREATED",
+      "details": "Created magic link invitation for cms.lead@ashalinnomech.com with role 'content_editor' and temporary password"
+    },
+    {
+      "id": "aud-mtbufbn4-dty4",
+      "timestamp": "2026-08-27T18:15:29.200Z",
+      "actor": "Super Admin",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'super_admin'"
+    },
+    {
+      "id": "aud-mtbue4qh-56b7",
+      "timestamp": "2026-08-27T18:14:33.593Z",
+      "actor": "Analytics Viewer",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'analytics_viewer'"
+    },
+    {
+      "id": "aud-mtbue4gu-ds2x",
+      "timestamp": "2026-08-27T18:14:33.246Z",
+      "actor": "Machine Manager",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'machine_manager'"
+    },
+    {
+      "id": "aud-mtbue46n-0ehn",
+      "timestamp": "2026-08-27T18:14:32.879Z",
+      "actor": "Content Editor",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'content_editor'"
+    },
+    {
+      "id": "aud-mtbue3en-qx5s",
+      "timestamp": "2026-08-27T18:14:31.871Z",
+      "actor": "Super Admin",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'super_admin'"
+    },
     {
       "id": "aud-mt9s9kb4-1hha",
       "timestamp": "2026-08-26T07:39:28.912Z",

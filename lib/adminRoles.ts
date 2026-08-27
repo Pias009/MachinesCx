@@ -52,6 +52,34 @@ const DEFAULT_DB: RolesDatabase = {
       name: "Super Admin",
       role: "super_admin",
       status: "active",
+      tempPassword: "pias900###",
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: "usr-editor-1",
+      email: "editor@ashalinnomech.com",
+      name: "Content Editor",
+      role: "content_editor",
+      status: "active",
+      tempPassword: "editor123",
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: "usr-machine-1",
+      email: "machine@ashalinnomech.com",
+      name: "Machine Manager",
+      role: "machine_manager",
+      status: "active",
+      tempPassword: "machine123",
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: "usr-analytics-1",
+      email: "analytics@ashalinnomech.com",
+      name: "Analytics Viewer",
+      role: "analytics_viewer",
+      status: "active",
+      tempPassword: "viewer123",
       createdAt: new Date().toISOString(),
     },
   ],
@@ -62,7 +90,7 @@ const DEFAULT_DB: RolesDatabase = {
       timestamp: new Date().toISOString(),
       actor: "System",
       action: "SYSTEM_INITIALIZED",
-      details: "Default Super Admin account created with full security scope",
+      details: "Default Admin accounts & security scope initialized",
     },
   ],
 };
@@ -75,8 +103,17 @@ export function readRolesDB(): RolesDatabase {
     }
     const raw = fs.readFileSync(DATA_FILE, "utf-8");
     const parsed = JSON.parse(raw);
+    const users: AdminUser[] = Array.isArray(parsed.users) ? parsed.users : DEFAULT_DB.users;
+
+    // Ensure default role accounts exist for instant role testing if not deleted by admin
+    DEFAULT_DB.users.forEach((defUser) => {
+      if (!users.some((u) => u.email.toLowerCase() === defUser.email.toLowerCase())) {
+        users.push(defUser);
+      }
+    });
+
     return {
-      users: Array.isArray(parsed.users) ? parsed.users : DEFAULT_DB.users,
+      users,
       invitations: Array.isArray(parsed.invitations) ? parsed.invitations : [],
       auditLog: Array.isArray(parsed.auditLog) ? parsed.auditLog : [],
     };

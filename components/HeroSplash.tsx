@@ -534,10 +534,16 @@ export default function HeroSplash() {
           border-color: rgba(13,34,32,0.25) !important;
           box-shadow: none !important;
         }
+        [data-theme="light"] .hs__btn-secondary span {
+          color: #0d2220 !important;
+        }
         [data-theme="light"] .hs__btn-secondary:hover {
-          background: rgba(43,191,179,0.08) !important;
-          border-color: var(--brand-teal) !important;
-          color: var(--brand-teal) !important;
+          background: #2BBFB3 !important;
+          border-color: #2BBFB3 !important;
+          color: #041a18 !important;
+        }
+        [data-theme="light"] .hs__btn-secondary:hover span {
+          color: #041a18 !important;
         }
         [data-theme="light"] .hs__node-card {
           background: #eef1f0;
@@ -564,10 +570,16 @@ export default function HeroSplash() {
           color: #0d2220 !important;
           border-color: rgba(13,34,32,0.25) !important;
         }
+        .hs--light .hs__btn-secondary span {
+          color: #0d2220 !important;
+        }
         .hs--light .hs__btn-secondary:hover {
-          background: rgba(43,191,179,0.08) !important;
-          border-color: var(--brand-teal) !important;
-          color: var(--brand-teal) !important;
+          background: #2BBFB3 !important;
+          border-color: #2BBFB3 !important;
+          color: #041a18 !important;
+        }
+        .hs--light .hs__btn-secondary:hover span {
+          color: #041a18 !important;
         }
         .hs--light .hs__node-card {
           /* Product photos are studio shots on a near-white background —
@@ -900,55 +912,39 @@ export default function HeroSplash() {
           white-space: nowrap;
           -webkit-backdrop-filter: blur(12px);
           backdrop-filter: blur(12px);
-          z-index: 1;
         }
         .hs__btn-primary span {
           position: relative;
-          z-index: 10 !important;
+          z-index: 2;
           color: inherit !important;
           transition: color .2s ease;
-        }
-        /* fill sweep from left on hover */
-        .hs__btn-primary::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background: #2BBFB3;
-          transform: scaleX(0);
-          transform-origin: left;
-          transition: transform .35s cubic-bezier(0.16,1,0.3,1);
-          z-index: 2;
-        }
-        .hs__btn-primary:hover::before { transform: scaleX(1); }
-        .hs__btn-primary:hover {
-          color: #041a18 !important;
-          border-color: #2BBFB3;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 20px rgba(43,191,179,0.35);
-        }
-        .hs__btn-primary:hover span {
-          color: #041a18 !important;
-          opacity: 1 !important;
-          visibility: visible !important;
         }
         .hs__btn-primary::after {
           content: "›";
           position: relative;
-          z-index: 10 !important;
+          z-index: 2;
           font-size: 1.1em;
           line-height: 1;
           color: inherit !important;
           transition: transform .2s ease, color .2s ease;
         }
+        .hs__btn-primary:hover {
+          background: #2BBFB3 !important;
+          color: #041a18 !important;
+          border-color: #2BBFB3 !important;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 24px rgba(43,191,179,0.45);
+        }
+        .hs__btn-primary:hover span,
+        .hs__btn-primary:hover::after {
+          color: #041a18 !important;
+        }
         .hs__btn-primary:hover::after {
           transform: translateX(4px);
-          color: #041a18 !important;
-          opacity: 1 !important;
-          visibility: visible !important;
         }
 
         /* ─────────────────────────────────────────────────────────────────
-           SECONDARY: dashed teal outline, muted text, glass fill on hover
+           SECONDARY: dashed teal outline, muted text, solid teal on hover
         ───────────────────────────────────────────────────────────────── */
         .hs__btn-secondary {
           position: relative;
@@ -963,28 +959,23 @@ export default function HeroSplash() {
           text-decoration: none;
           transition: all .25s ease;
           white-space: nowrap;
-          z-index: 1;
         }
         .hs__btn-secondary span {
           position: relative;
-          z-index: 10 !important;
+          z-index: 2;
           color: inherit !important;
           transition: color .2s ease;
         }
-        .hs__btn-secondary::before,
-        .hs__btn-secondary::after { content: none; }
         .hs__btn-secondary:hover {
-          background: rgba(43,191,179,0.15) !important;
-          border-color: rgba(43,191,179,0.85) !important;
+          background: #2BBFB3 !important;
+          border-color: #2BBFB3 !important;
           border-style: solid !important;
-          color: #ffffff !important;
+          color: #041a18 !important;
           transform: translateY(-2px);
-          box-shadow: 0 4px 16px rgba(43,191,179,0.2);
+          box-shadow: 0 6px 24px rgba(43,191,179,0.45);
         }
         .hs__btn-secondary:hover span {
-          color: #ffffff !important;
-          opacity: 1 !important;
-          visibility: visible !important;
+          color: #041a18 !important;
         }
 
 

@@ -150,6 +150,41 @@ function getFamilyImage(f: Pick<ProductFamily, "slug" | "image" | "images">): st
   return `/machines/${f.slug}.png`;
 }
 
+/* ── Mobile arc: 5 visible slots along a half-circle ────────────────────
+   Cards sit on an ellipse centred at (50%, 108%) — below the container
+   so it dips like a half-arch. The SVG guide line uses the exact same
+   math so both the line and the cards follow the identical curve. */
+const MOBILE_SLOTS = 5;
+const MOBILE_ARC_ANGLES = [-58, -32, 0, 32, 58];
+const MOBILE_ARC_RX = 36;  // % — tighter horizontal so cards stay on-screen
+const MOBILE_ARC_RY = 50;  // % — shallower vertical so bottom cards don't clip
+const MOBILE_ARC_CX = 50;
+const MOBILE_ARC_CY = 103; // % — centre slightly higher
+
+function getMobileArcPos(slotIdx: number): { left: number; top: number; scale: number } {
+  const angleDeg = MOBILE_ARC_ANGLES[slotIdx] ?? 0;
+  const angleRad = (angleDeg - 90) * (Math.PI / 180);
+  const left = MOBILE_ARC_CX + MOBILE_ARC_RX * Math.cos(angleRad);
+  const top  = MOBILE_ARC_CY + MOBILE_ARC_RY * Math.sin(angleRad);
+  const distFromCenter = Math.abs(slotIdx - 2);
+  const scale = 1 - distFromCenter * 0.15;
+  return { left, top, scale };
+}
+
+/* SVG Q-bezier control point for the new geometry:
+   Slot 0 ≈ (19.5%, 76.5%)  Slot 2 = (50%, 53%)  Slot 4 ≈ (80.5%, 76.5%)
+   CP = 2·apex − midpoint(ends) = (50, 29.5) */
+const MOB_SVG_P0 = { x: 19.5, y: 76.5 };
+const MOB_SVG_CP = { x: 50,   y: 29.5 };
+const MOB_SVG_P2 = { x: 80.5, y: 76.5 };
+
+const HERO_PHRASES = [
+  "High-Performance Blown Film Lines",
+  "Precision Bag Making Machinery",
+  "Recycling & Pelletizing Systems",
+  "Engineered for 24/7 Industrial Output"
+];
+
 export default function HeroSplash() {
   const archRef   = useRef<HTMLDivElement>(null);
   const shapesRef = useRef<HTMLDivElement>(null);
@@ -157,6 +192,23 @@ export default function HeroSplash() {
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [phraseIdx, setPhraseIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPhraseIdx((prev) => (prev + 1) % HERO_PHRASES.length);
+    }, 2800);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -234,25 +286,32 @@ export default function HeroSplash() {
     }));
   })();
 
-  /* Step-and-pause arch trajectory loop:
-     Cards sit anchored at 5 arch slots for 2.35s, then advance 1 step along
-     the arch trajectory over 0.85s. Cards entering emerge from bottom-right,
-     cards exiting fade out into bottom-left. */
+  /* Step-and-pause arch trajectory loop.
+     Desktop: only animates when more than 5 nodes (cards rotate through slots).
+     Mobile: always animates so the carousel cycles through all products. */
   useEffect(() => {
-    if (isPaused || nodes.length <= 5) return;
+    if (isPaused) return;
+    // Desktop: skip animation when ≤5 nodes (all slots filled, no cycling needed)
+    if (!isMobile && nodes.length <= 5) return;
+    // Mobile: always cycle so carousel advances through all products
+    if (nodes.length <= 1) return;
 
     const timer = setInterval(() => {
       setStep((prev) => prev + 1);
     }, 3200);
 
     return () => clearInterval(timer);
-  }, [isPaused, nodes.length]);
+  }, [isPaused, nodes.length, isMobile]);
 
-  /* GSAP: reveal media cards left → right, fading in one after another */
+  /* GSAP: reveal media cards — desktop gets scale+lift entrance, mobile
+     desktop gets scale+lift, mobile is CSS-only so GSAP never touches arc cards. */
   useEffect(() => {
     const root = archRef.current;
     if (!root) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Mobile entrance is handled by CSS @keyframes — bail out so GSAP never
+    // sets scale/opacity on mobile cards (avoids the small→big pop).
+    if (window.matchMedia("(max-width: 640px)").matches) return;
 
     let ctx: { revert: () => void } | null = null;
     let cancelled = false;
@@ -277,6 +336,7 @@ export default function HeroSplash() {
 
     return () => { cancelled = true; ctx?.revert(); };
   }, []);
+
 
   /* mouse-tracked tilt on the arch cards — each card leans toward the
      cursor independently (distance-weighted so only nearby cards react
@@ -467,18 +527,17 @@ export default function HeroSplash() {
         }
         [data-theme="light"] section.hs h1.hs__h1 { color: #0d2220 !important; }
         [data-theme="light"] .hs__h1 em { color: var(--brand-teal) !important; }
-        [data-theme="light"] .hs__desc { color: rgba(13,34,32,0.72) !important; }
+        [data-theme="light"] .hs__ticker-text { color: rgba(13,34,32,0.85) !important; }
+        [data-theme="light"] .hs__desc-ticker { background: rgba(13,34,32,0.05) !important; border-color: rgba(13,34,32,0.15) !important; }
         [data-theme="light"] .hs__btn-secondary {
-          background: rgba(13, 34, 32, 0.06) !important;
           color: #0d2220 !important;
-          border-color: rgba(13,34,32,0.18) !important;
-          box-shadow: 0 6px 16px rgba(13,34,32,0.08) !important;
+          border-color: rgba(13,34,32,0.25) !important;
+          box-shadow: none !important;
         }
         [data-theme="light"] .hs__btn-secondary:hover {
-          background: rgba(13, 34, 32, 0.12) !important;
-          border-color: #00A876 !important;
-          color: #0d2220 !important;
-          box-shadow: 0 10px 24px rgba(0, 168, 118, 0.2) !important;
+          background: rgba(43,191,179,0.08) !important;
+          border-color: var(--brand-teal) !important;
+          color: var(--brand-teal) !important;
         }
         [data-theme="light"] .hs__node-card {
           background: #eef1f0;
@@ -498,19 +557,17 @@ export default function HeroSplash() {
         .hs--light { background: #ffffff; }
         .hs--light .hs__h1  { color: #0d2220 !important; }
         .hs--light .hs__h1 em { color: var(--brand-teal) !important; }
-        .hs--light .hs__desc { color: rgba(13,34,32,0.72) !important; }
+        .hs--light .hs__ticker-text { color: rgba(13,34,32,0.85) !important; }
+        .hs--light .hs__desc-ticker { background: rgba(13,34,32,0.05) !important; border-color: rgba(13,34,32,0.15) !important; }
         .hs--light .hs__eyebrow { color: var(--brand-teal) !important; }
         .hs--light .hs__btn-secondary {
-          background: rgba(13, 34, 32, 0.06) !important;
           color: #0d2220 !important;
-          border-color: rgba(13,34,32,0.18) !important;
-          box-shadow: 0 6px 16px rgba(13,34,32,0.08) !important;
+          border-color: rgba(13,34,32,0.25) !important;
         }
         .hs--light .hs__btn-secondary:hover {
-          background: rgba(13, 34, 32, 0.12) !important;
-          border-color: #00A876 !important;
-          color: #0d2220 !important;
-          box-shadow: 0 10px 24px rgba(0, 168, 118, 0.2) !important;
+          background: rgba(43,191,179,0.08) !important;
+          border-color: var(--brand-teal) !important;
+          color: var(--brand-teal) !important;
         }
         .hs--light .hs__node-card {
           /* Product photos are studio shots on a near-white background —
@@ -545,7 +602,7 @@ export default function HeroSplash() {
           flex-direction: column;
           align-items: center;
           text-align: center;
-          padding: clamp(5.5rem, 10vh, 7.5rem) 1.5rem 1.5rem;
+          padding: clamp(9.5rem, 18vh, 12rem) 1.5rem 1.5rem;
         }
 
         .hs__eyebrow {
@@ -580,15 +637,195 @@ export default function HeroSplash() {
           filter: drop-shadow(0 6px 18px rgba(43,191,179,0.45));
         }
 
-        .hs__desc {
-          font-family: var(--ff-body);
-          font-size: clamp(.95rem, 1.1vw, 1.05rem);
-          color: var(--ink-60);
-          line-height: 1.7;
-          max-width: 46ch;
-          margin: 0 0 2.25rem;
-          letter-spacing: .01em;
+        .hs__desc-ticker {
+          display: inline-flex;
+          align-items: center;
+          gap: .6rem;
+          max-width: min(92vw, 380px);
+          margin: 0 0 2rem;
+          padding: .48rem 1.1rem;
+          background: rgba(43,191,179,0.07);
+          border: 1px solid rgba(43,191,179,0.22);
+          border-radius: 9999px;
+          -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+          overflow: hidden;
           opacity: 1; animation: hs-rise .9s cubic-bezier(.2,.7,.2,1) .2s both;
+        }
+
+        .hs__ticker-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #2BBFB3;
+          box-shadow: 0 0 8px #2BBFB3;
+          flex-shrink: 0;
+          animation: hs-pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes hs-pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.35; transform: scale(0.75); }
+        }
+
+        .hs__ticker-text {
+          font-family: var(--ff-mono);
+          font-size: clamp(.68rem, 1vw, .76rem);
+          color: var(--ink-60);
+          letter-spacing: .06em;
+          text-transform: uppercase;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          display: inline-block;
+          animation: hs-ticker-slide .4s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes hs-ticker-slide {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+
+        /* Mobile Product Showcase Spotlight Card */
+        .hs__mobile-showcase {
+          width: 100%;
+          max-width: 360px;
+          margin: 1.5rem auto 0;
+        }
+
+        .hs__showcase-card {
+          position: relative;
+          background: rgba(6, 20, 18, 0.75);
+          border: 1px solid rgba(43, 191, 179, 0.3);
+          border-radius: 12px;
+          padding: 1rem;
+          -webkit-backdrop-filter: blur(16px);
+          backdrop-filter: blur(16px);
+          box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .hs__showcase-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: .75rem;
+        }
+
+        .hs__showcase-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: .4rem;
+          font-family: var(--ff-mono);
+          font-size: .6rem;
+          letter-spacing: .06em;
+          text-transform: uppercase;
+          color: #2BBFB3;
+          background: rgba(43, 191, 179, 0.12);
+          border: 1px solid rgba(43, 191, 179, 0.25);
+          border-radius: 4px;
+          padding: .2rem .55rem;
+        }
+
+        .hs__badge-dot {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: #2BBFB3;
+          box-shadow: 0 0 6px #2BBFB3;
+        }
+
+        .hs__showcase-series {
+          font-family: var(--ff-mono);
+          font-size: .6rem;
+          color: rgba(255, 255, 255, 0.5);
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        }
+
+        .hs__showcase-body {
+          display: flex;
+          align-items: center;
+          gap: .9rem;
+          text-decoration: none;
+          background: rgba(43, 191, 179, 0.04);
+          border: 1px solid rgba(43, 191, 179, 0.15);
+          border-radius: 8px;
+          padding: .65rem;
+          transition: background .2s ease, border-color .2s ease;
+        }
+
+        .hs__showcase-body:active {
+          background: rgba(43, 191, 179, 0.1);
+          border-color: rgba(43, 191, 179, 0.4);
+        }
+
+        .hs__showcase-img-wrap {
+          position: relative;
+          width: 76px;
+          height: 64px;
+          flex-shrink: 0;
+          border-radius: 6px;
+          overflow: hidden;
+          background: rgba(4, 26, 24, 0.8);
+        }
+
+        .hs__showcase-img {
+          object-fit: contain;
+          padding: 2px;
+        }
+
+        .hs__showcase-info {
+          display: flex;
+          flex-direction: column;
+          gap: .2rem;
+          min-width: 0;
+        }
+
+        .hs__showcase-name {
+          font-family: var(--ff-heading, var(--ff-body));
+          font-size: .84rem;
+          font-weight: 700;
+          color: #ffffff;
+          margin: 0;
+          line-height: 1.25;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .hs__showcase-cta {
+          font-family: var(--ff-mono);
+          font-size: .65rem;
+          color: #2BBFB3;
+          letter-spacing: .04em;
+          font-weight: 600;
+          margin-top: .15rem;
+        }
+
+        .hs__showcase-dots {
+          display: flex;
+          justify-content: center;
+          gap: 6px;
+          margin-top: .8rem;
+        }
+
+        .hs__showcase-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          border: none;
+          background: rgba(255, 255, 255, 0.25);
+          padding: 0;
+          cursor: pointer;
+          transition: all .25s ease;
+        }
+
+        .hs__showcase-dot.is-active {
+          width: 18px;
+          border-radius: 3px;
+          background: #2BBFB3;
+          box-shadow: 0 0 8px rgba(43, 191, 179, 0.6);
         }
 
         .hs__actions {
@@ -632,50 +869,113 @@ export default function HeroSplash() {
         [data-theme="light"] .hs__stat-div { background: rgba(13,34,32,0.14) !important; }
 
         @media(max-width:640px){
+          .hs { min-height: auto !important; padding-bottom: 2.5rem; }
           .hs__stats { gap: 1rem; margin-top: 1.75rem; }
           .hs__stat-div { height: 22px; }
+          .hs__arch { display: none !important; }
+          .hs__mobile-dots { display: none !important; }
         }
         @media(max-width:480px){
           .hs__stats { gap: .75rem; }
           .hs__stat-label { font-size: .56rem; }
         }
 
+        /* ─────────────────────────────────────────────────────────────────
+           PRIMARY: dark fill + teal left-bar, text flips on hover
+        ───────────────────────────────────────────────────────────────── */
         .hs__btn-primary {
-          display: inline-flex; align-items: center; gap: .55rem;
-          padding: .8rem 1.75rem;
-          border-radius: 9999px;
-          background: linear-gradient(135deg, #00D294 0%, #00B880 100%);
-          color: #04211e;
-          font-family: var(--ff-body); font-size: .92rem;
-          letter-spacing: .02em; font-weight: 700;
-          text-decoration: none; border: 1px solid rgba(0, 210, 148, 0.4);
-          box-shadow: 0 10px 28px -6px rgba(0,210,148,0.45), inset 0 1px 1px rgba(255,255,255,0.5);
-          transition: all .25s cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap;
-        }
-        .hs__btn-primary:hover {
-          background: linear-gradient(135deg, #00E8A4 0%, #00C48C 100%);
-          transform: translateY(-2px) scale(1.02);
-          box-shadow: 0 16px 36px -6px rgba(0,210,148,0.65), inset 0 1px 2px rgba(255,255,255,0.8);
-        }
-        .hs__btn-secondary {
-          display: inline-flex; align-items: center; gap: .55rem;
-          padding: .8rem 1.75rem;
-          border-radius: 9999px;
-          background: rgba(255, 255, 255, 0.06); color: #ffffff;
-          border: 1px solid rgba(255, 255, 255, 0.18);
-          -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-          font-family: var(--ff-body); font-size: .92rem;
-          letter-spacing: .02em; font-weight: 600;
+          position: relative;
+          display: inline-flex; align-items: center; gap: .65rem;
+          padding: .78rem 1.8rem .78rem 1.4rem;
+          border-radius: 4px;
+          background: rgba(6, 20, 18, 0.92);
+          color: #2BBFB3;
+          font-family: var(--ff-mono); font-size: .76rem;
+          letter-spacing: .14em; font-weight: 700; text-transform: uppercase;
           text-decoration: none;
-          box-shadow: 0 8px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
-          transition: all .25s cubic-bezier(0.16, 1, 0.3, 1); white-space: nowrap;
+          border: 1px solid rgba(43,191,179,0.35);
+          border-left: 3px solid #2BBFB3;
+          overflow: hidden;
+          transition: all .25s ease;
+          white-space: nowrap;
+          -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(12px);
         }
+        .hs__btn-primary span {
+          position: relative;
+          z-index: 2;
+          color: inherit;
+        }
+        /* fill sweep from left on hover */
+        .hs__btn-primary::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: #2BBFB3;
+          transform: scaleX(0);
+          transform-origin: left;
+          transition: transform .35s cubic-bezier(0.16,1,0.3,1);
+          z-index: 1;
+        }
+        .hs__btn-primary:hover::before { transform: scaleX(1); }
+        .hs__btn-primary:hover {
+          color: #041a18 !important;
+          border-color: #2BBFB3;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 20px rgba(43,191,179,0.35);
+        }
+        .hs__btn-primary:hover span {
+          color: #041a18 !important;
+        }
+        .hs__btn-primary::after {
+          content: "›";
+          position: relative;
+          z-index: 2;
+          font-size: 1.1em;
+          line-height: 1;
+          color: inherit;
+          transition: transform .2s ease, color .2s ease;
+        }
+        .hs__btn-primary:hover::after {
+          transform: translateX(4px);
+          color: #041a18 !important;
+        }
+
+        /* ─────────────────────────────────────────────────────────────────
+           SECONDARY: dashed teal outline, muted text, glass fill on hover
+        ───────────────────────────────────────────────────────────────── */
+        .hs__btn-secondary {
+          position: relative;
+          display: inline-flex; align-items: center; gap: .65rem;
+          padding: .78rem 1.8rem;
+          border-radius: 4px;
+          background: transparent;
+          color: rgba(255,255,255,0.75);
+          border: 1px dashed rgba(43,191,179,0.45);
+          font-family: var(--ff-mono); font-size: .76rem;
+          letter-spacing: .14em; font-weight: 600; text-transform: uppercase;
+          text-decoration: none;
+          transition: all .25s ease;
+          white-space: nowrap;
+        }
+        .hs__btn-secondary span {
+          position: relative;
+          z-index: 2;
+          color: inherit;
+        }
+        .hs__btn-secondary::before,
+        .hs__btn-secondary::after { content: none; }
         .hs__btn-secondary:hover {
-          border-color: rgba(0, 210, 148, 0.6); color: #00D294;
-          background: rgba(0, 210, 148, 0.1);
-          transform: translateY(-2px) scale(1.02);
-          box-shadow: 0 12px 28px rgba(0, 210, 148, 0.2);
+          background: rgba(43,191,179,0.12);
+          border-color: rgba(43,191,179,0.8);
+          border-style: solid;
+          color: #ffffff !important;
+          transform: translateY(-2px);
         }
+        .hs__btn-secondary:hover span {
+          color: #ffffff !important;
+        }
+
 
         /* ── ARCH of media cards, bottom half ── */
         .hs__arch {
@@ -813,8 +1113,8 @@ export default function HeroSplash() {
           .hs__canvas { display: none; }
         }
 
-        /* ── responsive: same half-circle arch, scaled down ── */
-        @media(max-width: 900px){
+        /* ── responsive: same half-circle arch, scaled down (tablet) ── */
+        @media(max-width: 900px) and (min-width: 641px){
           .hs { min-height: auto; }
           .hs__canvas { opacity: .18; }
           .hs__arch {
@@ -822,32 +1122,98 @@ export default function HeroSplash() {
             padding: 0 0.5rem 1.5rem;
             margin-bottom: 0.5rem;
           }
-          .hs__node { width: calc(22vw * var(--hs-node-scale, 1)) !important; }
+          .hs__node { width: calc(18vw * var(--hs-node-scale, 1)) !important; }
           .hs__node-meta { padding: .35rem .45rem .4rem; }
           .hs__node-series { font-size: .46rem; margin-bottom: .05rem; }
           .hs__node-name { font-size: .62rem; }
+        }
 
-          /* Elevate arch cards on mobile view so bottom dip cards stay fully inside viewport */
-          .hs__arch .hs__node:nth-child(2),
-          .hs__arch .hs__node:nth-child(6) {
-            top: 44% !important;
+        /* ── Mobile: arc carousel layout ── */
+        @media(max-width: 640px){
+          .hs__main { padding: clamp(6.5rem, 13vh, 8rem) 1.25rem 1rem; }
+          .hs__h1 { font-size: clamp(2.2rem, 10vw, 3.2rem); }
+          .hs__desc-ticker { max-width: 90vw; padding: .4rem .85rem; }
+          .hs__ticker-text { font-size: .66rem; }
+
+          /* Mobile arch: container must be tall enough for bottom cards
+             (slot 0/4 sit at ~76.5% of height, card half-height ~65px → need ≥330px) */
+          .hs__arch {
+            min-height: 330px;
+            height: 330px;
+            margin-bottom: 0.25rem;
+            padding: 0;
+            overflow: visible;
           }
-          .hs__arch .hs__node:nth-child(3),
-          .hs__arch .hs__node:nth-child(5) {
-            top: 26% !important;
+
+          /* CSS-only entrance for mobile — GSAP never touches these.
+             animation: both ensures opacity:0 before delay fires. */
+          @keyframes mob-card-in {
+            from { opacity: 0; }
+            to   { opacity: 1; }
           }
-          .hs__arch .hs__node:nth-child(4) {
-            top: 14% !important;
+          /* Mobile nodes: position transitions only, entrance via keyframe */
+          .hs__node--mobile {
+            position: absolute;
+            transform: translateX(-50%) translateY(-50%);
+            transition:
+              left 0.75s cubic-bezier(0.25, 1, 0.5, 1),
+              top 0.75s cubic-bezier(0.25, 1, 0.5, 1),
+              width 0.75s cubic-bezier(0.25, 1, 0.5, 1),
+              z-index 0s;
+            will-change: left, top, width;
+          }
+          .hs__node--mobile .hs__node-inner {
+            animation: mob-card-in 0.5s ease-out both;
+          }
+          .hs__node--mobile:nth-child(1) .hs__node-inner { animation-delay: 0.05s; }
+          .hs__node--mobile:nth-child(2) .hs__node-inner { animation-delay: 0.15s; }
+          .hs__node--mobile:nth-child(3) .hs__node-inner { animation-delay: 0.25s; }
+          .hs__node--mobile:nth-child(4) .hs__node-inner { animation-delay: 0.35s; }
+          .hs__node--mobile:nth-child(5) .hs__node-inner { animation-delay: 0.45s; }
+          /* Hide ghost nodes off-arc */
+          .hs__node--mobile-hidden {
+            opacity: 0 !important;
+            pointer-events: none;
+          }
+
+          .hs__node-meta { padding: .3rem .4rem .35rem; }
+          .hs__node-series { font-size: .44rem; margin-bottom: .04rem; }
+          .hs__node-name { font-size: .6rem; }
+
+
+          /* Mobile dot indicators */
+          .hs__mobile-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            padding-bottom: 0.5rem;
+            position: relative;
+            z-index: 10;
+          }
+          .hs__mobile-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: rgba(43,191,179,0.3);
+            transition: background 0.3s, transform 0.3s;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+          }
+          .hs__mobile-dot--active {
+            background: var(--brand-teal);
+            transform: scale(1.35);
           }
         }
         @media(max-width:640px){
-          .hs__main { padding: clamp(5.5rem, 14vh, 7rem) 1.25rem 1.25rem; }
-          .hs__h1 { font-size: clamp(2.2rem, 10vw, 3.2rem); }
-          .hs__desc { font-size: 0.9rem; }
-        }
-        @media(max-width:480px){
-          .hs__actions { flex-direction: column; width: 100%; max-width: 320px; }
-          .hs__btn-primary, .hs__btn-secondary { width: 100%; justify-content: center; }
+          .hs__actions { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: .5rem; width: 100%; }
+          .hs__btn-primary, .hs__btn-secondary {
+            width: auto;
+            max-width: 170px;
+            padding: .58rem 1.1rem;
+            font-size: .66rem;
+            letter-spacing: .08em;
+            justify-content: center;
+          }
         }
       `}</style>
 
@@ -872,14 +1238,19 @@ export default function HeroSplash() {
             {hero.headline2 && <em>{hero.headline2}</em>}
           </h1>
           {hero.description && (
-            <p className="hs__desc">{hero.description}</p>
+            <div className="hs__desc-ticker">
+              <span className="hs__ticker-dot" aria-hidden="true" />
+              <span key={phraseIdx} className="hs__ticker-text">
+                {HERO_PHRASES[phraseIdx]}
+              </span>
+            </div>
           )}
           <div className="hs__actions">
             <Link href={hero.primaryHref} className="hs__btn-primary">
-              {hero.primaryLabel}
+              <span>{hero.primaryLabel}</span>
             </Link>
             <Link href={hero.secondaryHref} className="hs__btn-secondary">
-              {hero.secondaryLabel}
+              <span>{hero.secondaryLabel}</span>
             </Link>
           </div>
 
@@ -901,9 +1272,59 @@ export default function HeroSplash() {
               <span className="hs__stat-label">{t("stat3l")}</span>
             </div>
           </div>
+
+          {/* Mobile Product Spotlight Showcase Card */}
+          {isMobile && (() => {
+            const activeNodeIdx = ((step % (nodes.length || 1)) + (nodes.length || 1)) % (nodes.length || 1);
+            const currentProduct = nodes[activeNodeIdx];
+            if (!currentProduct) return null;
+            return (
+              <div className="hs__mobile-showcase">
+                <div className="hs__showcase-card">
+                  <div className="hs__showcase-header">
+                    <span className="hs__showcase-badge">
+                      <span className="hs__badge-dot" />
+                      <span>EQUIPMENT 0{activeNodeIdx + 1} / 0{nodes.length}</span>
+                    </span>
+                    <span className="hs__showcase-series">{currentProduct.series}</span>
+                  </div>
+
+                  <Link href={currentProduct.href} className="hs__showcase-body">
+                    <div className="hs__showcase-img-wrap">
+                      <Image
+                        src={currentProduct.image}
+                        alt={currentProduct.name}
+                        fill
+                        sizes="100px"
+                        className="hs__showcase-img"
+                        priority
+                        unoptimized={currentProduct.image.startsWith("http") || currentProduct.image.startsWith("/uploads")}
+                      />
+                    </div>
+                    <div className="hs__showcase-info">
+                      <h3 className="hs__showcase-name">{currentProduct.name}</h3>
+                      <span className="hs__showcase-cta">View Machine Specs ›</span>
+                    </div>
+                  </Link>
+
+                  <div className="hs__showcase-dots">
+                    {nodes.map((n, idx) => (
+                      <button
+                        key={n.key}
+                        type="button"
+                        className={`hs__showcase-dot ${idx === activeNodeIdx ? "is-active" : ""}`}
+                        onClick={() => setStep(idx)}
+                        aria-label={n.name}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
-        {/* ── ARCH of 5 video/media cards ── */}
+        {/* ── ARCH of media cards ── */}
         <div
           className="hs__arch"
           ref={archRef}
@@ -911,32 +1332,64 @@ export default function HeroSplash() {
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          {/* curved guide line */}
-          <svg
-            className="hs__arch-line"
-            viewBox="0 0 1000 400"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <defs>
-              <linearGradient id="hs-arch-grad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0"   stopColor="rgba(43,191,179,0)" />
-                <stop offset="0.5" stopColor="rgba(43,191,179,0.55)" />
-                <stop offset="1"   stopColor="rgba(43,191,179,0)" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M0,330 C 250,70 750,70 1000,330"
-              fill="none"
-              stroke="url(#hs-arch-grad)"
-              strokeWidth="1.5"
-              strokeDasharray="2 8"
-              strokeLinecap="round"
-              vectorEffect="non-scaling-stroke"
-            />
-          </svg>
+          {/* curved guide line — desktop only */}
+          {!isMobile && (
+            <svg
+              className="hs__arch-line"
+              viewBox="0 0 1000 400"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <defs>
+                <linearGradient id="hs-arch-grad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0"   stopColor="rgba(43,191,179,0)" />
+                  <stop offset="0.5" stopColor="rgba(43,191,179,0.55)" />
+                  <stop offset="1"   stopColor="rgba(43,191,179,0)" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M0,330 C 250,70 750,70 1000,330"
+                fill="none"
+                stroke="url(#hs-arch-grad)"
+                strokeWidth="1.5"
+                strokeDasharray="2 8"
+                strokeLinecap="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
+          )}
 
-          {nodes.map((f, i) => {
+          {/* Mobile: arc guide — same Q-bezier as the card positions */}
+          {isMobile && (
+            <svg
+              className="hs__arch-line"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible" }}
+            >
+              <defs>
+                <linearGradient id="hs-mob-arc-grad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0"   stopColor="rgba(43,191,179,0)" />
+                  <stop offset="0.5" stopColor="rgba(43,191,179,0.5)" />
+                  <stop offset="1"   stopColor="rgba(43,191,179,0)" />
+                </linearGradient>
+              </defs>
+              {/* Q-bezier computed from the same arc math: endpoint→control→endpoint */}
+              <path
+                d={`M ${MOB_SVG_P0.x},${MOB_SVG_P0.y} Q ${MOB_SVG_CP.x},${MOB_SVG_CP.y} ${MOB_SVG_P2.x},${MOB_SVG_P2.y}`}
+                fill="none"
+                stroke="url(#hs-mob-arc-grad)"
+                strokeWidth="0.7"
+                strokeDasharray="1.8 5"
+                strokeLinecap="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
+          )}
+
+          {/* ── Desktop / tablet layout (unchanged arch) ── */}
+          {!isMobile && nodes.map((f, i) => {
             const pos = getTrajectoryPos(i, step, nodes.length);
             const isUnoptimized = f.image.startsWith("http") || f.image.startsWith("/uploads");
             return (
@@ -983,7 +1436,79 @@ export default function HeroSplash() {
               </div>
             );
           })}
+
+          {/* ── Mobile: 5 cards pinned to arc slots, step cycles through products ── */}
+          {isMobile && (() => {
+            const total = nodes.length;
+            // Show 5 items centered on current step; wrap around
+            return Array.from({ length: MOBILE_SLOTS }, (_, slotIdx) => {
+              const nodeIdx = ((step - 2 + slotIdx) % total + total) % total;
+              const f = nodes[nodeIdx];
+              const { left, top, scale } = getMobileArcPos(slotIdx);
+              const isCenter = slotIdx === 2;
+              // center 38vw, outer cards scale proportionally
+              const cardWidth = Math.round(38 * scale);
+              const isUnoptimized = f.image.startsWith("http") || f.image.startsWith("/uploads");
+              return (
+                <div
+                  key={`mob-slot-${slotIdx}-${f.key}`}
+                  className="hs__node--mobile"
+                  style={{
+                    left: `${left}%`,
+                    top: `${top}%`,
+                    width: `${cardWidth}vw`,
+                    zIndex: isCenter ? 10 : Math.round(scale * 8),
+                    "--float-delay": `${slotIdx * 0.3}s`,
+                  } as React.CSSProperties}
+                >
+                  <div className="hs__node-inner">
+                    <Link
+                      href={f.href}
+                      className="hs__node-card"
+                      aria-label={f.name}
+                    >
+                      <div className="hs__node-img-wrap">
+                        <Image
+                          src={f.image}
+                          alt={f.name}
+                          fill
+                          sizes="60vw"
+                          className="hs__node-img"
+                          priority={isCenter}
+                          loading={isCenter ? undefined : "lazy"}
+                          unoptimized={isUnoptimized}
+                        />
+                      </div>
+                      <span className="hs__node-meta">
+                        <span className="hs__node-series">{f.series}</span>
+                        <span className="hs__node-name">{f.name}</span>
+                      </span>
+                    </Link>
+                  </div>
+                </div>
+              );
+            });
+          })()}
         </div>
+
+        {/* Mobile dot indicators */}
+        {isMobile && nodes.length > 1 && (
+          <div className="hs__mobile-dots" role="tablist" aria-label="Products">
+            {nodes.map((f, i) => {
+              const activeNodeIdx = ((step % nodes.length) + nodes.length) % nodes.length;
+              return (
+                <button
+                  key={f.key}
+                  className={`hs__mobile-dot${activeNodeIdx === i ? " hs__mobile-dot--active" : ""}`}
+                  onClick={() => setStep(i)}
+                  aria-label={f.name}
+                  role="tab"
+                  aria-selected={activeNodeIdx === i}
+                />
+              );
+            })}
+          </div>
+        )}
 
       </section>
     </>

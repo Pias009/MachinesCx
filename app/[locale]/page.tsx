@@ -2,12 +2,14 @@ import dynamic from "next/dynamic";
 import { alternates } from "@/lib/seo";
 import { routing } from "@/i18n/routing";
 
+import { generateMatrixMetadata, generateStructuredSchema } from "@/lib/seo-matrix";
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
 export function generateMetadata({ params }: { params: { locale: string } }) {
-  return { alternates: alternates(params.locale, "") };
+  return generateMatrixMetadata("home", params.locale || "en");
 }
 
 // ── Critical above-fold: SSR so first paint has real HTML ──
@@ -28,8 +30,16 @@ const NewsStrip           = dynamic(() => import("@/components/NewsStrip"),     
 const SectionReveal       = dynamic(() => import("@/components/SectionReveal"),      { ssr: false });
 
 export default function Home() {
+  const schemas = generateStructuredSchema("home");
   return (
     <>
+      {schemas.map((s, idx) => (
+        <script
+          key={idx}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }}
+        />
+      ))}
       {/* LCP: server-rendered so first paint has real HTML immediately */}
       <HeroSplash />
 

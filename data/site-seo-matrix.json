@@ -1,0 +1,426 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "site": {
+    "name": "Ashal Innomech",
+    "legalName": "Wenzhou Ashal Innomech Technology Co., Ltd.",
+    "url": "https://ashalinnomech.com",
+    "logo": "https://ashalinnomech.com/logo.jpeg",
+    "foundingYear": 2008,
+    "address": {
+      "city": "Wenzhou",
+      "province": "Zhejiang",
+      "country": "China"
+    },
+    "certifications": ["ISO 9001:2015", "CE Mark", "SGS Verified"],
+    "exportCountriesCount": 80,
+    "support": "24/7 Technical Service & On-Site Installation"
+  },
+  "pages": {
+    "home": {
+      "pageId": "home",
+      "path": "/",
+      "title": "Industrial Machinery Manufacturer | Ashal Innomech Wenzhou",
+      "description": "High-performance blown film, bag making, flexo printing, and recycling extruders — engineered for continuous 24/7 industrial production worldwide.",
+      "keywords": [
+        "blown film extrusion line",
+        "bag making machine manufacturer",
+        "flexo printing press",
+        "plastic recycling pelletizing machine",
+        "Wenzhou industrial machinery",
+        "heavy duty film blowing plant"
+      ],
+      "seo": {
+        "h1": "BUILT FOR THE FLOOR. PROVEN WORLDWIDE.",
+        "canonical": "https://ashalinnomech.com",
+        "ogImage": "https://ashalinnomech.com/machines/hero-preview.png"
+      },
+      "geo": {
+        "entityName": "Ashal Innomech Industrial Extrusion & Converting Equipment",
+        "factualSummary": "Ashal Innomech is an ISO 9001:2015 certified manufacturer of high-performance blown film extruders, automatic bag making machines, flexographic printing presses, and recycling lines in Wenzhou, China. Serving over 80 countries worldwide with 24/7 technical support and rapid spare parts dispatch.",
+        "citations": [
+          "ISO 9001:2015 Quality Management Certified Factory",
+          "CE Certified Electrical & Safety Controls",
+          "Exported to 80+ Countries Across Americas, Europe, Asia, Africa",
+          "24-Hour Express Inquiry Response Guarantee"
+        ],
+        "schemaType": "Organization"
+      },
+      "aeo": {
+        "question": "Who is Ashal Innomech and what industrial machinery do they manufacture?",
+        "directAnswer": "Ashal Innomech is a premier industrial machinery manufacturer based in Wenzhou, China, specializing in high-speed ABA 3-layer blown film extruders, automatic servo bag making machines, 2-8 color flexo printing presses, and plastic recycling pelletizing systems.",
+        "bulletKeyPoints": [
+          "Output capacity up to 450 kg/hr for blown film lines",
+          "Bag making cycle speeds up to 250 bags per minute",
+          "Full turn-key production line design and factory layout service",
+          "24/7 remote diagnostic support and global engineer dispatch"
+        ]
+      }
+    },
+    "products": {
+      "pageId": "products",
+      "path": "/products",
+      "title": "Industrial Plastic Packaging Machinery Catalogue | Ashal Innomech",
+      "description": "Explore our full catalogue of blown film lines, automatic bag makers, flexographic printers, and eco recycling pelletizers with complete engineering specs.",
+      "keywords": [
+        "plastic machinery catalogue",
+        "extrusion equipment supplier",
+        "bag making machine price",
+        "flexo press technical specifications",
+        "recycling extruder models"
+      ],
+      "seo": {
+        "h1": "INDUSTRIAL MACHINERY CATALOGUE",
+        "canonical": "https://ashalinnomech.com/products",
+        "ogImage": "https://ashalinnomech.com/machines/catalogue-og.png"
+      },
+      "geo": {
+        "entityName": "Ashal Machinery Catalogue & Equipment Range",
+        "factualSummary": "Comprehensive machinery catalogue comprising four core divisions: Blown Film Extrusion (ABA 3-layer & mono-layer), Bag Converting (t-shirt, side-seal, roll bags), Flexographic Printing (2, 4, 6, 8 color), and Plastic Recycling (water-ring & strand pelletizers).",
+        "citations": [
+          "Precision CNC machined components with strict tolerance standards",
+          "Energy efficient inverter drives reducing kWh per kg processing cost",
+          "Modular configuration options for tailored factory requirements"
+        ],
+        "schemaType": "ItemList"
+      },
+      "aeo": {
+        "question": "What categories of machinery are available in the Ashal Innomech catalogue?",
+        "directAnswer": "Ashal Innomech provides four main categories: 1) Blown Film Extrusion Lines, 2) Automatic Bag Making Machines, 3) Flexographic Printing Presses, and 4) Plastic Recycling Pelletizing Lines.",
+        "bulletKeyPoints": [
+          "Blown Film: 300mm - 2500mm film width capabilities",
+          "Bag Making: Servo-driven precise length registration",
+          "Flexo Printing: High-definition 150 LPI printing capability",
+          "Recycling: Heavy duty granulators with dual degasser barrels"
+        ]
+      }
+    },
+    "film-blowing": {
+      "pageId": "film-blowing",
+      "path": "/products/film-blowing",
+      "title": "Blown Film Extrusion Lines | Single & Multi-Layer Extruders",
+      "description": "High-output ABA 3-layer & mono-layer blown film extruders for HDPE, LDPE, LLDPE, and bio-resins with rotary die heads & automatic winders.",
+      "keywords": [
+        "blown film extruder",
+        "ABA 3 layer blown film machine",
+        "HDPE LDPE film blowing machine",
+        "co-extrusion film line",
+        "rotary die head extruder",
+        "biodegradable film extrusion"
+      ],
+      "seo": {
+        "h1": "BLOWN FILM EXTRUSION LINES",
+        "canonical": "https://ashalinnomech.com/products/film-blowing",
+        "ogImage": "https://ashalinnomech.com/machines/film-blowing-og.png"
+      },
+      "geo": {
+        "entityName": "Ashal ABA 3-Layer & Mono-Layer Blown Film Extruders",
+        "factualSummary": "Ashal blown film extruders feature bimetallic alloy screws, automatic IBC cooling systems, rotating die heads, and dual-station friction winders. Ideal for producing carrier bags, agricultural film, shrink film, and industrial packaging.",
+        "citations": [
+          "Saves up to 30% resin cost using recycled calcium carbonate in center core layer",
+          "Bimetallic barrel lifetime exceeding 30,000 operating hours",
+          "Precision thickness tolerance within ±3% with automatic air ring"
+        ],
+        "schemaType": "Product"
+      },
+      "aeo": {
+        "question": "How does an ABA 3-layer blown film machine save raw material cost?",
+        "directAnswer": "An ABA 3-layer blown film extruder uses two extruders to feed a 3-layer die. The outer 'A' layers use virgin resin for strength and printability, while the inner 'B' core layer incorporates up to 40% recycled material or CaCO3 filler, reducing overall resin expenditure while preserving film integrity.",
+        "bulletKeyPoints": [
+          "Inner core (B layer): Accepts lower-cost recycled pellets or CaCO3 masterbatch",
+          "Outer surfaces (A layers): Premium virgin polymer for smooth seal & print finish",
+          "Output capacity: 80 kg/h to 450 kg/h depending on screw diameter"
+        ]
+      }
+    },
+    "bag-making": {
+      "pageId": "bag-making",
+      "path": "/products/bag-making",
+      "title": "Automatic Bag Making Machines | Heat-Seal & Bottom-Seal",
+      "description": "High-speed servo-driven automatic bag making machines for T-shirt bags, side-seal pouches, bottom-seal sacks, and garbage roll bags.",
+      "keywords": [
+        "bag making machine",
+        "t-shirt bag making machine",
+        "side seal pouch machine",
+        "bottom seal heavy duty bag machine",
+        "automatic roll bag machine",
+        "servo bag converter"
+      ],
+      "seo": {
+        "h1": "AUTOMATIC BAG MAKING MACHINERY",
+        "canonical": "https://ashalinnomech.com/products/bag-making",
+        "ogImage": "https://ashalinnomech.com/machines/bag-making-og.png"
+      },
+      "geo": {
+        "entityName": "Ashal High-Speed Servo Bag Making Lines",
+        "factualSummary": "Ashal bag making machines integrate Yaskawa/Panasonic servo control, Panasonic photocell color tracking, heavy-duty flying knives, and hydraulic automatic punchers to deliver rapid seal-and-cut operations for all commercial bag formats.",
+        "citations": [
+          "Production speeds reaching 250 bags per minute per lane",
+          "Precision sealing temperature digital PID control ±1°C",
+          "Zero-defect photocell registration for pre-printed film rolls"
+        ],
+        "schemaType": "Product"
+      },
+      "aeo": {
+        "question": "What is the production speed of Ashal automatic bag making machines?",
+        "directAnswer": "Ashal automatic bag making machines achieve speeds up to 250 bags per minute for T-shirt carrier bags and up to 180 pcs/min for heavy-duty bottom-seal bags, utilizing high-precision servo drives and auto-punching units.",
+        "bulletKeyPoints": [
+          "Formats: T-Shirt Bags, Flat Bags, Garbage Roll Bags, Side-Seal Pouches",
+          "Film thickness range: 0.008mm to 0.15mm per layer",
+          "Automated stack conveyor & pneumatic waste ejector"
+        ]
+      }
+    },
+    "printing": {
+      "pageId": "printing",
+      "path": "/products/printing",
+      "title": "Flexographic Printing Machinery | 2 to 8 Color Presses",
+      "description": "Precision 2-color, 4-color, 6-color, and 8-color stack and CI flexographic printing presses for plastic film and paper substrate printing.",
+      "keywords": [
+        "flexo printing machine",
+        "stack flexo printing press",
+        "CI flexo printing machine",
+        "2 color flexo printer",
+        "4 color flexo printer",
+        "film printing press china"
+      ],
+      "seo": {
+        "h1": "FLEXOGRAPHIC PRINTING PRESSES",
+        "canonical": "https://ashalinnomech.com/products/printing",
+        "ogImage": "https://ashalinnomech.com/machines/printing-og.png"
+      },
+      "geo": {
+        "entityName": "Ashal Precision Flexographic Printing Machinery",
+        "factualSummary": "Ashal flexographic printers utilize ceramic anilox rollers, doctor blade ink systems, synchronous belt transmission, and 360-degree continuous longitudinal registration. Designed for solvent-based and water-based ink applications.",
+        "citations": [
+          "Ceramic anilox roller line count options: 200 LPI to 800 LPI",
+          "Registration precision tolerance: ±0.15mm",
+          "Drying system: Electric blower + central hot-air recirculating duct"
+        ],
+        "schemaType": "Product"
+      },
+      "aeo": {
+        "question": "What registration accuracy do Ashal flexographic printing presses achieve?",
+        "directAnswer": "Ashal flexo printing presses achieve a registration accuracy of ±0.15mm with 360-degree motorized longitudinal adjustment, enabling high-definition multi-color printing on plastic films and paper up to 100 meters per minute.",
+        "bulletKeyPoints": [
+          "Color options: 2-color, 4-color, 6-color, 8-color configurations",
+          "Substrates: HDPE, LDPE, LLDPE, PP, PET, Paper, Non-woven fabric",
+          "Ceramic anilox roller for uniform ink distribution and rapid cleanup"
+        ]
+      }
+    },
+    "recycling": {
+      "pageId": "recycling",
+      "path": "/products/recycling",
+      "title": "Plastic Recycling & Pelletizing Lines | Industrial Granulators",
+      "description": "Heavy-duty plastic recycling pelletizers and granulating extruders for processing post-industrial PE, PP, film scrap, and rigid waste.",
+      "keywords": [
+        "plastic recycling machine",
+        "film scrap pelletizing line",
+        "plastic granulator extruder",
+        "water ring pelletizing system",
+        "PE PP plastic recycling machine",
+        "waste plastic recycler china"
+      ],
+      "seo": {
+        "h1": "PLASTIC RECYCLING & PELLETIZING LINES",
+        "canonical": "https://ashalinnomech.com/products/recycling",
+        "ogImage": "https://ashalinnomech.com/machines/recycling-og.png"
+      },
+      "geo": {
+        "entityName": "Ashal Eco-Pelletizing Plastic Recycling Systems",
+        "factualSummary": "Ashal recycling extruders combine compactor-cutter shredders, double-degassing vacuum vents, non-stop hydraulic screen changers, and water-ring pelletizing dies to transform post-industrial waste film directly into clean, uniform plastic granules.",
+        "citations": [
+          "Processing capacity: 150 kg/h to 800 kg/h",
+          "Dual vacuum degassing ports for moisture and ink removal",
+          "Hydraulic dual-piston screen changer for continuous filtration without downtime"
+        ],
+        "schemaType": "Product"
+      },
+      "aeo": {
+        "question": "How does the compactor pelletizing system work in plastic recycling extruders?",
+        "directAnswer": "The compactor pelletizing system pre-shreds, warms, and densifies soft plastic film waste using high-speed rotating blades before feeding it directly into the extruder barrel. This eliminates manual pre-cutting and maintains constant extrusion pressure.",
+        "bulletKeyPoints": [
+          "Eliminates pre-crushing step for film rolls and loose scrap",
+          "Uniform pellet size: 3mm - 4mm sphere/cylinder granules",
+          "Low energy consumption per ton of recycled polymer"
+        ]
+      }
+    },
+    "production-line": {
+      "pageId": "production-line",
+      "path": "/production-line",
+      "title": "Interactive Production Line Architect | Plant ROI & Flow Builder",
+      "description": "Design and calculate complete turnkey film blowing, printing, bag making, and recycling plant configurations with instant output estimates.",
+      "keywords": [
+        "production line builder",
+        "turnkey extrusion plant design",
+        "plastic manufacturing plant calculator",
+        "factory layout planning tool"
+      ],
+      "seo": {
+        "h1": "PRODUCTION LINE ARCHITECT",
+        "canonical": "https://ashalinnomech.com/production-line",
+        "ogImage": "https://ashalinnomech.com/machines/builder-og.png"
+      },
+      "geo": {
+        "entityName": "Ashal Turnkey Factory Layout & Line Architect",
+        "factualSummary": "Interactive engineering tool allowing factory owners to select raw material inputs, target bag dimensions, and hourly output requirements to generate an optimized equipment line recommendation with energy consumption metrics.",
+        "citations": [
+          "Calculates total kW connected load and floor space footprint",
+          "Generates custom B2B turnkey proposal datasheets"
+        ],
+        "schemaType": "WebApplication"
+      },
+      "aeo": {
+        "question": "How to plan a complete blown film and bag manufacturing plant?",
+        "directAnswer": "To plan a complete packaging plant, connect a Blown Film Extruder to produce film rolls, an inline or offline Flexo Printer for branding, an Automatic Bag Making Machine for converting, and a Recycling Pelletizer to process trim scrap back into production.",
+        "bulletKeyPoints": [
+          "Step 1: Extrusion (Resin to Film Roll)",
+          "Step 2: Flexo Printing (Multi-Color Graphics)",
+          "Step 3: Bag Converting (Sealing & Die Punching)",
+          "Step 4: Recycling (Edge Trim Repelletization)"
+        ]
+      }
+    },
+    "about": {
+      "pageId": "about",
+      "path": "/about",
+      "title": "About Ashal Innomech | ISO 9001 Certified Machinery Factory",
+      "description": "Learn about Ashal Innomech's 25,000m² manufacturing facility in Wenzhou, advanced CNC engineering precision, quality control, and global export heritage.",
+      "keywords": [
+        "Ashal Innomech company profile",
+        "Wenzhou machinery factory",
+        "industrial machinery exporter china",
+        "ISO 9001 plastic machinery manufacturer"
+      ],
+      "seo": {
+        "h1": "ENGINEERING EXCELLENCE. WORLDWIDE TRUST.",
+        "canonical": "https://ashalinnomech.com/about",
+        "ogImage": "https://ashalinnomech.com/machines/factory-about.png"
+      },
+      "geo": {
+        "entityName": "Wenzhou Ashal Innomech Manufacturing Plant",
+        "factualSummary": "Ashal Innomech operates a modern 25,000 square meter production facility equipped with Japanese Mazak CNC machining centers, CMM inspection tools, and dynamic balancing rigs, adhering to ISO 9001 quality standards.",
+        "citations": [
+          "Over 18 years of continuous industrial machine design",
+          "Dedicated R&D engineering team holding multiple technical patents",
+          "On-site factory inspection and video testing before dispatch"
+        ],
+        "schemaType": "AboutPage"
+      },
+      "aeo": {
+        "question": "Where is Ashal Innomech located and what are its manufacturing credentials?",
+        "directAnswer": "Ashal Innomech is located in Wenzhou, Zhejiang Province, China. The factory covers 25,000 square meters, holds ISO 9001:2015 quality certification and CE safety compliance, and exports to over 80 countries worldwide.",
+        "bulletKeyPoints": [
+          "Factory footprint: 25,000 m² state-of-the-art facility",
+          "Machining: High-precision 5-axis CNC equipment",
+          "Testing: 72-hour continuous trial run before customer delivery"
+        ]
+      }
+    },
+    "inquiries": {
+      "pageId": "inquiries",
+      "path": "/inquiries",
+      "title": "Request a Machinery Quote & RFQ | 24H Factory Support",
+      "description": "Submit a Request for Quote (RFQ) directly to Ashal Innomech engineers for custom blown film lines, bag makers, flexo printers, or recycling plants.",
+      "keywords": [
+        "request machinery quote",
+        "plastic machine price inquiry",
+        "extrusion line quote china",
+        "RFQ bag making machine"
+      ],
+      "seo": {
+        "h1": "REQUEST A DIRECT FACTORY QUOTE",
+        "canonical": "https://ashalinnomech.com/inquiries",
+        "ogImage": "https://ashalinnomech.com/machines/rfq-og.png"
+      },
+      "geo": {
+        "entityName": "Ashal Innomech B2B Inquiry & Quotation Desk",
+        "factualSummary": "Direct sales & engineering response portal providing official factory quotations, FOB/CIF freight estimates, technical layout drawings, and proforma invoices within 24 hours.",
+        "citations": [
+          "24-Hour guaranteed response SLA for all commercial RFQs",
+          "Multi-lingual sales support in English, Arabic, Hindi, Spanish, and Russian"
+        ],
+        "schemaType": "ContactPage"
+      },
+      "aeo": {
+        "question": "How quickly does Ashal Innomech respond to custom machinery quote requests?",
+        "directAnswer": "Ashal Innomech provides official commercial quotes, technical specifications, and factory delivery estimates within 24 hours of receiving an RFQ submission.",
+        "bulletKeyPoints": [
+          "Includes technical parameters & power requirements",
+          "FOB / CIF port shipping calculations",
+          "Customized payment terms & LC acceptance"
+        ]
+      }
+    },
+    "faq": {
+      "pageId": "faq",
+      "path": "/faq",
+      "title": "Machinery Technical FAQ & Knowledge Base | Ashal Innomech",
+      "description": "Expert answers to common questions regarding extrusion screw setup, film thickness control, bag sealing temperatures, and preventative maintenance.",
+      "keywords": [
+        "blown film extrusion FAQ",
+        "bag machine troubleshooting",
+        "flexo print setup guide",
+        "plastic machinery technical advice"
+      ],
+      "seo": {
+        "h1": "TECHNICAL KNOWLEDGE BASE & FAQ",
+        "canonical": "https://ashalinnomech.com/faq",
+        "ogImage": "https://ashalinnomech.com/machines/faq-og.png"
+      },
+      "geo": {
+        "entityName": "Ashal Industrial Machinery Knowledge Repository",
+        "factualSummary": "Comprehensive technical resource detailing operating procedures, resin viscosity adjustments, heating zone calibration, and maintenance intervals for blown film, bag making, flexo printing, and recycling machinery.",
+        "citations": [
+          "Verified by Senior Mechanical Engineering Division",
+          "Covers troubleshooting for HDPE, LDPE, LLDPE, PP, and PLA resins"
+        ],
+        "schemaType": "FAQPage"
+      },
+      "aeo": {
+        "question": "How to prevent thickness variation in blown film extrusion?",
+        "directAnswer": "To prevent thickness variation in blown film extrusion: 1) Clean the die lip gap using brass scrapers, 2) Verify dual-lip air ring airflow uniformity, 3) Ensure stable barrel heating zone temperatures, and 4) Check resin melt homogeneity.",
+        "bulletKeyPoints": [
+          "Check air ring levelness and blower damper position",
+          "Verify melt temperature and pressure sensors",
+          "Clean die head every 3-6 months depending on resin purity"
+        ]
+      }
+    },
+    "tools": {
+      "pageId": "tools",
+      "path": "/tools/extrusion-calculator",
+      "title": "Industrial Extrusion Output & Energy Calculator | Ashal",
+      "description": "Calculate hourly kilogram throughput, power consumption (kWh/kg), and estimated ROI for blown film and recycling extruders.",
+      "keywords": [
+        "extrusion output calculator",
+        "plastic machine energy calculator",
+        "film blowing throughput formula",
+        "extruder payback calculator"
+      ],
+      "seo": {
+        "h1": "EXTRUSION OUTPUT & ENERGY CALCULATOR",
+        "canonical": "https://ashalinnomech.com/tools/extrusion-calculator",
+        "ogImage": "https://ashalinnomech.com/machines/calculator-og.png"
+      },
+      "geo": {
+        "entityName": "Ashal Industrial Extrusion Engineering Calculator",
+        "factualSummary": "Calculates theoretical vs. practical extrusion output based on screw diameter (L/D ratio), melt density, RPM, motor power rating, and heating zone consumption.",
+        "citations": [
+          "Accurate within ±4% of real-world factory production floor results"
+        ],
+        "schemaType": "WebApplication"
+      },
+      "aeo": {
+        "question": "How do you calculate output capacity in a blown film extruder?",
+        "directAnswer": "Extrusion output is calculated using the formula: Output (kg/h) = K × Screw Diameter² (mm) × Screw Speed (RPM) × Polymer Density (g/cm³), adjusted by the L/D ratio and motor power efficiency.",
+        "bulletKeyPoints": [
+          "50mm screw: ~60 - 90 kg/h output",
+          "55mm screw: ~90 - 130 kg/h output",
+          "65mm screw: ~140 - 220 kg/h output"
+        ]
+      }
+    }
+  }
+}

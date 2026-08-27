@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { Camera, Star, X, Plus, CheckCircle2, Package, Loader2, AlertTriangle, Search, Eye, Copy } from "lucide-react";
+import { Camera, Star, X, Plus, CheckCircle2, Package, Loader2, AlertTriangle, Search, Eye, Copy, Trash2 } from "lucide-react";
 import type { Field, Collection, SectionSchema } from "@/lib/cmsSchemas";
 import { CATEGORY_ICON as SHARED_CATEGORY_ICON } from "./adminIcons";
 
@@ -32,26 +32,29 @@ const inputStyle: React.CSSProperties = {
   transition: "border-color 0.2s ease, box-shadow 0.2s ease",
 };
 const btnBase: React.CSSProperties = {
-  padding: "0.6rem 1rem", borderRadius: 8,
+  padding: "0.6rem 1.15rem", borderRadius: 10,
   border: "none", cursor: "pointer",
-  fontFamily: "var(--ff-body)", fontSize: "0.88rem", fontWeight: 600,
-  display: "inline-flex", alignItems: "center", gap: "0.4rem",
-  transition: "all 0.18s ease",
+  fontFamily: "var(--ff-body), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  fontSize: "0.88rem", fontWeight: 700, letterSpacing: "0.02em",
+  display: "inline-flex", alignItems: "center", gap: "0.45rem",
+  transition: "all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1)",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
 };
 const smallBtn: React.CSSProperties = {
   ...btnBase,
-  background: "rgba(0, 210, 148, 0.15)", color: "var(--adm-mint)",
-  border: "1px solid rgba(0, 210, 148, 0.3)",
+  background: "linear-gradient(135deg, rgba(43, 191, 179, 0.2) 0%, rgba(13, 148, 136, 0.15) 100%)",
+  color: "#5eead4",
+  border: "1px solid rgba(43, 191, 179, 0.4)",
 };
 const dangerBtn: React.CSSProperties = {
-  ...btnBase, padding: "0.6rem 0.85rem",
-  background: "rgba(255,107,125,0.14)", color: "#ff8a97",
-  border: "1px solid rgba(255,107,125,0.3)",
+  ...btnBase, padding: "0.55rem 0.95rem",
+  background: "rgba(244, 63, 94, 0.15)", color: "#fda4af",
+  border: "1px solid rgba(244, 63, 94, 0.35)",
 };
 const iconBtn: React.CSSProperties = {
-  ...btnBase, padding: "0.5rem 0.7rem",
-  background: "#162338", color: "rgba(255,255,255,0.8)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  ...btnBase, padding: "0.55rem 0.85rem",
+  background: "#162338", color: "rgba(255,255,255,0.9)",
+  border: "1px solid rgba(255,255,255,0.12)",
 };
 
 function FieldLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
@@ -1908,9 +1911,9 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
                           Edit →
                         </button>
                         {col.canAdd && (
-                          <button type="button" title="Delete" style={dangerBtn}
+                          <button type="button" title="Delete item" style={{ ...dangerBtn, padding: "0.45rem 0.8rem", fontSize: "0.78rem" }}
                             onClick={() => { if (confirm('Delete "' + title + '"?')) mutate(d => ({ ...d, [col.key]: allItems.filter((_, j) => j !== i) })); }}>
-                            Delete
+                            <Trash2 size={13} /> Delete
                           </button>
                         )}
                       </div>

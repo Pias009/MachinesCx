@@ -12,7 +12,7 @@ export async function GET(_req: NextRequest, { params }: { params: { section: st
   }
   try {
     const res = NextResponse.json(await readSection(params.section));
-    res.headers.set("Cache-Control", "no-store");
+    res.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=600");
     return res;
   } catch {
     return NextResponse.json({ error: "read failed" }, { status: 500 });

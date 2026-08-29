@@ -18,11 +18,8 @@ const nextConfig = {
     optimizePackageImports: ["gsap", "lucide-react", "next-intl"],
   },
   images: {
+    unoptimized: true, // Bypasses Vercel's 5,000 transformation/month limit and eliminates serverless CPU usage — images serve directly from global Edge CDN
     formats: ["image/avif", "image/webp"],
-    // Serve images at extra-small sizes for mobile — reduces bytes on slow connections
-    deviceSizes: [390, 640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "img.youtube.com" },
@@ -36,6 +33,18 @@ const nextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/machines/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public,max-age=31536000,immutable" },
+        ],
+      },
+      {
+        source: "/images/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public,max-age=31536000,immutable" },
+        ],
+      },
       {
         // Hashed chunks under /_next/static/chunks and /_next/static/media
         // are safe to cache forever — a content change gives them a new

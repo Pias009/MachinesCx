@@ -362,12 +362,12 @@ export default function ClientJourney() {
 
     ScrollTrigger.create({
       trigger: el,
-      start: "top 75%",
+      start: "top 90%",
       once: true,
       onEnter: () => {
         gsap.to(icons, {
           opacity: 1, scale: 1,
-          duration: 0.7, ease: "back.out(1.4)", stagger: 0.08,
+          duration: 0.5, ease: "back.out(1.4)", stagger: 0.05,
         });
       },
     });

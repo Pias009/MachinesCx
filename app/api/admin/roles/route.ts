@@ -182,6 +182,12 @@ export async function POST(req: NextRequest) {
 
       const updatedPass = newTempPassword?.trim() || generateTempPassword();
       user.tempPassword = updatedPass;
+
+      const inv = db.invitations.find(i => i.email.toLowerCase() === user.email.toLowerCase());
+      if (inv) {
+        inv.tempPassword = updatedPass;
+      }
+
       writeRolesDB(db);
 
       logSecurityEvent(

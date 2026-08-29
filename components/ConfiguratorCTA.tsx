@@ -4,9 +4,10 @@ import { useTranslations } from "next-intl";
 import TransitionLink from "@/components/TransitionLink";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SECTION_ELEMENT_DELAY } from "@/components/SectionReveal";
 
-gsap.registerPlugin(useGSAP);
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 export default function ConfiguratorCTA() {
   const t = useTranslations("configuratorCTA");
@@ -20,41 +21,22 @@ export default function ConfiguratorCTA() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  // ScrollTrigger is a separate plugin bundle — load it lazily since this
-  // section is below the fold, then hand off to useGSAP once it's ready.
-  const [pluginReady, setPluginReady] = useState(false);
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let cancelled = false;
-    import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
-      if (cancelled) return;
-      gsap.registerPlugin(ScrollTrigger);
-      setPluginReady(true);
-    });
-    return () => { cancelled = true; };
-  }, []);
-
-  // Left copy swings in from depth (rotateY, as if turning to face the
-  // reader out of the Spline scene), the configurator panel rises after.
-  // Reverses on scroll back up via ScrollTrigger.
   useGSAP(() => {
-    if (!pluginReady) return;
-    const trigger = { trigger: sectionRef.current, start: "top 75%", end: "bottom top", toggleActions: "play reverse play reverse" };
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const trigger = { trigger: sectionRef.current, start: "top 90%", once: true };
     gsap.set([leftRef.current, rightRef.current], { transformPerspective: 1200 });
-    // One timeline, one ScrollTrigger — was 2 separate instances both
-    // watching sectionRef.
     const tl = gsap.timeline({ scrollTrigger: trigger, delay: SECTION_ELEMENT_DELAY });
     tl.fromTo(leftRef.current,
       { opacity: 0, x: -60, rotateY: 22 },
-      { opacity: 1, x: 0, rotateY: 0, duration: 0.9, ease: "power3.out" },
+      { opacity: 1, x: 0, rotateY: 0, duration: 0.7, ease: "power3.out" },
       0
     );
     tl.fromTo(rightRef.current,
       { opacity: 0, y: 40, rotateY: -14, scale: 0.94 },
-      { opacity: 1, y: 0, rotateY: 0, scale: 1, duration: 0.85, ease: "power3.out" },
-      0.2
+      { opacity: 1, y: 0, rotateY: 0, scale: 1, duration: 0.65, ease: "power3.out" },
+      0.15
     );
-  }, { scope: sectionRef, dependencies: [pluginReady] });
+  }, { scope: sectionRef });
 
   useEffect(() => {
     if (!mounted) return;

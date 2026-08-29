@@ -126,65 +126,43 @@ export default function MachineCatalogSection() {
       return;
     }
 
-    // reversible: plays on the way down, reverses on the way back up
-    const headTrigger = { trigger: sectionRef.current, start: "top 85%", end: "bottom top", toggleActions: "play reverse play reverse" };
-    const trigger = { trigger: gridRef.current, start: "top 88%", end: "bottom top", toggleActions: "play reverse play reverse" };
+    const headTrigger = { trigger: sectionRef.current, start: "top 90%", once: true };
+    const trigger = { trigger: gridRef.current, start: "top 92%", once: true };
 
-    // Press-plate shutter: a bordered panel with the company mark centered
-    // covers the whole section, then scales down and clears before the
-    // header/grid content underneath starts its own reveal. Everything
-    // else below is offset by SHUTTER_CLEAR so it only starts moving once
-    // the shutter has finished wiping away.
-    const SHUTTER_CLEAR = 0.95;
-
-    // One timeline per unique trigger element instead of one ScrollTrigger
-    // per tween (was 6 separate instances all watching sectionRef) — same
-    // relative timing, fewer ScrollTrigger instances to track on scroll.
-    const headTl = gsap.timeline({ scrollTrigger: headTrigger, delay: SECTION_ELEMENT_DELAY });
+    const headTl = gsap.timeline({ scrollTrigger: headTrigger });
 
     if (shutterRef.current) {
       headTl
-        .to(shutterMarkRef.current, { scale: 1, opacity: 1, duration: 0.35, ease: "power2.out" }, 0)
-        .to(shutterRef.current, { scaleY: 0, duration: 0.55, ease: "power3.inOut", transformOrigin: "top center" }, 0.4)
+        .to(shutterMarkRef.current, { scale: 1, opacity: 1, duration: 0.15, ease: "power2.out" }, 0)
+        .to(shutterRef.current, { scaleY: 0, duration: 0.25, ease: "power3.inOut", transformOrigin: "top center" }, 0.15)
         .set(shutterRef.current, { display: "none" }, ">");
     }
 
     headTl
-      .fromTo(badgeRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out" }, SHUTTER_CLEAR)
-      .fromTo(titleRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power3.out" }, SHUTTER_CLEAR + 0.08)
-      .fromTo(subRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out" }, SHUTTER_CLEAR + 0.18);
+      .fromTo(badgeRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power2.out" }, 0.1)
+      .fromTo(titleRef.current, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.15)
+      .fromTo(subRef.current, { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power2.out" }, 0.2);
 
-    // Tabs — border draws in, then each tab lifts with a fast stagger
     if (tabsRef.current) {
-      headTl.fromTo(tabsRef.current, { scaleX: 0 }, { scaleX: 1, transformOrigin: "left center", duration: 0.5, ease: "power2.out" }, SHUTTER_CLEAR + 0.25);
+      headTl.fromTo(tabsRef.current, { scaleX: 0 }, { scaleX: 1, transformOrigin: "left center", duration: 0.35, ease: "power2.out" }, 0.2);
       const tabs = Array.from(tabsRef.current.querySelectorAll<HTMLElement>(".mcs__tab"));
-      headTl.fromTo(tabs, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power2.out", stagger: 0.04 }, SHUTTER_CLEAR + 0.35);
+      headTl.fromTo(tabs, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25, ease: "power2.out", stagger: 0.03 }, 0.25);
     }
 
-    // Grid — column-major "batch load" stagger, auto-detects columns from layout,
-    // cards tilt up out of real depth (steeper rotateX + perspective than
-    // before for a more physically 3D feel, not just a flat lift). Mark the
-    // grid done immediately (not just on tween start) so the CSS mount-fade
-    // is suppressed for the same frame GSAP takes over — otherwise the
-    // still-running CSS animation's computed opacity can briefly outrank
-    // GSAP's inline opacity:0 before the tween begins. Kept as its own
-    // timeline since it watches gridRef, a different trigger element.
     if (gridRef.current) {
       gridRef.current.setAttribute("data-mcs-batch-done", "");
       const cards = Array.from(gridRef.current.querySelectorAll<HTMLElement>(".mcs-card"));
       gsap.set(cards, { transformPerspective: 1200, transformOrigin: "50% 100%" });
       gsap.fromTo(cards,
-        { opacity: 0, y: 34, scale: 0.92, rotateX: -32 },
+        { opacity: 0, y: 20, scale: 0.96 },
         {
-          opacity: 1, y: 0, scale: 1, rotateX: 0, duration: 0.6, ease: "power2.out",
-          stagger: { each: 0.05, grid: "auto", from: "start", axis: "x" },
-          delay: SECTION_ELEMENT_DELAY + SHUTTER_CLEAR,
+          opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "power2.out",
+          stagger: { each: 0.03, grid: "auto", from: "start", axis: "x" },
           scrollTrigger: trigger,
         }
       );
     }
-
-  }, { scope: sectionRef, dependencies: [pluginReady] });
+  }, { scope: sectionRef });
 
   const totalFamilies = allFamilies.length;
   const totalModels   = allFamilies.reduce((n, f) => n + f.models.length, 0);

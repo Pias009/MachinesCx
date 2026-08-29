@@ -370,104 +370,66 @@ export default function ScrollHome() {
           : [];
 
         if (cards.length) {
-          gsap.set(cards, { opacity: 0, x: 60 });
+          gsap.set(cards, { opacity: 0, x: 40 });
           const reversedCards = [...cards].reverse();
 
           ScrollTrigger.create({
             trigger: cardStripRef.current,
-            start: "top bottom-=80",
+            start: "top 90%",
+            once: true,
             onEnter: () => {
               gsap.to(reversedCards, {
                 opacity: 1, x: 0,
-                duration: 0.6,
+                duration: 0.5,
                 ease: "power3.out",
-                stagger: 0.08,
-                overwrite: true,
-              });
-            },
-            onLeaveBack: () => {
-              gsap.to(reversedCards, {
-                opacity: 0, x: 60,
-                duration: 0.4,
-                ease: "power2.in",
-                stagger: 0.04,
+                stagger: 0.06,
                 overwrite: true,
               });
             },
           });
         }
 
-        // ── Hero company name: plain fade-up on the whole line, replays
-        // every time it scrolls into view (both scrolling down into §1
-        // and back up) — previously a per-letter skewed rise ──
+        // ── Hero company name: plain fade-up on the whole line ──
         if (heroNameRef.current) {
           const heroLine = heroNameRef.current;
-          gsap.set(heroLine, { opacity: 0, y: 24 });
-
-          const playHeroName = () => {
-            gsap.to(heroLine, {
-              opacity: 1, y: 0,
-              duration: 0.6,
-              ease: "power2.out",
-              overwrite: true,
-            });
-          };
-          const resetHeroName = () => {
-            gsap.to(heroLine, {
-              opacity: 0, y: 24,
-              duration: 0.35,
-              ease: "power2.in",
-              overwrite: true,
-            });
-          };
+          gsap.set(heroLine, { opacity: 0, y: 20 });
 
           ScrollTrigger.create({
             trigger: heroNameRef.current,
-            start: "top bottom",
-            end: "bottom top",
-            onEnter: playHeroName,
-            onEnterBack: playHeroName,
-            onLeave: resetHeroName,
-            onLeaveBack: resetHeroName,
+            start: "top 90%",
+            once: true,
+            onEnter: () => {
+              gsap.to(heroLine, {
+                opacity: 1, y: 0,
+                duration: 0.5,
+                ease: "power2.out",
+                overwrite: true,
+              });
+            },
           });
         }
 
-        // ── "Hot Machines" heading: word reveal, replays on scroll
-        // into view (both directions) ──────────────────────────────────
+        // ── "Hot Machines" heading: word reveal ──────────────────────────────────
         const hotWords = hotHeadingRef.current
           ? Array.from(hotHeadingRef.current.querySelectorAll<HTMLElement>("[data-hot-word]"))
           : [];
 
         if (hotWords.length) {
-          gsap.set(hotWords, { opacity: 0, y: 36 });
-
-          const playHotHeading = () => {
-            gsap.to(hotWords, {
-              opacity: 1, y: 0,
-              duration: 0.55,
-              ease: "power3.out",
-              stagger: 0.12,
-              overwrite: true,
-            });
-          };
-          const resetHotHeading = () => {
-            gsap.to(hotWords, {
-              opacity: 0, y: 36,
-              duration: 0.3,
-              ease: "power2.in",
-              stagger: 0.06,
-              overwrite: true,
-            });
-          };
+          gsap.set(hotWords, { opacity: 0, y: 24 });
 
           ScrollTrigger.create({
             trigger: hotHeadingRef.current,
-            start: "top bottom-=60",
-            end: "bottom top",
-            onEnter: playHotHeading,
-            onEnterBack: playHotHeading,
-            onLeave: resetHotHeading,
-            onLeaveBack: resetHotHeading,
+            start: "top 90%",
+            once: true,
+            onEnter: () => {
+              gsap.to(hotWords, {
+                opacity: 1, y: 0,
+                duration: 0.5,
+                ease: "power3.out",
+                stagger: 0.08,
+                overwrite: true,
+              });
+            },
           });
         }
 

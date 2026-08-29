@@ -41,13 +41,10 @@ export async function POST(req: NextRequest) {
     );
 
     if (matchedUser) {
-      // Check password match against tempPassword or matching credentials
+      // Check password match against user tempPassword or Super Admin credentials
       const passwordMatch =
         (matchedUser.tempPassword && matchedUser.tempPassword.trim() === rawPassword) ||
-        (rawEmail.toLowerCase() === "admin@ashalinnomech.com" && rawPassword === "pias900###") ||
-        (rawEmail.toLowerCase() === "editor@ashalinnomech.com" && rawPassword === "editor123") ||
-        (rawEmail.toLowerCase() === "machine@ashalinnomech.com" && rawPassword === "machine123") ||
-        (rawEmail.toLowerCase() === "analytics@ashalinnomech.com" && rawPassword === "viewer123");
+        (matchedUser.role === "super_admin" && (await verifyCredentials(rawEmail, rawPassword)));
 
       if (passwordMatch) {
         matchedUser.status = "active";

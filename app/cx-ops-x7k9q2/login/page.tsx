@@ -4,78 +4,18 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ShieldCheck, Loader2, ArrowRight, Lock, Mail, Eye, EyeOff, Sparkles,
-  Layers, Cpu, LineChart, FileCode, CheckCircle2, UserCheck, Shield
+  ShieldCheck, Loader2, ArrowRight, Lock, Mail, Eye, EyeOff, CheckCircle2, Shield
 } from "lucide-react";
 import { ADMIN_PATH } from "@/lib/adminAuth";
-import { AdminRole } from "@/lib/adminRoles";
-
-interface QuickRolePreset {
-  role: AdminRole;
-  title: string;
-  badgeColor: string;
-  email: string;
-  pass: string;
-  icon: any;
-  desc: string;
-}
-
-const ROLE_PRESETS: QuickRolePreset[] = [
-  {
-    role: "super_admin",
-    title: "Super Admin",
-    badgeColor: "#00E5A3",
-    email: "admin@ashalinnomech.com",
-    pass: "pias900###",
-    icon: ShieldCheck,
-    desc: "Full system & security control",
-  },
-  {
-    role: "content_editor",
-    title: "Content Editor",
-    badgeColor: "#3b82f6",
-    email: "editor@ashalinnomech.com",
-    pass: "editor123",
-    icon: FileCode,
-    desc: "CMS content & product specs",
-  },
-  {
-    role: "machine_manager",
-    title: "Machine Manager",
-    badgeColor: "#f5c451",
-    email: "machine@ashalinnomech.com",
-    pass: "machine123",
-    icon: Cpu,
-    desc: "Catalogue & technical models",
-  },
-  {
-    role: "analytics_viewer",
-    title: "Analytics Viewer",
-    badgeColor: "#a855f7",
-    email: "analytics@ashalinnomech.com",
-    pass: "viewer123",
-    icon: LineChart,
-    desc: "Telemetry & inquiry pipeline",
-  },
-];
 
 export default function AdminLogin() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"quick_role" | "custom">("quick_role");
-  const [selectedRole, setSelectedRole] = useState<AdminRole>("super_admin");
   const [email, setEmail] = useState("admin@ashalinnomech.com");
   const [password, setPassword] = useState("pias900###");
   const [showPassword, setShowPassword] = useState(false);
   const [err, setErr] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [busy, setBusy] = useState(false);
-
-  const selectPreset = (preset: QuickRolePreset) => {
-    setSelectedRole(preset.role);
-    setEmail(preset.email);
-    setPassword(preset.pass);
-    setErr("");
-  };
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -87,7 +27,7 @@ export default function AdminLogin() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password: password.trim(), role: selectedRole }),
+        body: JSON.stringify({ email: email.trim(), password: password.trim() }),
       });
       const j = await res.json().catch(() => ({}));
       if (res.ok) {
@@ -105,8 +45,6 @@ export default function AdminLogin() {
       setBusy(false);
     }
   }
-
-  const activePreset = ROLE_PRESETS.find((r) => r.role === selectedRole) || ROLE_PRESETS[0];
 
   return (
     <div
@@ -136,7 +74,7 @@ export default function AdminLogin() {
           width: "600px",
           height: "600px",
           borderRadius: "50%",
-          background: `radial-gradient(circle, ${activePreset.badgeColor}33 0%, transparent 70%)`,
+          background: "radial-gradient(circle, rgba(0, 229, 163, 0.25) 0%, transparent 70%)",
           filter: "blur(90px)",
           pointerEvents: "none",
         }}
@@ -154,7 +92,7 @@ export default function AdminLogin() {
           width: "500px",
           height: "500px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(0, 229, 163, 0.2) 0%, transparent 75%)",
+          background: "radial-gradient(circle, rgba(13, 148, 136, 0.25) 0%, transparent 75%)",
           filter: "blur(100px)",
           pointerEvents: "none",
         }}
@@ -180,184 +118,59 @@ export default function AdminLogin() {
         transition={{ duration: 0.45, ease: "easeOut" }}
         style={{
           width: "100%",
-          maxWidth: 480,
-          background: "rgba(12, 20, 36, 0.78)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
+          maxWidth: 440,
+          background: "rgba(12, 20, 36, 0.85)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
           borderRadius: 24,
-          border: "1px solid rgba(255, 255, 255, 0.12)",
-          boxShadow: "0 30px 80px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 0, 0, 0.5)",
+          border: "1px solid rgba(43, 191, 179, 0.3)",
+          boxShadow: "0 30px 80px rgba(0, 0, 0, 0.8), 0 0 40px rgba(43, 191, 179, 0.15)",
           padding: "2.5rem 2.25rem",
           position: "relative",
           zIndex: 10,
         }}
       >
+        {/* Top Glow Bar */}
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0, height: 4,
+          background: "linear-gradient(90deg, #0d9488, #2dd4bf, #0d9488)",
+          borderTopLeftRadius: 24, borderTopRightRadius: 24,
+          boxShadow: "0 0 16px #2dd4bf"
+        }} />
+
         {/* Brand Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.75rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
-            <div
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 14,
-                background: `${activePreset.badgeColor}1c`,
-                border: `1px solid ${activePreset.badgeColor}44`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: activePreset.badgeColor,
-                boxShadow: `0 0 20px ${activePreset.badgeColor}33`,
-                transition: "all 0.3s ease",
-              }}
-            >
-              {<activePreset.icon size={22} />}
-            </div>
-            <div>
-              <div style={{ fontSize: "1.25rem", fontWeight: 900, color: "#fff", letterSpacing: "0.02em", lineHeight: 1.1 }}>
-                <span style={{ color: "#ef4444", marginRight: "0.2em" }}>ASHAL</span>
-                INNOMECH
-              </div>
-              <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.5)", fontWeight: 700, letterSpacing: "0.08em" }}>
-                OPS COMMAND CONSOLE
-              </div>
-            </div>
-          </div>
-          <span
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <div
             style={{
-              fontSize: "0.68rem",
-              padding: "0.2rem 0.6rem",
-              borderRadius: 20,
-              background: `${activePreset.badgeColor}1a`,
-              color: activePreset.badgeColor,
-              border: `1px solid ${activePreset.badgeColor}3d`,
-              fontWeight: 800,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.3rem",
-            }}
-          >
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: activePreset.badgeColor }} />
-            {activePreset.title.toUpperCase()}
-          </span>
-        </div>
-
-        {/* Tab Switcher: Quick Role Access vs Custom Credentials */}
-        <div
-          style={{
-            display: "flex",
-            background: "rgba(0,0,0,0.35)",
-            padding: "4px",
-            borderRadius: 14,
-            marginBottom: "1.5rem",
-            border: "1px solid rgba(255,255,255,0.07)",
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setActiveTab("quick_role")}
-            style={{
-              flex: 1,
-              padding: "0.55rem 0.8rem",
-              borderRadius: 10,
-              border: "none",
-              background: activeTab === "quick_role" ? "rgba(255,255,255,0.12)" : "transparent",
-              color: activeTab === "quick_role" ? "#fff" : "rgba(255,255,255,0.5)",
-              fontSize: "0.82rem",
-              fontWeight: 700,
-              cursor: "pointer",
+              width: 52,
+              height: 52,
+              borderRadius: 16,
+              background: "rgba(43, 191, 179, 0.15)",
+              border: "1px solid rgba(43, 191, 179, 0.4)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: "0.4rem",
-              transition: "all 0.2s ease",
+              color: "#5eead4",
+              boxShadow: "0 0 20px rgba(43, 191, 179, 0.25)",
+              margin: "0 auto 1rem",
             }}
           >
-            <Sparkles size={14} color={activeTab === "quick_role" ? activePreset.badgeColor : "currentColor"} />
-            Role Based Login
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("custom")}
-            style={{
-              flex: 1,
-              padding: "0.55rem 0.8rem",
-              borderRadius: 10,
-              border: "none",
-              background: activeTab === "custom" ? "rgba(255,255,255,0.12)" : "transparent",
-              color: activeTab === "custom" ? "#fff" : "rgba(255,255,255,0.5)",
-              fontSize: "0.82rem",
-              fontWeight: 700,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.4rem",
-              transition: "all 0.2s ease",
-            }}
-          >
-            <Shield size={14} />
-            Custom Login
-          </button>
-        </div>
-
-        {/* Dynamic Role Cards Selector (Visible in Quick Role mode) */}
-        {activeTab === "quick_role" && (
-          <div style={{ marginBottom: "1.5rem" }}>
-            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.65rem" }}>
-              Select Admin Role Account
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem" }}>
-              {ROLE_PRESETS.map((preset) => {
-                const isSelected = selectedRole === preset.role;
-                const IconComponent = preset.icon;
-                return (
-                  <motion.button
-                    key={preset.role}
-                    type="button"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => selectPreset(preset)}
-                    style={{
-                      padding: "0.75rem 0.85rem",
-                      borderRadius: 12,
-                      border: `1px solid ${isSelected ? preset.badgeColor : "rgba(255,255,255,0.08)"}`,
-                      background: isSelected ? `${preset.badgeColor}18` : "rgba(255,255,255,0.03)",
-                      textAlign: "left",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "0.3rem",
-                      boxShadow: isSelected ? `0 0 16px ${preset.badgeColor}22` : "none",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <span
-                        style={{
-                          fontSize: "0.82rem",
-                          fontWeight: 800,
-                          color: isSelected ? "#fff" : "rgba(255,255,255,0.8)",
-                        }}
-                      >
-                        {preset.title}
-                      </span>
-                      <IconComponent size={15} color={preset.badgeColor} />
-                    </div>
-                    <span style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.5)", lineHeight: 1.2 }}>
-                      {preset.desc}
-                    </span>
-                  </motion.button>
-                );
-              })}
-            </div>
+            <ShieldCheck size={28} />
           </div>
-        )}
+          <div style={{ fontSize: "1.35rem", fontWeight: 900, color: "#fff", letterSpacing: "0.02em", marginBottom: "0.25rem" }}>
+            <span style={{ color: "#ef4444", marginRight: "0.25em" }}>ASHAL</span>
+            INNOMECH
+          </div>
+          <div style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.5)", fontWeight: 700, letterSpacing: "0.08em" }}>
+            OPS COMMAND CONSOLE — ADMIN AUTHENTICATION
+          </div>
+        </div>
 
         {/* Main Sign-In Form */}
-        <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
+        <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
           <div>
-            <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "rgba(255,255,255,0.8)", marginBottom: "0.4rem" }}>
-              Email Address
+            <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "rgba(255,255,255,0.8)", marginBottom: "0.45rem" }}>
+              Admin Email Address
             </label>
             <div style={{ position: "relative" }}>
               <Mail size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.4)" }} />
@@ -365,6 +178,7 @@ export default function AdminLogin() {
                 type="email"
                 required
                 autoComplete="username"
+                placeholder="admin@ashalinnomech.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 style={{
@@ -372,7 +186,7 @@ export default function AdminLogin() {
                   padding: "0.85rem 1rem 0.85rem 2.6rem",
                   borderRadius: 12,
                   background: "rgba(0,0,0,0.35)",
-                  border: "1px solid rgba(255,255,255,0.14)",
+                  border: "1px solid rgba(255,255,255,0.15)",
                   color: "#fff",
                   fontSize: "0.92rem",
                   outline: "none",
@@ -383,7 +197,7 @@ export default function AdminLogin() {
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "rgba(255,255,255,0.8)", marginBottom: "0.4rem" }}>
+            <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "rgba(255,255,255,0.8)", marginBottom: "0.45rem" }}>
               Password
             </label>
             <div style={{ position: "relative" }}>
@@ -392,6 +206,7 @@ export default function AdminLogin() {
                 type={showPassword ? "text" : "password"}
                 required
                 autoComplete="current-password"
+                placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 style={{
@@ -399,7 +214,7 @@ export default function AdminLogin() {
                   padding: "0.85rem 2.8rem 0.85rem 2.6rem",
                   borderRadius: 12,
                   background: "rgba(0,0,0,0.35)",
-                  border: "1px solid rgba(255,255,255,0.14)",
+                  border: "1px solid rgba(255,255,255,0.15)",
                   color: "#fff",
                   fontSize: "0.92rem",
                   outline: "none",
@@ -485,7 +300,7 @@ export default function AdminLogin() {
               width: "100%",
               padding: "0.95rem",
               borderRadius: 12,
-              background: activePreset.badgeColor,
+              background: "linear-gradient(135deg, #0d9488, #2dd4bf)",
               border: "none",
               color: "#04211e",
               fontWeight: 800,
@@ -495,9 +310,9 @@ export default function AdminLogin() {
               alignItems: "center",
               justifyContent: "center",
               gap: "0.5rem",
-              boxShadow: `0 8px 24px ${activePreset.badgeColor}40`,
+              boxShadow: "0 8px 24px rgba(45, 212, 191, 0.35)",
               marginTop: "0.4rem",
-              transition: "background 0.3s ease",
+              transition: "all 0.2s ease",
             }}
           >
             {busy ? (
@@ -505,7 +320,7 @@ export default function AdminLogin() {
             ) : (
               <ArrowRight size={18} />
             )}
-            {busy ? "Authenticating Account…" : `Sign In as ${activePreset.title}`}
+            {busy ? "Authenticating Admin…" : "Sign In to Ops Command"}
           </motion.button>
         </form>
       </motion.div>

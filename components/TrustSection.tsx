@@ -5,9 +5,10 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SECTION_ELEMENT_DELAY } from "@/components/SectionReveal";
 
-gsap.registerPlugin(useGSAP);
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 // ─────────────────────────────────────────────
 // NEBULA BACKGROUND
@@ -272,43 +273,14 @@ export default function TrustSection() {
     rows.forEach(el => { el.style.opacity = "1"; el.style.clipPath = "none"; });
   };
 
-  // ScrollTrigger is a separate plugin bundle — load it lazily since this
-  // section is below the fold, then hand off to useGSAP once it's ready.
-  const [pluginReady, setPluginReady] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
-      if (cancelled) return;
-      gsap.registerPlugin(ScrollTrigger);
-      setPluginReady(true);
-    }).catch(() => { if (!cancelled) revealAll(); });
-    // Safety net — plugin load or a trigger never firing for any reason
-    // (null ref race, layout quirk): never leave this section's content
-    // permanently invisible.
-    const fallback = setTimeout(() => { if (!cancelled) revealAll(); }, 4000);
-    return () => { cancelled = true; clearTimeout(fallback); };
-  }, []);
-
-  // ── "Ledger Stamp" scroll-in — distinct from every other homepage
-  // section: the headline shears in on a skew (not a plain fade/slide),
-  // the dossier rows wipe open left-to-right like a clip-path ledger
-  // stamping down one line at a time, and the stat cards pop in with a
-  // scale-overshoot instead of a rise. All three reverse on scroll-up.
   useGSAP(() => {
-    if (!pluginReady) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const trigger = {
       trigger: sectionRef.current,
-      start: "top 78%",
-      end: "bottom 15%",
-      toggleActions: "play reverse play reverse",
+      start: "top 90%",
+      once: true,
     };
-
-    if (reduced) {
-      gsap.set([headlineRef.current, dossierRef.current, statsRef.current], { opacity: 1, clearProps: "all" });
-      return;
-    }
 
     const tl = gsap.timeline({ scrollTrigger: trigger, delay: SECTION_ELEMENT_DELAY });
 
@@ -350,7 +322,7 @@ export default function TrustSection() {
       },
       0.3
     );
-  }, { scope: sectionRef, dependencies: [pluginReady] });
+  }, { scope: sectionRef });
 
   return (
     <>

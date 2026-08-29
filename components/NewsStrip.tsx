@@ -7,9 +7,10 @@ import TransitionLink from "@/components/TransitionLink";
 import { latestArticles, type NewsArticle } from "@/lib/news";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SECTION_ELEMENT_DELAY } from "@/components/SectionReveal";
 
-gsap.registerPlugin(useGSAP);
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 function fmtDate(iso: string) {
   try {
@@ -66,7 +67,6 @@ export default function NewsStrip() {
     const set = new Set<string>();
     articles.forEach((a) => {
       if (a.category) {
-        // Group similar categories for clean tabs
         if (a.category.toLowerCase().includes("product")) set.add("Product Launch");
         else if (a.category.toLowerCase().includes("tech")) set.add("Technical");
         else if (a.category.toLowerCase().includes("sustain") || a.category.toLowerCase().includes("recycl")) set.add("Sustainability");
@@ -108,7 +108,6 @@ export default function NewsStrip() {
     return () => clearInterval(interval);
   }, [viewMode, isPlaying, filteredArticles.length]);
 
-  // Handle Carousel navigation
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev === 0 ? filteredArticles.length - 1 : prev - 1));
   };
@@ -117,31 +116,15 @@ export default function NewsStrip() {
     setCurrentIndex((prev) => (prev + 1) % filteredArticles.length);
   };
 
-  // Entrance animations using GSAP
-  const [pluginReady, setPluginReady] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    import("gsap/ScrollTrigger")
-      .then(({ ScrollTrigger }) => {
-        if (cancelled) return;
-        gsap.registerPlugin(ScrollTrigger);
-        setPluginReady(true);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   useGSAP(
     () => {
-      if (!pluginReady || filteredArticles.length === 0) return;
+      if (filteredArticles.length === 0) return;
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
+          start: "top 90%",
+          once: true,
         },
         delay: SECTION_ELEMENT_DELAY,
       });
@@ -150,7 +133,7 @@ export default function NewsStrip() {
         tl.fromTo(
           eyebrowRef.current,
           { opacity: 0, x: -20 },
-          { opacity: 1, x: 0, duration: 0.7, ease: "power2.out" },
+          { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" },
           0
         );
       }
@@ -158,9 +141,9 @@ export default function NewsStrip() {
       if (headRef.current) {
         tl.fromTo(
           headRef.current,
-          { opacity: 0, y: 24 },
-          { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
-          0.1
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+          0.05
         );
       }
 
@@ -168,12 +151,12 @@ export default function NewsStrip() {
         tl.fromTo(
           trackRef.current,
           { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
-          0.2
+          { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+          0.1
         );
       }
     },
-    { scope: sectionRef, dependencies: [pluginReady, filteredArticles.length] }
+    { scope: sectionRef, dependencies: [filteredArticles.length] }
   );
 
   return (

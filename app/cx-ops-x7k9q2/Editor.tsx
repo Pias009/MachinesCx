@@ -497,6 +497,18 @@ function ProductSelectField({
   );
 }
 
+function slugify(text: string): string {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
+}
+
 // ── one field, dispatched by kind ──────────────────────────
 function FieldControl({ field, value, item, onChange, onItemChange }: {
   field: Field;
@@ -508,6 +520,47 @@ function FieldControl({ field, value, item, onChange, onItemChange }: {
 }) {
   switch (field.kind) {
     case "text":
+      if (field.key === "name" || field.key === "title") {
+        return (
+          <input
+            style={inputStyle}
+            value={(value as string) ?? ""}
+            onChange={e => {
+              const val = e.target.value;
+              onChange(val);
+              const currentSlug = String(item.slug ?? "");
+              const currentName = String(item.name || item.title || "");
+              if (val && (!currentSlug || item.isNew || currentSlug === slugify(currentName) || currentSlug === "new-machine" || currentSlug === "new-article" || currentSlug === "new-product")) {
+                onItemChange("slug", slugify(val));
+              }
+            }}
+          />
+        );
+      }
+      if (field.key === "slug") {
+        return (
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <input
+              style={{ ...inputStyle, flex: 1 }}
+              value={(value as string) ?? ""}
+              onChange={e => onChange(e.target.value)}
+            />
+            <button
+              type="button"
+              style={{ ...smallBtn, padding: "0.4rem 0.75rem", fontSize: "0.78rem", whiteSpace: "nowrap" }}
+              onClick={() => {
+                const title = String(item.name || item.title || item.series || "");
+                if (title) {
+                  onChange(slugify(title));
+                }
+              }}
+              title="Auto-generate slug from title"
+            >
+              ⚡ Sync from Title
+            </button>
+          </div>
+        );
+      }
       return <input style={inputStyle} value={(value as string) ?? ""} onChange={e => onChange(e.target.value)} />;
     case "textarea":
       return <textarea style={{ ...inputStyle, minHeight: 90, resize: "vertical" }} value={(value as string) ?? ""} onChange={e => onChange(e.target.value)} />;

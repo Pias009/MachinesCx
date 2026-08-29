@@ -143,10 +143,8 @@ export default function PrintingShowcase() {
     // used to take ~1.15s from trigger to fully settled (on top of a
     // separate 0.7s outer section-push, since removed for this section);
     // now the whole thing lands in well under 0.3s.
-    const trigger = { trigger: sectionElRef.current, start: "top 85%", end: "bottom 20%", toggleActions: "play reverse play reverse" };
+    const trigger = { trigger: sectionElRef.current, start: "top 90%", once: true };
 
-    // One timeline, one ScrollTrigger for the whole entrance — was 5
-    // separate ScrollTrigger instances all watching the same trigger.
     const tl = gsap.timeline({ scrollTrigger: trigger });
 
     // Brand label — 3D Character-by-Character GSAP reveal

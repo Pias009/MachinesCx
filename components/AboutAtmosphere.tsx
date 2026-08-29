@@ -3,8 +3,9 @@
 import { useEffect, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-gsap.registerPlugin(useGSAP);
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 /**
  * Moody fbm-noise "smoke" canvas + dot-grid texture, used as an atmospheric
@@ -129,22 +130,19 @@ export default function AboutAtmosphere() {
     const stop = () => { if (ticking) { gsap.ticker.remove(render); ticking = false; } };
 
     render(); // paint first frame immediately so there's no blank flash
-    if (!reduceMotion) start();
+    let st: ScrollTrigger | undefined;
 
-    let st: ReturnType<typeof gsap.to>["scrollTrigger"] | undefined;
-    (async () => {
-      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-      gsap.registerPlugin(ScrollTrigger);
-
-      gsap.set([canvas, gridRef.current], { opacity: 0 });
-      gsap.to([canvas, gridRef.current], {
+    gsap.fromTo([canvas, gridRef.current],
+      { opacity: 0.3 },
+      {
         opacity: 1,
-        duration: 1.1,
+        duration: 0.6,
         ease: "power2.out",
-        scrollTrigger: { trigger: host, start: "top 90%" },
-      });
+        scrollTrigger: { trigger: host, start: "top 95%", once: true },
+      }
+    );
 
-      st = ScrollTrigger.create({
+    st = ScrollTrigger.create({
         trigger: host,
         start: "top bottom",
         end: "bottom top",
@@ -161,7 +159,6 @@ export default function AboutAtmosphere() {
           scrollTrigger: { trigger: host, start: "top bottom", end: "bottom top", scrub: 0.6 },
         });
       }
-    })();
 
     return () => {
       stop();

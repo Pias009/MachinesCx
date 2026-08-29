@@ -13,7 +13,7 @@ function InviteContent() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [invInfo, setInvInfo] = useState<{ email: string; name: string; role: string; tempPasswordHint?: string } | null>(null);
+  const [invInfo, setInvInfo] = useState<{ email: string; name: string; role: string; status?: string; tempPasswordHint?: string } | null>(null);
 
   const [tempPassword, setTempPassword] = useState("");
   const [showTempPass, setShowTempPass] = useState(false);
@@ -23,13 +23,17 @@ function InviteContent() {
   const [successMsg, setSuccessMsg] = useState("");
 
   useEffect(() => {
-    if (!token) {
-      setError("No invitation token provided in URL.");
+    if (!token && !emailParam) {
+      setError("No invitation token or email address provided in URL.");
       setLoading(false);
       return;
     }
 
-    fetch(`/api/admin/invite/verify?token=${encodeURIComponent(token)}`)
+    const query = new URLSearchParams();
+    if (token) query.set("token", token);
+    if (emailParam) query.set("email", emailParam);
+
+    fetch(`/api/admin/invite/verify?${query.toString()}`)
       .then(r => r.json().then(j => ({ ok: r.ok, j })))
       .then(({ ok, j }) => {
         if (!ok) {
@@ -41,7 +45,7 @@ function InviteContent() {
       })
       .catch(() => setError("Network error checking invitation token."))
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [token, emailParam]);
 
   async function handleActivate(e: React.FormEvent) {
     e.preventDefault();
@@ -151,14 +155,52 @@ function InviteContent() {
         {!loading && error && (
           <div style={{
             background: "rgba(255,107,125,0.12)", border: "1px solid rgba(255,107,125,0.3)",
-            borderRadius: 14, padding: "1.2rem", textAlign: "center", color: "#ff8a97", fontSize: "0.9rem"
+            borderRadius: 14, padding: "1.25rem", textAlign: "center", color: "#ff8a97", fontSize: "0.9rem"
           }}>
-            <AlertCircle size={24} style={{ margin: "0 auto 0.5rem", display: "block" }} />
-            {error}
+            <AlertCircle size={26} style={{ margin: "0 auto 0.5rem", display: "block" }} />
+            <div style={{ marginBottom: "1rem" }}>{error}</div>
+            <button
+              type="button"
+              onClick={() => router.push(`/${ADMIN_PATH}`)}
+              style={{
+                padding: "0.6rem 1.2rem", borderRadius: 10,
+                background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)",
+                color: "#fff", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer",
+                transition: "all 0.2s"
+              }}
+            >
+              Go to Ops Admin Login
+            </button>
           </div>
         )}
 
-        {!loading && invInfo && (
+        {!loading && invInfo && invInfo.status === "accepted" && (
+          <div style={{
+            background: "rgba(43,191,179,0.12)", border: "1px solid rgba(43,191,179,0.3)",
+            borderRadius: 14, padding: "1.5rem", textAlign: "center", color: "#5eead4", fontSize: "0.95rem"
+          }}>
+            <CheckCircle2 size={32} style={{ margin: "0 auto 0.5rem", display: "block" }} />
+            <h3 style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0 0 0.5rem", color: "#fff" }}>
+              Account Already Activated
+            </h3>
+            <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.7)", margin: "0 0 1.25rem" }}>
+              The invitation for <strong>{invInfo.email}</strong> has already been activated. You can log in directly with your password.
+            </p>
+            <button
+              type="button"
+              onClick={() => router.push(`/${ADMIN_PATH}`)}
+              style={{
+                width: "100%", padding: "0.75rem", borderRadius: 10,
+                background: "linear-gradient(135deg, #0d9488, #2dd4bf)",
+                border: "none", color: "#04211e", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer"
+              }}
+            >
+              Go to Ops Admin Login
+            </button>
+          </div>
+        )}
+
+        {!loading && invInfo && invInfo.status !== "accepted" && (
           <form onSubmit={handleActivate} style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
             {/* Account Card Summary */}
             <div style={{

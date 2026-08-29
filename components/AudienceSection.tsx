@@ -1,14 +1,15 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import TransitionLink from "@/components/TransitionLink";
 import AetherBtn from "@/components/AetherBtn";
 import { SECTION_ELEMENT_DELAY } from "@/components/SectionReveal";
 
-gsap.registerPlugin(useGSAP);
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const ROLE_KEYS = ["plantManagers", "procurement", "factoryOwners"] as const;
 
@@ -18,43 +19,27 @@ export default function AudienceSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const roleRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const [pluginReady, setPluginReady] = useState(false);
   const [bodyExpanded, setBodyExpanded] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
-      if (cancelled) return;
-      gsap.registerPlugin(ScrollTrigger);
-      setPluginReady(true);
-    }).catch(() => {
-      if (cardRef.current) { cardRef.current.style.opacity = "1"; cardRef.current.style.transform = "none"; }
-    });
-    return () => { cancelled = true; };
-  }, []);
-
   useGSAP(() => {
-    if (!pluginReady) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const roles = roleRefs.current.filter(Boolean);
-    gsap.set(roles, { opacity: 0, y: 10 });
 
     gsap.fromTo(cardRef.current,
-      { opacity: 0, y: 32, scale: 0.98 },
+      { opacity: 0, y: 24, scale: 0.98 },
       {
         opacity: 1, y: 0, scale: 1,
-        duration: 0.8, ease: "power3.out", delay: SECTION_ELEMENT_DELAY,
+        duration: 0.6, ease: "power3.out", delay: SECTION_ELEMENT_DELAY,
         scrollTrigger: {
-          trigger: sectionRef.current, start: "top 82%", end: "bottom top",
-          toggleActions: "play reverse play reverse",
+          trigger: sectionRef.current, start: "top 90%", once: true,
         },
         onComplete: () => {
-          gsap.to(roles, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out", stagger: 0.1 });
+          gsap.to(roles, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out", stagger: 0.08 });
         },
       }
     );
-  }, { scope: sectionRef, dependencies: [pluginReady] });
+  }, { scope: sectionRef });
 
   return (
     <section

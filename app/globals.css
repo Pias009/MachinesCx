@@ -1596,13 +1596,25 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
   .cat2-hero { padding-top: 5rem; }
   .cat2-hero__h1 { font-size: clamp(2rem, 9vw, 3rem); }
   .cat2-search { max-width: none; }
+
+  /* Toolbar: bleed the filter strip to the screen edge so pills can scroll
+     without being clipped by the wrap's padding. Negative margin + matching
+     padding compensates for the wrap's inline padding, then overflow-x:auto
+     on the filter strip does the rest. */
+  .cat2-toolbar { margin-inline: -1rem; padding-inline: 1rem; overflow: hidden; }
   .cat2-filter {
     flex-wrap: nowrap; gap: 0.6rem;
     overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
-    padding-bottom: 0.25rem;
+    padding-inline: 1rem; padding-bottom: 0.5rem; margin-inline: -1rem;
   }
   .cat2-filter::-webkit-scrollbar { display: none; }
   .cat2-filter__pill { font-size: 0.62rem; white-space: nowrap; flex-shrink: 0; }
+
+  /* Feature card: stack image above body on narrow screens */
+  .cat2-feature { grid-template-columns: 1fr !important; }
+  .cat2-feature__stage { order: -1; max-height: 240px; overflow: hidden; }
+  .cat2-feature__name { font-size: 1.3rem; }
+  .cat2-feature__body { padding: 0.5rem 0; }
 
   /* family block */
   .family-block { padding-block: 2.5rem; }
@@ -4170,6 +4182,22 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .pdv2-float__icn--whatsapp:hover { color: #fff; border-color: #25d366; }
 .pdv2-float__icn--quote { background: var(--brand-teal); color: #04211e; border-color: var(--brand-teal); }
 .pdv2-float__icn--quote:hover { color: #04211e; }
+
+/* On mobile the bottom nav + chat widget already cover quick contact —
+   hide the floating stack so it doesn't collide with them */
+@media (max-width: 768px) {
+  .pdv2-float {
+    /* Move to left side on mobile to avoid chat widget collision */
+    right: auto;
+    left: clamp(0.75rem, 3vw, 1.25rem);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 5.5rem);
+    flex-direction: row;
+    gap: 0.45rem;
+  }
+  .pdv2-float__icn {
+    width: 40px; height: 40px;
+  }
+}
 
 /* ── Sonner toasts — matched to .ci-error / .ci-review-card surface language ── */
 .cx-toast {

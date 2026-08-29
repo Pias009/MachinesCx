@@ -804,26 +804,17 @@ export default function ProductDetail({ family, category, related, relatedArticl
       </section>
 
       {/* ══════════════════════════════════════════════════
-          VIDEO — sits above the tabs, like the reference page
+          VIDEO — only rendered when at least one valid video exists
+          (hides entirely on mobile when no video, preventing blank space)
       ══════════════════════════════════════════════════ */}
-      <section className="bg-[var(--bg-base)] py-16 sm:py-20" aria-label={t("productVideosAria")}>
+      {videos.length > 0 && (
+      <section className="bg-[var(--bg-base)] py-12 sm:py-20" aria-label={t("productVideosAria")}>
         <div className="mx-auto max-w-[1280px] px-6 sm:px-10">
           <SectionHead
             eyebrow={t("productionDemo")}
             title={t.rich("seeItInAction", { em: (chunks) => <em className="text-[var(--brand-teal)] not-italic">{chunks}</em> })}
           />
 
-          {videos.length === 0 ? (
-            /* honest empty state — never falls back to a fake/placeholder video */
-            <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-[var(--bg-line)] px-6 py-16 text-center" data-reveal>
-              <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--ink-35)]">
-                <rect x="2.5" y="5" width="19" height="14" rx="2" />
-                <path d="M9.5 9.5v5l5-2.5z" fill="currentColor" stroke="none" />
-              </svg>
-              <p className="text-[var(--ink-60)]"><strong className="text-[var(--ink)]">{t("videoComingSoon")}</strong><br />{t("videoComingSoonSub")}</p>
-              <InquiryButton slug={family.slug} name={family.name} />
-            </div>
-          ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]" data-reveal>
             {/* main video */}
             <div className="relative aspect-video overflow-hidden rounded-xl border border-[var(--bg-line)]" style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 3% 100%)" }}>
@@ -883,9 +874,9 @@ export default function ProductDetail({ family, category, related, relatedArticl
               </div>
             )}
           </div>
-          )}
         </div>
       </section>
+      )}
 
       {/* ══════════════════════════════════════════════════
           TABS — Product Details / Output Sample / Packing & Shipping
@@ -1211,19 +1202,12 @@ export default function ProductDetail({ family, category, related, relatedArticl
       <CustomSections sections={family.customSections} />
 
       {/* ══════════════════════════════════════════════════
-          REVIEWS — real, admin-entered reviews only. No fabricated
-          rating or testimonials; an honest empty state otherwise.
+          REVIEWS — real, admin-entered reviews only. Hidden entirely
+          when no reviews exist (avoids blank space on mobile).
       ══════════════════════════════════════════════════ */}
-      <section className="bg-[var(--bg-base)] py-16 sm:py-20" aria-label={t("customerReviewsAria")}>
-        {reviews.length === 0 ? (
-          <div className="pdv2-wrap flex flex-col items-center gap-4 py-8 text-center" data-reveal>
-            <h2 className="text-[clamp(1.8rem,3.5vw,2.8rem)] leading-[0.95] text-[var(--ink)]" style={{ fontFamily: "var(--ff-display)" }}>
-              {t.rich("beFirstToReview", { em: (chunks) => <em className="text-[var(--brand-teal)] not-italic">{chunks}</em> })}
-            </h2>
-            <p className="text-[var(--ink-60)]">{t("noReviewYet")}</p>
-            <InquiryButton slug={family.slug} name={family.name} />
-          </div>
-        ) : (
+      {reviews.length > 0 && (
+      <section className="bg-[var(--bg-base)] py-12 sm:py-20" aria-label={t("customerReviewsAria")}>
+        {(
           <div className="mx-auto grid max-w-[1400px] grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
             {/* left — grain-textured rating block, echoing the hero's diagonal panel */}
             <div
@@ -1308,6 +1292,7 @@ export default function ProductDetail({ family, category, related, relatedArticl
           </div>
         )}
       </section>
+      )}
 
       {/* ══════════════════════════════════════════════════
           FEATURED TECHNICAL GUIDES & ENGINEERING INSIGHTS

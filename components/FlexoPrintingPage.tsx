@@ -159,10 +159,72 @@ export default function FlexoPrintingPage() {
           .fp-series-row { grid-template-columns: 1fr !important; }
           .fp-substrate-grid { grid-template-columns: 1fr !important; }
         }
+
+        /* ── Large phone ── */
+        @media (max-width: 640px) {
+          /* Hero section: tighter top padding so it doesn't feel buried */
+          .fp-hero-section { padding-top: 4rem !important; }
+
+          /* Hero image: make room by reducing aspect ratio & thumb strip */
+          .fp-hero-img { aspect-ratio: 3/2 !important; }
+          .fp-hero-thumbs { gap: .35rem !important; }
+          .fp-gallery-thumb { width: 56px !important; height: 42px !important; }
+
+          /* Hero text content: reduce internal spacing */
+          .fp-hero-text { padding-bottom: 1.25rem !important; gap: .9rem !important; }
+          .fp-hero-text h1 { font-size: clamp(2rem, 9vw, 3rem) !important; }
+
+          /* Key stats under hero title: keep 3-col but compress */
+          .fp-hero-kv-row { gap: .6rem !important; padding-top: .4rem !important; }
+          .fp-kv__value { font-size: 1.15rem !important; }
+
+          /* Tier selector section: tighter */
+          .fp-tier-section { padding: 2.5rem 0 3.5rem !important; }
+          .fp-tier-btn { padding: .75rem 1rem !important; }
+          .fp-tier-label { font-size: 1.1rem !important; }
+
+          /* Key-specs grid: 2×2 instead of 4×1 (already applied above at 860px) */
+
+          /* CTA section: stack vertically */
+          .fp-cta-section { flex-direction: column !important; align-items: flex-start !important; }
+
+          /* All-series section: reduce padding */
+          .fp-series-section { padding: 3rem 0 !important; }
+          .fp-series-section h2 { margin-bottom: 2rem !important; }
+
+          /* Substrate section: reduce gap after stacking */
+          .fp-substrate-section { padding: 3rem 0 !important; }
+        }
+
+        /* ── Small phone ── */
+        @media (max-width: 480px) {
+          /* Tier grid: keep 2-col but tighter padding */
+          .fp-tier-grid { gap: .5rem !important; }
+          .fp-tier-btn { padding: .65rem .85rem !important; gap: .15rem !important; }
+          .fp-tier-label { font-size: 1rem !important; }
+          .fp-tier-sub { font-size: .62rem !important; }
+          .fp-tier-badge { font-size: .6rem !important; }
+
+          /* Key-specs grid: 2 columns, tighter cells */
+          .fp-kv-grid { grid-template-columns: repeat(2,1fr) !important; }
+          .fp-kv-grid > div { padding: 1rem 1.1rem !important; }
+          .fp-kv-grid > div > div:last-child { font-size: 1rem !important; }
+
+          /* Width selector pills: allow wrap, smaller text */
+          .fp-width-btn { padding: .35rem .65rem !important; font-size: .65rem !important; }
+
+          /* Hero thumbnail strip: hide on tiny screens (swipe not needed at this size) */
+          .fp-hero-thumbs { display: none !important; }
+
+          /* Substrate grid: single column already, but reduce padding */
+          .fp-substrate-grid > div:first-child { order: 2; }
+          .fp-substrate-grid > div:last-child { order: 1; }
+          .fp-substrate-grid > div > div { padding: .85rem 1rem !important; }
+        }
       `}</style>
 
       {/* ── HERO GALLERY ── */}
-      <section className="fp-dark" style={{
+      <section className="fp-dark fp-hero-section" style={{
         background: "#0d1614",
         padding: "5rem 0 0",
         overflow: "hidden",
@@ -190,7 +252,7 @@ export default function FlexoPrintingPage() {
                 sizes="60vw"
               />
               {/* thumbnail strip */}
-              <div style={{ position:"absolute", bottom:"1rem", left:"1rem", display:"flex", gap:".5rem" }}>
+              <div className="fp-hero-thumbs" style={{ position:"absolute", bottom:"1rem", left:"1rem", display:"flex", gap:".5rem" }}>
                 {GALLERY.map((g,i) => (
                   <CldImage key={i} src={g.src} alt="" onClick={() => setActiveImg(i)}
                     width={144} height={104} sizes="72px"
@@ -200,7 +262,7 @@ export default function FlexoPrintingPage() {
             </div>
 
             {/* hero text */}
-            <div data-reveal="blur" style={{ paddingBottom:"2.5rem", display:"flex", flexDirection:"column", gap:"1.2rem" }}>
+            <div className="fp-hero-text" data-reveal="blur" style={{ paddingBottom:"2.5rem", display:"flex", flexDirection:"column", gap:"1.2rem" }}>
               <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--brand-red)" }}>
                 {t("heroEyebrow")}
               </span>
@@ -212,7 +274,7 @@ export default function FlexoPrintingPage() {
               </p>
 
               {/* key stats */}
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"1rem", paddingTop:".5rem", borderTop:"1px solid rgba(255,255,255,.08)" }}>
+              <div className="fp-hero-kv-row" style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"1rem", paddingTop:".5rem", borderTop:"1px solid rgba(255,255,255,.08)" }}>
                 <div className="fp-kv">
                   <span className="fp-kv__label">{t("maxSpeed")}</span>
                   <span className="fp-kv__value" style={{ color:"#fff" }}>350 m/min</span>
@@ -234,7 +296,7 @@ export default function FlexoPrintingPage() {
       </section>
 
       {/* ── COLOUR TIER + WIDTH SELECTOR ── */}
-      <section style={{ background:"var(--bg-base)", borderTop:"1px solid var(--bg-line)", padding:"4rem 0 5rem" }}>
+      <section className="fp-tier-section" style={{ background:"var(--bg-base)", borderTop:"1px solid var(--bg-line)", padding:"4rem 0 5rem" }}>
         <div className="wrap" style={{ display:"flex", flexDirection:"column", gap:"3rem" }}>
 
           {/* heading */}
@@ -312,7 +374,7 @@ export default function FlexoPrintingPage() {
       </section>
 
       {/* ── ALL SERIES OVERVIEW ── */}
-      <section style={{ background:"var(--bg-surface)", borderTop:"1px solid var(--bg-line)", padding:"5rem 0" }}>
+      <section className="fp-series-section" style={{ background:"var(--bg-surface)", borderTop:"1px solid var(--bg-line)", padding:"5rem 0" }}>
         <div className="wrap">
           <span style={{ fontFamily:"var(--ff-mono)", fontSize:"0.7rem", letterSpacing:".22em", textTransform:"uppercase", color:"var(--ink-60)", display:"block", marginBottom:".6rem" }}>
             {t("completeRange")}
@@ -359,7 +421,7 @@ export default function FlexoPrintingPage() {
       </section>
 
       {/* ── SUBSTRATE SECTION ── */}
-      <section className="fp-dark" style={{ background:"#0d1614", padding:"4rem 0" }}>
+      <section className="fp-dark fp-substrate-section" style={{ background:"#0d1614", padding:"4rem 0" }}>
         <div className="wrap">
           <div className="fp-substrate-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4rem", alignItems:"center" }}>
             <div data-reveal="blur">
@@ -393,7 +455,7 @@ export default function FlexoPrintingPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section style={{
+      <section className="fp-cta-section" style={{
         background:"var(--bg-surface)", borderTop:"1px solid var(--bg-line)",
         padding:"clamp(2.5rem,5vw,4rem) clamp(1.25rem,4vw,3rem)",
         display:"flex", justifyContent:"space-between", alignItems:"center", gap:"2rem", flexWrap:"wrap",

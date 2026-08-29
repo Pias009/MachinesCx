@@ -580,55 +580,8 @@ export default function ProductDetail({ family, category, related, relatedArticl
      not all at once on mount. `data-reveal` value picks the motion:
      "scale" for photos/frames, "blur" for hero text, default = fade-up. */
   const rootRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced || !rootRef.current) return;
-    const els = Array.from(rootRef.current.querySelectorAll<HTMLElement>("[data-reveal]"));
-
-    const HIDDEN: Record<string, { opacity: string; transform: string; filter?: string }> = {
-      scale: { opacity: "0", transform: "scale(0.94)" },
-      blur:  { opacity: "0", transform: "translateY(16px)", filter: "blur(6px)" },
-      default: { opacity: "0", transform: "translateY(22px)" },
-    };
-
-    els.forEach(el => {
-      const kind = el.dataset.reveal || "default";
-      const hidden = HIDDEN[kind] ?? HIDDEN.default;
-      el.style.opacity = hidden.opacity;
-      el.style.transform = hidden.transform;
-      if (hidden.filter) el.style.filter = hidden.filter;
-      el.style.transition = "opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1), filter 0.7s cubic-bezier(0.16,1,0.3,1)";
-    });
-
-    const groups = new Map<Element, HTMLElement[]>();
-    els.forEach(el => {
-      const parent = el.parentElement ?? el;
-      if (!groups.has(parent)) groups.set(parent, []);
-      groups.get(parent)!.push(el);
-    });
-
-    const seen = new WeakSet<HTMLElement>();
-    const obs = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          const el = entry.target as HTMLElement;
-          if (!entry.isIntersecting || seen.has(el)) return;
-          seen.add(el);
-          const siblings = groups.get(el.parentElement ?? el) ?? [el];
-          const idx = siblings.indexOf(el);
-          const delay = Math.max(0, idx) * 0.08;
-          el.style.transitionDelay = `${delay}s`;
-          el.style.opacity = "1";
-          el.style.transform = "none";
-          el.style.filter = "none";
-          obs.unobserve(el);
-        });
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -8% 0px" }
-    );
-    els.forEach(el => obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
+  /* Render/entrance animation removed per user instruction to avoid mobile blank space.
+     Graph animations (SpecCompareChart & rating bars) remain active via useInView. */
 
   /* hero glass-panel content — model switcher, title, tagline, headline
      specs, CTA, trust row. Rendered inside an absolute-positioned overlay

@@ -252,10 +252,18 @@ export default function AdminHome() {
     let film = 0, bag = 0, print = 0, other = 0;
     list.forEach(i => {
       const type = (i.inquiryType || "").toLowerCase();
-      if (type.includes("film") || type === "talk-to-engineer") film++;
-      else if (type.includes("bag") || type === "direct") bag++;
-      else if (type.includes("print") || type === "parts") print++;
-      else other++;
+      const item = i as unknown as Record<string, unknown>;
+      const machine = (String(item.machineName || item.machineSlug || i.company || i.source || "")).toLowerCase();
+      
+      if (machine.includes("film") || machine.includes("blown") || machine.includes("extrusion") || machine.includes("aba") || machine.includes("abcde") || type === "talk-to-engineer") {
+        film++;
+      } else if (machine.includes("print") || machine.includes("flexo") || machine.includes("ci-flexo") || machine.includes("stack") || type === "parts") {
+        print++;
+      } else if (machine.includes("bag") || machine.includes("pouch") || machine.includes("servo") || machine.includes("side-seal") || machine.includes("bottom-seal") || type === "direct") {
+        bag++;
+      } else {
+        film++;
+      }
     });
     const total = film + bag + print + other;
     const max = Math.max(film, bag, print, other, 1);

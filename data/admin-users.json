@@ -8,7 +8,7 @@
       "status": "active",
       "createdAt": "2026-08-26T07:02:19.888Z",
       "tempPassword": "pias900###",
-      "lastLoginAt": "2026-08-29T05:46:14.969Z"
+      "lastLoginAt": "2026-08-30T17:51:29.307Z"
     },
     {
       "id": "usr-mtg2tkxn",
@@ -19,9 +19,51 @@
       "tempPassword": "pppppppp",
       "createdAt": "2026-08-30T17:21:36.059Z",
       "lastLoginAt": "2026-08-30T17:22:31.681Z"
+    },
+    {
+      "id": "usr-mtg3wzec",
+      "email": "newinviteuser@gmail.com",
+      "name": "newinviteuser",
+      "role": "super_admin",
+      "status": "active",
+      "tempPassword": "MyNewPassword123!",
+      "createdAt": "2026-08-30T17:52:14.388Z",
+      "lastLoginAt": "2026-08-30T17:55:00.061Z"
+    },
+    {
+      "id": "usr-mtg41twn",
+      "email": "newinviteduser@gmail.com",
+      "name": "newinviteduser",
+      "role": "super_admin",
+      "status": "active",
+      "tempPassword": "MyNewPassword123!",
+      "createdAt": "2026-08-30T17:56:00.551Z",
+      "lastLoginAt": "2026-08-30T17:56:00.552Z"
     }
   ],
   "invitations": [
+    {
+      "id": "inv-mtg41twn",
+      "email": "newinviteduser@gmail.com",
+      "name": "newinviteduser",
+      "role": "super_admin",
+      "tempPassword": "MyNewPassword123!",
+      "token": "mag_1788112560551",
+      "status": "accepted",
+      "createdAt": "2026-08-30T17:56:00.551Z",
+      "expiresAt": "2027-08-30T17:56:00.551Z"
+    },
+    {
+      "id": "inv-mtg3wzec",
+      "email": "newinviteuser@gmail.com",
+      "name": "newinviteuser",
+      "role": "super_admin",
+      "tempPassword": "MyNewPassword123!",
+      "token": "mag_user_test",
+      "status": "accepted",
+      "createdAt": "2026-08-30T17:52:14.388Z",
+      "expiresAt": "2027-08-30T17:54:17.602Z"
+    },
     {
       "id": "inv-mtg2tkxn",
       "email": "pvs178380@gmail.com",
@@ -46,6 +88,34 @@
     }
   ],
   "auditLog": [
+    {
+      "id": "aud-mtg41twv-0r84",
+      "timestamp": "2026-08-30T17:56:00.559Z",
+      "actor": "newinviteduser",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'super_admin'"
+    },
+    {
+      "id": "aud-mtg40j8d-vujj",
+      "timestamp": "2026-08-30T17:55:00.061Z",
+      "actor": "newinviteuser@gmail.com",
+      "action": "INVITATION_ACCEPTED",
+      "details": "Accepted invitation and set secure permanent password for role super_admin"
+    },
+    {
+      "id": "aud-mtg3w0m4-3tvy",
+      "timestamp": "2026-08-30T17:51:29.308Z",
+      "actor": "Super Admin",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'super_admin'"
+    },
+    {
+      "id": "aud-mtg3moab-yxag",
+      "timestamp": "2026-08-30T17:44:13.427Z",
+      "actor": "Super Admin",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'super_admin'"
+    },
     {
       "id": "aud-mtg2uruq-kfpn",
       "timestamp": "2026-08-30T17:22:31.682Z",

@@ -14,8 +14,6 @@ const nextConfig = {
   },
   experimental: {
     optimizeCss: true,
-    // Pre-bundle these large libs so they aren't re-parsed on every page load
-    optimizePackageImports: ["gsap", "lucide-react", "next-intl"],
   },
   images: {
     unoptimized: true, // Bypasses Vercel's 5,000 transformation/month limit and eliminates serverless CPU usage — images serve directly from global Edge CDN
@@ -25,11 +23,6 @@ const nextConfig = {
       { protocol: "https", hostname: "img.youtube.com" },
       { protocol: "https", hostname: "picsum.photos" },
     ],
-  },
-  generateBuildId: async () => `build-${Date.now()}`,
-  webpack: (config, { dev }) => {
-    if (!dev) config.cache = { type: "memory" };
-    return config;
   },
   async headers() {
     return [

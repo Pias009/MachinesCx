@@ -8,7 +8,7 @@
       "status": "active",
       "createdAt": "2026-08-26T07:02:19.888Z",
       "tempPassword": "pias900###",
-      "lastLoginAt": "2026-08-30T17:51:29.307Z"
+      "lastLoginAt": "2026-08-30T18:04:20.170Z"
     },
     {
       "id": "usr-mtg2tkxn",
@@ -88,6 +88,20 @@
     }
   ],
   "auditLog": [
+    {
+      "id": "aud-mtg4cjf0-fsf7",
+      "timestamp": "2026-08-30T18:04:20.172Z",
+      "actor": "Super Admin",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'super_admin'"
+    },
+    {
+      "id": "aud-mtg48pft-qd2h",
+      "timestamp": "2026-08-30T18:01:21.353Z",
+      "actor": "Super Admin",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'super_admin'"
+    },
     {
       "id": "aud-mtg41twv-0r84",
       "timestamp": "2026-08-30T17:56:00.559Z",

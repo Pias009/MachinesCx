@@ -54,7 +54,7 @@ export default function AdminHome() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedInquiryDetail, setSelectedInquiryDetail] = useState<InquiryRow | null>(null);
   const [showDateDropdown, setShowDateDropdown] = useState(false);
-  const [selectedDate, setSelectedDate] = useState("11 Nov 2024");
+  const [selectedDate, setSelectedDate] = useState("30 Aug 2026");
   const [activeCardMenu, setActiveCardMenu] = useState<string | null>(null);
   const [activeRowMenu, setActiveRowMenu] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -69,8 +69,8 @@ export default function AdminHome() {
   const [scheduleItems, setScheduleItems] = useState<ScheduleTask[]>([
     {
       id: "s1",
-      title: "Client Technical Sync — Film Blowing Specs",
-      subtitle: "Apex Packaging Consultation",
+      title: "Technical Commissioning — ABA 3-Layer Co-Extrusion Line",
+      subtitle: "PolyFlex Industries (Germany)",
       category: "meetings",
       time: "13:00 - 13:30",
       type: "Google Meet",
@@ -78,8 +78,8 @@ export default function AdminHome() {
     },
     {
       id: "s2",
-      title: "Extrusion Line 3D Layout Review",
-      subtitle: "Engineering Dept",
+      title: "Factory Acceptance Test — High-Speed Servo Bag Machine",
+      subtitle: "MetroPack Solutions (UAE)",
       category: "meetings",
       time: "15:00 - 16:00",
       type: "Google Meet",
@@ -87,7 +87,7 @@ export default function AdminHome() {
     },
     {
       id: "s3",
-      title: "Update Machine Technical Specs PDF",
+      title: "Publish Technical Specs for 8-Color CI Flexo Press",
       subtitle: "Catalogue CMS",
       category: "tasks",
       time: "10:00 - 11:30",
@@ -95,16 +95,16 @@ export default function AdminHome() {
     },
     {
       id: "s4",
-      title: "Quarterly Extrusion Line Quality Audit",
+      title: "ISO 9001 Extrusion Die Head Precision Audit",
       subtitle: "Factory Operations",
       category: "tasks",
       time: "16:30 - 17:30",
-      type: "Inspection"
+      type: "Quality Inspection"
     },
     {
       id: "s5",
-      title: "Wenzhou International Machinery Expo 2026",
-      subtitle: "Main Stage Presentation",
+      title: "Global Plastics & Packaging Summit 2026",
+      subtitle: "Keynote Presentation",
       category: "events",
       time: "All Day",
       type: "Conference"
@@ -138,11 +138,11 @@ export default function AdminHome() {
   // Compute stat totals dynamically from real inquiries data
   const stats = useMemo(() => {
     const list = inquiries ?? [];
-    const total = list.length || 158;
-    const newCount = list.filter(i => i.status === "new").length || 14;
-    const replied = list.filter(i => i.status === "replied").length || 112;
-    const activeQuotes = list.filter(i => i.inquiryType === "talk-to-engineer").length || 32;
-    const conversionRate = Math.round((replied / (total || 1)) * 100) || 94;
+    const total = list.length || 178;
+    const newCount = list.filter(i => i.status === "new").length || 16;
+    const replied = list.filter(i => i.status === "replied").length || 134;
+    const activeQuotes = list.filter(i => i.inquiryType === "talk-to-engineer").length || 42;
+    const conversionRate = Math.round((replied / (total || 1)) * 100) || 95;
     return { total, newCount, replied, activeQuotes, conversionRate };
   }, [inquiries]);
 
@@ -150,37 +150,37 @@ export default function AdminHome() {
   const chartDataSeries = useMemo(() => {
     if (chartTimeframe === "7D") {
       return [
-        { label: "Mon", inquiries: 12, rate: 88, quotes: 3 },
-        { label: "Tue", inquiries: 19, rate: 91, quotes: 5 },
-        { label: "Wed", inquiries: 25, rate: 94, quotes: 8 },
-        { label: "Thu", inquiries: 22, rate: 92, quotes: 6 },
-        { label: "Fri", inquiries: 30, rate: 96, quotes: 11 },
-        { label: "Sat", inquiries: 16, rate: 90, quotes: 4 },
-        { label: "Sun", inquiries: 14, rate: 89, quotes: 3 },
+        { label: "Mon", inquiries: 14, rate: 90, quotes: 4 },
+        { label: "Tue", inquiries: 22, rate: 92, quotes: 6 },
+        { label: "Wed", inquiries: 28, rate: 95, quotes: 9 },
+        { label: "Thu", inquiries: 24, rate: 93, quotes: 7 },
+        { label: "Fri", inquiries: 34, rate: 97, quotes: 12 },
+        { label: "Sat", inquiries: 18, rate: 91, quotes: 5 },
+        { label: "Sun", inquiries: 15, rate: 90, quotes: 4 },
       ];
     } else if (chartTimeframe === "30D") {
       return [
-        { label: "Wk 1", inquiries: 42, rate: 89, quotes: 12 },
-        { label: "Wk 2", inquiries: 68, rate: 92, quotes: 19 },
-        { label: "Wk 3", inquiries: 85, rate: 95, quotes: 24 },
-        { label: "Wk 4", inquiries: 110, rate: 97, quotes: 31 },
+        { label: "Wk 1", inquiries: 46, rate: 91, quotes: 14 },
+        { label: "Wk 2", inquiries: 72, rate: 93, quotes: 21 },
+        { label: "Wk 3", inquiries: 92, rate: 96, quotes: 28 },
+        { label: "Wk 4", inquiries: 118, rate: 98, quotes: 34 },
       ];
     } else if (chartTimeframe === "1Y") {
       return [
-        { label: "Q1", inquiries: 180, rate: 87, quotes: 45 },
-        { label: "Q2", inquiries: 290, rate: 91, quotes: 72 },
-        { label: "Q3", inquiries: 410, rate: 94, quotes: 105 },
-        { label: "Q4", inquiries: 540, rate: 98, quotes: 138 },
+        { label: "Q1", inquiries: 195, rate: 89, quotes: 48 },
+        { label: "Q2", inquiries: 310, rate: 93, quotes: 78 },
+        { label: "Q3", inquiries: 435, rate: 96, quotes: 112 },
+        { label: "Q4", inquiries: 570, rate: 98, quotes: 145 },
       ];
     } else {
       // 6M default
       return [
-        { label: "Jul", inquiries: 18, rate: 86, quotes: 4 },
-        { label: "Aug", inquiries: 32, rate: 89, quotes: 7 },
-        { label: "Sep", inquiries: 28, rate: 91, quotes: 6 },
-        { label: "Oct", inquiries: 45, rate: 93, quotes: 12 },
-        { label: "Nov", inquiries: 62, rate: 96, quotes: 18 },
-        { label: "Dec", inquiries: 78, rate: 98, quotes: 22 },
+        { label: "Mar", inquiries: 22, rate: 88, quotes: 5 },
+        { label: "Apr", inquiries: 36, rate: 91, quotes: 8 },
+        { label: "May", inquiries: 32, rate: 93, quotes: 7 },
+        { label: "Jun", inquiries: 48, rate: 94, quotes: 14 },
+        { label: "Jul", inquiries: 68, rate: 96, quotes: 20 },
+        { label: "Aug", inquiries: 84, rate: 98, quotes: 26 },
       ];
     }
   }, [chartTimeframe]);
@@ -224,23 +224,24 @@ export default function AdminHome() {
         else other++;
       });
     } else {
-      film = 85; bag = 48; print = 25;
+      film = 94; bag = 52; print = 24;
     }
     const total = film + bag + print + other || 1;
     return [
-      { name: "Film Blow", count: film, pct: Math.round((film / total) * 100) || 54, color: "#00D294" },
-      { name: "Bag Making", count: bag, pct: Math.round((bag / total) * 100) || 30, color: "#3B82F6" },
-      { name: "Printing", count: print, pct: Math.round((print / total) * 100) || 16, color: "#F59E0B" }
+      { name: "Film Blow", count: film, pct: Math.round((film / total) * 100) || 55, color: "#00D294" },
+      { name: "Bag Making", count: bag, pct: Math.round((bag / total) * 100) || 31, color: "#3B82F6" },
+      { name: "Printing", count: print, pct: Math.round((print / total) * 100) || 14, color: "#F59E0B" }
     ];
   }, [inquiries]);
 
   // Filter table rows
   const tableRows = useMemo(() => {
     const list: InquiryRow[] = inquiries && inquiries.length > 0 ? inquiries : [
-      { _id: "1", name: "Zhang Min", company: "Shanghai Tech Co", email: "zhang@shanghaitech.cn", status: "new", createdAt: "2024-11-11", inquiryType: "talk-to-engineer", source: "Website CTA" },
-      { _id: "2", name: "David Miller", company: "Apex Packaging USA", email: "david@apexpkg.com", status: "new", createdAt: "2024-11-10", inquiryType: "direct", source: "Direct Email" },
-      { _id: "3", name: "Elena Rostova", company: "Global Flexo Corp", email: "elena@globalflexo.eu", status: "replied", createdAt: "2024-11-09", inquiryType: "parts", source: "Catalog Spec" },
-      { _id: "4", name: "Tariq Al-Mansoor", company: "Gulf Extrusion LLC", email: "tariq@gulfext.ae", status: "read", createdAt: "2024-11-08", inquiryType: "direct", source: "WhatsApp Chat" },
+      { _id: "inq-101", name: "Carlos Rodriguez", company: "PackTech Global S.A.", email: "carlos.rodriguez@packtechglobal.com", status: "new", createdAt: "2026-08-30", inquiryType: "direct", source: "Google Search" },
+      { _id: "inq-102", name: "Dr. Alistair Vance", company: "Polymer Eco Industries Ltd", email: "a.vance@polymereco.co.uk", status: "read", createdAt: "2026-08-29", inquiryType: "talk-to-engineer", source: "LinkedIn" },
+      { _id: "inq-103", name: "Mohamed El-Sayed", company: "Nile Packaging & Converting", email: "m.elsayed@nilepack.eg", status: "replied", createdAt: "2026-08-28", inquiryType: "parts", source: "Direct Email" },
+      { _id: "inq-104", name: "Kenji Takahashi", company: "Nippon Flexible Film Inc", email: "takahashi@nipponfilm.jp", status: "read", createdAt: "2026-08-27", inquiryType: "talk-to-engineer", source: "WhatsApp Chat" },
+      { _id: "inq-105", name: "Elena Rostova", company: "EuroFlexo Packaging AB", email: "elena.r@euroflexo.se", status: "replied", createdAt: "2026-08-26", inquiryType: "direct", source: "Website CTA" },
     ];
     if (!tableSearch.trim()) return list;
     return list.filter(r =>
@@ -545,7 +546,7 @@ export default function AdminHome() {
                     background: "#162338", border: "1px solid var(--adm-border)", borderRadius: 10,
                     padding: "0.4rem", width: 140, boxShadow: "0 10px 25px rgba(0,0,0,0.5)"
                   }}>
-                    {["11 Nov 2024", "Today", "This Week", "All Time"].map(d => (
+                    {["30 Aug 2026", "Today", "This Week", "All Time"].map(d => (
                       <button
                         key={d}
                         onClick={() => { setSelectedDate(d); setShowDateDropdown(false); showToast(`Date updated to ${d}`); }}
@@ -827,21 +828,21 @@ export default function AdminHome() {
 
             {/* Quick Metric Badges Grid */}
             <div className="adm-badges-grid">
-              <motion.div whileHover={{ scale: 1.05 }} className="adm-badge-box" style={{ cursor: "pointer" }} onClick={() => showToast("Active Inquiries: 14 New Leads")}>
+              <motion.div whileHover={{ scale: 1.05 }} className="adm-badge-box" style={{ cursor: "pointer" }} onClick={() => showToast("Active Inquiries: 16 New Leads")}>
                 <div className="adm-badge-box__top">Inquiries <ArrowUpRight size={10} color="var(--adm-mint)" /></div>
-                <div className="adm-badge-box__val">14 New</div>
+                <div className="adm-badge-box__val">16 New</div>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} className="adm-badge-box" style={{ cursor: "pointer" }} onClick={() => showToast("Average SLA Response: 1.5 Hours")}>
+              <motion.div whileHover={{ scale: 1.05 }} className="adm-badge-box" style={{ cursor: "pointer" }} onClick={() => showToast("Average SLA Response: 1.2 Hours")}>
                 <div className="adm-badge-box__top">Avg SLA <ArrowUpRight size={10} color="var(--adm-mint)" /></div>
-                <div className="adm-badge-box__val">1.5 Hrs</div>
+                <div className="adm-badge-box__val">1.2 Hrs</div>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} className="adm-badge-box" style={{ cursor: "pointer" }} onClick={() => showToast("Machine Technical Specs Downloads: 48 Today")}>
+              <motion.div whileHover={{ scale: 1.05 }} className="adm-badge-box" style={{ cursor: "pointer" }} onClick={() => showToast("Machine Technical Specs Downloads: 54 Today")}>
                 <div className="adm-badge-box__top">Specs <ArrowUpRight size={10} color="var(--adm-mint)" /></div>
-                <div className="adm-badge-box__val">48 PDFs</div>
+                <div className="adm-badge-box__val">54 PDFs</div>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} className="adm-badge-box" style={{ cursor: "pointer" }} onClick={() => showToast("Live Site Visitors: 124 Online")}>
+              <motion.div whileHover={{ scale: 1.05 }} className="adm-badge-box" style={{ cursor: "pointer" }} onClick={() => showToast("Live Site Visitors: 148 Online")}>
                 <div className="adm-badge-box__top">Traffic <ArrowUpRight size={10} color="var(--adm-mint)" /></div>
-                <div className="adm-badge-box__val">124 Live</div>
+                <div className="adm-badge-box__val">148 Live</div>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} className="adm-badge-box" style={{ cursor: "pointer" }} onClick={() => showToast("CMS Status: All Schemas Synced")}>
                 <div className="adm-badge-box__top">CMS Sync <ArrowUpRight size={10} color="var(--adm-mint)" /></div>
@@ -1117,11 +1118,11 @@ export default function AdminHome() {
                     key={day}
                     style={{
                       padding: "0.4rem", borderRadius: 8, fontSize: "0.8rem", fontWeight: 600,
-                      background: day === 11 ? "var(--adm-mint)" : "rgba(255,255,255,0.03)",
-                      color: day === 11 ? "#061814" : "#fff",
+                      background: day === 30 ? "var(--adm-mint)" : "rgba(255,255,255,0.03)",
+                      color: day === 30 ? "#061814" : "#fff",
                       cursor: "pointer"
                     }}
-                    onClick={() => { setSelectedDate(`${day} Nov 2024`); setShowCalendarModal(false); showToast(`Date filter set to ${day} Nov 2024`); }}
+                    onClick={() => { setSelectedDate(`${day} Aug 2026`); setShowCalendarModal(false); showToast(`Date filter set to ${day} Aug 2026`); }}
                   >
                     {day}
                   </div>

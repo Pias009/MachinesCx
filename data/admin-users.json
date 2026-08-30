@@ -9,9 +9,30 @@
       "createdAt": "2026-08-26T07:02:19.888Z",
       "tempPassword": "pias900###",
       "lastLoginAt": "2026-08-29T05:46:14.969Z"
+    },
+    {
+      "id": "usr-mtg2tkxn",
+      "email": "pvs178380@gmail.com",
+      "name": "pvs178380",
+      "role": "content_editor",
+      "status": "active",
+      "tempPassword": "pppppppp",
+      "createdAt": "2026-08-30T17:21:36.059Z",
+      "lastLoginAt": "2026-08-30T17:22:31.681Z"
     }
   ],
   "invitations": [
+    {
+      "id": "inv-mtg2tkxn",
+      "email": "pvs178380@gmail.com",
+      "name": "pvs178380",
+      "role": "content_editor",
+      "tempPassword": "pppppppp",
+      "token": "mag_1912a4588207cef861e2e8c8df26a6b1",
+      "status": "accepted",
+      "createdAt": "2026-08-30T17:21:36.059Z",
+      "expiresAt": "2026-09-29T17:21:40.736Z"
+    },
     {
       "id": "inv-super-1",
       "email": "admin@ashalinnomech.com",
@@ -25,6 +46,27 @@
     }
   ],
   "auditLog": [
+    {
+      "id": "aud-mtg2uruq-kfpn",
+      "timestamp": "2026-08-30T17:22:31.682Z",
+      "actor": "pvs178380",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'content_editor'"
+    },
+    {
+      "id": "aud-mtg2ud3i-w8uw",
+      "timestamp": "2026-08-30T17:22:12.558Z",
+      "actor": "pvs178380@gmail.com",
+      "action": "INVITATION_ACCEPTED",
+      "details": "Accepted invitation and set secure permanent password for role content_editor"
+    },
+    {
+      "id": "aud-mtg2tlms-b4ce",
+      "timestamp": "2026-08-30T17:21:36.964Z",
+      "actor": "Super Admin",
+      "action": "GMAIL_MAGIC_LINK_CREATED",
+      "details": "Created magic link invitation for pvs178380@gmail.com with role 'content_editor' and temporary password"
+    },
     {
       "id": "aud-mtdyji2j-aqod",
       "timestamp": "2026-08-29T05:46:14.971Z",

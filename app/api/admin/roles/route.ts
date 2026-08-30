@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
         db.invitations.splice(existingInvIdx, 1);
       }
 
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
       const newInv = {
         id: `inv-${Date.now().toString(36)}`,
         email: email.toLowerCase(),

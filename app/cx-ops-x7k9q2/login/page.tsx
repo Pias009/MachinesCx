@@ -10,8 +10,8 @@ import { ADMIN_PATH } from "@/lib/adminAuth";
 
 export default function AdminLogin() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@ashalinnomech.com");
-  const [password, setPassword] = useState("pias900###");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [err, setErr] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -167,7 +167,7 @@ export default function AdminLogin() {
         </div>
 
         {/* Main Sign-In Form */}
-        <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
+        <form onSubmit={submit} autoComplete="off" style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
           <div>
             <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "rgba(255,255,255,0.8)", marginBottom: "0.45rem" }}>
               Admin Email Address
@@ -177,7 +177,7 @@ export default function AdminLogin() {
               <input
                 type="email"
                 required
-                autoComplete="username"
+                autoComplete="off"
                 placeholder="admin@ashalinnomech.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

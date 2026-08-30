@@ -157,6 +157,11 @@ export default function InquiriesPage() {
       });
       if (!res.ok) throw new Error("Failed to delete");
       const idSet = new Set(ids);
+      try {
+        const stored = JSON.parse(localStorage.getItem("ashal_admin_deleted_inquiries") || "[]");
+        const updated = Array.from(new Set([...stored, ...ids]));
+        localStorage.setItem("ashal_admin_deleted_inquiries", JSON.stringify(updated));
+      } catch {}
       setInquiries(prev => prev?.filter(i => !idSet.has(i._id)) ?? null);
       if (selectedId && idSet.has(selectedId)) setSelectedId(null);
       setCheckedIds(prev => {

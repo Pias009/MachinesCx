@@ -51,17 +51,12 @@ export async function GET(req: NextRequest) {
   const user = db.users.find(u => u.email.toLowerCase() === inv!.email.toLowerCase());
   const activeTempPassword = user?.tempPassword || inv.tempPassword;
 
-  // Auto-extend expiry for valid invited users so links don't randomly fail
-  if (new Date(inv.expiresAt).getTime() < Date.now()) {
-    if (inv.status === "pending") {
-      inv.expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
-      writeRolesDB(db);
-    } else {
-      inv.status = "expired";
-      writeRolesDB(db);
-      return NextResponse.json({ error: "Invitation token has expired. Please ask your Super Admin to generate a fresh link." }, { status: 410 });
-    }
+  // Auto-renew invitation link expiration & reactivate status so magic links never show expired
+  inv.expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  if (inv.status === "expired") {
+    inv.status = "pending";
   }
+  writeRolesDB(db);
 
   return NextResponse.json({
     email: inv.email,

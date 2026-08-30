@@ -9,7 +9,7 @@ import {
   Users, DollarSign, TrendingUp, UserPlus, CheckCircle2, Clock,
   Video, CalendarDays, ChevronDown, MoreVertical, ExternalLink,
   X, Plus, RefreshCw, Download, Filter, Trash2, Eye, Mail, Check,
-  Inbox, FileText, Sparkles, Activity, Layers, Send
+  Inbox, FileText, Sparkles, Activity, Layers, Send, Loader2
 } from "lucide-react";
 import AdminShell from "./AdminShell";
 import { ADMIN_PATH } from "@/lib/adminAuth";
@@ -65,51 +65,84 @@ export default function AdminHome() {
   const [newTaskTime, setNewTaskTime] = useState("14:00 - 15:00");
   const [newTaskCat, setNewTaskCat] = useState<"meetings" | "tasks" | "events">("meetings");
 
-  // Schedule Tasks initial state
-  const [scheduleItems, setScheduleItems] = useState<ScheduleTask[]>([
-    {
-      id: "s1",
-      title: "Technical Commissioning — ABA 3-Layer Co-Extrusion Line",
-      subtitle: "PolyFlex Industries (Germany)",
-      category: "meetings",
-      time: "13:00 - 13:30",
-      type: "Google Meet",
-      link: "https://meet.google.com/new"
-    },
-    {
-      id: "s2",
-      title: "Factory Acceptance Test — High-Speed Servo Bag Machine",
-      subtitle: "MetroPack Solutions (UAE)",
-      category: "meetings",
-      time: "15:00 - 16:00",
-      type: "Google Meet",
-      link: "https://meet.google.com/new"
-    },
-    {
-      id: "s3",
-      title: "Publish Technical Specs for 8-Color CI Flexo Press",
-      subtitle: "Catalogue CMS",
-      category: "tasks",
-      time: "10:00 - 11:30",
-      type: "Internal Task"
-    },
-    {
-      id: "s4",
-      title: "ISO 9001 Extrusion Die Head Precision Audit",
-      subtitle: "Factory Operations",
-      category: "tasks",
-      time: "16:30 - 17:30",
-      type: "Quality Inspection"
-    },
-    {
-      id: "s5",
-      title: "Global Plastics & Packaging Summit 2026",
-      subtitle: "Keynote Presentation",
-      category: "events",
-      time: "All Day",
-      type: "Conference"
+  // Schedule Tasks state & localStorage persistence
+  const [mounted, setMounted] = useState(false);
+  const [scheduleItems, setScheduleItems] = useState<ScheduleTask[]>([]);
+  const [scheduleLoaded, setScheduleLoaded] = useState(false);
+  const [deletedInquiryIds, setDeletedInquiryIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    setMounted(true);
+    try {
+      const savedSchedule = localStorage.getItem("ashal_admin_schedule_items");
+      if (savedSchedule !== null) {
+        setScheduleItems(JSON.parse(savedSchedule));
+      } else {
+        setScheduleItems([
+          {
+            id: "s1",
+            title: "Technical Commissioning — ABA 3-Layer Co-Extrusion Line",
+            subtitle: "PolyFlex Industries (Germany)",
+            category: "meetings",
+            time: "13:00 - 13:30",
+            type: "Google Meet",
+            link: "https://meet.google.com/new"
+          },
+          {
+            id: "s2",
+            title: "Factory Acceptance Test — High-Speed Servo Bag Machine",
+            subtitle: "MetroPack Solutions (UAE)",
+            category: "meetings",
+            time: "15:00 - 16:00",
+            type: "Google Meet",
+            link: "https://meet.google.com/new"
+          },
+          {
+            id: "s3",
+            title: "Publish Technical Specs for 8-Color CI Flexo Press",
+            subtitle: "Catalogue CMS",
+            category: "tasks",
+            time: "10:00 - 11:30",
+            type: "Internal Task"
+          },
+          {
+            id: "s4",
+            title: "ISO 9001 Extrusion Die Head Precision Audit",
+            subtitle: "Factory Operations",
+            category: "tasks",
+            time: "16:30 - 17:30",
+            type: "Quality Inspection"
+          },
+          {
+            id: "s5",
+            title: "Global Plastics & Packaging Summit 2026",
+            subtitle: "Keynote Presentation",
+            category: "events",
+            time: "All Day",
+            type: "Conference"
+          }
+        ]);
+      }
+
+      const savedDeleted = localStorage.getItem("ashal_admin_deleted_inquiries");
+      if (savedDeleted) {
+        setDeletedInquiryIds(JSON.parse(savedDeleted));
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setScheduleLoaded(true);
     }
-  ]);
+  }, []);
+
+  useEffect(() => {
+    if (!scheduleLoaded || !mounted) return;
+    try {
+      localStorage.setItem("ashal_admin_schedule_items", JSON.stringify(scheduleItems));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [scheduleItems, scheduleLoaded, mounted]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -234,22 +267,25 @@ export default function AdminHome() {
     ];
   }, [inquiries]);
 
-  // Filter table rows
+  // Filter table rows (excluding any deleted inquiry IDs permanently)
   const tableRows = useMemo(() => {
-    const list: InquiryRow[] = inquiries && inquiries.length > 0 ? inquiries : [
+    const defaultFallback: InquiryRow[] = [
       { _id: "inq-101", name: "Carlos Rodriguez", company: "PackTech Global S.A.", email: "carlos.rodriguez@packtechglobal.com", status: "new", createdAt: "2026-08-30", inquiryType: "direct", source: "Google Search" },
       { _id: "inq-102", name: "Dr. Alistair Vance", company: "Polymer Eco Industries Ltd", email: "a.vance@polymereco.co.uk", status: "read", createdAt: "2026-08-29", inquiryType: "talk-to-engineer", source: "LinkedIn" },
       { _id: "inq-103", name: "Mohamed El-Sayed", company: "Nile Packaging & Converting", email: "m.elsayed@nilepack.eg", status: "replied", createdAt: "2026-08-28", inquiryType: "parts", source: "Direct Email" },
       { _id: "inq-104", name: "Kenji Takahashi", company: "Nippon Flexible Film Inc", email: "takahashi@nipponfilm.jp", status: "read", createdAt: "2026-08-27", inquiryType: "talk-to-engineer", source: "WhatsApp Chat" },
       { _id: "inq-105", name: "Elena Rostova", company: "EuroFlexo Packaging AB", email: "elena.r@euroflexo.se", status: "replied", createdAt: "2026-08-26", inquiryType: "direct", source: "Website CTA" },
     ];
+    // If inquiries is an array (even if empty []), use it. Only use defaultFallback if inquiries is null (before initial fetch)
+    const rawList: InquiryRow[] = inquiries !== null ? inquiries : defaultFallback;
+    const list = rawList.filter(r => !deletedInquiryIds.includes(r._id));
     if (!tableSearch.trim()) return list;
     return list.filter(r =>
       r.name.toLowerCase().includes(tableSearch.toLowerCase()) ||
       r.company.toLowerCase().includes(tableSearch.toLowerCase()) ||
       (r.email && r.email.toLowerCase().includes(tableSearch.toLowerCase()))
     );
-  }, [inquiries, tableSearch]);
+  }, [inquiries, tableSearch, deletedInquiryIds]);
 
   // Real CSV Export Handler
   const exportDataToCSV = () => {
@@ -301,15 +337,69 @@ export default function AdminHome() {
       return;
     }
     setScheduleItems([]);
+    try {
+      localStorage.setItem("ashal_admin_schedule_items", JSON.stringify([]));
+    } catch {}
     setActiveCardMenu(null);
-    showToast("All schedule data removed!");
+    showToast("All schedule data permanently removed!");
   };
 
   // Row actions
-  const handleDeleteRow = (id: string) => {
+  const handleDeleteRow = async (id: string) => {
+    // 1. Filter out locally
     setInquiries(prev => prev ? prev.filter(r => r._id !== id) : []);
+    
+    // 2. Add to deletedInquiryIds & persist in localStorage
+    setDeletedInquiryIds(prev => {
+      const next = Array.from(new Set([...prev, id]));
+      try {
+        localStorage.setItem("ashal_admin_deleted_inquiries", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    // 3. Delete from database permanently
+    try {
+      await fetch("/api/admin/inquiries", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: [id] }),
+      });
+    } catch (err) {
+      console.error("Error permanently deleting inquiry:", err);
+    }
+
     setActiveRowMenu(null);
-    showToast("Record removed!");
+    showToast("Record permanently deleted!");
+  };
+
+  const handleDeleteAllInquiries = async () => {
+    if (tableRows.length === 0) {
+      showToast("Inquiries table is already empty");
+      return;
+    }
+
+    const idsToDelete = tableRows.map(r => r._id);
+    setInquiries([]);
+    setDeletedInquiryIds(prev => {
+      const next = Array.from(new Set([...prev, ...idsToDelete]));
+      try {
+        localStorage.setItem("ashal_admin_deleted_inquiries", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    try {
+      await fetch("/api/admin/inquiries", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: idsToDelete }),
+      });
+    } catch (err) {
+      console.error("Error bulk deleting inquiries:", err);
+    }
+
+    showToast("All customer inquiries permanently deleted!");
   };
 
   const handleToggleStatus = (id: string, currentStatus: string) => {
@@ -337,6 +427,16 @@ export default function AdminHome() {
       transition: { type: "spring" as const, stiffness: 280, damping: 22 }
     }
   };
+
+  if (!mounted) {
+    return (
+      <AdminShell>
+        <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--adm-mint)" }}>
+          <Loader2 size={32} className="adm-spin-icon" />
+        </div>
+      </AdminShell>
+    );
+  }
 
   return (
     <AdminShell>
@@ -945,6 +1045,16 @@ export default function AdminHome() {
                 onClick={exportDataToCSV}
               >
                 <Download size={16} />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="adm-icon-btn"
+                style={{ width: 34, height: 34, color: "#ff8a97" }}
+                title="Delete All Inquiries"
+                onClick={handleDeleteAllInquiries}
+              >
+                <Trash2 size={16} />
               </motion.button>
             </div>
           </div>

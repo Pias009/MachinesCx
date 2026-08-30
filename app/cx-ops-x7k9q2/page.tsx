@@ -295,6 +295,16 @@ export default function AdminHome() {
     showToast("Schedule item added!");
   };
 
+  const handleDeleteAllSchedule = () => {
+    if (scheduleItems.length === 0) {
+      showToast("Schedule is already empty");
+      return;
+    }
+    setScheduleItems([]);
+    setActiveCardMenu(null);
+    showToast("All schedule data removed!");
+  };
+
   // Row actions
   const handleDeleteRow = (id: string) => {
     setInquiries(prev => prev ? prev.filter(r => r._id !== id) : []);
@@ -574,6 +584,14 @@ export default function AdminHome() {
                   <Plus size={16} />
                 </button>
                 <button
+                  onClick={handleDeleteAllSchedule}
+                  className="adm-card__more"
+                  title="Delete All Schedule Data"
+                  style={{ color: "#ff8a97" }}
+                >
+                  <Trash2 size={16} />
+                </button>
+                <button
                   onClick={() => setActiveCardMenu(activeCardMenu === "schedule" ? null : "schedule")}
                   className="adm-card__more"
                 >
@@ -583,7 +601,7 @@ export default function AdminHome() {
                   <div style={{
                     position: "absolute", top: 40, right: 10, zIndex: 30,
                     background: "#162338", border: "1px solid var(--adm-border)", borderRadius: 10,
-                    padding: "0.4rem", width: 150, boxShadow: "0 10px 25px rgba(0,0,0,0.5)"
+                    padding: "0.4rem", width: 160, boxShadow: "0 10px 25px rgba(0,0,0,0.5)"
                   }}>
                     <button
                       onClick={() => { fetchInquiries(); setActiveCardMenu(null); showToast("Schedule synced!"); }}
@@ -596,6 +614,12 @@ export default function AdminHome() {
                       style={{ width: "100%", textAlign: "left", padding: "0.45rem 0.6rem", border: "none", background: "transparent", color: "#fff", borderRadius: 6, fontSize: "0.78rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.4rem" }}
                     >
                       <Plus size={13} /> Add Item
+                    </button>
+                    <button
+                      onClick={handleDeleteAllSchedule}
+                      style={{ width: "100%", textAlign: "left", padding: "0.45rem 0.6rem", border: "none", background: "transparent", color: "#ff8a97", borderRadius: 6, fontSize: "0.78rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.4rem" }}
+                    >
+                      <Trash2 size={13} /> Delete All Data
                     </button>
                   </div>
                 )}
@@ -670,8 +694,19 @@ export default function AdminHome() {
                           </span>
                         )}
                       </div>
-                      <div className="adm-task-item__foot">
+                      <div className="adm-task-item__foot" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <span style={{ fontWeight: 700, color: "#fff" }}>{item.time}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setScheduleItems(prev => prev.filter(t => t.id !== item.id));
+                            showToast("Item deleted");
+                          }}
+                          title="Delete item"
+                          style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", padding: "0.1rem 0.3rem" }}
+                        >
+                          <Trash2 size={13} />
+                        </button>
                       </div>
                     </motion.div>
                   ))

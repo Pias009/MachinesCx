@@ -275,7 +275,6 @@ function UserRoleManagementTable({ users, invitations, onRefresh }: { users: Adm
   }
 
   async function handleRevoke(userId: string, email: string) {
-    if (!confirm(`Are you sure you want to revoke access for ${email}?`)) return;
     try {
       const res = await fetch("/api/admin/roles", {
         method: "POST",
@@ -407,11 +406,11 @@ function UserRoleManagementTable({ users, invitations, onRefresh }: { users: Adm
                     >
                       <KeyRound size={14} />
                     </button>
-                    {u.role !== "super_admin" && (
+                    {u.email.toLowerCase() !== "admin@ashalinnomech.com" && (
                       <button
                         type="button"
                         onClick={() => handleRevoke(u.id, u.email)}
-                        title="Revoke access"
+                        title="Delete / Revoke access"
                         style={{ padding: "0.35rem 0.6rem", borderRadius: 6, background: "rgba(255,107,125,0.15)", border: "1px solid rgba(255,107,125,0.3)", color: "#ff8a97", cursor: "pointer", fontSize: "0.78rem" }}
                       >
                         <Trash2 size={14} />

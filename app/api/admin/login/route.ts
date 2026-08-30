@@ -36,11 +36,19 @@ export async function POST(req: NextRequest) {
   // 2. Check JSON Roles Database (Admin Users & Invitations)
   if (!sessionUser) {
     const db = readRolesDB();
+    const cleanEmail = rawEmail.toLowerCase();
+
+    // Block access if email is explicitly revoked
+    if (db.revokedEmails && db.revokedEmails.includes(cleanEmail) && cleanEmail !== "admin@ashalinnomech.com") {
+      logSecurityEvent("System", "LOGIN_BLOCKED_REVOKED", `Blocked login attempt for revoked user: ${cleanEmail}`);
+      return NextResponse.json({ error: "Access for this account has been revoked by an administrator." }, { status: 403 });
+    }
+
     let matchedUser = db.users.find(
-      (u) => u.email.toLowerCase() === rawEmail.toLowerCase()
+      (u) => u.email.toLowerCase() === cleanEmail
     );
     const matchedInv = db.invitations.find(
-      (i) => i.email.toLowerCase() === rawEmail.toLowerCase()
+      (i) => i.email.toLowerCase() === cleanEmail
     );
 
     // If user is in invitations but not in users list, auto-create user in db.users
@@ -55,34 +63,6 @@ export async function POST(req: NextRequest) {
         createdAt: new Date().toISOString(),
       };
       db.users.push(matchedUser);
-      writeRolesDB(db);
-    }
-
-    // Universal Registration Fallback: Ensure ANY Gmail address entered for login is registered in db.users
-    if (!matchedUser && rawEmail.includes("@")) {
-      matchedUser = {
-        id: `usr-${Date.now().toString(36)}`,
-        email: rawEmail.toLowerCase(),
-        name: rawEmail.split("@")[0],
-        role: "super_admin",
-        status: "active",
-        tempPassword: rawPassword,
-        createdAt: new Date().toISOString(),
-      };
-      db.users.push(matchedUser);
-
-      db.invitations.unshift({
-        id: `inv-${Date.now().toString(36)}`,
-        email: rawEmail.toLowerCase(),
-        name: rawEmail.split("@")[0],
-        role: "super_admin",
-        tempPassword: rawPassword,
-        token: `mag_${Date.now()}`,
-        status: "accepted",
-        createdAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-      });
-
       writeRolesDB(db);
     }
 

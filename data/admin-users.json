@@ -8,7 +8,7 @@
       "status": "active",
       "createdAt": "2026-08-26T07:02:19.888Z",
       "tempPassword": "pias900###",
-      "lastLoginAt": "2026-08-30T18:04:20.170Z"
+      "lastLoginAt": "2026-08-30T18:21:27.812Z"
     },
     {
       "id": "usr-mtg2tkxn",
@@ -16,9 +16,9 @@
       "name": "pvs178380",
       "role": "content_editor",
       "status": "active",
-      "tempPassword": "pppppppp",
+      "tempPassword": "pias900",
       "createdAt": "2026-08-30T17:21:36.059Z",
-      "lastLoginAt": "2026-08-30T17:22:31.681Z"
+      "lastLoginAt": "2026-08-30T18:16:19.354Z"
     },
     {
       "id": "usr-mtg3wzec",
@@ -69,7 +69,7 @@
       "email": "pvs178380@gmail.com",
       "name": "pvs178380",
       "role": "content_editor",
-      "tempPassword": "pppppppp",
+      "tempPassword": "pias900",
       "token": "mag_1912a4588207cef861e2e8c8df26a6b1",
       "status": "accepted",
       "createdAt": "2026-08-30T17:21:36.059Z",
@@ -88,6 +88,27 @@
     }
   ],
   "auditLog": [
+    {
+      "id": "aud-mtg4ykcm-26xv",
+      "timestamp": "2026-08-30T18:21:27.814Z",
+      "actor": "Super Admin",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'super_admin'"
+    },
+    {
+      "id": "aud-mtg4ryca-mvql",
+      "timestamp": "2026-08-30T18:16:19.354Z",
+      "actor": "pvs178380",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'content_editor'"
+    },
+    {
+      "id": "aud-mtg4rjhk-nkor",
+      "timestamp": "2026-08-30T18:16:00.104Z",
+      "actor": "pvs178380",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'content_editor'"
+    },
     {
       "id": "aud-mtg4cjf0-fsf7",
       "timestamp": "2026-08-30T18:04:20.172Z",
@@ -165,5 +186,6 @@
       "action": "SYSTEM_INITIALIZED",
       "details": "Production Super Admin account configured with full security scope"
     }
-  ]
+  ],
+  "revokedEmails": []
 }

@@ -66,6 +66,11 @@ export async function POST(req: NextRequest) {
       const tempPassword = generateTempPassword();
       const token = generateInviteToken();
 
+      // Remove from revokedEmails if previously revoked
+      if (db.revokedEmails) {
+        db.revokedEmails = db.revokedEmails.filter(e => e.toLowerCase() !== email.toLowerCase());
+      }
+
       // Check if invitation already exists
       const existingInvIdx = db.invitations.findIndex(i => i.email.toLowerCase() === email.toLowerCase());
       if (existingInvIdx >= 0) {
@@ -201,37 +206,36 @@ export async function POST(req: NextRequest) {
 
     if (action === "revoke_user") {
       const { userId, email } = body as { userId?: string; email?: string };
-      
-      const userIdx = db.users.findIndex(u => 
-        (userId && u.id === userId) || 
-        (email && u.email.toLowerCase() === email.toLowerCase())
-      );
+      const targetEmail = (email || "").toLowerCase().trim();
 
-      if (userIdx < 0) {
-        // If user not in main users array, check invitations list
-        if (email) {
-          const invIdx = db.invitations.findIndex(i => i.email.toLowerCase() === email.toLowerCase());
-          if (invIdx >= 0) {
-            db.invitations.splice(invIdx, 1);
-            writeRolesDB(db);
-            return NextResponse.json({ success: true });
-          }
-        }
-        return NextResponse.json({ error: "User or invitation not found" }, { status: 404 });
+      if (targetEmail === "admin@ashalinnomech.com" || userId === "usr-super-1") {
+        return NextResponse.json({ error: "Cannot revoke the Master Super Admin account (admin@ashalinnomech.com)" }, { status: 400 });
       }
 
-      const removedUser = db.users[userIdx];
-      if (removedUser.role === "super_admin" && db.users.filter(u => u.role === "super_admin").length <= 1) {
-        return NextResponse.json({ error: "Cannot revoke the primary Super Admin account" }, { status: 400 });
+      // Filter out user from db.users
+      const originalUsersLength = db.users.length;
+      db.users = db.users.filter(u => {
+        const matchId = userId && u.id === userId;
+        const matchEmail = targetEmail && u.email.toLowerCase() === targetEmail;
+        return !matchId && !matchEmail;
+      });
+
+      // Filter out invitation from db.invitations
+      if (targetEmail) {
+        db.invitations = db.invitations.filter(i => i.email.toLowerCase() !== targetEmail);
       }
 
-      db.users.splice(userIdx, 1);
-      db.invitations = db.invitations.filter(i => i.email.toLowerCase() !== removedUser.email.toLowerCase());
+      // Add to revokedEmails to prevent auto-re-registration
+      if (!db.revokedEmails) db.revokedEmails = [];
+      if (targetEmail && !db.revokedEmails.includes(targetEmail)) {
+        db.revokedEmails.push(targetEmail);
+      }
+
       writeRolesDB(db);
 
-      logSecurityEvent("Super Admin", "USER_REVOKED", `Revoked access for ${removedUser.email}`);
+      logSecurityEvent("Super Admin", "USER_REVOKED", `Revoked access for ${targetEmail || userId}`);
 
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true, message: `Access revoked permanently for ${targetEmail || userId}` });
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });

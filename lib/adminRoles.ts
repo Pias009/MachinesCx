@@ -40,6 +40,7 @@ export interface RolesDatabase {
   users: AdminUser[];
   invitations: MagicLinkInvitation[];
   auditLog: SecurityAuditItem[];
+  revokedEmails?: string[];
 }
 
 const DATA_FILE = path.join(process.cwd(), "data", "admin-users.json");
@@ -66,6 +67,7 @@ const DEFAULT_DB: RolesDatabase = {
       details: "Production Super Admin security scope initialized",
     },
   ],
+  revokedEmails: [],
 };
 
 export function readRolesDB(): RolesDatabase {
@@ -78,9 +80,11 @@ export function readRolesDB(): RolesDatabase {
     const parsed = JSON.parse(raw);
     const users: AdminUser[] = Array.isArray(parsed.users) ? parsed.users : DEFAULT_DB.users;
     let invitations: MagicLinkInvitation[] = Array.isArray(parsed.invitations) ? parsed.invitations : [];
+    const revokedEmails: string[] = Array.isArray(parsed.revokedEmails) ? parsed.revokedEmails : [];
 
-    // Auto-heal missing invitations for all users with tempPassword or invited status
+    // Auto-heal missing invitations for active users with tempPassword (excluding revoked)
     users.forEach((u) => {
+      if (revokedEmails.includes(u.email.toLowerCase())) return;
       const existingInv = invitations.find((inv) => inv.email.toLowerCase() === u.email.toLowerCase());
       if (!existingInv && u.tempPassword) {
         invitations.push({
@@ -103,6 +107,7 @@ export function readRolesDB(): RolesDatabase {
       users,
       invitations,
       auditLog: Array.isArray(parsed.auditLog) ? parsed.auditLog : [],
+      revokedEmails,
     };
   } catch (err) {
     console.error("Error reading admin roles DB:", err);

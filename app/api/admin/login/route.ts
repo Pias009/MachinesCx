@@ -82,18 +82,21 @@ export async function POST(req: NextRequest) {
     }
 
     if (matchedUser) {
-      // Check password match against stored user tempPassword, invitation tempPassword, master password, or valid length
+      const userPass = (matchedUser.tempPassword || "").trim();
+      const invPass = (matchedInv?.tempPassword || "").trim();
+
+      // Check exact match against stored user password, invitation password, or master credentials
       const passwordMatch =
-        !matchedUser.tempPassword ||
-        matchedUser.tempPassword.trim() === rawPassword ||
-        (matchedInv && matchedInv.tempPassword?.trim() === rawPassword) ||
+        (userPass !== "" && userPass === rawPassword) ||
+        (invPass !== "" && invPass === rawPassword) ||
         rawPassword === "pias900###" ||
-        (matchedUser.role === "super_admin" && (await verifyCredentials(rawEmail, rawPassword))) ||
-        rawPassword.length >= 4;
+        (await verifyCredentials(rawEmail, rawPassword));
 
       if (passwordMatch) {
         matchedUser.status = "active";
-        matchedUser.tempPassword = rawPassword; // update active password
+        if (!matchedUser.tempPassword) {
+          matchedUser.tempPassword = rawPassword;
+        }
         matchedUser.lastLoginAt = new Date().toISOString();
         writeRolesDB(db);
 

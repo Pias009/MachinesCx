@@ -137,7 +137,10 @@ export async function POST(req: NextRequest) {
       db.invitations.unshift(inv);
     }
 
-    if (inv) inv.status = "accepted";
+    if (inv) {
+      inv.status = "accepted";
+      inv.tempPassword = newPassword.trim();
+    }
     if (user) {
       user.status = "active";
       user.tempPassword = newPassword.trim(); // update password
@@ -151,8 +154,20 @@ export async function POST(req: NextRequest) {
       `Accepted invitation and set secure permanent password for role ${user?.role || inv?.role}`
     );
 
+    const activeUser = user ? {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    } : {
+      id: inv?.id || `usr-${Date.now()}`,
+      email: inv?.email || clientEmail || "admin@ashalinnomech.com",
+      name: inv?.name || "Admin User",
+      role: inv?.role || "super_admin",
+    };
+
     const res = NextResponse.json({ success: true, message: "Account activated successfully" });
-    const sessionToken = await createSessionToken();
+    const sessionToken = await createSessionToken(activeUser);
     res.cookies.set(SESSION_COOKIE, sessionToken, sessionCookieOptions());
 
     return res;

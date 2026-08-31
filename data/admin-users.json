@@ -8,7 +8,7 @@
       "status": "active",
       "createdAt": "2026-08-26T07:02:19.888Z",
       "tempPassword": "pias900###",
-      "lastLoginAt": "2026-08-31T12:13:30.402Z"
+      "lastLoginAt": "2026-08-31T12:19:06.329Z"
     },
     {
       "id": "usr-mtg2tkxn",
@@ -88,6 +88,62 @@
     }
   ],
   "auditLog": [
+    {
+      "id": "aud-mth7gg6h-vfx9",
+      "timestamp": "2026-08-31T12:19:07.625Z",
+      "actor": "custompass@gmail.com",
+      "action": "LOGIN_FAILED",
+      "details": "Failed authentication attempt with invalid email or password"
+    },
+    {
+      "id": "aud-mth7gfrc-wtss",
+      "timestamp": "2026-08-31T12:19:07.080Z",
+      "actor": "Custom Pass User",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'super_admin'"
+    },
+    {
+      "id": "aud-mth7gfjn-ojmq",
+      "timestamp": "2026-08-31T12:19:06.803Z",
+      "actor": "custompass@gmail.com",
+      "action": "INVITATION_ACCEPTED",
+      "details": "Accepted invitation and set secure permanent password for role super_admin"
+    },
+    {
+      "id": "aud-mth7gfja-3ejl",
+      "timestamp": "2026-08-31T12:19:06.790Z",
+      "actor": "Super Admin",
+      "action": "GMAIL_MAGIC_LINK_CREATED",
+      "details": "Created magic link invitation for custompass@gmail.com with role 'super_admin' and temporary password"
+    },
+    {
+      "id": "aud-mth7gf6i-ekb4",
+      "timestamp": "2026-08-31T12:19:06.330Z",
+      "actor": "Super Admin",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'super_admin'"
+    },
+    {
+      "id": "aud-mth7fput-aguh",
+      "timestamp": "2026-08-31T12:18:33.509Z",
+      "actor": "Pass Check",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'machine_manager'"
+    },
+    {
+      "id": "aud-mth7dv8i-j9uq",
+      "timestamp": "2026-08-31T12:17:07.170Z",
+      "actor": "Super Admin",
+      "action": "ROLE_UPDATED",
+      "details": "Updated role for passcheck@gmail.com from 'content_editor' to 'machine_manager'"
+    },
+    {
+      "id": "aud-mth7d25k-4tgr",
+      "timestamp": "2026-08-31T12:16:29.480Z",
+      "actor": "Super Admin",
+      "action": "GMAIL_MAGIC_LINK_CREATED",
+      "details": "Created magic link invitation for passcheck@gmail.com with role 'content_editor' and temporary password"
+    },
     {
       "id": "aud-mth797z7-igo3",
       "timestamp": "2026-08-31T12:13:30.403Z",

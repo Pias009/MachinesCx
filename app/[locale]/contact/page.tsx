@@ -26,16 +26,31 @@ export default function ContactPage() {
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
           name: BRAND,
+          legalName: "Wenzhou Ashal Innomach Technology Co., Ltd.",
           url: SITE_URL,
           image: `${SITE_URL}/logo.jpeg`,
           telephone: "+86 159 8877 5831",
           email: "ashal@ashalinnomech.com",
+          priceRange: "$$$$",
           address: {
             "@type": "PostalAddress",
             addressLocality: "Wenzhou",
             addressRegion: "Zhejiang",
             addressCountry: "CN",
           },
+          geo: {
+            "@type": "GeoCoordinates",
+            latitude: "27.9943",
+            longitude: "120.6994",
+          },
+          openingHoursSpecification: [
+            {
+              "@type": "OpeningHoursSpecification",
+              dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+              opens: "08:00",
+              closes: "18:00",
+            },
+          ],
         }}
       />
       <ContactClient />

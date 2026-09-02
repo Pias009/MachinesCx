@@ -151,9 +151,28 @@ export default async function ProductPage({ params }: { params: { locale: string
     offers: {
       "@type": "Offer",
       priceCurrency: "USD",
+      price: "100000",
+      priceValidUntil: "2027-12-31",
       availability: "https://schema.org/InStock",
       url,
       seller: { "@type": "Organization", name: BRAND, url: SITE_URL },
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "US",
+        returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
+      },
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: {
+          "@type": "MonetaryAmount",
+          value: "0",
+          currency: "USD",
+        },
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "US",
+        },
+      },
     },
     aggregateRating: {
       "@type": "AggregateRating",

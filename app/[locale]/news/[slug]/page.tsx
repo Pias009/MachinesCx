@@ -9,7 +9,7 @@ import { pageMetadata, localePath } from "@/lib/seo";
 import { SITE_URL, BRAND } from "@/lib/products";
 import JsonLd from "@/components/JsonLd";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: { locale: string; slug: string } }) {
   const t = await getTranslations("newsArticlePage");
@@ -54,7 +54,8 @@ export default async function ArticlePage({ params }: { params: { locale: string
           description: a.excerpt,
           image: a.image ? `${SITE_URL}${a.image}` : undefined,
           datePublished: a.date,
-          author: { "@type": "Organization", name: BRAND },
+          dateModified: a.date,
+          author: { "@type": "Organization", name: BRAND, url: SITE_URL },
           publisher: { "@type": "Organization", name: BRAND, logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.jpeg` } },
           mainEntityOfPage: url,
         }}

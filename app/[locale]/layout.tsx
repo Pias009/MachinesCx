@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -136,13 +136,42 @@ export default async function LocaleLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: BRAND,
-              url: SITE_URL,
-              logo: `${SITE_URL}/logo.jpeg`,
-            }),
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: BRAND,
+                legalName: "Wenzhou Ashal Innomach Technology Co., Ltd.",
+                url: SITE_URL,
+                logo: `${SITE_URL}/logo.jpeg`,
+                email: "ashal@ashalinnomech.com",
+                telephone: "+86 159 8877 5831",
+                address: {
+                  "@type": "PostalAddress",
+                  addressLocality: "Wenzhou",
+                  addressRegion: "Zhejiang",
+                  addressCountry: "China",
+                },
+                contactPoint: {
+                  "@type": "ContactPoint",
+                  telephone: "+86 159 8877 5831",
+                  contactType: "sales",
+                  email: "ashal@ashalinnomech.com",
+                  availableLanguage: ["English", "Arabic", "Hindi", "Chinese"],
+                },
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: BRAND,
+                url: SITE_URL,
+                potentialAction: {
+                  "@type": "SearchAction",
+                  target: `${SITE_URL}/products?q={search_term_string}`,
+                  "query-input": "required name=search_term_string",
+                },
+              },
+            ]),
           }}
         />
       </head>

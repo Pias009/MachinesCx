@@ -6,7 +6,7 @@ import { pageMetadata } from "@/lib/seo";
 import { getMachineCategories, getMachineCategoryBySlug, getMachineProductsByCategory } from "@/lib/machinesData";
 import CategoryPageClient from "./CategoryPageClient";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   const legacyCatParams = categories.map((c) => ({ category: c.slug }));

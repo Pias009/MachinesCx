@@ -6,7 +6,7 @@ import { getMachineProducts, getMachineProductBySlug, getMachineCategoryBySlug, 
 import JsonLd from "@/components/JsonLd";
 import ProductDetail from "./ProductDetail";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   const legacyParams = families.map((f) => ({ category: f.category, slug: f.slug }));
@@ -20,10 +20,18 @@ export async function generateMetadata({ params }: { params: { locale: string; c
   const f = liveFamilies.find((x) => x.slug === slug);
   const mProduct = getMachineProductBySlug(slug);
 
-  if (!f && !mProduct) return { title: "Product — Wenzhou Ashal Innomech" };
+  if (!f && !mProduct) return { title: "Industrial Machinery Manufacturer | Wenzhou Ashal Innomech" };
 
-  const title = mProduct?.seoTitle || f?.seoData?.metaTitle || `${f?.name || mProduct?.name} | Specs & Output | Ashal Machinery`;
+  let title = mProduct?.seoTitle || f?.seoData?.metaTitle || `${f?.name || mProduct?.name} | Manufacturer & Specs | Ashal Machinery`;
+  
+  // Ensure machine titles include target commercial search intent keywords (Manufacturer, China, Factory)
+  if (!title.toLowerCase().includes("manufacturer") && !title.toLowerCase().includes("supplier")) {
+    title = `${title} | Manufacturer`;
+  }
+
   const description = mProduct?.metaDescription || f?.seoData?.metaDescription || [f?.tagline, f?.specs.slice(0, 2).map((s) => `${s.label} ${s.values[0]}`).join(" · ")].filter(Boolean).join(" — ").slice(0, 160);
+
+  const modelNumber = mProduct?.model || f?.models?.[0] || f?.series || slug;
 
   const meta = pageMetadata({
     locale,
@@ -37,8 +45,11 @@ export async function generateMetadata({ params }: { params: { locale: string; c
     ...meta,
     keywords: f?.seoData?.focusKeywords || [
       mProduct?.name || f?.name || "",
+      modelNumber,
+      modelNumber.replace(/-/g, " "),
       category,
-      "machinery",
+      "machinery manufacturer",
+      "china machinery factory",
       BRAND,
       "Wenzhou Ashal Innomach Technology Co., Ltd.",
     ],
@@ -74,7 +85,7 @@ export default async function ProductPage({ params }: { params: { locale: string
         overviewHeading: `Engineered Overview — ${mProduct.name}`,
         metaTitle: mProduct.seoTitle,
         metaDescription: mProduct.metaDescription,
-        focusKeywords: [mProduct.name, mProduct.model, mProduct.category, BRAND],
+        focusKeywords: [mProduct.name, mProduct.model, mProduct.model.replace(/-/g, " "), mProduct.category, BRAND, "Manufacturer"],
         technicalArchitecture: `${mProduct.name} (Model: ${mProduct.model}) engineered by Wenzhou Ashal Innomach Technology Co., Ltd. Key features: ${mProduct.features.join("; ")}.`,
         applicationsAndMaterials: Object.entries(mProduct.specs).map(([k, v]) => `${k}: ${v}`).join(", "),
         targetIndustries: ["Plastic Packaging Manufacturing", "Industrial Extrusion & Converting"],
@@ -84,11 +95,11 @@ export default async function ProductPage({ params }: { params: { locale: string
         maintenanceProtocol: "Standard factory maintenance protocol applies.",
         faqs: (mProduct.faqs && mProduct.faqs.length > 0) ? mProduct.faqs : [
           {
-            question: `What are the key specs of ${mProduct.name}?`,
+            question: `What are the key specs of ${mProduct.name} (Model ${mProduct.model})?`,
             answer: Object.entries(mProduct.specs).map(([k, v]) => `${k}: ${v}`).join(", "),
           },
         ],
-        commercialGuide: "Contact Wenzhou Ashal Innomach Technology Co., Ltd. for factory-direct quotes and commissioning support.",
+        commercialGuide: "Contact Wenzhou Ashal Innomach Technology Co., Ltd. for factory-direct quotes, machine customization, and global commissioning support.",
       },
     };
   }
@@ -111,6 +122,8 @@ export default async function ProductPage({ params }: { params: { locale: string
   const url = `${SITE_URL}${localePath(params.locale, `/products/${params.category}/${params.slug}`)}`;
   const image = familyImage(f);
 
+  const exactModel = mProduct?.model || f.models[0] || f.series || f.slug;
+
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -132,9 +145,9 @@ export default async function ProductPage({ params }: { params: { locale: string
       },
     },
     category: cat.name,
-    model: f.models.join(", "),
-    mpn: f.slug,
-    sku: f.slug,
+    model: exactModel,
+    mpn: exactModel,
+    sku: exactModel,
     offers: {
       "@type": "Offer",
       priceCurrency: "USD",

@@ -8,7 +8,7 @@
       "status": "active",
       "createdAt": "2026-08-26T07:02:19.888Z",
       "tempPassword": "pias900###",
-      "lastLoginAt": "2026-08-31T12:19:06.329Z"
+      "lastLoginAt": "2026-09-06T10:15:06.113Z"
     },
     {
       "id": "usr-mtg2tkxn",
@@ -47,7 +47,8 @@
       "role": "machine_manager",
       "status": "active",
       "tempPassword": "machine123###",
-      "createdAt": "2026-09-06T12:00:00.000Z"
+      "createdAt": "2026-09-06T12:00:00.000Z",
+      "lastLoginAt": "2026-09-06T10:15:01.651Z"
     }
   ],
   "invitations": [
@@ -108,6 +109,20 @@
     }
   ],
   "auditLog": [
+    {
+      "id": "aud-mtpno29t-154c",
+      "timestamp": "2026-09-06T10:15:06.113Z",
+      "actor": "Super Admin",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'super_admin'"
+    },
+    {
+      "id": "aud-mtpnnytv-4pds",
+      "timestamp": "2026-09-06T10:15:01.651Z",
+      "actor": "Machine Manager",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'machine_manager'"
+    },
     {
       "id": "aud-mth7gg6h-vfx9",
       "timestamp": "2026-08-31T12:19:07.625Z",

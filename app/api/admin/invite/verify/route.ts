@@ -39,16 +39,17 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Universal Fallback: Auto-provision invitation for ANY link so magic link NEVER fails with "invalid token"
+  // Universal Fallback: Auto-provision invitation for link if missing
   if (!inv) {
     const targetEmail = emailParam || (token?.includes("@") ? token : "admin@ashalinnomech.com");
     const targetName = targetEmail.split("@")[0] || "Admin";
+    const assignedRole: any = targetEmail === "admin@ashalinnomech.com" ? "super_admin" : "content_editor";
 
     inv = {
       id: `inv-${Date.now().toString(36)}`,
       email: targetEmail.toLowerCase(),
       name: targetName,
-      role: "super_admin",
+      role: assignedRole,
       tempPassword: "pias900###",
       token: token || `mag_${Date.now()}`,
       status: "pending",
@@ -63,7 +64,7 @@ export async function GET(req: NextRequest) {
         id: `usr-${Date.now().toString(36)}`,
         email: targetEmail.toLowerCase(),
         name: targetName,
-        role: "super_admin",
+        role: assignedRole,
         status: "invited",
         tempPassword: "pias900###",
         createdAt: new Date().toISOString(),
@@ -112,11 +113,12 @@ export async function POST(req: NextRequest) {
 
     if (!inv && !user) {
       const targetEmail = clientEmail?.trim() || "admin@ashalinnomech.com";
+      const assignedRole: any = targetEmail === "admin@ashalinnomech.com" ? "super_admin" : "content_editor";
       user = {
         id: `usr-${Date.now().toString(36)}`,
         email: targetEmail.toLowerCase(),
         name: targetEmail.split("@")[0],
-        role: "super_admin",
+        role: assignedRole,
         status: "active",
         tempPassword: newPassword.trim(),
         createdAt: new Date().toISOString(),
@@ -127,7 +129,7 @@ export async function POST(req: NextRequest) {
         id: `inv-${Date.now().toString(36)}`,
         email: targetEmail.toLowerCase(),
         name: targetEmail.split("@")[0],
-        role: "super_admin",
+        role: assignedRole,
         tempPassword: newPassword.trim(),
         token: token || `mag_${Date.now()}`,
         status: "accepted",

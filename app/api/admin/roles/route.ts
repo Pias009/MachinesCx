@@ -7,9 +7,16 @@ import {
   generateInviteToken,
   AdminRole,
 } from "@/lib/adminRoles";
+import { parseSessionToken, SESSION_COOKIE } from "@/lib/adminAuth";
 
 // GET /api/admin/roles — return users, invitations, audit log & role definitions
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const token = req.cookies.get(SESSION_COOKIE)?.value;
+  const user = await parseSessionToken(token);
+  if (!user || user.role !== "super_admin") {
+    return NextResponse.json({ error: "forbidden: super admin required" }, { status: 403 });
+  }
+
   const db = readRolesDB();
   return NextResponse.json({
     users: db.users,
@@ -51,6 +58,12 @@ export async function GET() {
 // POST /api/admin/roles — handle invitations, role updates, password changes, revokes
 export async function POST(req: NextRequest) {
   try {
+    const token = req.cookies.get(SESSION_COOKIE)?.value;
+    const user = await parseSessionToken(token);
+    if (!user || user.role !== "super_admin") {
+      return NextResponse.json({ error: "forbidden: super admin required" }, { status: 403 });
+    }
+
     const body = await req.json();
     const { action } = body;
     const db = readRolesDB();

@@ -39,9 +39,29 @@
       "tempPassword": "MyNewPassword123!",
       "createdAt": "2026-08-30T17:56:00.551Z",
       "lastLoginAt": "2026-08-30T17:56:00.552Z"
+    },
+    {
+      "id": "usr-machine-mgr-1",
+      "email": "manager@ashalinnomech.com",
+      "name": "Machine Manager",
+      "role": "machine_manager",
+      "status": "active",
+      "tempPassword": "machine123###",
+      "createdAt": "2026-09-06T12:00:00.000Z"
     }
   ],
   "invitations": [
+    {
+      "id": "inv-machine-mgr-1",
+      "email": "manager@ashalinnomech.com",
+      "name": "Machine Manager",
+      "role": "machine_manager",
+      "tempPassword": "machine123###",
+      "token": "mag_machine_manager_test",
+      "status": "accepted",
+      "createdAt": "2026-09-06T12:00:00.000Z",
+      "expiresAt": "2028-09-06T12:00:00.000Z"
+    },
     {
       "id": "inv-mtg41twn",
       "email": "newinviteduser@gmail.com",

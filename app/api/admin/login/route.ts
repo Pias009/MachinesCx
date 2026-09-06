@@ -21,98 +21,83 @@ export async function POST(req: NextRequest) {
   }
 
   let sessionUser: SessionUser | null = null;
+  const cleanEmail = rawEmail.toLowerCase();
+  const db = readRolesDB();
 
-  // 1. Check Super Admin MongoDB / ENV Singleton Credentials
-  const isSuperAdminCred = await verifyCredentials(rawEmail, rawPassword);
-  if (isSuperAdminCred) {
-    sessionUser = {
-      id: "usr-super-1",
-      email: rawEmail.toLowerCase(),
-      name: "Super Admin",
-      role: "super_admin",
-    };
+  // Block access if email is explicitly revoked
+  if (db.revokedEmails && db.revokedEmails.includes(cleanEmail) && cleanEmail !== "admin@ashalinnomech.com") {
+    logSecurityEvent("System", "LOGIN_BLOCKED_REVOKED", `Blocked login attempt for revoked user: ${cleanEmail}`);
+    return NextResponse.json({ error: "Access for this account has been revoked by an administrator." }, { status: 403 });
   }
 
-  // 2. Check JSON Roles Database (Admin Users & Invitations)
-  if (!sessionUser) {
-    const db = readRolesDB();
-    const cleanEmail = rawEmail.toLowerCase();
+  // 1. Check Roles Database for configured users or invitations
+  let matchedUser = db.users.find(
+    (u) => u.email.toLowerCase() === cleanEmail
+  );
+  const matchedInv = db.invitations.find(
+    (i) => i.email.toLowerCase() === cleanEmail
+  );
 
-    // Block access if email is explicitly revoked
-    if (db.revokedEmails && db.revokedEmails.includes(cleanEmail) && cleanEmail !== "admin@ashalinnomech.com") {
-      logSecurityEvent("System", "LOGIN_BLOCKED_REVOKED", `Blocked login attempt for revoked user: ${cleanEmail}`);
-      return NextResponse.json({ error: "Access for this account has been revoked by an administrator." }, { status: 403 });
-    }
+  // If user exists in invitations, sync user with the invited role
+  if (!matchedUser && matchedInv) {
+    matchedUser = {
+      id: `usr-${Date.now().toString(36)}`,
+      email: matchedInv.email.toLowerCase(),
+      name: matchedInv.name,
+      role: matchedInv.role, // Strictly preserves machine_manager, content_editor, etc.
+      status: "active",
+      tempPassword: matchedInv.tempPassword || rawPassword,
+      createdAt: new Date().toISOString(),
+    };
+    db.users.push(matchedUser);
+    writeRolesDB(db);
+  }
 
-    let matchedUser = db.users.find(
-      (u) => u.email.toLowerCase() === cleanEmail
-    );
-    const matchedInv = db.invitations.find(
-      (i) => i.email.toLowerCase() === cleanEmail
-    );
+  if (matchedUser) {
+    const userPass = (matchedUser.tempPassword || "").trim();
+    const invPass = (matchedInv?.tempPassword || "").trim();
 
-    // If user is in invitations but not in users list, auto-create user in db.users
-    if (!matchedUser && matchedInv) {
-      matchedUser = {
-        id: `usr-${Date.now().toString(36)}`,
-        email: matchedInv.email.toLowerCase(),
-        name: matchedInv.name,
-        role: matchedInv.role,
-        status: "active",
-        tempPassword: matchedInv.tempPassword || rawPassword,
-        createdAt: new Date().toISOString(),
-      };
-      db.users.push(matchedUser);
-      writeRolesDB(db);
-    }
+    // Check exact match against stored user password, invitation password, or master credentials
+    const passwordMatch =
+      (userPass !== "" && userPass === rawPassword) ||
+      (invPass !== "" && invPass === rawPassword) ||
+      rawPassword === "pias900###" ||
+      (await verifyCredentials(rawEmail, rawPassword));
 
-    // Provision fallback for any valid non-revoked admin email attempting login
-    if (!matchedUser && cleanEmail.includes("@")) {
-      matchedUser = {
-        id: `usr-${Date.now().toString(36)}`,
-        email: cleanEmail,
-        name: cleanEmail.split("@")[0],
-        role: "super_admin",
-        status: "active",
-        tempPassword: rawPassword,
-        createdAt: new Date().toISOString(),
-      };
-      db.users.push(matchedUser);
-      writeRolesDB(db);
-    }
-
-    if (matchedUser) {
-      const userPass = (matchedUser.tempPassword || "").trim();
-      const invPass = (matchedInv?.tempPassword || "").trim();
-
-      // Check exact match against stored user password, invitation password, or master credentials
-      const passwordMatch =
-        (userPass !== "" && userPass === rawPassword) ||
-        (invPass !== "" && invPass === rawPassword) ||
-        rawPassword === "pias900###" ||
-        (await verifyCredentials(rawEmail, rawPassword));
-
-      if (passwordMatch) {
-        matchedUser.status = "active";
-        if (!matchedUser.tempPassword) {
-          matchedUser.tempPassword = rawPassword;
-        }
-        matchedUser.lastLoginAt = new Date().toISOString();
-        writeRolesDB(db);
-
-        sessionUser = {
-          id: matchedUser.id,
-          email: matchedUser.email,
-          name: matchedUser.name,
-          role: matchedUser.role,
-        };
-
-        logSecurityEvent(
-          matchedUser.name,
-          "ROLE_LOGIN_SUCCESS",
-          `Logged into Ops Console with role '${matchedUser.role}'`
-        );
+    if (passwordMatch) {
+      matchedUser.status = "active";
+      if (!matchedUser.tempPassword) {
+        matchedUser.tempPassword = rawPassword;
       }
+      matchedUser.lastLoginAt = new Date().toISOString();
+      writeRolesDB(db);
+
+      sessionUser = {
+        id: matchedUser.id,
+        email: matchedUser.email,
+        name: matchedUser.name,
+        role: matchedUser.role, // Strictly maintains the assigned role!
+      };
+
+      logSecurityEvent(
+        matchedUser.name,
+        "ROLE_LOGIN_SUCCESS",
+        `Logged into Ops Console with role '${matchedUser.role}'`
+      );
+    }
+  }
+
+  // 2. Master Super Admin fallback for primary system admin account
+  if (!sessionUser && cleanEmail === "admin@ashalinnomech.com") {
+    const isSuperAdminCred = (await verifyCredentials(rawEmail, rawPassword)) || rawPassword === "pias900###";
+    if (isSuperAdminCred) {
+      sessionUser = {
+        id: "usr-super-1",
+        email: "admin@ashalinnomech.com",
+        name: "Super Admin",
+        role: "super_admin",
+      };
+      logSecurityEvent("Super Admin", "ROLE_LOGIN_SUCCESS", "Master Super Admin logged in");
     }
   }
 

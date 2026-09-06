@@ -32,6 +32,9 @@ export default function AdminLogin() {
       const j = await res.json().catch(() => ({}));
       if (res.ok) {
         setSuccessMsg(`Authenticated as ${j.user?.name || "Admin"}! Redirecting…`);
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("cx_ops_tab_active", "true");
+        }
         setTimeout(() => {
           router.replace(`/${ADMIN_PATH}`);
           router.refresh();

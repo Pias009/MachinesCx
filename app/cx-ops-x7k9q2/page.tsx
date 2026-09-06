@@ -9,10 +9,11 @@ import {
   Users, DollarSign, TrendingUp, UserPlus, CheckCircle2, Clock,
   Video, CalendarDays, ChevronDown, MoreVertical, ExternalLink,
   X, Plus, RefreshCw, Download, Filter, Trash2, Eye, Mail, Check,
-  Inbox, FileText, Sparkles, Activity, Layers, Send, Loader2
+  Inbox, FileText, Sparkles, Activity, Layers, Send, Loader2,
+  Wrench, Cpu, Factory, Gauge, Box, ShieldCheck, ArrowRight
 } from "lucide-react";
 import AdminShell from "./AdminShell";
-import { ADMIN_PATH } from "@/lib/adminAuth";
+import { ADMIN_PATH, SessionUser } from "@/lib/adminAuth";
 import type { InquiryType } from "@/models/Inquiry";
 
 interface InquiryRow {
@@ -38,8 +39,214 @@ interface ScheduleTask {
 
 type TimeframeOption = "7D" | "30D" | "6M" | "1Y";
 
+function MachineManagerDashboard({ userName }: { userName: string }) {
+  const schemas = [
+    {
+      title: "Machinery Catalogue & Models",
+      slug: "products",
+      desc: "Configure primary machine specifications, motor power, extruder outputs, and dimensions.",
+      badge: "Primary Specification Hub",
+      icon: Factory,
+      accent: "#f5c451",
+    },
+    {
+      title: "Machine Catalog Directory",
+      slug: "machine-catalog",
+      desc: "Manage series breakdowns, equipment categories, and manufacturing capabilities.",
+      badge: "Series Structure",
+      icon: Cpu,
+      accent: "#00E5A3",
+    },
+    {
+      title: "Turnkey Production Lines",
+      slug: "production-line",
+      desc: "Configure turnkey extrusion plant blueprints, upstream/downstream integrations, and throughputs.",
+      badge: "Plant Layouts",
+      icon: Layers,
+      accent: "#3b82f6",
+    },
+    {
+      title: "CI Flexo Printing Strip",
+      slug: "flexo-strip",
+      desc: "Update central impression printing highlights, line speeds, and rapid sleeve changeover specs.",
+      badge: "Flexo Equipment",
+      icon: Gauge,
+      accent: "#a855f7",
+    },
+    {
+      title: "Printing Showcase & Decks",
+      slug: "printing-showcase",
+      desc: "Manage color deck capabilities, anilox configurations, substrate tensions, and gallery items.",
+      badge: "Press Systems",
+      icon: Sparkles,
+      accent: "#ec4899",
+    },
+    {
+      title: "Bag Making & Converting Showcase",
+      slug: "scrollhome-bags",
+      desc: "Edit bag making machines, servo drive systems, punch configurations, and sealing parameters.",
+      badge: "Converting Machinery",
+      icon: Box,
+      accent: "#f97316",
+    },
+  ];
+
+  return (
+    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "1rem 0" }}>
+      {/* Top Banner */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, rgba(245, 196, 81, 0.12), rgba(12, 20, 36, 0.95))",
+          border: "1px solid rgba(245, 196, 81, 0.35)",
+          borderRadius: 20,
+          padding: "2rem",
+          marginBottom: "2rem",
+          boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
+          <div>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.3rem 0.8rem", borderRadius: 20, background: "rgba(245, 196, 81, 0.18)", border: "1px solid rgba(245, 196, 81, 0.4)", color: "#f5c451", fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.06em", marginBottom: "0.8rem" }}>
+              <Wrench size={14} /> MACHINE MANAGER CONSOLE
+            </div>
+            <h1 style={{ fontSize: "1.9rem", fontWeight: 900, color: "#fff", margin: "0 0 0.5rem" }}>
+              Welcome back, <span style={{ color: "#f5c451" }}>{userName}</span>
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.95rem", margin: 0, maxWidth: 640, lineHeight: 1.5 }}>
+              You have dedicated operational access to configure machine models, technical specifications, and industrial catalogue showcases.
+            </p>
+          </div>
+
+          <div style={{ display: "flex", gap: "0.75rem" }}>
+            <Link
+              href={`/${ADMIN_PATH}/s/products`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                background: "#f5c451",
+                color: "#1a1202",
+                padding: "0.75rem 1.4rem",
+                borderRadius: 12,
+                fontWeight: 800,
+                fontSize: "0.92rem",
+                textDecoration: "none",
+                boxShadow: "0 8px 24px rgba(245, 196, 81, 0.35)",
+              }}
+            >
+              Open Products Catalogue <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Scope Security Isolation Info Notice */}
+      <div
+        style={{
+          background: "rgba(18, 27, 45, 0.5)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: 14,
+          padding: "1rem 1.25rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.85rem",
+          marginBottom: "2rem",
+        }}
+      >
+        <ShieldCheck size={20} style={{ color: "#00E5A3", flexShrink: 0 }} />
+        <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.75)", lineHeight: 1.4 }}>
+          <strong>Role-Based Access Enforcement Active:</strong> You are operating under the <strong>Machine Manager</strong> scope. Customer inquiries, sales quotes, telemetry analytics, and user role administration are securely isolated to designated roles.
+        </span>
+      </div>
+
+      {/* Grid of 6 Allowed Machinery Schemas */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "1.25rem" }}>
+        {schemas.map((s) => {
+          const Icon = s.icon;
+          return (
+            <Link
+              key={s.slug}
+              href={`/${ADMIN_PATH}/s/${s.slug}`}
+              style={{
+                background: "rgba(12, 20, 36, 0.7)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 16,
+                padding: "1.5rem",
+                textDecoration: "none",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                transition: "transform 0.2s, border-color 0.2s, box-shadow 0.2s",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+                  <div
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 12,
+                      background: `${s.accent}22`,
+                      color: s.accent,
+                      border: `1px solid ${s.accent}44`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon size={22} />
+                  </div>
+                  <span
+                    style={{
+                      fontSize: "0.72rem",
+                      fontWeight: 700,
+                      padding: "0.2rem 0.6rem",
+                      borderRadius: 8,
+                      background: "rgba(255,255,255,0.06)",
+                      color: "rgba(255,255,255,0.7)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    {s.badge}
+                  </span>
+                </div>
+                <h3 style={{ fontSize: "1.15rem", fontWeight: 800, color: "#fff", margin: "0 0 0.5rem" }}>
+                  {s.title}
+                </h3>
+                <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.6)", lineHeight: 1.5, margin: 0 }}>
+                  {s.desc}
+                </p>
+              </div>
+
+              <div
+                style={{
+                  marginTop: "1.25rem",
+                  paddingTop: "1rem",
+                  borderTop: "1px solid rgba(255,255,255,0.08)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  color: s.accent,
+                  fontSize: "0.82rem",
+                  fontWeight: 700,
+                }}
+              >
+                <span>Edit Specifications</span>
+                <ArrowRight size={15} />
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminHome() {
   const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<SessionUser | null>(null);
   const [inquiries, setInquiries] = useState<InquiryRow[] | null>(null);
   const [tableSearch, setTableSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"meetings" | "tasks" | "events">("meetings");
@@ -153,6 +360,10 @@ export default function AdminHome() {
     setIsRefreshing(true);
     try {
       const res = await fetch("/api/admin/inquiries");
+      if (!res.ok) {
+        setInquiries([]);
+        return;
+      }
       const data = await res.json();
       if (Array.isArray(data.inquiries)) {
         setInquiries(data.inquiries);
@@ -165,7 +376,19 @@ export default function AdminHome() {
   };
 
   useEffect(() => {
-    fetchInquiries();
+    fetch("/api/admin/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (j?.authenticated && j.user) {
+          setCurrentUser(j.user);
+          if (j.user.role !== "machine_manager") {
+            fetchInquiries();
+          } else {
+            setInquiries([]);
+          }
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Compute stat totals dynamically from real inquiries data
@@ -433,6 +656,14 @@ export default function AdminHome() {
         <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--adm-mint)" }}>
           <Loader2 size={32} className="adm-spin-icon" />
         </div>
+      </AdminShell>
+    );
+  }
+
+  if (currentUser?.role === "machine_manager") {
+    return (
+      <AdminShell>
+        <MachineManagerDashboard userName={currentUser.name || "Machine Manager"} />
       </AdminShell>
     );
   }

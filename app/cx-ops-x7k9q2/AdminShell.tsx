@@ -8,7 +8,7 @@ import {
   ChevronDown, Bell, Menu, X, ShieldAlert, ArrowLeft, Lock
 } from "lucide-react";
 import { SECTION_SCHEMAS } from "@/lib/cmsSchemas";
-import { ADMIN_PATH, SessionUser } from "@/lib/adminAuth";
+import { ADMIN_PATH, SessionUser, MACHINE_MANAGER_SCHEMAS } from "@/lib/adminAuth";
 import { AdminRole } from "@/lib/adminRoles";
 import { SectionIcon } from "./adminIcons";
 
@@ -26,15 +26,6 @@ const roleTitles: Record<AdminRole, string> = {
   analytics_viewer: "Analytics Viewer",
 };
 
-const MACHINE_MANAGER_SCHEMAS = [
-  "products",
-  "machine-catalog",
-  "production-line",
-  "flexo-strip",
-  "printing-showcase",
-  "scrollhome-bags",
-];
-
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? "";
   const router = useRouter();
@@ -44,8 +35,19 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  // Fetch current authenticated user & role
+  // Tab session guard & fetch current authenticated user
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isTabActive = sessionStorage.getItem("cx_ops_tab_active");
+      if (!isTabActive) {
+        // Tab or browser was closed; terminate session and force re-login
+        fetch("/api/admin/logout", { method: "POST" }).finally(() => {
+          router.replace(`/${ADMIN_PATH}/login`);
+        });
+        return;
+      }
+    }
+
     let alive = true;
     fetch("/api/admin/me")
       .then((r) => (r.ok ? r.json() : null))
@@ -53,6 +55,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         if (!alive) return;
         if (j && j.authenticated && j.user) {
           setCurrentUser(j.user);
+        } else {
+          router.replace(`/${ADMIN_PATH}/login`);
         }
       })
       .catch(() => {})
@@ -62,7 +66,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     return () => {
       alive = false;
     };
-  }, []);
+  }, [router]);
 
   // Fetch inquiries count if user has access to inquiries
   useEffect(() => {
@@ -89,12 +93,15 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   }, [pathname]);
 
   async function logout() {
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("cx_ops_tab_active");
+    }
     await fetch("/api/admin/logout", { method: "POST" });
     router.replace(`/${ADMIN_PATH}/login`);
     router.refresh();
   }
 
-  const role: AdminRole = currentUser?.role || "super_admin";
+  const role: AdminRole = currentUser?.role || "content_editor";
 
   // Filter visible nav items based on role
   const canSeeInquiries = role === "super_admin" || role === "analytics_viewer";
@@ -142,6 +149,17 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     .join("")
     .slice(0, 2)
     .toUpperCase();
+
+  if (loadingUser) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#060b14", color: "#00E5A3" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ display: "inline-block", width: 34, height: 34, border: "3px solid rgba(0, 229, 163, 0.2)", borderTopColor: "#00E5A3", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+          <p style={{ marginTop: "0.85rem", color: "rgba(255,255,255,0.65)", fontSize: "0.85rem", fontWeight: 600 }}>Verifying console access...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="adm-shell" data-admin="true">

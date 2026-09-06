@@ -109,13 +109,22 @@ export async function verifySessionToken(token: string | undefined): Promise<boo
   return user !== null;
 }
 
+export const MACHINE_MANAGER_SCHEMAS = [
+  "products",
+  "machine-catalog",
+  "production-line",
+  "flexo-strip",
+  "printing-showcase",
+  "scrollhome-bags",
+];
+
 export function sessionCookieOptions() {
   return {
     httpOnly: true,
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: SESSION_TTL_S,
+    // Omit maxAge and expires so this is a true session cookie that is cleared on browser close
   };
 }
 

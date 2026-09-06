@@ -92,6 +92,9 @@ function InviteContent() {
       }
 
       setSuccessMsg("Account activated successfully! Redirecting to Ops Command...");
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("cx_ops_tab_active", "true");
+      }
       setTimeout(() => {
         router.replace(`/${ADMIN_PATH}`);
         router.refresh();

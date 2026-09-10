@@ -22,3 +22,5 @@ public/about-hero.mp4
 
 # Ad-hoc dev/testing screenshots — not part of the app
 /shots/
+.agents/context/
+

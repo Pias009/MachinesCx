@@ -1,0 +1,41 @@
+{
+  "output": {
+    "filePath": ".agents/context/repomix-output.md",
+    "style": "markdown",
+    "compress": true,
+    "removeComments": true,
+    "removeEmptyLines": true,
+    "topFilesLen": 10,
+    "showLineNumbers": false
+  },
+  "ignore": {
+    "useGitignore": true,
+    "customPatterns": [
+      "data/products*.json",
+      "messages/*.json",
+      "data/news*.json",
+      "app/data/news*.json",
+      ".agents/**",
+      ".claude/**",
+      ".impeccable/**",
+      "*.zip",
+      "*.pdf",
+      "*.jpeg",
+      "*.jpg",
+      "*.png",
+      "*.svg",
+      "*.ico",
+      "*.mp4",
+      "*.webp",
+      ".next/**",
+      "package-lock.json",
+      "tsconfig.tsbuildinfo",
+      "shots/**",
+      ".scratch*",
+      "node_modules/**"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": true
+  }
+}

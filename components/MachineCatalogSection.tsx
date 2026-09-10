@@ -181,7 +181,7 @@ export default function MachineCatalogSection() {
         .mcs {
           background: var(--bg-base);
           border-top: 1px solid rgba(255,255,255,0.06);
-          padding: clamp(4rem,8vw,8rem) 0;
+          padding: clamp(4.5rem,8vw,8rem) 0;
           position: relative;
           overflow: hidden;
         }
@@ -191,19 +191,20 @@ export default function MachineCatalogSection() {
           position: relative; z-index: 2;
         }
 
-        /* ── Decorative color blobs ── */
+        /* ── Decorative Ambient Lighting Orbs ── */
         .mcs__blob {
           position: absolute; border-radius: 50%; pointer-events: none; z-index: 0;
+          filter: blur(60px);
         }
         .mcs__blob--t {
-          width: min(40vw, 500px); height: min(40vw, 500px);
-          top: -10%; right: -5%;
-          background: radial-gradient(circle, rgba(43,191,179,0.06) 0%, transparent 70%);
+          width: min(45vw, 550px); height: min(45vw, 550px);
+          top: -12%; right: -6%;
+          background: radial-gradient(circle, rgba(43,191,179,0.09) 0%, transparent 70%);
         }
         .mcs__blob--b {
-          width: min(50vw, 600px); height: min(50vw, 600px);
-          bottom: -15%; left: -10%;
-          background: radial-gradient(circle, rgba(245,158,11,0.05) 0%, transparent 70%);
+          width: min(55vw, 650px); height: min(55vw, 650px);
+          bottom: -18%; left: -10%;
+          background: radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 70%);
         }
 
         /* ── Header ── */
@@ -211,318 +212,515 @@ export default function MachineCatalogSection() {
           display: flex; align-items: flex-end;
           justify-content: space-between; gap: 2rem;
           flex-wrap: wrap;
-          margin-bottom: clamp(2rem,4vw,3.5rem);
+          margin-bottom: clamp(2.5rem,4vw,3.5rem);
         }
         .mcs__badge {
-          display: inline-flex; align-items: center; gap: .45rem;
-          font-family: var(--ff-mono); font-size: 0.7rem;
-          letter-spacing: .14em; text-transform: uppercase;
-          color: var(--brand-red); margin-bottom: .75rem;
+          display: inline-flex; align-items: center; gap: .55rem;
+          font-family: var(--ff-mono); font-size: 0.72rem;
+          letter-spacing: .2em; text-transform: uppercase;
+          color: var(--brand-teal); margin-bottom: .85rem;
+          font-weight: 700;
         }
         .mcs__badge::before {
           content: ""; display: inline-block;
-          width: 18px; height: 1px;
-          background: var(--brand-red);
+          width: 22px; height: 1.5px;
+          background: var(--brand-teal);
+          box-shadow: 0 0 8px rgba(43,191,179,0.6);
         }
         .mcs__title {
           font-family: var(--ff-display);
           font-size: clamp(3rem,6vw,6.5rem);
-          line-height: .88; letter-spacing: -.02em;
-          color: var(--ink); margin: 0 0 .6rem;
+          line-height: .9; letter-spacing: -.025em;
+          color: var(--ink); margin: 0 0 .75rem;
         }
-        .mcs__title em { font-style: normal; color: var(--brand-teal); }
+        .mcs__title em {
+          font-style: normal;
+          color: transparent;
+          background: linear-gradient(135deg, #2bbfb3 20%, #7ee5dc 100%);
+          -webkit-background-clip: text;
+          background-clip: text;
+        }
         .mcs__sub {
-          font-family: var(--ff-mono); font-size: .68rem;
-          letter-spacing: .08em; text-transform: uppercase;
-          color: var(--ink-60); margin: 0;
-        }
-        .mcs__cta {
-          display: inline-flex; align-items: center; gap: .6rem;
-          padding: .75rem 1.75rem;
-          background: var(--glass-bg); color: var(--ink-60);
-          border: 1px solid rgba(255,255,255,0.12);
-          -webkit-backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
-                  backdrop-filter: blur(var(--glass-blur-sm)) saturate(var(--glass-sat));
           font-family: var(--ff-mono); font-size: .72rem;
-          letter-spacing: .1em; text-transform: uppercase;
+          letter-spacing: .12em; text-transform: uppercase;
+          color: var(--ink-60); margin: 0;
+          display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+        }
+
+        /* ── Island Header CTA ── */
+        .mcs__cta {
+          display: inline-flex; align-items: center; gap: 0.85rem;
+          padding: 0.5rem 0.5rem 0.5rem 1.4rem;
+          background: rgba(255,255,255,0.05); color: #ffffff;
+          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 9999px;
+          -webkit-backdrop-filter: blur(16px);
+          backdrop-filter: blur(16px);
+          font-family: var(--ff-mono); font-size: .72rem;
+          letter-spacing: .12em; text-transform: uppercase;
           text-decoration: none; white-space: nowrap;
-          transition: border-color .18s, color .18s, background .18s, transform .15s var(--ease-out, ease);
+          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
           flex-shrink: 0;
+          box-shadow: 0 10px 25px -8px rgba(0,0,0,0.3);
         }
-        .mcs__cta:hover { border-color: var(--brand-teal); color: var(--brand-teal); background: rgba(43,191,179,.08); transform: translateY(-2px); }
-        .mcs__cta:active { transform: translateY(0) scale(0.97); transition-duration: .08s; }
-        [data-theme="light"] .mcs__cta { border-color: rgba(0,0,0,0.15); }
-        [data-theme="light"] .mcs__cta:hover { border-color: var(--brand-teal); color: var(--brand-teal); }
-        @media (prefers-reduced-motion: reduce) { .mcs__cta { transform: none !important; } }
+        .mcs__cta-disc {
+          width: 34px; height: 34px; border-radius: 50%;
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.15);
+          display: flex; align-items: center; justify-content: center;
+          color: #ffffff;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mcs__cta:hover {
+          background: rgba(43,191,179,0.1);
+          border-color: rgba(43,191,179,0.4);
+          color: #2bbfb3;
+          transform: translateY(-2px);
+          box-shadow: 0 16px 32px -10px rgba(43,191,179,0.25);
+        }
+        .mcs__cta:hover .mcs__cta-disc {
+          background: var(--brand-teal);
+          color: #040e0d;
+          border-color: var(--brand-teal);
+          transform: rotate(45deg);
+        }
+        .mcs__cta:active { transform: translateY(0) scale(0.97); }
 
-        /* ── Tabs ── */
+        /* ── Floating Hardware Segmented Tabs Dock ── */
+        .mcs__tabs-wrapper {
+          margin-bottom: clamp(2rem,3.5vw,3rem);
+          overflow-x: auto;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          padding-bottom: 4px;
+        }
+        .mcs__tabs-wrapper::-webkit-scrollbar { display: none; }
         .mcs__tabs {
-          display: flex; align-items: center; gap: .5rem;
-          flex-wrap: wrap;
-          margin-bottom: clamp(1.5rem,3vw,2.5rem);
-          border-bottom: 1px solid rgba(255,255,255,0.07);
-          padding-bottom: 0;
+          display: inline-flex; align-items: center; gap: 0.35rem;
+          padding: 0.35rem;
+          background: rgba(255,255,255,0.035);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 9999px;
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 12px 30px -10px rgba(0,0,0,0.35);
         }
-        [data-theme="light"] .mcs__tabs { border-bottom-color: rgba(0,0,0,0.08); }
-
         .mcs__tab {
-          display: inline-flex; align-items: center; gap: .5rem;
-          padding: .65rem 1.1rem;
+          display: inline-flex; align-items: center; gap: 0.5rem;
+          padding: 0.55rem 1.15rem;
           background: transparent;
-          border: none;
-          border-bottom: 2px solid transparent;
-          margin-bottom: -1px;
-          font-family: var(--ff-mono); font-size: .68rem;
-          letter-spacing: .1em; text-transform: uppercase;
-          color: var(--ink-60);
+          border: 1px solid transparent;
+          border-radius: 9999px;
+          font-family: var(--ff-mono); font-size: 0.7rem;
+          letter-spacing: .12em; text-transform: uppercase;
+          color: rgba(255,255,255,0.6);
           cursor: pointer;
-          transition: color .15s, border-color .15s;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
           white-space: nowrap;
+          font-weight: 600;
         }
-        .mcs__tab:hover { color: var(--ink); }
-        .mcs__tab--active { color: var(--ink); border-bottom-color: var(--brand-teal); }
-
-        /* per-category active tab color */
-        .mcs__tab--film-blowing { color: var(--ink); border-bottom-color: #2bbfb3; }
-        .mcs__tab--bag-making { color: var(--ink); border-bottom-color: #f59e0b; }
-        .mcs__tab--recycling { color: var(--ink); border-bottom-color: #22c55e; }
-        .mcs__tab--printing { color: var(--ink); border-bottom-color: #e11d48; }
-
-        .mcs__tab-icon { font-size: 1rem; }
+        .mcs__tab:hover {
+          color: #ffffff;
+          background: rgba(255,255,255,0.06);
+        }
+        .mcs__tab--active {
+          color: #ffffff !important;
+          background: rgba(255,255,255,0.12) !important;
+          border-color: rgba(255,255,255,0.18) !important;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.25), inset 0 1px 1px rgba(255,255,255,0.25);
+        }
+        .mcs__tab--film-blowing.mcs__tab--active {
+          background: rgba(43,191,179,0.16) !important;
+          border-color: rgba(43,191,179,0.4) !important;
+          color: #7ee5dc !important;
+        }
+        .mcs__tab--bag-making.mcs__tab--active {
+          background: rgba(245,158,11,0.16) !important;
+          border-color: rgba(245,158,11,0.4) !important;
+          color: #fcd34d !important;
+        }
+        .mcs__tab--recycling.mcs__tab--active {
+          background: rgba(34,197,94,0.16) !important;
+          border-color: rgba(34,197,94,0.4) !important;
+          color: #86efac !important;
+        }
+        .mcs__tab--printing.mcs__tab--active {
+          background: rgba(225,29,72,0.16) !important;
+          border-color: rgba(225,29,72,0.4) !important;
+          color: #fda4af !important;
+        }
+        .mcs__tab-icon { font-size: 0.85rem; opacity: 0.9; }
         .mcs__tab-count {
-          font-size: 0.66rem;
-          background: rgba(255,255,255,0.08);
-          padding: .15rem .4rem;
-          border-radius: 2px;
-          color: var(--ink-60);
+          font-size: 0.65rem;
+          background: rgba(255,255,255,0.09);
+          padding: 0.12rem 0.45rem;
+          border-radius: 9999px;
+          color: rgba(255,255,255,0.7);
         }
-        [data-theme="light"] .mcs__tab-count { background: rgba(0,0,0,0.07); }
         .mcs__tab--active .mcs__tab-count {
-          background: rgba(43,191,179,0.12);
-          color: var(--brand-teal);
+          background: rgba(255,255,255,0.2);
+          color: #ffffff;
         }
 
-        /* ── Vision Pro / Apple 3D Clay Bento Cards Grid — 2 cards per row (2 cols) ── */
+        /* ── Hardware Double-Bezel Bento Grid ── */
         .mcs__grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 1.5rem;
+          gap: 1.75rem;
           background: transparent !important;
           border: none !important;
           perspective: 1400px;
         }
 
-        /* ── Machine card ── */
+        /* ── Double-Bezel Card Enclosure (Doppelrand) ── */
         .mcs-card {
-          border-radius: 28px;
-          padding: 2rem 1.75rem;
-          min-height: 300px;
+          border-radius: 30px;
+          padding: 6px;
           position: relative;
-          overflow: hidden;
           text-decoration: none;
+          display: block;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 20px 50px -15px rgba(0,0,0,0.45);
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                      border-color 0.3s ease,
+                      box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          transform-style: preserve-3d;
+        }
+        .mcs-card:hover {
+          transform: translateY(-8px) rotateX(3deg);
+          border-color: rgba(43, 191, 179, 0.35);
+          box-shadow: 0 32px 70px -18px rgba(0,0,0,0.6), 0 0 30px -10px rgba(43,191,179,0.25);
+        }
+
+        /* ── Concentric Inner Core ── */
+        .mcs-card__inner {
+          border-radius: 24px;
+          padding: 2rem 1.85rem;
+          min-height: 310px;
+          position: relative;
+          overflow: hidden !important;
+          background: linear-gradient(180deg, rgba(14, 23, 34, 0.88) 0%, rgba(8, 14, 22, 0.95) 100%);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.22);
           display: flex; flex-direction: column; justify-content: space-between;
-          box-shadow: 0 20px 45px -15px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.4);
-          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
           transform-style: preserve-3d;
         }
 
-        .mcs-card:hover {
-          transform: translateY(-8px) rotateX(4deg) scale(1.02);
-          box-shadow: 0 32px 65px -18px rgba(0,0,0,0.32), inset 0 1px 2px rgba(255,255,255,0.6);
+        /* Specular Sheen Effect */
+        .mcs-card__inner::before {
+          content: "";
+          position: absolute; inset: 0;
+          background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,0.09) 50%, transparent 65%);
+          transform: translateX(-120%);
+          transition: transform 0.75s ease;
+          pointer-events: none;
+          z-index: 5;
+        }
+        .mcs-card:hover .mcs-card__inner::before {
+          transform: translateX(120%);
         }
 
-        /* Bento Neutral Glass Theme — No heavy category colors */
-        .mcs-card {
-          background: rgba(15, 25, 38, 0.75);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          color: #ffffff;
-        }
-        .mcs-card--film-blowing,
-        .mcs-card--bag-making,
-        .mcs-card--recycling,
-        .mcs-card--printing {
-          background: rgba(15, 25, 38, 0.75);
-          color: #ffffff;
-        }
-
-        /* Ambient Wave Lighting Inside Cards */
+        /* Ambient Lighting Inside Card Core */
         .mcs-card__scrim {
-          position: absolute; inset: 0; pointer-events: none;
-          background: radial-gradient(circle at 85% 15%, rgba(255,255,255,0.25) 0%, transparent 60%);
+          position: absolute; inset: 0; pointer-events: none; z-index: 1;
+          background: radial-gradient(circle at 85% 15%, rgba(255,255,255,0.18) 0%, transparent 60%);
+        }
+        .mcs-card--film-blowing .mcs-card__scrim {
+          background: radial-gradient(circle at 85% 15%, rgba(43,191,179,0.16) 0%, transparent 65%);
+        }
+        .mcs-card--bag-making .mcs-card__scrim {
+          background: radial-gradient(circle at 85% 15%, rgba(245,158,11,0.14) 0%, transparent 65%);
         }
         .mcs-card--recycling .mcs-card__scrim {
-          background: radial-gradient(circle at 85% 15%, rgba(0,122,90,0.08) 0%, transparent 60%);
+          background: radial-gradient(circle at 85% 15%, rgba(34,197,94,0.14) 0%, transparent 65%);
+        }
+        .mcs-card--printing .mcs-card__scrim {
+          background: radial-gradient(circle at 85% 15%, rgba(225,29,72,0.14) 0%, transparent 65%);
         }
 
-        /* Machine image background */
+        /* 3D Machine Image Container */
         .mcs-card__bg {
           position: absolute;
-          bottom: -5%; right: -2%;
-          width: 62%; height: 78%;
+          bottom: -4%; right: -2%;
+          width: 62%; height: 80%;
+          max-width: 65%;
+          max-height: 85%;
           pointer-events: none;
-          z-index: 1;
+          z-index: 2;
+          transform: translateZ(24px);
         }
         .mcs-card__bg img {
           width: 100%; height: 100%;
           object-fit: contain;
           object-position: right bottom;
-          opacity: 0.88;
-          filter: drop-shadow(0 12px 24px rgba(0,0,0,0.25));
-          transition: transform .4s cubic-bezier(0.16,1,0.3,1);
+          opacity: 0.92;
+          filter: drop-shadow(0 16px 28px rgba(0,0,0,0.45));
+          transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .mcs-card:hover .mcs-card__bg img {
-          transform: scale(1.08) translateY(-4px);
+          transform: scale(1.08) translateY(-6px) translateZ(10px);
         }
 
+        /* Card Top Metadata */
+        .mcs-card__top {
+          position: relative; z-index: 3;
+          transform: translateZ(28px);
+        }
         .mcs-card__cat {
           font-family: var(--ff-mono); font-size: 0.7rem;
           letter-spacing: .12em; text-transform: uppercase;
-          margin-bottom: .6rem;
+          margin-bottom: .65rem;
           display: inline-flex; align-items: center; gap: .5rem;
           padding: 0.35rem 0.85rem; border-radius: 9999px;
-          background: rgba(255,255,255,0.18);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
+          background: rgba(255,255,255,0.08);
+          border: 1px solid rgba(255,255,255,0.12);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           color: #ffffff; font-weight: 700;
           width: fit-content;
         }
-        .mcs-card--recycling .mcs-card__cat {
-          background: rgba(0,0,0,0.06); color: #121A24;
-        }
         .mcs-card__cat-dot {
-          width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: currentColor;
+          width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+          background: currentColor;
+          box-shadow: 0 0 8px currentColor;
         }
         .mcs-card__series {
-          font-family: var(--ff-mono); font-size: 0.75rem;
-          letter-spacing: .12em; text-transform: uppercase;
-          font-weight: 800; opacity: 0.9;
+          font-family: var(--ff-mono); font-size: 0.74rem;
+          letter-spacing: .14em; text-transform: uppercase;
+          font-weight: 700; color: rgba(255,255,255,0.7);
           margin-bottom: .35rem;
         }
         .mcs-card__name {
-          font-family: var(--ff-display); font-size: 1.45rem;
+          font-family: var(--ff-display); font-size: 1.48rem;
           line-height: 1.15; font-weight: 800;
-          letter-spacing: -.01em; max-width: 85%;
+          letter-spacing: -.02em; max-width: 82%;
+          color: #ffffff;
         }
 
+        /* Card Bottom Specs & Trailing Disc */
         .mcs-card__bottom {
           display: flex; align-items: flex-end;
           justify-content: space-between; gap: .5rem;
-          margin-top: 1.75rem; position: relative; z-index: 2;
+          margin-top: 1.85rem; position: relative; z-index: 3;
+          transform: translateZ(28px);
         }
         .mcs-card__stat {
-          font-family: var(--ff-display); font-size: 1.85rem;
-          line-height: 1; font-weight: 900; letter-spacing: -.02em;
+          font-family: var(--ff-display); font-size: 1.95rem;
+          line-height: 1; font-weight: 900; letter-spacing: -.03em;
+          color: #ffffff;
         }
         .mcs-card__stat-label {
           font-family: var(--ff-mono); font-size: 0.68rem;
-          letter-spacing: .1em; text-transform: uppercase;
-          opacity: 0.8; display: block; margin-top: .25rem; font-weight: 600;
+          letter-spacing: .12em; text-transform: uppercase;
+          color: rgba(255,255,255,0.7); display: block;
+          margin-top: .25rem; font-weight: 600;
         }
 
-        /* Tactile 3D Floating Pill Buttons */
-        .mcs-card__pill-btn {
-          display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem;
-          padding: 0.65rem 1.35rem;
-          border-radius: 9999px;
-          font-family: var(--ff-mono); font-size: 0.75rem; font-weight: 800;
-          letter-spacing: 0.04em; text-transform: uppercase;
-          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        /* Button-in-Button Arrow Disc */
+        .mcs-card__disc {
+          width: 36px; height: 36px; border-radius: 50%;
+          background: rgba(255,255,255,0.08);
+          border: 1px solid rgba(255,255,255,0.15);
+          display: flex; align-items: center; justify-content: center;
+          color: rgba(255,255,255,0.85);
+          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+          flex-shrink: 0;
         }
-        .mcs-card:hover .mcs-card__arrow-icon {
-          transform: translateX(4px);
-          opacity: 1 !important;
+        .mcs-card:hover .mcs-card__disc {
+          background: var(--brand-teal);
+          color: #040e0d;
+          border-color: var(--brand-teal);
+          transform: rotate(45deg) scale(1.08);
+          box-shadow: 0 0 20px rgba(43,191,179,0.5);
         }
 
-        /* ── Light Mode Overrides for Product Cards ── */
+        /* Alert badge */
+        .new-machine-alert-badge {
+          font-family: var(--ff-mono); font-size: 0.65rem;
+          letter-spacing: 0.08em; font-weight: 800;
+          color: #fcd34d; background: rgba(245,158,11,0.2);
+          border: 1px solid rgba(245,158,11,0.4);
+          padding: 0.2rem 0.5rem; border-radius: 9999px;
+        }
+
+        /* ── Light Mode Overrides ── */
         [data-theme="light"] .mcs-card {
-          background: #ffffff !important;
-          border: 1px solid rgba(13,34,32,0.12) !important;
-          color: #0d2220 !important;
-          box-shadow: 0 10px 30px -10px rgba(13,34,32,0.08), 0 2px 6px -1px rgba(13,34,32,0.04) !important;
+          background: rgba(13,34,32,0.03) !important;
+          border-color: rgba(13,34,32,0.1) !important;
+          box-shadow: 0 12px 30px -10px rgba(13,34,32,0.06) !important;
         }
         [data-theme="light"] .mcs-card:hover {
           border-color: var(--brand-teal) !important;
-          box-shadow: 0 20px 45px -12px rgba(43,191,179,0.25) !important;
+          box-shadow: 0 24px 50px -12px rgba(43,191,179,0.25) !important;
+        }
+        [data-theme="light"] .mcs-card__inner {
+          background: #ffffff !important;
+          border-color: rgba(13,34,32,0.08) !important;
+          box-shadow: inset 0 1px 1px 0 rgba(255,255,255,1), 0 4px 16px rgba(13,34,32,0.04) !important;
         }
         [data-theme="light"] .mcs-card__cat {
-          background: rgba(13,34,32,0.07) !important;
+          background: rgba(13,34,32,0.06) !important;
+          border-color: rgba(13,34,32,0.1) !important;
           color: #0d2220 !important;
         }
-        [data-theme="light"] .mcs-card__series {
-          color: rgba(13,34,32,0.75) !important;
-        }
-        [data-theme="light"] .mcs-card__name {
+        [data-theme="light"] .mcs-card__series { color: rgba(13,34,32,0.7) !important; }
+        [data-theme="light"] .mcs-card__name { color: #0d2220 !important; }
+        [data-theme="light"] .mcs-card__stat { color: #0d2220 !important; }
+        [data-theme="light"] .mcs-card__stat-label { color: rgba(13,34,32,0.6) !important; }
+        [data-theme="light"] .mcs-card__disc {
+          background: rgba(13,34,32,0.06) !important;
+          border-color: rgba(13,34,32,0.12) !important;
           color: #0d2220 !important;
         }
-        [data-theme="light"] .mcs-card__stat {
+        [data-theme="light"] .mcs__tabs {
+          background: rgba(13,34,32,0.04) !important;
+          border-color: rgba(13,34,32,0.08) !important;
+        }
+        [data-theme="light"] .mcs__tab { color: rgba(13,34,32,0.65) !important; }
+        [data-theme="light"] .mcs__tab:hover { color: #0d2220 !important; }
+        [data-theme="light"] .mcs__tab--active {
+          background: #ffffff !important;
+          border-color: rgba(13,34,32,0.12) !important;
+          color: #0d2220 !important;
+          box-shadow: 0 4px 12px rgba(13,34,32,0.08) !important;
+        }
+        [data-theme="light"] .mcs__cta {
+          background: #ffffff !important;
+          border-color: rgba(13,34,32,0.12) !important;
           color: #0d2220 !important;
         }
-        [data-theme="light"] .mcs-card__stat-label {
-          color: rgba(13,34,32,0.65) !important;
-        }
-        [data-theme="light"] .mcs-card__pill-btn {
-          background: #0d2220 !important;
-          color: #ffffff !important;
-          box-shadow: 0 6px 16px rgba(13,34,32,0.2) !important;
+        [data-theme="light"] .mcs__cta-disc {
+          background: rgba(13,34,32,0.06) !important;
+          border-color: rgba(13,34,32,0.1) !important;
+          color: #0d2220 !important;
         }
 
         /* ── Footer ── */
         .mcs__footer {
-          margin-top: 2rem;
+          margin-top: 2.5rem;
           display: flex; align-items: center; justify-content: space-between;
           flex-wrap: wrap; gap: 1rem;
-          padding-top: 1.5rem;
-          border-top: 1px solid rgba(255,255,255,0.06);
+          padding-top: 1.75rem;
+          border-top: 1px solid rgba(255,255,255,0.08);
         }
-        [data-theme="light"] .mcs__footer { border-top-color: rgba(0,0,0,0.07); }
+        [data-theme="light"] .mcs__footer { border-top-color: rgba(0,0,0,0.08); }
         .mcs__footer-count {
-          font-family: var(--ff-mono); font-size: .65rem;
-          letter-spacing: .08em; text-transform: uppercase;
+          font-family: var(--ff-mono); font-size: .68rem;
+          letter-spacing: .1em; text-transform: uppercase;
           color: var(--ink-60);
         }
         .mcs__footer-count strong {
-          font-family: var(--ff-display); font-size: 1.1rem;
+          font-family: var(--ff-display); font-size: 1.15rem;
           color: var(--ink); letter-spacing: -.01em;
-          margin-right: .3rem;
+          margin-right: .35rem;
         }
         .mcs__footer-link {
           display: inline-flex; align-items: center; gap: .5rem;
-          font-family: var(--ff-mono); font-size: .68rem;
-          letter-spacing: .1em; text-transform: uppercase;
+          font-family: var(--ff-mono); font-size: .7rem;
+          letter-spacing: .12em; text-transform: uppercase;
           color: var(--brand-teal); text-decoration: none;
-          transition: opacity .15s;
+          transition: all .2s ease;
+          font-weight: 700;
         }
-        .mcs__footer-link:hover { opacity: .7; }
+        .mcs__footer-link:hover { opacity: .8; transform: translateX(3px); }
 
-        /* ── Animation ── */
+        /* ── Animations ── */
         @keyframes mcs-fade-in {
-          from { opacity: 0; transform: translateY(12px); }
+          from { opacity: 0; transform: translateY(16px); }
           to   { opacity: 1; transform: translateY(0);    }
         }
         .mcs-card {
-          animation: mcs-fade-in .32s cubic-bezier(0.16,1,0.3,1) both;
+          animation: mcs-fade-in .35s cubic-bezier(0.16,1,0.3,1) both;
         }
-        .mcs-card--gsap-entrance {
-          animation: none;
-        }
+        .mcs-card--gsap-entrance { animation: none; }
         @media (prefers-reduced-motion: reduce) {
-          .mcs-card { animation: none; }
+          .mcs-card { animation: none; transform: none !important; }
         }
 
-        /* ── Responsive — 1 column on mobile ── */
+        /* ── Responsive — 2 Cards Per Row on Mobile ── */
         @media(max-width:768px) {
-          .mcs__grid { grid-template-columns: 1fr; }
+          .mcs__wrap { padding-inline: 0.75rem; }
+          .mcs__grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 0.75rem;
+          }
+          .mcs-card {
+            padding: 3px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -8px rgba(0,0,0,0.4);
+          }
+          .mcs-card:hover {
+            transform: translateY(-4px);
+          }
+          .mcs-card__inner {
+            padding: 1.1rem 0.9rem;
+            min-height: 225px;
+            border-radius: 17px;
+          }
+          .mcs-card__cat {
+            font-size: 0.54rem;
+            padding: 0.2rem 0.55rem;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.35rem;
+          }
+          .mcs-card__cat-dot {
+            width: 4px; height: 4px;
+          }
+          .mcs-card__disc {
+            width: 26px; height: 26px;
+          }
+          .mcs-card__disc svg {
+            width: 10px; height: 10px;
+          }
+          .mcs-card__series {
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.2rem;
+          }
+          .mcs-card__name {
+            font-size: 0.95rem;
+            line-height: 1.15;
+            max-width: 100%;
+            font-weight: 800;
+          }
+          .mcs-card__bottom {
+            margin-top: 1rem;
+          }
+          .mcs-card__stat {
+            font-size: 1.2rem;
+            line-height: 1;
+          }
+          .mcs-card__stat-label {
+            font-size: 0.56rem;
+            letter-spacing: 0.08em;
+            margin-top: 0.15rem;
+          }
+          .mcs-card__bg {
+            width: 68%;
+            height: 62%;
+            bottom: -2%;
+            right: -2%;
+          }
         }
         @media(max-width:640px) {
-          .mcs { padding: clamp(1.75rem,5vw,2.75rem) 0; }
-          .mcs__header { flex-direction: column; align-items: flex-start; gap: 1rem; margin-bottom: clamp(1.25rem,3vw,2rem); }
-          .mcs__title { font-size: clamp(2.5rem,9vw,3.5rem); }
-          .mcs__grid { grid-template-columns: 1fr; }
-          .mcs-card { padding: 1.4rem; min-height: 240px; border-radius: 20px; }
-          .mcs-card__name { font-size: 1.15rem; }
-          .mcs-card__stat { font-size: 1.4rem; }
+          .mcs { padding: clamp(2rem,5vw,3rem) 0; }
+          .mcs__header { flex-direction: column; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; }
+          .mcs__title { font-size: clamp(2.2rem,8.5vw,3.2rem); }
+          .mcs__sub { font-size: 0.65rem; gap: 0.4rem; }
+          .mcs__cta { padding: 0.4rem 0.4rem 0.4rem 1.1rem; font-size: 0.65rem; }
+          .mcs__cta-disc { width: 28px; height: 28px; }
+          .mcs__tabs { padding: 0.25rem; gap: 0.25rem; }
+          .mcs__tab { padding: 0.45rem 0.85rem; font-size: 0.65rem; }
+        }
+        @media(max-width:400px) {
+          .mcs__wrap { padding-inline: 0.5rem; }
+          .mcs__grid { gap: 0.5rem; }
+          .mcs-card__inner { padding: 0.9rem 0.75rem; min-height: 210px; }
+          .mcs-card__name { font-size: 0.86rem; }
+          .mcs-card__stat { font-size: 1.1rem; }
         }
 
         /* ── Press-plate shutter ── */
@@ -549,18 +747,6 @@ export default function MachineCatalogSection() {
         @media (prefers-reduced-motion: reduce) {
           .mcs__shutter { display: none; }
         }
-
-        .mcs-card__top, .mcs-card__bottom { transform: translateZ(24px); }
-        .mcs-card::before {
-          content: "";
-          position: absolute; inset: 0;
-          background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.08) 50%, transparent 60%);
-          transform: translateX(-100%);
-          transition: transform .6s ease;
-          pointer-events: none;
-          z-index: 2;
-        }
-        .mcs-card:hover::before { transform: translateX(100%); }
       `}</style>
 
       <section ref={sectionRef} className="mcs" data-no-anim aria-label={t("sectionAria")}>
@@ -582,48 +768,55 @@ export default function MachineCatalogSection() {
                 <em>{cms.headline2}</em>
               </h2>
               <p ref={subRef} className="mcs__sub">
-                {totalFamilies} {t("subFamilies")} · {totalModels}+ {t("subModels")} · {t("subShipped")}
+                <span>{totalFamilies} {t("subFamilies")}</span>
+                <span className="mcs__sub-dot" aria-hidden="true" />
+                <span>{totalModels}+ {t("subModels")}</span>
+                <span className="mcs__sub-dot" aria-hidden="true" />
+                <span>{t("subShipped")}</span>
               </p>
             </div>
             <TransitionLink href="/products" className="mcs__cta">
-              {t("fullCatalogue")}
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <span>{t("fullCatalogue")}</span>
+              <span className="mcs__cta-disc" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2.5 9.5L9.5 2.5M9.5 2.5H4.5M9.5 2.5V7.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
             </TransitionLink>
           </div>
 
           {/* ── Category tabs ── */}
-          <div ref={tabsRef} className="mcs__tabs" role="tablist" aria-label={t("filterAria")}>
-            <button
-              role="tab"
-              aria-selected={activeTab === "all"}
-              className={`mcs__tab${activeTab === "all" ? " mcs__tab--active" : ""}`}
-              onClick={() => { isFirstTabRef.current = false; setActiveTab("all"); }}
-            >
-              {t("allMachines")}
-              <span className="mcs__tab-count">{tabCounts.all}</span>
-            </button>
-            {tabSlugs.map(slug => {
-              const col = CAT_COLORS[slug];
-              return (
-                <button
-                  key={slug}
-                  role="tab"
-                  aria-selected={activeTab === slug}
-                  className={`mcs__tab${activeTab === slug ? ` mcs__tab--active mcs__tab--${slug}` : ""}`}
-                  onClick={() => { isFirstTabRef.current = false; setActiveTab(slug); }}
-                  style={activeTab === slug ? { borderBottomColor: col?.accent } : undefined}
-                >
-                  <span className="mcs__tab-icon">{CAT_ICONS[slug] ?? ""}</span>
-                  {CAT_LABELS[slug] ?? slug}
-                  <span className="mcs__tab-count">{tabCounts[slug]}</span>
-                </button>
-              );
-            })}
+          <div className="mcs__tabs-wrapper">
+            <div ref={tabsRef} className="mcs__tabs" role="tablist" aria-label={t("filterAria")}>
+              <button
+                role="tab"
+                aria-selected={activeTab === "all"}
+                className={`mcs__tab${activeTab === "all" ? " mcs__tab--active" : ""}`}
+                onClick={() => { isFirstTabRef.current = false; setActiveTab("all"); }}
+              >
+                {t("allMachines")}
+                <span className="mcs__tab-count">{tabCounts.all}</span>
+              </button>
+              {tabSlugs.map(slug => {
+                const col = CAT_COLORS[slug];
+                return (
+                  <button
+                    key={slug}
+                    role="tab"
+                    aria-selected={activeTab === slug}
+                    className={`mcs__tab${activeTab === slug ? ` mcs__tab--active mcs__tab--${slug}` : ""}`}
+                    onClick={() => { isFirstTabRef.current = false; setActiveTab(slug); }}
+                  >
+                    <span className="mcs__tab-icon">{CAT_ICONS[slug] ?? ""}</span>
+                    {CAT_LABELS[slug] ?? slug}
+                    <span className="mcs__tab-count">{tabCounts[slug]}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* ── Machine grid ── */}
+          {/* ── Machine grid with Double-Bezel Architecture ── */}
           <div ref={gridRef} className="mcs__grid" role="tabpanel">
             {filtered.map((fam, i) => {
               const spec = KEY_SPECS[fam.slug];
@@ -635,39 +828,43 @@ export default function MachineCatalogSection() {
                   className={`mcs-card mcs-card--${fam.category}${isFirstTabRef.current ? " mcs-card--gsap-entrance" : ""}`}
                   style={{ animationDelay: `${Math.min(i, 15) * 28}ms` }}
                 >
-                  <div className="mcs-card__scrim" aria-hidden="true" />
-                  <div className="mcs-card__bg" aria-hidden="true">
-                    <Image src={familyImage(fam, CUSTOM_IMAGES[fam.slug])} alt="" fill sizes="(max-width: 900px) 65vw, 320px" loading="lazy" />
-                  </div>
-                  <div className="mcs-card__top" style={{ position: "relative", zIndex: 2 }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
-                      <div className="mcs-card__cat">
-                        <span className="mcs-card__cat-dot" />
-                        <span>{CAT_LABELS[fam.category]}</span>
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                        {(fam as any).isNew && (
-                          <span className="new-machine-alert-badge">⚡ NEW</span>
-                        )}
-                        <span className="mcs-card__arrow-icon" aria-hidden="true" style={{ opacity: 0.7, color: "var(--brand-teal)", transition: "transform 0.25s ease, opacity 0.25s ease" }}>
-                          <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
-                            <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </span>
-                      </div>
+                  <div className="mcs-card__inner">
+                    <div className="mcs-card__scrim" aria-hidden="true" />
+                    <div className="mcs-card__bg" aria-hidden="true">
+                      <Image src={familyImage(fam, CUSTOM_IMAGES[fam.slug])} alt="" fill sizes="(max-width: 900px) 65vw, 320px" loading="lazy" />
                     </div>
-                    <div className="mcs-card__series">{fam.series}</div>
-                    <div className="mcs-card__name">{fam.name.split("—")[0].trim()}</div>
-                  </div>
-                  <div className="mcs-card__bottom">
-                    {spec ? (
-                      <div>
-                        <div className="mcs-card__stat">{spec.stat}</div>
-                        <span className="mcs-card__stat-label">{spec.label}</span>
+
+                    <div className="mcs-card__top">
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
+                        <div className="mcs-card__cat">
+                          <span className="mcs-card__cat-dot" />
+                          <span>{CAT_LABELS[fam.category]}</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          {(fam as any).isNew && (
+                            <span className="new-machine-alert-badge">⚡ NEW</span>
+                          )}
+                          <div className="mcs-card__disc" aria-hidden="true">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                              <path d="M2.5 9.5L9.5 2.5M9.5 2.5H4.5M9.5 2.5V7.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                        </div>
                       </div>
-                    ) : (
-                      <div />
-                    )}
+                      <div className="mcs-card__series">{fam.series}</div>
+                      <div className="mcs-card__name">{fam.name.split("—")[0].trim()}</div>
+                    </div>
+
+                    <div className="mcs-card__bottom">
+                      {spec ? (
+                        <div>
+                          <div className="mcs-card__stat">{spec.stat}</div>
+                          <span className="mcs-card__stat-label">{spec.label}</span>
+                        </div>
+                      ) : (
+                        <div />
+                      )}
+                    </div>
                   </div>
                 </TransitionLink>
               );
@@ -681,9 +878,9 @@ export default function MachineCatalogSection() {
               {filtered.length === 1 ? t("footerFamily") : t("footerFamilies")} {t("footerShown")}
             </p>
             <TransitionLink href="/products" className="mcs__footer-link">
-              {t("viewAllSpecs")}
+              <span>{t("viewAllSpecs")}</span>
               <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2.5 9.5L9.5 2.5M9.5 2.5H4.5M9.5 2.5V7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </TransitionLink>
           </div>

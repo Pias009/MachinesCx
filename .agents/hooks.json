@@ -1,0 +1,25 @@
+{
+  "fast-typecheck-on-edit": {
+    "PostToolUse": [
+      {
+        "matcher": "replace_file_content|multi_replace_file_content|write_to_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./scripts/agent-post-edit.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  },
+  "verify-before-stop": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "./scripts/agent-verify.sh",
+        "timeout": 45
+      }
+    ]
+  }
+}

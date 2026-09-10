@@ -302,10 +302,10 @@ export default function MachineCatalogSection() {
           color: var(--brand-teal);
         }
 
-        /* ── Vision Pro / Apple 3D Clay Bento Cards Grid ── */
+        /* ── Vision Pro / Apple 3D Clay Bento Cards Grid — 2 cards per row (2 cols) ── */
         .mcs__grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 1.5rem;
           background: transparent !important;
           border: none !important;
@@ -511,15 +511,15 @@ export default function MachineCatalogSection() {
           .mcs-card { animation: none; }
         }
 
-        /* ── Responsive ── */
-        @media(max-width:900px) {
-          .mcs__grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+        /* ── Responsive — 1 column on mobile ── */
+        @media(max-width:768px) {
+          .mcs__grid { grid-template-columns: 1fr; }
         }
         @media(max-width:640px) {
           .mcs { padding: clamp(1.75rem,5vw,2.75rem) 0; }
           .mcs__header { flex-direction: column; align-items: flex-start; gap: 1rem; margin-bottom: clamp(1.25rem,3vw,2rem); }
           .mcs__title { font-size: clamp(2.5rem,9vw,3.5rem); }
-          .mcs__grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+          .mcs__grid { grid-template-columns: 1fr; }
           .mcs-card { padding: 1.4rem; min-height: 240px; border-radius: 20px; }
           .mcs-card__name { font-size: 1.15rem; }
           .mcs-card__stat { font-size: 1.4rem; }

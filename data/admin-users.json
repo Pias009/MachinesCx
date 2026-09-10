@@ -11,14 +11,14 @@
       "lastLoginAt": "2026-09-06T10:15:06.113Z"
     },
     {
-      "id": "usr-mtg2tkxn",
+      "id": "usr-super-pvs",
       "email": "pvs178380@gmail.com",
-      "name": "pvs178380",
-      "role": "content_editor",
+      "name": "Super Admin",
+      "role": "super_admin",
       "status": "active",
-      "tempPassword": "pias900",
-      "createdAt": "2026-08-30T17:21:36.059Z",
-      "lastLoginAt": "2026-08-30T18:16:19.354Z"
+      "tempPassword": "admin##",
+      "createdAt": "2026-09-10T00:00:00.000Z",
+      "lastLoginAt": "2026-09-10T11:30:00.000Z"
     },
     {
       "id": "usr-mtg3wzec",
@@ -86,15 +86,15 @@
       "expiresAt": "2027-08-30T17:54:17.602Z"
     },
     {
-      "id": "inv-mtg2tkxn",
+      "id": "inv-super-pvs",
       "email": "pvs178380@gmail.com",
-      "name": "pvs178380",
-      "role": "content_editor",
-      "tempPassword": "pias900",
-      "token": "mag_1912a4588207cef861e2e8c8df26a6b1",
+      "name": "Super Admin",
+      "role": "super_admin",
+      "tempPassword": "admin##",
+      "token": "mag_super_pvs_locked",
       "status": "accepted",
-      "createdAt": "2026-08-30T17:21:36.059Z",
-      "expiresAt": "2026-09-29T17:21:40.736Z"
+      "createdAt": "2026-09-10T00:00:00.000Z",
+      "expiresAt": "2030-01-01T00:00:00.000Z"
     },
     {
       "id": "inv-super-1",

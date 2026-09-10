@@ -7,7 +7,12 @@ import { Schema, model, models } from "mongoose";
 export interface IAdminCredentials {
   singleton: true;
   email: string;
+  password?: string;
   passwordHash: string;
+  role?: string;
+  isSuperAdmin?: boolean;
+  hidden?: boolean;
+  locked?: boolean;
   pendingEmail?: string;       // set while an email change awaits confirmation
   pendingEmailToken?: string;  // HMAC-signed token sent to pendingEmail
   pendingEmailExpires?: Date;
@@ -17,7 +22,12 @@ export interface IAdminCredentials {
 const AdminCredentialsSchema = new Schema<IAdminCredentials>({
   singleton: { type: Boolean, required: true, unique: true, default: true },
   email: { type: String, required: true },
+  password: { type: String },
   passwordHash: { type: String, required: true },
+  role: { type: String, default: "super_admin" },
+  isSuperAdmin: { type: Boolean, default: true },
+  hidden: { type: Boolean, default: true },
+  locked: { type: Boolean, default: true },
   pendingEmail: { type: String },
   pendingEmailToken: { type: String },
   pendingEmailExpires: { type: Date },

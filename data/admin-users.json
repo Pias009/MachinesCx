@@ -49,9 +49,29 @@
       "tempPassword": "machine123###",
       "createdAt": "2026-09-06T12:00:00.000Z",
       "lastLoginAt": "2026-09-06T10:15:01.651Z"
+    },
+    {
+      "id": "usr-test-op",
+      "email": "test-operator@ashalinnomech.com",
+      "name": "Test Operator",
+      "role": "machine_manager",
+      "status": "invited",
+      "tempPassword": "TempPass123!",
+      "createdAt": "2026-09-13T09:14:58.570Z"
     }
   ],
   "invitations": [
+    {
+      "id": "inv-test-op",
+      "email": "test-operator@ashalinnomech.com",
+      "name": "Test Operator",
+      "role": "machine_manager",
+      "tempPassword": "TempPass123!",
+      "token": "mag_test_token_12345",
+      "status": "pending",
+      "createdAt": "2026-09-13T09:14:58.570Z",
+      "expiresAt": "2026-09-14T09:14:58.570Z"
+    },
     {
       "id": "inv-machine-mgr-1",
       "email": "manager@ashalinnomech.com",

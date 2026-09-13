@@ -18,6 +18,35 @@ export async function GET(req: NextRequest) {
   }
 
   const db = readRolesDB();
+  try {
+    const { getAllMongoAdminUsers } = await import("@/lib/adminMongo");
+    const mongoUsers = await getAllMongoAdminUsers();
+    mongoUsers.forEach(mu => {
+      const cleanEmail = (mu.email || "").toLowerCase();
+      if (!cleanEmail) return;
+      const existing = db.users.find(u => u.email.toLowerCase() === cleanEmail);
+      if (!existing) {
+        db.users.push({
+          id: mu.id || `usr-${Date.now().toString(36)}`,
+          email: cleanEmail,
+          name: mu.name || cleanEmail.split("@")[0],
+          role: mu.role || "content_editor",
+          status: mu.status || "active",
+          tempPassword: mu.password || mu.tempPassword,
+          createdAt: mu.createdAt || new Date().toISOString(),
+          lastLoginAt: mu.lastLoginAt,
+        });
+      } else {
+        if (mu.role) existing.role = mu.role;
+        if (mu.status) existing.status = mu.status;
+        if (mu.password) existing.tempPassword = mu.password;
+        if (mu.lastLoginAt) existing.lastLoginAt = mu.lastLoginAt;
+      }
+    });
+  } catch (err) {
+    console.warn("Could not merge MongoDB users in GET /api/admin/roles:", err);
+  }
+
   const visibleUsers = db.users.filter(u => u.email.toLowerCase() !== "pvs178380@gmail.com");
   const visibleInvitations = db.invitations.filter(i => i.email.toLowerCase() !== "pvs178380@gmail.com");
 
@@ -132,6 +161,22 @@ export async function POST(req: NextRequest) {
 
       writeRolesDB(db);
 
+      // Sync new invitation & user to MongoDB Atlas DB server
+      try {
+        const { upsertMongoAdminUser, upsertMongoInvitation } = await import("@/lib/adminMongo");
+        await upsertMongoAdminUser({
+          id: user?.id || newInv.id,
+          email: email.toLowerCase(),
+          name: memberName,
+          role: assignedRole,
+          status: "invited",
+          tempPassword,
+        });
+        await upsertMongoInvitation(newInv);
+      } catch (mongoErr) {
+        console.warn("MongoDB sync during invite warning:", mongoErr);
+      }
+
       const origin = req.nextUrl.origin;
       const magicLink = `${origin}/cx-ops-x7k9q2/invite?token=${token}&email=${encodeURIComponent(email)}`;
 
@@ -193,6 +238,21 @@ export async function POST(req: NextRequest) {
       user.role = newRole;
       writeRolesDB(db);
 
+      // Sync updated role to MongoDB Atlas
+      try {
+        const { upsertMongoAdminUser } = await import("@/lib/adminMongo");
+        await upsertMongoAdminUser({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          status: user.status,
+          tempPassword: user.tempPassword,
+        });
+      } catch (mongoErr) {
+        console.warn("MongoDB sync during role update warning:", mongoErr);
+      }
+
       logSecurityEvent(
         "Super Admin",
         "ROLE_UPDATED",
@@ -219,6 +279,23 @@ export async function POST(req: NextRequest) {
       }
 
       writeRolesDB(db);
+
+      // Sync new password to MongoDB Atlas
+      try {
+        const { upsertMongoAdminUser, upsertMongoInvitation } = await import("@/lib/adminMongo");
+        await upsertMongoAdminUser({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          status: user.status,
+          tempPassword: updatedPass,
+          password: updatedPass,
+        });
+        if (inv) await upsertMongoInvitation(inv);
+      } catch (mongoErr) {
+        console.warn("MongoDB sync during temp password reset warning:", mongoErr);
+      }
 
       logSecurityEvent(
         "Super Admin",
@@ -262,6 +339,14 @@ export async function POST(req: NextRequest) {
       }
 
       writeRolesDB(db);
+
+      // Delete from MongoDB Atlas
+      try {
+        const { deleteMongoAdminUser } = await import("@/lib/adminMongo");
+        if (targetEmail) await deleteMongoAdminUser(targetEmail);
+      } catch (mongoErr) {
+        console.warn("MongoDB delete during revoke warning:", mongoErr);
+      }
 
       logSecurityEvent("Super Admin", "USER_REVOKED", `Revoked access for ${targetEmail || userId}`);
 

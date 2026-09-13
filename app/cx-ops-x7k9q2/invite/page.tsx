@@ -80,6 +80,7 @@ function InviteContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           token,
+          email: invInfo?.email || emailParam,
           tempPassword: tempPassword.trim(),
           newPassword: newPassword.trim(),
         }),

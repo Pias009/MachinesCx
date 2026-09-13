@@ -15,6 +15,48 @@ export async function GET(req: NextRequest) {
     (emailParam && i.email.toLowerCase() === emailParam.toLowerCase())
   );
 
+  // Fallback: search MongoDB if invitation entry was missing in local JSON
+  if (!inv) {
+    try {
+      const { findMongoInvitation, findMongoAdminUserByEmail } = await import("@/lib/adminMongo");
+      const mongoInv = token ? await findMongoInvitation(token) : (emailParam ? await findMongoInvitation(emailParam) : null);
+      if (mongoInv) {
+        inv = {
+          id: mongoInv.id || `inv-${Date.now().toString(36)}`,
+          email: mongoInv.email,
+          name: mongoInv.name,
+          role: mongoInv.role,
+          tempPassword: mongoInv.tempPassword || "pias900###",
+          token: mongoInv.token || token || `mag_${Date.now()}`,
+          status: "pending",
+          createdAt: mongoInv.createdAt || new Date().toISOString(),
+          expiresAt: mongoInv.expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        };
+        db.invitations.unshift(inv);
+        writeRolesDB(db);
+      } else if (emailParam) {
+        const mongoUser = await findMongoAdminUserByEmail(emailParam);
+        if (mongoUser) {
+          inv = {
+            id: `inv-${(mongoUser.id || Date.now().toString(36)).replace("usr-", "")}`,
+            email: mongoUser.email,
+            name: mongoUser.name,
+            role: mongoUser.role,
+            tempPassword: mongoUser.tempPassword || mongoUser.password || "pias900###",
+            token: token || `mag_${mongoUser.id || Date.now()}`,
+            status: "pending",
+            createdAt: mongoUser.createdAt || new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          };
+          db.invitations.unshift(inv);
+          writeRolesDB(db);
+        }
+      }
+    } catch (e) {
+      console.warn("MongoDB fallback lookup in invite verify GET skipped:", e);
+    }
+  }
+
   // Fallback: search users array if invitation entry was missing
   if (!inv) {
     const user = db.users.find(u => 
@@ -150,6 +192,33 @@ export async function POST(req: NextRequest) {
     }
 
     writeRolesDB(db);
+
+    // Persist activated user and invitation directly into MongoDB Atlas DB server
+    try {
+      const { upsertMongoAdminUser, upsertMongoInvitation } = await import("@/lib/adminMongo");
+      const targetUserEmail = user?.email || inv?.email || clientEmail;
+      const targetUserName = user?.name || inv?.name || targetUserEmail.split("@")[0];
+      const targetUserRole = user?.role || inv?.role || "content_editor";
+      const targetUserId = user?.id || inv?.id || `usr-${Date.now().toString(36)}`;
+
+      await upsertMongoAdminUser({
+        id: targetUserId,
+        email: targetUserEmail,
+        name: targetUserName,
+        role: targetUserRole,
+        status: "active",
+        password: newPassword.trim(),
+        tempPassword: newPassword.trim(),
+        lastLoginAt: new Date().toISOString(),
+      });
+
+      if (inv) {
+        await upsertMongoInvitation(inv);
+      }
+    } catch (mongoErr) {
+      console.error("Warning: Error syncing activated user to MongoDB Atlas:", mongoErr);
+    }
+
     logSecurityEvent(
       user?.email || inv?.email || "User",
       "INVITATION_ACCEPTED",

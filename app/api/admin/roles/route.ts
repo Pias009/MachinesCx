@@ -5,13 +5,25 @@ import {
   logSecurityEvent,
   generateTempPassword,
   generateInviteToken,
+  normalizeAdminRole,
   AdminRole,
 } from "@/lib/adminRoles";
 import { parseSessionToken, SESSION_COOKIE } from "@/lib/adminAuth";
 
+function extractSessionToken(req: NextRequest | Request): string | undefined {
+  if ("cookies" in req && typeof (req as any).cookies?.get === "function") {
+    const val = (req as any).cookies.get(SESSION_COOKIE)?.value;
+    if (val) return val;
+  }
+  const cookieHeader = req.headers.get("cookie");
+  if (!cookieHeader) return undefined;
+  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${SESSION_COOKIE}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
 // GET /api/admin/roles — return users, invitations, audit log & role definitions
 export async function GET(req: NextRequest) {
-  const token = req.cookies.get(SESSION_COOKIE)?.value;
+  const token = extractSessionToken(req);
   const user = await parseSessionToken(token);
   if (!user || user.role !== "super_admin") {
     return NextResponse.json({ error: "forbidden: super admin required" }, { status: 403 });
@@ -21,28 +33,44 @@ export async function GET(req: NextRequest) {
   try {
     const { getAllMongoAdminUsers } = await import("@/lib/adminMongo");
     const mongoUsers = await getAllMongoAdminUsers();
+    let updated = false;
     mongoUsers.forEach(mu => {
       const cleanEmail = (mu.email || "").toLowerCase();
       if (!cleanEmail) return;
       const existing = db.users.find(u => u.email.toLowerCase() === cleanEmail);
+      const role = normalizeAdminRole(mu.role);
       if (!existing) {
         db.users.push({
           id: mu.id || `usr-${Date.now().toString(36)}`,
           email: cleanEmail,
           name: mu.name || cleanEmail.split("@")[0],
-          role: mu.role || "content_editor",
+          role: role,
           status: mu.status || "active",
           tempPassword: mu.password || mu.tempPassword,
           createdAt: mu.createdAt || new Date().toISOString(),
           lastLoginAt: mu.lastLoginAt,
         });
+        updated = true;
       } else {
-        if (mu.role) existing.role = mu.role;
-        if (mu.status) existing.status = mu.status;
-        if (mu.password) existing.tempPassword = mu.password;
+        if (existing.role !== role) {
+          existing.role = role;
+          updated = true;
+        }
+        if (mu.status && existing.status !== mu.status) {
+          existing.status = mu.status;
+          updated = true;
+        }
+        if (mu.password && existing.tempPassword !== mu.password) {
+          existing.tempPassword = mu.password;
+          updated = true;
+        }
         if (mu.lastLoginAt) existing.lastLoginAt = mu.lastLoginAt;
       }
     });
+
+    if (updated) {
+      writeRolesDB(db);
+    }
   } catch (err) {
     console.warn("Could not merge MongoDB users in GET /api/admin/roles:", err);
   }
@@ -90,7 +118,7 @@ export async function GET(req: NextRequest) {
 // POST /api/admin/roles — handle invitations, role updates, password changes, revokes
 export async function POST(req: NextRequest) {
   try {
-    const token = req.cookies.get(SESSION_COOKIE)?.value;
+    const token = extractSessionToken(req);
     const user = await parseSessionToken(token);
     if (!user || user.role !== "super_admin") {
       return NextResponse.json({ error: "forbidden: super admin required" }, { status: 403 });
@@ -101,7 +129,7 @@ export async function POST(req: NextRequest) {
     const db = readRolesDB();
 
     if (action === "invite") {
-      const { email, name, role } = body as { email: string; name?: string; role?: AdminRole };
+      const { email, name, role } = body as { email: string; name?: string; role?: string };
       if (!email || !email.includes("@")) {
         return NextResponse.json({ error: "Please enter a valid Gmail / email address" }, { status: 400 });
       }
@@ -109,10 +137,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "The Hidden Super Admin account is permanent and cannot be modified." }, { status: 403 });
       }
 
-      const assignedRole: AdminRole = role || "content_editor";
+      // Strictly normalize the role (e.g. "analytics", "analatic", "analytics_viewer" -> "analytics_viewer")
+      const assignedRole: AdminRole = normalizeAdminRole(role);
       const memberName = name?.trim() || email.split("@")[0];
       const tempPassword = generateTempPassword();
-      const token = generateInviteToken();
+      const inviteToken = generateInviteToken();
 
       // Remove from revokedEmails if previously revoked
       if (db.revokedEmails) {
@@ -132,7 +161,7 @@ export async function POST(req: NextRequest) {
         name: memberName,
         role: assignedRole,
         tempPassword,
-        token,
+        token: inviteToken,
         status: "pending" as const,
         createdAt: new Date().toISOString(),
         expiresAt,
@@ -141,9 +170,9 @@ export async function POST(req: NextRequest) {
       db.invitations.unshift(newInv);
 
       // Add user record if not present
-      let user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
-      if (!user) {
-        user = {
+      let userRecord = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      if (!userRecord) {
+        userRecord = {
           id: `usr-${Date.now().toString(36)}`,
           email: email.toLowerCase(),
           name: memberName,
@@ -152,11 +181,11 @@ export async function POST(req: NextRequest) {
           tempPassword,
           createdAt: new Date().toISOString(),
         };
-        db.users.push(user);
+        db.users.push(userRecord);
       } else {
-        user.role = assignedRole;
-        user.status = "invited";
-        user.tempPassword = tempPassword;
+        userRecord.role = assignedRole;
+        userRecord.status = "invited";
+        userRecord.tempPassword = tempPassword;
       }
 
       writeRolesDB(db);
@@ -165,7 +194,7 @@ export async function POST(req: NextRequest) {
       try {
         const { upsertMongoAdminUser, upsertMongoInvitation } = await import("@/lib/adminMongo");
         await upsertMongoAdminUser({
-          id: user?.id || newInv.id,
+          id: userRecord?.id || newInv.id,
           email: email.toLowerCase(),
           name: memberName,
           role: assignedRole,
@@ -177,8 +206,8 @@ export async function POST(req: NextRequest) {
         console.warn("MongoDB sync during invite warning:", mongoErr);
       }
 
-      const origin = req.nextUrl.origin;
-      const magicLink = `${origin}/cx-ops-x7k9q2/invite?token=${token}&email=${encodeURIComponent(email)}`;
+      const origin = (req as any).nextUrl?.origin || (req.url ? new URL(req.url).origin : "http://localhost:3000");
+      const magicLink = `${origin}/cx-ops-x7k9q2/invite?token=${inviteToken}&email=${encodeURIComponent(email)}`;
 
       // Attempt to send email via Resend
       let emailSent = false;
@@ -227,28 +256,68 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "update_role") {
-      const { userId, newRole } = body as { userId: string; newRole: AdminRole };
-      const user = db.users.find(u => u.id === userId);
-      if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-      if (user.email.toLowerCase() === "pvs178380@gmail.com" || user.id === "usr-super-pvs") {
+      const { userId, email, newRole } = body as { userId?: string; email?: string; newRole: string };
+      const normalizedRole = normalizeAdminRole(newRole);
+
+      // Check MongoDB Atlas first or concurrently
+      let mongoUser: any = null;
+      try {
+        const { findMongoAdminUser, updateMongoUserRole } = await import("@/lib/adminMongo");
+        if (userId) mongoUser = await findMongoAdminUser(userId);
+        if (!mongoUser && email) mongoUser = await findMongoAdminUser(email);
+        if (mongoUser) {
+          await updateMongoUserRole(mongoUser.email, normalizedRole);
+        }
+      } catch (mongoErr) {
+        console.warn("MongoDB role update error:", mongoErr);
+      }
+
+      let userToUpdate = db.users.find(u => 
+        (userId && u.id === userId) ||
+        (email && u.email.toLowerCase() === email.toLowerCase()) ||
+        (mongoUser && u.email.toLowerCase() === mongoUser.email.toLowerCase())
+      );
+
+      if (!userToUpdate && mongoUser) {
+        userToUpdate = {
+          id: mongoUser.id || userId || `usr-${Date.now().toString(36)}`,
+          email: mongoUser.email.toLowerCase(),
+          name: mongoUser.name || mongoUser.email.split("@")[0],
+          role: normalizedRole,
+          status: mongoUser.status || "active",
+          tempPassword: mongoUser.password || mongoUser.tempPassword,
+          createdAt: mongoUser.createdAt || new Date().toISOString(),
+        };
+        db.users.push(userToUpdate);
+      }
+
+      if (!userToUpdate) return NextResponse.json({ error: "User not found" }, { status: 404 });
+      if (userToUpdate.email.toLowerCase() === "pvs178380@gmail.com" || userToUpdate.id === "usr-super-pvs") {
         return NextResponse.json({ error: "Cannot modify role of the Hidden Super Admin account." }, { status: 403 });
       }
 
-      const oldRole = user.role;
-      user.role = newRole;
+      const oldRole = userToUpdate.role;
+      userToUpdate.role = normalizedRole;
+
+      const inv = db.invitations.find(i => i.email.toLowerCase() === userToUpdate!.email.toLowerCase());
+      if (inv) {
+        inv.role = normalizedRole;
+      }
+
       writeRolesDB(db);
 
-      // Sync updated role to MongoDB Atlas
+      // Also ensure updated in MongoDB Atlas
       try {
-        const { upsertMongoAdminUser } = await import("@/lib/adminMongo");
+        const { upsertMongoAdminUser, upsertMongoInvitation } = await import("@/lib/adminMongo");
         await upsertMongoAdminUser({
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          status: user.status,
-          tempPassword: user.tempPassword,
+          id: userToUpdate.id,
+          email: userToUpdate.email,
+          name: userToUpdate.name,
+          role: normalizedRole,
+          status: userToUpdate.status,
+          tempPassword: userToUpdate.tempPassword,
         });
+        if (inv) await upsertMongoInvitation(inv);
       } catch (mongoErr) {
         console.warn("MongoDB sync during role update warning:", mongoErr);
       }
@@ -256,24 +325,49 @@ export async function POST(req: NextRequest) {
       logSecurityEvent(
         "Super Admin",
         "ROLE_UPDATED",
-        `Updated role for ${user.email} from '${oldRole}' to '${newRole}'`
+        `Updated role for ${userToUpdate.email} from '${oldRole}' to '${normalizedRole}'`
       );
 
-      return NextResponse.json({ success: true, user });
+      return NextResponse.json({ success: true, user: userToUpdate });
     }
 
     if (action === "change_temp_password") {
-      const { userId, newTempPassword } = body as { userId: string; newTempPassword?: string };
-      const user = db.users.find(u => u.id === userId);
-      if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-      if (user.email.toLowerCase() === "pvs178380@gmail.com" || user.id === "usr-super-pvs") {
+      const { userId, email, newTempPassword } = body as { userId?: string; email?: string; newTempPassword?: string };
+      let mongoUser: any = null;
+      try {
+        const { findMongoAdminUser } = await import("@/lib/adminMongo");
+        if (userId) mongoUser = await findMongoAdminUser(userId);
+        if (!mongoUser && email) mongoUser = await findMongoAdminUser(email);
+      } catch (e) {}
+
+      let targetUser = db.users.find(u => 
+        (userId && u.id === userId) ||
+        (email && u.email.toLowerCase() === email.toLowerCase()) ||
+        (mongoUser && u.email.toLowerCase() === mongoUser.email.toLowerCase())
+      );
+
+      if (!targetUser && mongoUser) {
+        targetUser = {
+          id: mongoUser.id || userId || `usr-${Date.now().toString(36)}`,
+          email: mongoUser.email.toLowerCase(),
+          name: mongoUser.name || mongoUser.email.split("@")[0],
+          role: normalizeAdminRole(mongoUser.role),
+          status: mongoUser.status || "active",
+          tempPassword: mongoUser.password || mongoUser.tempPassword,
+          createdAt: mongoUser.createdAt || new Date().toISOString(),
+        };
+        db.users.push(targetUser);
+      }
+
+      if (!targetUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+      if (targetUser.email.toLowerCase() === "pvs178380@gmail.com" || targetUser.id === "usr-super-pvs") {
         return NextResponse.json({ error: "Cannot change password of the Hidden Super Admin account." }, { status: 403 });
       }
 
       const updatedPass = newTempPassword?.trim() || generateTempPassword();
-      user.tempPassword = updatedPass;
+      targetUser.tempPassword = updatedPass;
 
-      const inv = db.invitations.find(i => i.email.toLowerCase() === user.email.toLowerCase());
+      const inv = db.invitations.find(i => i.email.toLowerCase() === targetUser!.email.toLowerCase());
       if (inv) {
         inv.tempPassword = updatedPass;
       }
@@ -284,11 +378,11 @@ export async function POST(req: NextRequest) {
       try {
         const { upsertMongoAdminUser, upsertMongoInvitation } = await import("@/lib/adminMongo");
         await upsertMongoAdminUser({
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          status: user.status,
+          id: targetUser.id,
+          email: targetUser.email,
+          name: targetUser.name,
+          role: targetUser.role,
+          status: targetUser.status,
           tempPassword: updatedPass,
           password: updatedPass,
         });
@@ -300,15 +394,27 @@ export async function POST(req: NextRequest) {
       logSecurityEvent(
         "Super Admin",
         "TEMP_PASSWORD_RESET",
-        `Reset password for user ${user.email}`
+        `Reset password for user ${targetUser.email}`
       );
 
-      return NextResponse.json({ success: true, tempPassword: updatedPass, email: user.email });
+      return NextResponse.json({ success: true, tempPassword: updatedPass, email: targetUser.email });
     }
 
     if (action === "revoke_user") {
       const { userId, email } = body as { userId?: string; email?: string };
-      const targetEmail = (email || "").toLowerCase().trim();
+      let targetEmail = (email || "").toLowerCase().trim();
+
+      if (!targetEmail && userId) {
+        const local = db.users.find(u => u.id === userId);
+        if (local) targetEmail = local.email.toLowerCase();
+        else {
+          try {
+            const { findMongoAdminUser } = await import("@/lib/adminMongo");
+            const m = await findMongoAdminUser(userId);
+            if (m) targetEmail = m.email.toLowerCase();
+          } catch (e) {}
+        }
+      }
 
       if (
         targetEmail === "admin@ashalinnomech.com" ||
@@ -320,7 +426,6 @@ export async function POST(req: NextRequest) {
       }
 
       // Filter out user from db.users
-      const originalUsersLength = db.users.length;
       db.users = db.users.filter(u => {
         const matchId = userId && u.id === userId;
         const matchEmail = targetEmail && u.email.toLowerCase() === targetEmail;
@@ -344,6 +449,7 @@ export async function POST(req: NextRequest) {
       try {
         const { deleteMongoAdminUser } = await import("@/lib/adminMongo");
         if (targetEmail) await deleteMongoAdminUser(targetEmail);
+        else if (userId) await deleteMongoAdminUser(userId);
       } catch (mongoErr) {
         console.warn("MongoDB delete during revoke warning:", mongoErr);
       }

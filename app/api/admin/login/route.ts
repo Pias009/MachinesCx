@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyCredentials } from "@/lib/adminCredentials";
 import { createSessionToken, SESSION_COOKIE, sessionCookieOptions, SessionUser } from "@/lib/adminAuth";
-import { readRolesDB, writeRolesDB, logSecurityEvent, AdminRole } from "@/lib/adminRoles";
+import { readRolesDB, writeRolesDB, logSecurityEvent, AdminRole, normalizeAdminRole } from "@/lib/adminRoles";
 
 export const runtime = "nodejs";
 
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
             id: mongoUser.id || `usr-${Date.now().toString(36)}`,
             email: mongoUser.email,
             name: mongoUser.name || mongoUser.email.split("@")[0],
-            role: mongoUser.role || "content_editor",
+            role: normalizeAdminRole(mongoUser.role),
           };
 
           // Update lastLoginAt in MongoDB
@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
           id: matchedUser.id,
           email: matchedUser.email,
           name: matchedUser.name,
-          role: matchedUser.role, // Strictly maintains the assigned role!
+          role: normalizeAdminRole(matchedUser.role), // Strictly maintains the assigned role!
         };
 
         logSecurityEvent(

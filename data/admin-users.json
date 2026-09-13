@@ -48,7 +48,7 @@
       "status": "active",
       "tempPassword": "machine123###",
       "createdAt": "2026-09-06T12:00:00.000Z",
-      "lastLoginAt": "2026-09-06T10:15:01.651Z"
+      "lastLoginAt": "2026-09-13T16:20:36.126Z"
     },
     {
       "id": "usr-test-op",
@@ -58,9 +58,80 @@
       "status": "invited",
       "tempPassword": "TempPass123!",
       "createdAt": "2026-09-13T09:14:58.570Z"
+    },
+    {
+      "id": "usr-mtzol85u",
+      "email": "test45@gmail.com",
+      "name": "test45",
+      "role": "analytics_viewer",
+      "status": "active",
+      "tempPassword": "mmmmmmmm",
+      "createdAt": "2026-09-13T10:38:05.693Z",
+      "lastLoginAt": "2026-09-13T10:38:48.647Z"
+    },
+    {
+      "id": "usr-mtzpcfyl",
+      "email": "amanhaider.pk@gmail.com",
+      "name": "amanhaider.pk",
+      "role": "analytics_viewer",
+      "status": "active",
+      "tempPassword": "Asdf1234@@",
+      "createdAt": "2026-09-13T10:59:28.587Z",
+      "lastLoginAt": "2026-09-13T16:20:35.550Z"
+    },
+    {
+      "id": "usr-mu00p4uu",
+      "email": "analytics.test.1789316252651@gmail.com",
+      "name": "Analytics Tester",
+      "role": "analytics_viewer",
+      "status": "invited",
+      "tempPassword": "CX-TMP-4A1E07E3",
+      "createdAt": "2026-09-13T16:17:32.886Z"
+    },
+    {
+      "id": "usr-mu00q18p",
+      "email": "analytics.test.1789316294621@gmail.com",
+      "name": "Analytics Tester",
+      "role": "machine_manager",
+      "status": "active",
+      "tempPassword": "SecurePass123!@",
+      "createdAt": "2026-09-13T16:18:14.857Z",
+      "lastLoginAt": "2026-09-13T16:18:20.993Z"
+    },
+    {
+      "id": "usr-mu00tdek",
+      "email": "editor@ashalinnomech.com",
+      "name": "Content Editor",
+      "role": "content_editor",
+      "status": "active",
+      "tempPassword": "editorPass123!",
+      "createdAt": "2026-09-13T16:20:48.002Z",
+      "lastLoginAt": "2026-09-13T16:20:50.894Z"
     }
   ],
   "invitations": [
+    {
+      "id": "inv-mu00q18p",
+      "email": "analytics.test.1789316294621@gmail.com",
+      "name": "Analytics Tester",
+      "role": "machine_manager",
+      "tempPassword": "SecurePass123!@",
+      "token": "mag_a4444e6d54ce46a89dca9b270d9c23c4",
+      "status": "accepted",
+      "createdAt": "2026-09-13T16:18:14.857Z",
+      "expiresAt": "2027-09-13T16:18:17.108Z"
+    },
+    {
+      "id": "inv-mu00p4uu",
+      "email": "analytics.test.1789316252651@gmail.com",
+      "name": "Analytics Tester",
+      "role": "analytics_viewer",
+      "tempPassword": "CX-TMP-4A1E07E3",
+      "token": "mag_2992cc17cf4065fbb1bf04b2832ff4f2",
+      "status": "pending",
+      "createdAt": "2026-09-13T16:17:32.886Z",
+      "expiresAt": "2027-09-13T16:17:32.886Z"
+    },
     {
       "id": "inv-test-op",
       "email": "test-operator@ashalinnomech.com",
@@ -126,9 +197,126 @@
       "status": "accepted",
       "createdAt": "2026-08-26T07:02:19.888Z",
       "expiresAt": "2029-09-28T05:46:14.969Z"
+    },
+    {
+      "id": "inv-mtzol85u",
+      "email": "test45@gmail.com",
+      "name": "test45",
+      "role": "analytics_viewer",
+      "tempPassword": "mmmmmmmm",
+      "token": "mag_17c21afb5e1f70a93e188da3b2d043b7",
+      "status": "accepted",
+      "createdAt": "2026-09-13T10:38:05.693Z",
+      "expiresAt": "2026-10-13T16:16:21.051Z"
+    },
+    {
+      "id": "inv-mtzpcfyl",
+      "email": "amanhaider.pk@gmail.com",
+      "name": "amanhaider.pk",
+      "role": "analytics_viewer",
+      "tempPassword": "Asdf1234@@",
+      "token": "mag_76db67763d65a4831f1f591291424abd",
+      "status": "accepted",
+      "createdAt": "2026-09-13T10:59:28.587Z",
+      "expiresAt": "2026-10-13T16:16:21.051Z"
+    },
+    {
+      "id": "inv-mu00tdek",
+      "email": "editor@ashalinnomech.com",
+      "name": "Content Editor",
+      "role": "content_editor",
+      "tempPassword": "editorPass123!",
+      "token": "mag_6769acb70db76840415ee8dc2246ba09",
+      "status": "accepted",
+      "createdAt": "2026-09-13T16:20:48.002Z",
+      "expiresAt": "2026-10-13T16:20:50.895Z"
     }
   ],
   "auditLog": [
+    {
+      "id": "aud-mu00tdn3-x17m",
+      "timestamp": "2026-09-13T16:20:50.895Z",
+      "actor": "Content Editor",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'content_editor' (authenticated via DB server)"
+    },
+    {
+      "id": "aud-mu00t28v-9ha8",
+      "timestamp": "2026-09-13T16:20:36.127Z",
+      "actor": "Machine Manager",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'machine_manager' (authenticated via DB server)"
+    },
+    {
+      "id": "aud-mu00t1sv-4j10",
+      "timestamp": "2026-09-13T16:20:35.551Z",
+      "actor": "amanhaider.pk",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'analytics_viewer' (authenticated via DB server)"
+    },
+    {
+      "id": "aud-mu00sy77-s2ui",
+      "timestamp": "2026-09-13T16:20:30.883Z",
+      "actor": "Super Admin",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Primary Hidden Super Admin logged in"
+    },
+    {
+      "id": "aud-mu00q5z6-1qem",
+      "timestamp": "2026-09-13T16:18:20.994Z",
+      "actor": "Analytics Tester",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'machine_manager' (authenticated via DB server)"
+    },
+    {
+      "id": "aud-mu00q5jw-ku68",
+      "timestamp": "2026-09-13T16:18:20.444Z",
+      "actor": "Super Admin",
+      "action": "ROLE_UPDATED",
+      "details": "Updated role for analytics.test.1789316294621@gmail.com from 'analytics_viewer' to 'machine_manager'"
+    },
+    {
+      "id": "aud-mu00q4hc-1c62",
+      "timestamp": "2026-09-13T16:18:19.056Z",
+      "actor": "Analytics Tester",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'analytics_viewer' (authenticated via DB server)"
+    },
+    {
+      "id": "aud-mu00q3u7-mxs8",
+      "timestamp": "2026-09-13T16:18:18.223Z",
+      "actor": "analytics.test.1789316294621@gmail.com",
+      "action": "INVITATION_ACCEPTED",
+      "details": "Accepted invitation and set secure permanent password for role 'analytics_viewer'"
+    },
+    {
+      "id": "aud-mu00q2pt-5avb",
+      "timestamp": "2026-09-13T16:18:16.769Z",
+      "actor": "Super Admin",
+      "action": "GMAIL_MAGIC_LINK_CREATED",
+      "details": "Created magic link invitation for analytics.test.1789316294621@gmail.com with role 'analytics_viewer' and temporary password"
+    },
+    {
+      "id": "aud-mu00q11p-jc6w",
+      "timestamp": "2026-09-13T16:18:14.605Z",
+      "actor": "amanhaider.pk",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'analytics_viewer' (authenticated via DB server)"
+    },
+    {
+      "id": "aud-mu00p4o2-wtnn",
+      "timestamp": "2026-09-13T16:17:32.642Z",
+      "actor": "amanhaider.pk",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'analytics_viewer' (authenticated via DB server)"
+    },
+    {
+      "id": "aud-mu00nous-64ce",
+      "timestamp": "2026-09-13T16:16:25.492Z",
+      "actor": "amanhaider.pk",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Logged into Ops Console with role 'analytics_viewer' (authenticated via DB server)"
+    },
     {
       "id": "aud-mtpno29t-154c",
       "timestamp": "2026-09-06T10:15:06.113Z",

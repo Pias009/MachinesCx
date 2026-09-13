@@ -261,14 +261,19 @@ function UserRoleManagementTable({ users, invitations, onRefresh }: { users: Adm
   const [showModalPass, setShowModalPass] = useState(false);
   const [showResultPass, setShowResultPass] = useState(false);
 
-  async function handleRoleChange(userId: string, newRole: AdminRole) {
+  async function handleRoleChange(userId: string, userEmail: string, newRole: AdminRole) {
     try {
       const res = await fetch("/api/admin/roles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "update_role", userId, newRole }),
+        body: JSON.stringify({ action: "update_role", userId, email: userEmail, newRole }),
       });
-      if (res.ok) onRefresh();
+      if (res.ok) {
+        onRefresh();
+      } else {
+        const j = await res.json().catch(() => ({}));
+        alert(j.error || "Failed to update role");
+      }
     } catch {
       alert("Failed to update role");
     }
@@ -372,7 +377,7 @@ function UserRoleManagementTable({ users, invitations, onRefresh }: { users: Adm
                 <td style={{ padding: "0.85rem 0.5rem" }}>
                   <select
                     value={u.role}
-                    onChange={e => handleRoleChange(u.id, e.target.value as AdminRole)}
+                    onChange={e => handleRoleChange(u.id, u.email, e.target.value as AdminRole)}
                     style={{
                       padding: "0.35rem 0.6rem", borderRadius: 8,
                       background: "rgba(0,0,0,0.3)", border: `1px solid ${roleBadgeColors[u.role]}`,

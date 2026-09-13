@@ -4,6 +4,31 @@ import crypto from "crypto";
 
 export type AdminRole = "super_admin" | "content_editor" | "machine_manager" | "analytics_viewer";
 
+/** Normalize any incoming role string or typo to a strict AdminRole */
+export function normalizeAdminRole(roleInput?: string | null): AdminRole {
+  if (!roleInput) return "content_editor";
+  const r = roleInput.toLowerCase().trim().replace(/[-_ ]+/g, "_");
+  if (
+    r.includes("analyt") ||
+    r.includes("analat") ||
+    r.includes("analy") ||
+    r.includes("telemetry") ||
+    r.includes("viewer")
+  ) {
+    return "analytics_viewer";
+  }
+  if (r.includes("super")) {
+    return "super_admin";
+  }
+  if (r.includes("machin") || r.includes("manager")) {
+    return "machine_manager";
+  }
+  if (r.includes("content") || r.includes("creator") || r.includes("editor")) {
+    return "content_editor";
+  }
+  return "content_editor";
+}
+
 export interface AdminUser {
   id: string;
   email: string;
@@ -112,6 +137,11 @@ export function readRolesDB(): RolesDatabase {
       });
     }
 
+    // Normalize roles for all users
+    users.forEach(u => {
+      u.role = normalizeAdminRole(u.role);
+    });
+
     // Auto-heal missing invitations for active users with tempPassword (excluding revoked)
     users.forEach((u) => {
       if (revokedEmails.includes(u.email.toLowerCase())) return;
@@ -121,16 +151,23 @@ export function readRolesDB(): RolesDatabase {
           id: `inv-${u.id.replace("usr-", "")}`,
           email: u.email.toLowerCase(),
           name: u.name,
-          role: u.role,
+          role: normalizeAdminRole(u.role),
           tempPassword: u.tempPassword,
           token: `mag_${crypto.createHash("md5").update(u.email.toLowerCase()).digest("hex")}`,
           status: u.status === "active" ? "accepted" : "pending",
           createdAt: u.createdAt || new Date().toISOString(),
           expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         });
-      } else if (existingInv && u.tempPassword && existingInv.tempPassword !== u.tempPassword) {
-        existingInv.tempPassword = u.tempPassword;
+      } else if (existingInv) {
+        existingInv.role = normalizeAdminRole(existingInv.role);
+        if (u.tempPassword && existingInv.tempPassword !== u.tempPassword) {
+          existingInv.tempPassword = u.tempPassword;
+        }
       }
+    });
+
+    invitations.forEach(inv => {
+      inv.role = normalizeAdminRole(inv.role);
     });
 
     return {

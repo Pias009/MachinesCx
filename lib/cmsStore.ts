@@ -41,14 +41,30 @@ const BUNDLED_DEFAULTS: Record<CmsSection, unknown> = {
 };
 
 export async function readSection(section: CmsSection): Promise<unknown> {
+  const fallback = BUNDLED_DEFAULTS[section];
   try {
     await connectDB();
     const doc = await CmsSection.findOne({ section }).lean();
-    if (doc) return doc.data;
+    if (doc && doc.data && typeof doc.data === "object") {
+      if (section === "products") {
+        const prod = doc.data as Record<string, any>;
+        const fb = fallback as Record<string, any>;
+        const hasCats = Array.isArray(prod.categories) && prod.categories.length > 0;
+        const hasFams = Array.isArray(prod.families) && prod.families.length > 0;
+        if (!hasCats || !hasFams) {
+          return {
+            ...fb,
+            ...prod,
+            categories: hasCats ? prod.categories : fb.categories,
+            families: hasFams ? prod.families : fb.families,
+          };
+        }
+      }
+      return doc.data;
+    }
   } catch (e) {
     console.error(`CMS: DB unavailable for "${section}", using bundled fallback:`, e);
   }
-  const fallback = BUNDLED_DEFAULTS[section];
   if (fallback !== undefined) return fallback;
   throw new Error(`section "${section}" not found`);
 }

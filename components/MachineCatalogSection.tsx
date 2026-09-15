@@ -365,11 +365,25 @@ export default function MachineCatalogSection() {
         /* ── Hardware Double-Bezel Bento Grid ── */
         .mcs__grid {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 1.75rem;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 1.25rem;
           background: transparent !important;
           border: none !important;
           perspective: 1400px;
+        }
+
+        @media (max-width: 1200px) {
+          .mcs__grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1.15rem;
+          }
+        }
+
+        @media (max-width: 960px) {
+          .mcs__grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+          }
         }
 
         /* ── Double-Bezel Card Enclosure (Doppelrand) ── */

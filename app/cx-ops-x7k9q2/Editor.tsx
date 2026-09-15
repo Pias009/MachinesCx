@@ -1193,6 +1193,13 @@ function ItemFieldsPanel({ collection, item, onFieldChange, onFieldItemChange }:
   );
 }
 
+const DEFAULT_PRODUCT_CATEGORIES: Item[] = [
+  { slug: "film-blowing", name: "Film Blowing Machines" },
+  { slug: "bag-making", name: "Bag Making Machines" },
+  { slug: "recycling", name: "Recycling & Lab Lines" },
+  { slug: "printing", name: "Flexographic Printing Machines" },
+];
+
 // ── category tiles — shown in place of the flat family list so 30+
 // products across categories don't have to be scrolled through as one
 // long list. Only used for the `families` collection (has a `category`
@@ -1202,9 +1209,34 @@ function CategoryTiles({ categories, items, onSelect }: {
   items: Item[];
   onSelect: (slug: string) => void;
 }) {
+  const cats = Array.isArray(categories) && categories.length > 0 ? categories : DEFAULT_PRODUCT_CATEGORIES;
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1rem" }} className="adm-stagger">
-      {categories.map(cat => {
+      <button
+        type="button"
+        onClick={() => onSelect("all")}
+        className="adm-tile"
+        style={{
+          textAlign: "left",
+          cursor: "pointer",
+          color: "#fff",
+          padding: "1.5rem",
+          border: "1px solid rgba(43,191,179,0.35)",
+          background: "linear-gradient(135deg, rgba(43,191,179,0.14), rgba(13,148,136,0.06))",
+        }}
+      >
+        <div className="adm-tile__icon" style={{ marginBottom: "0.75rem", color: "var(--brand-teal)" }}>
+          <Package size={20} />
+        </div>
+        <div style={{ fontFamily: "var(--ff-display)", fontSize: "1.15rem", marginBottom: "0.35rem", color: "#fff" }}>
+          All Machines & Products
+        </div>
+        <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: "rgba(255,255,255,0.6)" }}>
+          {items.length} {items.length === 1 ? "machine" : "machines"} across all lines
+        </div>
+      </button>
+
+      {cats.map(cat => {
         const slug = String(cat.slug ?? "");
         const count = items.filter(f => f.category === slug).length;
         const CatIcon = SHARED_CATEGORY_ICON[slug] ?? Package;
@@ -1762,27 +1794,33 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
       {schema.collections.map(col => {
         const allItems = ((data[col.key] as Item[]) ?? []);
         const isFamilies = col.key === "families";
-        const categoryList = isFamilies ? ((data.categories as Item[]) ?? []) : [];
+        const categoryList = isFamilies
+          ? (Array.isArray(data.categories) && (data.categories as Item[]).length > 0
+              ? (data.categories as Item[])
+              : DEFAULT_PRODUCT_CATEGORIES)
+          : [];
 
-        const visibleIndices = isFamilies && activeCategory
+        const isAllSelected = isFamilies && activeCategory === "all";
+
+        const visibleIndices = isFamilies && activeCategory && !isAllSelected
           ? allItems.reduce<number[]>((acc, it, idx) => { if (it.category === activeCategory) acc.push(idx); return acc; }, [])
           : allItems.map((_, idx) => idx);
 
-        let items = visibleIndices.map(idx => allItems[idx]);
+        let itemsWithIndices = visibleIndices.map(idx => ({ item: allItems[idx], index: idx }));
 
         // Filter items dynamically by search query & filter chips
         if (filterQuery.trim()) {
           const q = filterQuery.toLowerCase();
-          items = items.filter(it => {
-            const title = col.titleKeys.map(k => String(it[k] ?? "")).join(" ").toLowerCase();
-            return title.includes(q) || String(it.series ?? "").toLowerCase().includes(q) || String(it.name ?? "").toLowerCase().includes(q);
+          itemsWithIndices = itemsWithIndices.filter(({ item }) => {
+            const title = col.titleKeys.map(k => String(item[k] ?? "")).join(" ").toLowerCase();
+            return title.includes(q) || String(item.series ?? "").toLowerCase().includes(q) || String(item.name ?? "").toLowerCase().includes(q);
           });
         }
 
         if (filterType === "has_image") {
-          items = items.filter(it => Boolean(it.image || it.heroImage || (Array.isArray(it.images) && it.images.length > 0)));
+          itemsWithIndices = itemsWithIndices.filter(({ item }) => Boolean(item.image || item.heroImage || (Array.isArray(item.images) && item.images.length > 0)));
         } else if (filterType === "warnings") {
-          items = items.filter(it => isFamilies ? validateFamily(it).length > 0 : false);
+          itemsWithIndices = itemsWithIndices.filter(({ item }) => isFamilies ? validateFamily(item).length > 0 : false);
         }
 
         if (isFamilies && !activeCategory) {
@@ -1797,7 +1835,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
         }
 
         const activeCategoryName = isFamilies && activeCategory
-          ? String(categoryList.find(c => c.slug === activeCategory)?.name ?? activeCategory)
+          ? (activeCategory === "all" ? "All Machines & Products" : String(categoryList.find(c => c.slug === activeCategory)?.name ?? activeCategory))
           : "";
 
         return (
@@ -1812,12 +1850,16 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
                       ← Back to categories
                     </button>
                   )}
-                  {isFamilies ? activeCategoryName : col.label} <span style={{ color: "rgba(255,255,255,0.4)", fontFamily: "var(--ff-body)", fontSize: "1rem", fontWeight: 400 }}>({items.length} items)</span>
+                  {isFamilies ? activeCategoryName : col.label} <span style={{ color: "rgba(255,255,255,0.4)", fontFamily: "var(--ff-body)", fontSize: "1rem", fontWeight: 400 }}>({itemsWithIndices.length} items)</span>
                 </h2>
                 {col.canAdd && (
                   <button type="button" style={smallBtn} onClick={() => {
                     const template = JSON.parse(JSON.stringify(col.template ?? {}));
-                    if (isFamilies && activeCategory) template.category = activeCategory;
+                    if (isFamilies && activeCategory && activeCategory !== "all") {
+                      template.category = activeCategory;
+                    } else if (isFamilies && activeCategory === "all") {
+                      template.category = "film-blowing";
+                    }
                     template.isNew = true;
                     mutate(d => {
                       const newItems = [template, ...allItems];
@@ -1875,8 +1917,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
 
             {/* List Cards */}
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-              {items.map((item, listI) => {
-                const i = visibleIndices[listI];
+              {itemsWithIndices.map(({ item, index: i }, listI) => {
                 const title = col.titleKeys.map(k => String(item[k] ?? "")).filter(Boolean).join(" — ") || `#${listI + 1}`;
                 const itemWarnings = isFamilies ? validateFamily(item) : [];
                 const hasErrors = itemWarnings.some(w => w.severity === "error");

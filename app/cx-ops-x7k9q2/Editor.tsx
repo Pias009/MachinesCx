@@ -1,6 +1,10 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { Camera, Star, X, Plus, CheckCircle2, Package, Loader2, AlertTriangle, Search, Eye, Copy, Trash2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import {
+  Camera, Star, X, Plus, CheckCircle2, Package, Loader2,
+  AlertTriangle, Search, Eye, Copy, Trash2, ArrowLeft, ExternalLink, Sparkles
+} from "lucide-react";
 import type { Field, Collection, SectionSchema } from "@/lib/cmsSchemas";
 import { CATEGORY_ICON as SHARED_CATEGORY_ICON } from "./adminIcons";
 
@@ -1194,60 +1198,101 @@ function ItemFieldsPanel({ collection, item, onFieldChange, onFieldItemChange }:
 }
 
 const DEFAULT_PRODUCT_CATEGORIES: Item[] = [
-  { slug: "film-blowing", name: "Film Blowing Machines" },
-  { slug: "bag-making", name: "Bag Making Machines" },
-  { slug: "recycling", name: "Recycling & Lab Lines" },
-  { slug: "printing", name: "Flexographic Printing Machines" },
+  { slug: "film-blowing", name: "Film Blowing Machines", tagline: "Pellet to film · Blown film lines & co-extrusion towers" },
+  { slug: "bag-making", name: "Bag Making Machines", tagline: "Film to bag · Heat-seal, roll-bag & pouch converters" },
+  { slug: "recycling", name: "Recycling & Lab Lines", tagline: "Scrap to pellet · Pelletizing & closed-loop resin lines" },
+  { slug: "printing", name: "Flexographic Printing Machines", tagline: "Film to print · CI flexographic printing presses" },
 ];
 
-// ── category tiles — shown in place of the flat family list so 30+
-// products across categories don't have to be scrolled through as one
-// long list. Only used for the `families` collection (has a `category`
-// field); every other collection keeps the plain flat list. ──
-function CategoryTiles({ categories, items, onSelect }: {
+// ── distinct category cards — renders each category as a distinct themed card.
+// Clicking a card activates it and renders that category's machines directly below it.
+function DistinctCategoryCards({ categories, items, activeCategory, onSelect }: {
   categories: Item[];
   items: Item[];
+  activeCategory: string;
   onSelect: (slug: string) => void;
 }) {
   const cats = Array.isArray(categories) && categories.length > 0 ? categories : DEFAULT_PRODUCT_CATEGORIES;
+
+  const categoryTaglines: Record<string, string> = {
+    "film-blowing": "Pellet to film · Blown film lines & co-extrusion towers",
+    "bag-making": "Film to bag · Heat-seal, roll-bag & pouch converters",
+    "recycling": "Scrap to pellet · Pelletizing & closed-loop resin lines",
+    "printing": "Film to print · CI flexographic printing presses",
+  };
+
+  const getThemeClass = (slug: string) => {
+    switch (slug) {
+      case "all": return "adm-cat-card--all";
+      case "film-blowing": return "adm-cat-card--film-blowing";
+      case "bag-making": return "adm-cat-card--bag-making";
+      case "recycling": return "adm-cat-card--recycling";
+      case "printing": return "adm-cat-card--printing";
+      default: return "adm-cat-card--custom";
+    }
+  };
+
+  const isAllActive = activeCategory === "all";
+
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1rem" }} className="adm-stagger">
+    <div className="adm-cat-grid adm-stagger">
+      {/* "All Machines & Products" Distinct Card */}
       <button
         type="button"
         onClick={() => onSelect("all")}
-        className="adm-tile"
-        style={{
-          textAlign: "left",
-          cursor: "pointer",
-          color: "#fff",
-          padding: "1.5rem",
-          border: "1px solid rgba(43,191,179,0.35)",
-          background: "linear-gradient(135deg, rgba(43,191,179,0.14), rgba(13,148,136,0.06))",
-        }}
+        className={`adm-cat-card adm-cat-card--all ${isAllActive ? "is-active" : ""}`}
       >
-        <div className="adm-tile__icon" style={{ marginBottom: "0.75rem", color: "var(--brand-teal)" }}>
-          <Package size={20} />
+        <div>
+          <div className="adm-cat-card__top">
+            <div className="adm-cat-card__icon">
+              <Package size={20} />
+            </div>
+            <div className="adm-cat-card__badge">
+              {items.length} {items.length === 1 ? "Machine" : "Machines"}
+            </div>
+          </div>
+          <h3 className="adm-cat-card__title">All Machines & Products</h3>
+          <p className="adm-cat-card__tagline">
+            Complete machinery catalogue across all manufacturing lines
+          </p>
         </div>
-        <div style={{ fontFamily: "var(--ff-display)", fontSize: "1.15rem", marginBottom: "0.35rem", color: "#fff" }}>
-          All Machines & Products
-        </div>
-        <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: "rgba(255,255,255,0.6)" }}>
-          {items.length} {items.length === 1 ? "machine" : "machines"} across all lines
+        <div className="adm-cat-card__active-indicator" style={{ opacity: isAllActive ? 1 : 0.5 }}>
+          <span>{isAllActive ? "● Active Category" : "Click to view"}</span>
+          <span>{isAllActive ? "Viewing below ↓" : "→"}</span>
         </div>
       </button>
 
+      {/* Individual Category Distinct Cards */}
       {cats.map(cat => {
         const slug = String(cat.slug ?? "");
         const count = items.filter(f => f.category === slug).length;
         const CatIcon = SHARED_CATEGORY_ICON[slug] ?? Package;
+        const isActive = activeCategory === slug;
+        const tagline = String(cat.tagline || categoryTaglines[slug] || cat.blurb || "Machinery category");
+        const themeClass = getThemeClass(slug);
+
         return (
-          <button key={slug} type="button" onClick={() => onSelect(slug)} className="adm-tile" style={{ textAlign: "left", cursor: "pointer", color: "#fff", padding: "1.5rem" }}>
-            <div className="adm-tile__icon" style={{ marginBottom: "0.75rem" }}><CatIcon size={20} /></div>
-            <div style={{ fontFamily: "var(--ff-display)", fontSize: "1.15rem", marginBottom: "0.35rem" }}>
-              {String(cat.name ?? slug)}
+          <button
+            key={slug}
+            type="button"
+            onClick={() => onSelect(slug)}
+            className={`adm-cat-card ${themeClass} ${isActive ? "is-active" : ""}`}
+          >
+            <div>
+              <div className="adm-cat-card__top">
+                <div className="adm-cat-card__icon">
+                  <CatIcon size={20} />
+                </div>
+                <div className="adm-cat-card__badge">
+                  {count} {count === 1 ? "Machine" : "Machines"}
+                </div>
+              </div>
+              <h3 className="adm-cat-card__title">{String(cat.name ?? slug)}</h3>
+              <p className="adm-cat-card__tagline">{tagline}</p>
             </div>
-            <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: "rgba(255,255,255,0.5)" }}>
-              {count} {count === 1 ? "machine" : "machines"}
+            <div className="adm-cat-card__active-indicator" style={{ opacity: isActive ? 1 : 0.5 }}>
+              <span>{isActive ? "● Active Category" : "Click to view"}</span>
+              <span>{isActive ? "Viewing below ↓" : "→"}</span>
             </div>
           </button>
         );
@@ -1360,16 +1405,28 @@ function validateSectionData(data: Json, schema: SectionSchema): ValidationWarni
   return warnings;
 }
 
-// ── product editor modal ──────────────────────────────────
-// ── product editor modal (centered with live image & data preview) ──────────────
-function ProductEditorModal({ item, index, collection, onClose, onSave, onFieldChange, onFieldItemChange }: {
+// ── full page item editor ──────────────────────────────────
+// Dedicated full-page workspace for editing a machine / product item.
+function FullPageItemEditor({
+  item,
+  index,
+  collection,
+  allCategories,
+  onBack,
+  onSave,
+  onFieldChange,
+  onFieldItemChange,
+  status,
+}: {
   item: Item;
   index: number;
   collection: Collection;
-  onClose: () => void;
+  allCategories: Item[];
+  onBack: () => void;
   onSave: () => void;
   onFieldChange: (key: string, v: unknown) => void;
   onFieldItemChange: (key: string, v: unknown) => void;
+  status: "idle" | "dirty" | "saving" | "saved" | "error";
 }) {
   const [dirty, setDirty] = useState(false);
 
@@ -1396,74 +1453,144 @@ function ProductEditorModal({ item, index, collection, onClose, onSave, onFieldC
   const statVal = item.stat ? String(item.stat) : (item.speed ? `${item.speed} m/min` : "");
   const statLabel = item.label ? String(item.label) : (item.stat ? "Max Rating" : "");
   const specsArr = Array.isArray(item.specs) ? item.specs : [];
-  const featuresArr = Array.isArray(item.features) ? item.features : [];
+
+  const catObj = allCategories.find(c => c.slug === item.category);
+  const categoryName = catObj ? String(catObj.name ?? item.category) : String(item.category ?? "");
+  const warnings = collection.key === "families" ? validateFamily(item) : [];
+  const livePageUrl = item.slug && item.category ? `/products/${item.category}/${item.slug}` : "";
 
   return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 9998,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "1.5rem",
-      background: "rgba(3, 8, 16, 0.82)",
-      backdropFilter: "blur(12px)",
-      WebkitBackdropFilter: "blur(12px)",
-    }} onClick={() => {
-      if (dirty && !confirm("You have unsaved changes. Discard?")) return;
-      onClose();
-    }}>
-      <div style={{
-        width: "100%", maxWidth: 1180, maxHeight: "90vh",
-        display: "flex", flexDirection: "column",
-        background: "#0d1522",
-        border: "1px solid rgba(43, 191, 179, 0.35)",
-        borderRadius: 24,
-        boxShadow: "0 30px 90px rgba(0,0,0,0.9), 0 0 50px rgba(43, 191, 179, 0.15)",
-        overflow: "hidden",
-      }} onClick={e => e.stopPropagation()}>
-
-        {/* Modal Header */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "1.1rem 1.75rem", borderBottom: "1px solid rgba(255,255,255,0.08)",
-          background: "rgba(255,255,255,0.02)", flexShrink: 0,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
-            <button type="button" onClick={() => {
+    <div className="adm-fullpage-editor adm-rise">
+      {/* Top Sticky Navigation & Action Bar */}
+      <div className="adm-fullpage-editor__topbar">
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            onClick={() => {
               if (dirty && !confirm("You have unsaved changes. Discard?")) return;
-              onClose();
-            }} style={{ ...iconBtn, padding: "0.5rem 0.85rem", fontSize: "0.88rem" }}>← Back</button>
-            <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.35rem", color: "#fff", margin: 0 }}>
-              Edit: {titleText}
-            </h2>
-            {dirty && <span style={{ fontFamily: "var(--ff-body)", fontSize: "0.82rem", color: "#f5c451", fontWeight: 600 }}>● Unsaved</span>}
+              onBack();
+            }}
+            className="adm-btn-secondary"
+            style={{ padding: "0.5rem 0.9rem", fontSize: "0.85rem", gap: "0.4rem" }}
+          >
+            <ArrowLeft size={16} /> Back to Products
+          </button>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.85rem", color: "var(--adm-text-sub)" }}>
+            <span style={{ color: "rgba(255,255,255,0.4)" }}>Catalogue</span>
+            <span>/</span>
+            {categoryName && (
+              <>
+                <span style={{ color: "var(--brand-teal)", fontWeight: 600 }}>{categoryName}</span>
+                <span>/</span>
+              </>
+            )}
+            <span style={{ color: "#fff", fontWeight: 700, maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {titleText}
+            </span>
           </div>
-          <div style={{ display: "flex", gap: "0.6rem" }}>
-            <button type="button" onClick={onClose} style={{
-              ...btnBase, background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.7)",
-            }}>Close</button>
-            <button type="button" onClick={() => { setDirty(false); onSave(); }} style={{
-              ...btnBase, background: "var(--brand-teal)", color: "#04211e", fontWeight: 700,
+
+          {dirty && (
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: "0.35rem", fontSize: "0.78rem",
+              color: "#f5c451", fontWeight: 700, background: "rgba(245,196,81,0.12)",
+              padding: "0.2rem 0.65rem", borderRadius: 20, border: "1px solid rgba(245,196,81,0.3)"
             }}>
-              <CheckCircle2 size={16} /> Save product
-            </button>
-          </div>
+              ● Unsaved Changes
+            </span>
+          )}
+          {status === "saved" && !dirty && (
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: "0.35rem", fontSize: "0.78rem",
+              color: "var(--brand-teal)", fontWeight: 700, background: "rgba(0,210,148,0.12)",
+              padding: "0.2rem 0.65rem", borderRadius: 20, border: "1px solid rgba(0,210,148,0.3)"
+            }}>
+              <CheckCircle2 size={13} /> Saved
+            </span>
+          )}
+          {Boolean(item.isNew) && (
+            <span className="new-machine-alert-badge" style={{ fontSize: "0.72rem" }}>⚡ NEW MACHINE</span>
+          )}
         </div>
 
-        {/* Modal Body with 2-Column Split View */}
-        <div style={{
-          display: "grid", gridTemplateColumns: "1fr 380px", flex: 1, overflow: "hidden",
-        }}>
-          {/* Left Column: Form Controls */}
-          <div style={{ overflowY: "auto", padding: "1.75rem", borderRight: "1px solid rgba(255,255,255,0.08)" }}>
-            <ItemFieldsPanel
-              collection={collection}
-              item={item}
-              onFieldChange={handleChange}
-              onFieldItemChange={handleItemChange}
-            />
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+          {livePageUrl && (
+            <a
+              href={livePageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="adm-btn-secondary"
+              style={{ textDecoration: "none", padding: "0.5rem 0.85rem", fontSize: "0.82rem", color: "#5eead4", borderColor: "rgba(45,212,191,0.3)" }}
+            >
+              <ExternalLink size={14} /> View Live Page ↗
+            </a>
+          )}
+          <button
+            type="button"
+            onClick={() => { setDirty(false); onSave(); }}
+            disabled={status === "saving"}
+            className="adm-btn"
+            style={{ padding: "0.55rem 1.25rem", fontSize: "0.88rem" }}
+          >
+            {status === "saving" ? <Loader2 size={16} className="adm-spin-icon" /> : <CheckCircle2 size={16} />}
+            {status === "saving" ? "Saving..." : "Save Product (Ctrl+S)"}
+          </button>
+        </div>
+      </div>
+
+      {/* Main Workspace (2-column layout) */}
+      <div className="adm-fullpage-editor__workspace">
+        {/* Left: Complete Form Controls */}
+        <div className="adm-fullpage-editor__main">
+          <div style={{
+            padding: "1.25rem 1.5rem", borderBottom: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(255,255,255,0.02)", display: "flex", alignItems: "center",
+            justifyContent: "space-between", flexWrap: "wrap", gap: "1rem"
+          }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.2rem" }}>
+                <span style={{
+                  fontSize: "0.72rem", fontFamily: "var(--ff-mono)", color: "var(--brand-teal)",
+                  background: "rgba(43,191,179,0.12)", padding: "0.15rem 0.5rem", borderRadius: 6
+                }}>
+                  {String(item.category || collection.singular || "PRODUCT")}
+                </span>
+                <span style={{ fontSize: "0.75rem", color: "var(--adm-text-sub)" }}>
+                  Slug: {String(item.slug || "not-set")}
+                </span>
+              </div>
+              <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.45rem", color: "#fff", margin: 0, lineHeight: 1.2 }}>
+                {titleText}
+              </h2>
+            </div>
+            {warnings.length > 0 && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: "0.4rem",
+                background: "rgba(245,196,81,0.12)", border: "1px solid rgba(245,196,81,0.3)",
+                padding: "0.35rem 0.75rem", borderRadius: 8, fontSize: "0.78rem", color: "#f5c451", fontWeight: 600
+              }}>
+                <AlertTriangle size={14} />
+                {warnings.length} {warnings.length === 1 ? "issue to review" : "issues to review"}
+              </div>
+            )}
           </div>
 
-          {/* Right Column: Centered Live Product & Image Preview Box */}
-          <div style={{ overflowY: "auto", padding: "1.5rem", background: "rgba(0,0,0,0.25)", display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <ItemFieldsPanel
+            collection={collection}
+            item={item}
+            onFieldChange={handleChange}
+            onFieldItemChange={handleItemChange}
+          />
+        </div>
+
+        {/* Right: Sticky Inspector & Live Machine Card Preview */}
+        <div className="adm-fullpage-editor__sidebar">
+          {/* Live Card Preview */}
+          <div style={{
+            background: "#121b2d", border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 18, padding: "1.25rem", boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+            display: "flex", flexDirection: "column", gap: "1rem"
+          }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{
                 fontSize: "0.72rem", fontWeight: 800, color: "var(--brand-teal)",
@@ -1473,21 +1600,18 @@ function ProductEditorModal({ item, index, collection, onClose, onSave, onFieldC
                 <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#2dd4bf", boxShadow: "0 0 10px #2dd4bf" }} />
                 Live Card Preview
               </span>
-              {Boolean(item.isNew) && (
-                <span className="new-machine-alert-badge">⚡ NEW</span>
-              )}
+              <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.4)" }}>Real-time</span>
             </div>
 
-            {/* Product Image Card Preview */}
+            {/* Product Card Container */}
             <div style={{
-              background: "#162338", border: "1px solid rgba(255,255,255,0.12)",
-              borderRadius: 18, overflow: "hidden", padding: "1.25rem",
-              boxShadow: "0 12px 30px rgba(0,0,0,0.5)",
-              display: "flex", flexDirection: "column", gap: "1rem",
+              background: "#162338", border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 16, overflow: "hidden", padding: "1.1rem",
+              display: "flex", flexDirection: "column", gap: "0.85rem",
             }}>
               {Boolean(imgUrl) ? (
                 <div style={{
-                  position: "relative", width: "100%", height: 210, borderRadius: 14,
+                  position: "relative", width: "100%", height: 180, borderRadius: 12,
                   overflow: "hidden", background: "radial-gradient(circle, rgba(13,148,136,0.15) 0%, rgba(0,0,0,0.4) 100%)",
                   border: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", padding: "0.5rem"
                 }}>
@@ -1500,11 +1624,11 @@ function ProductEditorModal({ item, index, collection, onClose, onSave, onFieldC
                 </div>
               ) : (
                 <div style={{
-                  width: "100%", height: 180, borderRadius: 14, background: "rgba(255,255,255,0.03)",
+                  width: "100%", height: 140, borderRadius: 12, background: "rgba(255,255,255,0.03)",
                   border: "1px dashed rgba(255,255,255,0.15)", display: "flex", flexDirection: "column",
                   alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.35)", fontSize: "0.85rem", gap: "0.5rem"
                 }}>
-                  <Camera size={28} />
+                  <Camera size={26} />
                   <span>No Machine Image Set</span>
                 </div>
               )}
@@ -1513,46 +1637,64 @@ function ProductEditorModal({ item, index, collection, onClose, onSave, onFieldC
                 <div style={{ fontFamily: "var(--ff-mono)", fontSize: "0.68rem", color: "var(--brand-teal)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.2rem" }}>
                   {String(item.category || item.series || "MACHINE MODEL")}
                 </div>
-                <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.25rem", color: "#fff", margin: "0 0 0.5rem", lineHeight: 1.25 }}>
+                <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.15rem", color: "#fff", margin: "0 0 0.35rem", lineHeight: 1.25 }}>
                   {titleText}
                 </h4>
+                {Boolean(item.tagline) && (
+                  <p style={{ margin: 0, fontSize: "0.78rem", color: "rgba(255,255,255,0.6)", lineHeight: 1.4 }}>
+                    {String(item.tagline)}
+                  </p>
+                )}
                 {Boolean(statVal) && (
-                  <div style={{ display: "inline-flex", flexDirection: "column", background: "rgba(13,148,136,0.15)", border: "1px solid rgba(13,148,136,0.3)", padding: "0.4rem 0.8rem", borderRadius: 10, marginTop: "0.4rem" }}>
-                    <span style={{ fontSize: "1.1rem", fontWeight: 800, color: "#5eead4", lineHeight: 1.1 }}>{statVal}</span>
-                    {statLabel && <span style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{statLabel}</span>}
+                  <div style={{ display: "inline-flex", flexDirection: "column", background: "rgba(13,148,136,0.15)", border: "1px solid rgba(13,148,136,0.3)", padding: "0.35rem 0.75rem", borderRadius: 8, marginTop: "0.5rem" }}>
+                    <span style={{ fontSize: "1.05rem", fontWeight: 800, color: "#5eead4", lineHeight: 1.1 }}>{statVal}</span>
+                    {statLabel && <span style={{ fontSize: "0.65rem", color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{statLabel}</span>}
                   </div>
                 )}
               </div>
 
               {/* Spec Rows Preview */}
               {specsArr.length > 0 && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem", background: "rgba(0,0,0,0.3)", padding: "0.85rem", borderRadius: 12, border: "1px solid rgba(255,255,255,0.06)" }}>
-                  <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.2rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem", background: "rgba(0,0,0,0.25)", padding: "0.75rem", borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "0.15rem" }}>
                     Technical Specifications
                   </div>
-                  {specsArr.slice(0, 5).map((s: any, idx: number) => (
-                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", borderBottom: idx < specsArr.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", paddingBottom: "0.2rem" }}>
+                  {specsArr.slice(0, 4).map((s: any, idx: number) => (
+                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", borderBottom: idx < specsArr.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none", paddingBottom: "0.15rem" }}>
                       <span style={{ color: "rgba(255,255,255,0.5)" }}>{s.label}</span>
                       <strong style={{ color: "#fff" }}>{Array.isArray(s.values) ? s.values.join(" / ") : String(s.value || s.values || "")}</strong>
                     </div>
                   ))}
                 </div>
               )}
+            </div>
+          </div>
 
-              {/* Features Preview */}
-              {featuresArr.length > 0 && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-                  <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                    Key Highlights
-                  </div>
-                  {featuresArr.slice(0, 3).map((f: any, idx: number) => (
-                    <div key={idx} style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.75)", background: "rgba(255,255,255,0.03)", padding: "0.5rem 0.7rem", borderRadius: 8 }}>
-                      <strong style={{ color: "#5eead4", display: "block", marginBottom: "0.1rem" }}>{f.head}</strong>
-                      <span>{f.body}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+          {/* Quality Checklist */}
+          <div style={{
+            background: "#121b2d", border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 18, padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.75rem"
+          }}>
+            <h4 style={{ margin: 0, fontSize: "0.85rem", fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+              <Sparkles size={14} color="var(--brand-teal)" /> Quality Checklist
+            </h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.78rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: item.name ? "rgba(255,255,255,0.85)" : "#ff8a97" }}>
+                {item.name ? <CheckCircle2 size={13} color="#2dd4bf" /> : <AlertTriangle size={13} color="#ff8a97" />}
+                <span>Product Name {item.name ? "configured" : "is missing"}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: item.slug ? "rgba(255,255,255,0.85)" : "#ff8a97" }}>
+                {item.slug ? <CheckCircle2 size={13} color="#2dd4bf" /> : <AlertTriangle size={13} color="#ff8a97" />}
+                <span>URL Slug {item.slug ? `(/${item.slug})` : "is missing"}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: imgUrl ? "rgba(255,255,255,0.85)" : "#f5c451" }}>
+                {imgUrl ? <CheckCircle2 size={13} color="#2dd4bf" /> : <AlertTriangle size={13} color="#f5c451" />}
+                <span>Primary Photo {imgUrl ? "uploaded" : "recommended"}</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: specsArr.length > 0 ? "rgba(255,255,255,0.85)" : "#f5c451" }}>
+                {specsArr.length > 0 ? <CheckCircle2 size={13} color="#2dd4bf" /> : <AlertTriangle size={13} color="#f5c451" />}
+                <span>Spec Table ({specsArr.length} specs)</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1563,10 +1705,14 @@ function ProductEditorModal({ item, index, collection, onClose, onSave, onFieldC
 
 // ── main editor ────────────────────────────────────────────
 export default function Editor({ schema }: { schema: SectionSchema }) {
+  const searchParams = useSearchParams();
+  const editSlug = searchParams?.get("edit");
+  const catParam = searchParams?.get("category");
+
   const [data, setData] = useState<Json | null>(null);
   const [status, setStatus] = useState<"idle" | "dirty" | "saving" | "saved" | "error">("idle");
   const [errMsg, setErrMsg] = useState("");
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>("all");
   const [filterQuery, setFilterQuery] = useState("");
   const [filterType, setFilterType] = useState<"all" | "complete" | "warnings" | "has_image">("all");
 
@@ -1574,11 +1720,39 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
   const [pendingWarnings, setPendingWarnings] = useState<ValidationWarning[] | null>(null);
   const [pendingSaveFn, setPendingSaveFn] = useState<(() => void) | null>(null);
 
-  // product editor modal state
-  const [modalItem, setModalItem] = useState<{ item: Item; index: number; collection: Collection } | null>(null);
+  // full-page product/item editor state (replaces popup modal)
+  const [editingItem, setEditingItem] = useState<{ item: Item; index: number; collection: Collection } | null>(null);
 
   // live preview card modal state
   const [previewItem, setPreviewItem] = useState<{ item: Item; title: string } | null>(null);
+
+  // Helper to sync URL params without reload
+  const updateUrlParam = useCallback((key: string, val: string | null) => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (val) {
+      url.searchParams.set(key, val);
+    } else {
+      url.searchParams.delete(key);
+    }
+    window.history.pushState(null, "", url.toString());
+  }, []);
+
+  const handleOpenEdit = useCallback((item: Item, index: number, collection: Collection) => {
+    setEditingItem({ item, index, collection });
+    const slugOrIdx = String(item.slug || index);
+    updateUrlParam("edit", slugOrIdx);
+  }, [updateUrlParam]);
+
+  const handleCloseEdit = useCallback(() => {
+    setEditingItem(null);
+    updateUrlParam("edit", null);
+  }, [updateUrlParam]);
+
+  const handleSelectCategory = useCallback((catSlug: string) => {
+    setActiveCategory(catSlug);
+    updateUrlParam("category", catSlug === "all" ? null : catSlug);
+  }, [updateUrlParam]);
 
   useEffect(() => {
     let alive = true;
@@ -1588,6 +1762,54 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
       .catch(() => { if (alive) { setStatus("error"); setErrMsg("Failed to load section data"); } });
     return () => { alive = false; };
   }, [schema.slug]);
+
+  // Sync category from URL param
+  useEffect(() => {
+    if (catParam) {
+      setActiveCategory(catParam);
+    }
+  }, [catParam]);
+
+  // Sync item from URL edit param
+  useEffect(() => {
+    if (editSlug && data && !editingItem) {
+      const primaryCol = schema.collections[0];
+      if (!primaryCol) return;
+      const items = (data[primaryCol.key] as Item[]) ?? [];
+      const foundIdx = items.findIndex(it => String(it.slug ?? "") === editSlug || String(it.name ?? "") === editSlug);
+      if (foundIdx >= 0) {
+        setEditingItem({ item: items[foundIdx], index: foundIdx, collection: primaryCol });
+      } else {
+        const numIdx = parseInt(editSlug, 10);
+        if (!isNaN(numIdx) && items[numIdx]) {
+          setEditingItem({ item: items[numIdx], index: numIdx, collection: primaryCol });
+        }
+      }
+    }
+  }, [editSlug, data, schema.collections, editingItem]);
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const url = new URL(window.location.href);
+      const eParam = url.searchParams.get("edit");
+      const cParam = url.searchParams.get("category");
+      if (cParam) setActiveCategory(cParam);
+      if (!eParam) {
+        setEditingItem(null);
+      } else if (data) {
+        const primaryCol = schema.collections[0];
+        if (!primaryCol) return;
+        const items = (data[primaryCol.key] as Item[]) ?? [];
+        const foundIdx = items.findIndex(it => String(it.slug ?? "") === eParam);
+        if (foundIdx >= 0) {
+          setEditingItem({ item: items[foundIdx], index: foundIdx, collection: primaryCol });
+        }
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [data, schema.collections]);
 
   const mutate = useCallback((fn: (d: Json) => Json) => {
     setData(d => (d ? fn(d) : d));
@@ -1652,6 +1874,48 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
     );
   }
 
+  // ── FULL PAGE ITEM EDITOR VIEW ──
+  // If an item is being edited, render it as a dedicated full page instead of a popup box
+  if (editingItem) {
+    return (
+      <div style={{ maxWidth: 1360, position: "relative" }} className="adm-rise">
+        {pendingWarnings && (
+          <WarningModal
+            title="Review before saving"
+            warnings={pendingWarnings}
+            onConfirm={() => { setPendingWarnings(null); pendingSaveFn?.(); }}
+            onCancel={() => { setPendingWarnings(null); setPendingSaveFn(null); }}
+          />
+        )}
+        <FullPageItemEditor
+          item={editingItem.item}
+          index={editingItem.index}
+          collection={editingItem.collection}
+          allCategories={((data.categories as Item[]) || DEFAULT_PRODUCT_CATEGORIES)}
+          onBack={handleCloseEdit}
+          onSave={save}
+          onFieldChange={(key, v) => {
+            mutate(d => {
+              const n = ((d[editingItem.collection.key] as Item[]) ?? []).map(x => ({ ...x }));
+              n[editingItem.index][key] = v;
+              return { ...d, [editingItem.collection.key]: n };
+            });
+            setEditingItem(prev => prev ? { ...prev, item: { ...prev.item, [key]: v } } : null);
+          }}
+          onFieldItemChange={(key, v) => {
+            mutate(d => {
+              const n = ((d[editingItem.collection.key] as Item[]) ?? []).map(x => ({ ...x }));
+              n[editingItem.index][key] = v;
+              return { ...d, [editingItem.collection.key]: n };
+            });
+            setEditingItem(prev => prev ? { ...prev, item: { ...prev.item, [key]: v } } : null);
+          }}
+          status={status}
+        />
+      </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth: 1200, position: "relative" }} className="adm-rise">
       {/* validation warning modal */}
@@ -1661,33 +1925,6 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
           warnings={pendingWarnings}
           onConfirm={() => { setPendingWarnings(null); pendingSaveFn?.(); }}
           onCancel={() => { setPendingWarnings(null); setPendingSaveFn(null); }}
-        />
-      )}
-
-      {/* product editor modal */}
-      {modalItem && (
-        <ProductEditorModal
-          item={modalItem.item}
-          index={modalItem.index}
-          collection={modalItem.collection}
-          onClose={() => setModalItem(null)}
-          onSave={() => { doSave(); setModalItem(null); }}
-          onFieldChange={(key, v) => {
-            mutate(d => {
-              const n = ((d[modalItem.collection.key] as Item[]) ?? []).map(x => ({ ...x }));
-              n[modalItem.index][key] = v;
-              return { ...d, [modalItem.collection.key]: n };
-            });
-            setModalItem(prev => prev ? { ...prev, item: { ...prev.item, [key]: v } } : null);
-          }}
-          onFieldItemChange={(key, v) => {
-            mutate(d => {
-              const n = ((d[modalItem.collection.key] as Item[]) ?? []).map(x => ({ ...x }));
-              n[modalItem.index][key] = v;
-              return { ...d, [modalItem.collection.key]: n };
-            });
-            setModalItem(prev => prev ? { ...prev, item: { ...prev.item, [key]: v } } : null);
-          }}
         />
       )}
 
@@ -1754,7 +1991,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.4rem" }}>
             <span style={{ background: "var(--adm-mint-sub)", color: "var(--adm-mint)", padding: "0.2rem 0.6rem", borderRadius: 10, fontSize: "0.75rem", fontWeight: 700 }}>
-              CMS CMS Section
+              {schema.slug === "products" ? "Machinery Catalogue" : "CMS Section"}
             </span>
             <span style={{ fontSize: "0.78rem", color: "var(--adm-text-sub)" }}>Press Ctrl+S to save</span>
           </div>
@@ -1823,52 +2060,95 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
           itemsWithIndices = itemsWithIndices.filter(({ item }) => isFamilies ? validateFamily(item).length > 0 : false);
         }
 
-        if (isFamilies && !activeCategory) {
-          return (
-            <section key={col.key} style={{ marginBottom: "2.5rem" }}>
-              <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.3rem", color: "#fff", margin: "0 0 1rem" }}>
-                {col.label} <span style={{ color: "rgba(255,255,255,0.4)", fontFamily: "var(--ff-body)", fontSize: "1rem", fontWeight: 400 }}>({allItems.length})</span>
-              </h2>
-              <CategoryTiles categories={categoryList} items={allItems} onSelect={setActiveCategory} />
-            </section>
-          );
-        }
+        const activeCatObj = categoryList.find(c => c.slug === activeCategory);
+        const activeCategoryName = isFamilies
+          ? (isAllSelected ? "All Machines & Products" : String(activeCatObj?.name ?? activeCategory))
+          : col.label;
 
-        const activeCategoryName = isFamilies && activeCategory
-          ? (activeCategory === "all" ? "All Machines & Products" : String(categoryList.find(c => c.slug === activeCategory)?.name ?? activeCategory))
+        const activeCategoryTagline = isFamilies
+          ? (isAllSelected
+              ? "Complete machinery catalogue across all manufacturing lines"
+              : String(activeCatObj?.tagline || (activeCategory === "film-blowing" ? "Pellet to film · Blown film lines & co-extrusion towers" : activeCategory === "bag-making" ? "Film to bag · Heat-seal, roll-bag & pouch converters" : activeCategory === "recycling" ? "Scrap to pellet · Pelletizing & closed-loop resin lines" : activeCategory === "printing" ? "Film to print · CI flexographic printing presses" : "")))
           : "";
+
+        const ActiveIcon = isFamilies
+          ? (isAllSelected ? Package : (SHARED_CATEGORY_ICON[activeCategory] ?? Package))
+          : Package;
 
         return (
           <section key={col.key} style={{ marginBottom: "2.5rem" }}>
-            {/* Collection Header & Filter Toolbar */}
-            <div style={{ background: "#121b2d", border: "1px solid var(--adm-border)", borderRadius: 16, padding: "1.2rem", marginBottom: "1rem" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", flexWrap: "wrap", marginBottom: "0.8rem" }}>
-                <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.3rem", color: "#fff", margin: 0 }}>
-                  {isFamilies && (
-                    <button type="button" onClick={() => { setActiveCategory(null); }}
-                      style={{ background: "none", border: "none", cursor: "pointer", color: "var(--brand-teal)", fontFamily: "var(--ff-body)", fontSize: "0.9rem", fontWeight: 700, marginRight: "0.9rem", verticalAlign: "middle" }}>
-                      ← Back to categories
-                    </button>
+            {/* If families: ALWAYS render Distinct Category Cards prominently at the top */}
+            {isFamilies && (
+              <div style={{ marginBottom: "1.75rem" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.85rem" }}>
+                  <div>
+                    <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.25rem", color: "#fff", margin: 0 }}>
+                      Machinery Categories
+                    </h2>
+                    <p style={{ margin: "0.2rem 0 0", fontSize: "0.82rem", color: "var(--adm-text-sub)" }}>
+                      Click any category card to render its products below.
+                    </p>
+                  </div>
+                  <span style={{ fontFamily: "var(--ff-mono)", fontSize: "0.78rem", color: "rgba(255,255,255,0.4)" }}>
+                    {allItems.length} machines total
+                  </span>
+                </div>
+                <DistinctCategoryCards
+                  categories={categoryList}
+                  items={allItems}
+                  activeCategory={activeCategory}
+                  onSelect={handleSelectCategory}
+                />
+              </div>
+            )}
+
+            {/* Collection Header & Filter Toolbar for products rendered at bottom */}
+            <div style={{ background: "#121b2d", border: "1px solid var(--adm-border)", borderRadius: 16, padding: "1.25rem 1.5rem", marginBottom: "1.25rem" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                    <span style={{ color: "var(--brand-teal)", display: "flex", alignItems: "center" }}>
+                      <ActiveIcon size={20} />
+                    </span>
+                    <h2 style={{ fontFamily: "var(--ff-display)", fontSize: "1.35rem", color: "#fff", margin: 0 }}>
+                      {activeCategoryName}
+                    </h2>
+                    <span style={{
+                      background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.8)",
+                      fontFamily: "var(--ff-mono)", fontSize: "0.78rem", padding: "0.2rem 0.55rem",
+                      borderRadius: 20, fontWeight: 700, border: "1px solid rgba(255,255,255,0.08)"
+                    }}>
+                      {itemsWithIndices.length} {itemsWithIndices.length === 1 ? "machine" : "machines"}
+                    </span>
+                  </div>
+                  {activeCategoryTagline && (
+                    <p style={{ margin: "0.3rem 0 0", fontSize: "0.82rem", color: "var(--adm-text-sub)" }}>
+                      {activeCategoryTagline}
+                    </p>
                   )}
-                  {isFamilies ? activeCategoryName : col.label} <span style={{ color: "rgba(255,255,255,0.4)", fontFamily: "var(--ff-body)", fontSize: "1rem", fontWeight: 400 }}>({itemsWithIndices.length} items)</span>
-                </h2>
+                </div>
+
                 {col.canAdd && (
-                  <button type="button" style={smallBtn} onClick={() => {
-                    const template = JSON.parse(JSON.stringify(col.template ?? {}));
-                    if (isFamilies && activeCategory && activeCategory !== "all") {
-                      template.category = activeCategory;
-                    } else if (isFamilies && activeCategory === "all") {
-                      template.category = "film-blowing";
-                    }
-                    template.isNew = true;
-                    mutate(d => {
-                      const newItems = [template, ...allItems];
-                      const newIdx = 0;
-                      setTimeout(() => setModalItem({ item: template, index: newIdx, collection: col }), 50);
-                      return { ...d, [col.key]: newItems };
-                    });
-                  }}>
-                    + Add {(col.singular ?? col.label.replace(/s$/, "")).toLowerCase()}
+                  <button
+                    type="button"
+                    className="adm-btn"
+                    style={{ padding: "0.55rem 1.15rem", fontSize: "0.82rem" }}
+                    onClick={() => {
+                      const template = JSON.parse(JSON.stringify(col.template ?? {}));
+                      if (isFamilies && activeCategory && activeCategory !== "all") {
+                        template.category = activeCategory;
+                      } else if (isFamilies) {
+                        template.category = "film-blowing";
+                      }
+                      template.isNew = true;
+                      mutate(d => {
+                        const newItems = [template, ...allItems];
+                        setTimeout(() => handleOpenEdit(template, 0, col), 50);
+                        return { ...d, [col.key]: newItems };
+                      });
+                    }}
+                  >
+                    + Add {isFamilies && activeCategory !== "all" ? `${activeCategoryName.replace(/ Machines$/, "").replace(/ & Lab Lines$/, "")} Machine` : (col.singular ?? col.label.replace(/s$/, "")).toLowerCase()}
                   </button>
                 )}
               </div>
@@ -1879,7 +2159,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
                   <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--adm-text-sub)" }} />
                   <input
                     type="text"
-                    placeholder={`Filter ${col.label.toLowerCase()}...`}
+                    placeholder={`Filter ${activeCategoryName.toLowerCase()}...`}
                     value={filterQuery}
                     onChange={e => setFilterQuery(e.target.value)}
                     style={{
@@ -1915,107 +2195,155 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
               </div>
             </div>
 
-            {/* List Cards */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-              {itemsWithIndices.map(({ item, index: i }, listI) => {
-                const title = col.titleKeys.map(k => String(item[k] ?? "")).filter(Boolean).join(" — ") || `#${listI + 1}`;
-                const itemWarnings = isFamilies ? validateFamily(item) : [];
-                const hasErrors = itemWarnings.some(w => w.severity === "error");
-                const hasWarnings = itemWarnings.some(w => w.severity === "warning");
-                const itemImg = String(item.image || item.heroImage || (Array.isArray(item.images) && item.images[0]) || "");
+            {/* List Cards Rendered Nicely at Bottom */}
+            {itemsWithIndices.length === 0 ? (
+              <div style={{
+                background: "#121b2d", border: "1px dashed var(--adm-border)",
+                borderRadius: 16, padding: "3rem 1.5rem", textAlign: "center",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem"
+              }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.04)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--adm-text-sub)" }}>
+                  <Package size={24} />
+                </div>
+                <h3 style={{ margin: 0, fontSize: "1.1rem", color: "#fff" }}>
+                  No machines found
+                </h3>
+                <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--adm-text-sub)", maxWidth: 360 }}>
+                  {filterQuery ? `No machines matching "${filterQuery}" in this category.` : `There are no machines listed under ${activeCategoryName} yet.`}
+                </p>
+                {col.canAdd && (
+                  <button
+                    type="button"
+                    className="adm-btn"
+                    style={{ marginTop: "0.5rem", padding: "0.5rem 1rem", fontSize: "0.82rem" }}
+                    onClick={() => {
+                      const template = JSON.parse(JSON.stringify(col.template ?? {}));
+                      if (isFamilies && activeCategory && activeCategory !== "all") {
+                        template.category = activeCategory;
+                      }
+                      template.isNew = true;
+                      mutate(d => {
+                        const newItems = [template, ...allItems];
+                        setTimeout(() => handleOpenEdit(template, 0, col), 50);
+                        return { ...d, [col.key]: newItems };
+                      });
+                    }}
+                  >
+                    + Add first machine to this category
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {itemsWithIndices.map(({ item, index: i }, listI) => {
+                  const title = col.titleKeys.map(k => String(item[k] ?? "")).filter(Boolean).join(" — ") || `#${listI + 1}`;
+                  const itemWarnings = isFamilies ? validateFamily(item) : [];
+                  const hasErrors = itemWarnings.some(w => w.severity === "error");
+                  const hasWarnings = itemWarnings.some(w => w.severity === "warning");
+                  const itemImg = String(item.image || item.heroImage || (Array.isArray(item.images) && item.images[0]) || "");
+                  const specCount = Array.isArray(item.specs) ? item.specs.length : 0;
+                  const photoCount = Array.isArray(item.images) ? item.images.length : (itemImg ? 1 : 0);
+                  const itemCat = String(item.category || "");
 
-                const specCount = Array.isArray(item.specs) ? item.specs.length : 0;
-                const photoCount = Array.isArray(item.images) ? item.images.length : (itemImg ? 1 : 0);
-
-                return (
-                  <div key={i} className="adm-panel" style={{
-                    borderRadius: 16,
-                    background: "#121b2d",
-                    overflow: "hidden",
-                    border: "1px solid",
-                    transition: "all 0.2s ease",
-                    borderColor: hasErrors ? "rgba(255,107,125,0.35)" : hasWarnings ? "rgba(245,196,81,0.3)" : "var(--adm-border)",
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "0.9rem 1.25rem", flexWrap: "wrap" }}>
-
-                      {/* Thumbnail or Badge */}
-                      <div style={{
-                        width: 48, height: 48, borderRadius: 12, flexShrink: 0,
-                        background: itemImg ? "rgba(0,0,0,0.3)" : "rgba(0,210,148,0.1)",
-                        border: "1px solid rgba(255,255,255,0.1)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        overflow: "hidden"
-                      }}>
-                        {itemImg ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={itemImg} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        ) : (
-                          <span style={{ color: "var(--adm-mint)", fontWeight: 700, fontSize: "0.9rem" }}>
-                            {listI + 1}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Title & Badges Info */}
-                      <div style={{ flex: 1, minWidth: 220 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                          <h4 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 700, color: "#fff" }}>
-                            {title}
-                          </h4>
-                          {hasErrors && <span title="Has errors"><AlertTriangle size={14} color="#ff8a97" /></span>}
-                          {hasWarnings && !hasErrors && <span title="Has warnings"><AlertTriangle size={14} color="#f5c451" /></span>}
+                  return (
+                    <div key={i} className="adm-panel" style={{
+                      borderRadius: 16,
+                      background: "#121b2d",
+                      overflow: "hidden",
+                      border: "1px solid",
+                      transition: "all 0.2s ease",
+                      borderColor: hasErrors ? "rgba(255,107,125,0.35)" : hasWarnings ? "rgba(245,196,81,0.3)" : "var(--adm-border)",
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "0.9rem 1.25rem", flexWrap: "wrap" }}>
+                        {/* Thumbnail or Badge */}
+                        <div style={{
+                          width: 52, height: 52, borderRadius: 12, flexShrink: 0,
+                          background: itemImg ? "rgba(0,0,0,0.3)" : "rgba(0,210,148,0.1)",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          overflow: "hidden"
+                        }}>
+                          {itemImg ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={itemImg} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          ) : (
+                            <span style={{ color: "var(--adm-mint)", fontWeight: 700, fontSize: "0.9rem" }}>
+                              {listI + 1}
+                            </span>
+                          )}
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "0.35rem", fontSize: "0.78rem", color: "var(--adm-text-sub)" }}>
-                          {specCount > 0 && <span>⚡ {specCount} Specs</span>}
-                          {photoCount > 0 && <span>📷 {photoCount} Photos</span>}
-                          {Boolean(item.datasheetPdf) && <span style={{ color: "var(--adm-mint)" }}>📄 PDF Datasheet</span>}
-                          {Boolean(item.series) && <span style={{ background: "rgba(255,255,255,0.06)", padding: "0.1rem 0.4rem", borderRadius: 6 }}>{String(item.series)}</span>}
-                        </div>
-                      </div>
 
-                      {/* Dynamic Action Buttons */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                        <button
-                          type="button"
-                          title="Live Card Preview"
-                          style={{ ...iconBtn, padding: "0.45rem 0.7rem", display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.78rem" }}
-                          onClick={() => setPreviewItem({ item, title })}
-                        >
-                          <Eye size={13} /> Preview
-                        </button>
-                        <button
-                          type="button"
-                          title="Clone / Duplicate"
-                          style={{ ...iconBtn, padding: "0.45rem 0.7rem", display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.78rem" }}
-                          onClick={() => {
-                            const clone = JSON.parse(JSON.stringify(item));
-                            if (clone.name) clone.name = `${clone.name} (Copy)`;
-                            mutate(d => ({ ...d, [col.key]: [...allItems, clone] }));
-                          }}
-                        >
-                          <Copy size={13} /> Clone
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setModalItem({ item, index: i, collection: col })}
-                          style={{
-                            ...btnBase, padding: "0.45rem 0.85rem", fontSize: "0.78rem", background: "var(--adm-mint)", color: "#061814"
-                          }}
-                        >
-                          Edit →
-                        </button>
-                        {col.canAdd && (
-                          <button type="button" title="Delete item" style={{ ...dangerBtn, padding: "0.45rem 0.8rem", fontSize: "0.78rem" }}
-                            onClick={() => { if (confirm('Delete "' + title + '"?')) mutate(d => ({ ...d, [col.key]: allItems.filter((_, j) => j !== i) })); }}>
-                            <Trash2 size={13} /> Delete
+                        {/* Title & Badges Info */}
+                        <div style={{ flex: 1, minWidth: 220 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
+                            <h4 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 700, color: "#fff" }}>
+                              {title}
+                            </h4>
+                            {isAllSelected && itemCat && (
+                              <span style={{
+                                fontSize: "0.7rem", fontFamily: "var(--ff-mono)",
+                                background: "rgba(43,191,179,0.15)", color: "#5eead4",
+                                padding: "0.15rem 0.5rem", borderRadius: 6, border: "1px solid rgba(43,191,179,0.3)"
+                              }}>
+                                {itemCat}
+                              </span>
+                            )}
+                            {hasErrors && <span title="Has errors"><AlertTriangle size={14} color="#ff8a97" /></span>}
+                            {hasWarnings && !hasErrors && <span title="Has warnings"><AlertTriangle size={14} color="#f5c451" /></span>}
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "0.35rem", fontSize: "0.78rem", color: "var(--adm-text-sub)", flexWrap: "wrap" }}>
+                            {specCount > 0 && <span>⚡ {specCount} Specs</span>}
+                            {photoCount > 0 && <span>📷 {photoCount} Photos</span>}
+                            {Boolean(item.datasheetPdf) && <span style={{ color: "var(--adm-mint)" }}>📄 PDF Datasheet</span>}
+                            {Boolean(item.series) && <span style={{ background: "rgba(255,255,255,0.06)", padding: "0.1rem 0.4rem", borderRadius: 6 }}>{String(item.series)}</span>}
+                          </div>
+                        </div>
+
+                        {/* Actions: Edit Page Button + Secondary Actions */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
+                          <button
+                            type="button"
+                            title="Live Card Preview"
+                            style={{ ...iconBtn, padding: "0.45rem 0.7rem", display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.78rem" }}
+                            onClick={() => setPreviewItem({ item, title })}
+                          >
+                            <Eye size={13} /> Preview
                           </button>
-                        )}
+                          <button
+                            type="button"
+                            title="Clone / Duplicate"
+                            style={{ ...iconBtn, padding: "0.45rem 0.7rem", display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.78rem" }}
+                            onClick={() => {
+                              const clone = JSON.parse(JSON.stringify(item));
+                              if (clone.name) clone.name = `${clone.name} (Copy)`;
+                              mutate(d => ({ ...d, [col.key]: [...allItems, clone] }));
+                            }}
+                          >
+                            <Copy size={13} /> Clone
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEdit(item, i, col)}
+                            className="adm-btn"
+                            style={{
+                              padding: "0.45rem 0.95rem", fontSize: "0.8rem", gap: "0.35rem"
+                            }}
+                          >
+                            Edit Page →
+                          </button>
+                          {col.canAdd && (
+                            <button type="button" title="Delete item" style={{ ...dangerBtn, padding: "0.45rem 0.75rem", fontSize: "0.78rem" }}
+                              onClick={() => { if (confirm('Delete "' + title + '"?')) mutate(d => ({ ...d, [col.key]: allItems.filter((_, j) => j !== i) })); }}>
+                              <Trash2 size={13} /> Delete
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </section>
         );
       })}

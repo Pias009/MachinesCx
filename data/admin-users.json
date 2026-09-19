@@ -234,6 +234,13 @@
   ],
   "auditLog": [
     {
+      "id": "aud-mu8n28ny-uao5",
+      "timestamp": "2026-09-19T17:05:45.310Z",
+      "actor": "Super Admin",
+      "action": "ROLE_LOGIN_SUCCESS",
+      "details": "Primary Hidden Super Admin logged in"
+    },
+    {
       "id": "aud-mu00tdn3-x17m",
       "timestamp": "2026-09-13T16:20:50.895Z",
       "actor": "Content Editor",

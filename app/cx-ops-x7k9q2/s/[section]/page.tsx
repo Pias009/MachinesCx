@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import AdminShell from "../../AdminShell";
 import Editor from "../../Editor";
@@ -10,7 +11,9 @@ export default function SectionPage({ params }: { params: { section: string } })
 
   return (
     <AdminShell>
-      <Editor key={schema.slug} schema={schema} />
+      <Suspense fallback={<div className="adm-skel" style={{ height: 260, borderRadius: 16 }} />}>
+        <Editor key={schema.slug} schema={schema} />
+      </Suspense>
     </AdminShell>
   );
 }

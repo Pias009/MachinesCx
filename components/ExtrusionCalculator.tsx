@@ -412,7 +412,7 @@ Calculated at https://www.wzashal.com/tools/extrusion-calculator`;
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Card 1 */}
           <Link
-            href="/products/film-blowing-machines/aba-three-layer-blown-film-line"
+            href="/products/film-blowing/aba-1000-1500"
             className="group flex flex-col rounded-xl border border-[var(--bg-line)] bg-[var(--bg-base)] p-5 hover:border-[var(--brand-teal)]/50 transition-all"
           >
             <span className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-[var(--brand-teal)] mb-2 font-semibold">ABA 3-Layer Series</span>
@@ -430,7 +430,7 @@ Calculated at https://www.wzashal.com/tools/extrusion-calculator`;
 
           {/* Card 2 */}
           <Link
-            href="/products/film-blowing-machines/abcde-2200-five-layer-co-extrusion-line"
+            href="/products/film-blowing/abcde-2200"
             className="group flex flex-col rounded-xl border border-[var(--bg-line)] bg-[var(--bg-base)] p-5 hover:border-[var(--brand-teal)]/50 transition-all"
           >
             <span className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-[var(--brand-teal)] mb-2 font-semibold">High Barrier 5-Layer</span>
@@ -448,7 +448,7 @@ Calculated at https://www.wzashal.com/tools/extrusion-calculator`;
 
           {/* Card 3 */}
           <Link
-            href="/products/bag-making-machines/t-pro-multi-lane-heat-seal-bag-machine"
+            href="/products/bag-making/t-pro-heatseal"
             className="group flex flex-col rounded-xl border border-[var(--bg-line)] bg-[var(--bg-base)] p-5 hover:border-[var(--brand-teal)]/50 transition-all"
           >
             <span className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-[var(--brand-teal)] mb-2 font-semibold">Converting & Bag Making</span>

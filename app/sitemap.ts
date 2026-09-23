@@ -1,9 +1,15 @@
 import type { MetadataRoute } from "next";
-import { SITE_URL, categories, families } from "@/lib/products";
+import { SITE_URL } from "@/lib/products";
 import { locales, defaultLocale } from "@/i18n/routing";
 import { localePath } from "@/lib/seo";
-import newsData from "@/data/news.json";
-import { getMachineCategories, getMachineProducts } from "@/lib/machinesData";
+import { getLiveCatalogue } from "@/lib/liveCatalogue";
+import { getLiveNews } from "@/lib/liveNews";
+
+// Built from the live CMS (not the bundled JSON) so every URL listed is one
+// that actually renders — a slug renamed in the admin panel previously left
+// the sitemap pointing Google at a not-found page. machines.json pages are
+// omitted: they 301 to their catalogue family (next.config.mjs).
+export const revalidate = 3600;
 
 const STATIC_PATHS = [
   "",
@@ -29,8 +35,9 @@ function languageAlternates(path: string): Record<string, string> {
   return languages;
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+  const [{ categories, families }, { articles }] = await Promise.all([getLiveCatalogue(), getLiveNews()]);
 
   // Static pages
   const staticEntries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({
@@ -41,8 +48,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     alternates: { languages: languageAlternates(path) },
   }));
 
-  // Categories from legacy productsData
-  const legacyCategoryEntries: MetadataRoute.Sitemap = categories.map((c) => ({
+  // Categories
+  const categoryEntries: MetadataRoute.Sitemap = categories.map((c) => ({
     url: `${SITE_URL}/products/${c.slug}`,
     lastModified: now,
     changeFrequency: "monthly",
@@ -50,17 +57,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     alternates: { languages: languageAlternates(`/products/${c.slug}`) },
   }));
 
-  // Categories from app/data/machines.json
-  const machineCategories = getMachineCategories();
-  const machineCategoryEntries: MetadataRoute.Sitemap = machineCategories.map((c) => ({
-    url: `${SITE_URL}/products/${c.slug}`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.85,
-    alternates: { languages: languageAlternates(`/products/${c.slug}`) },
-  }));
-
-  // Families from legacy productsData
+  // Product families
   const familyEntries: MetadataRoute.Sitemap = families.map((f) => ({
     url: `${SITE_URL}/products/${f.category}/${f.slug}`,
     lastModified: now,
@@ -69,18 +66,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     alternates: { languages: languageAlternates(`/products/${f.category}/${f.slug}`) },
   }));
 
-  // Dynamic machine products from app/data/machines.json
-  const machineProducts = getMachineProducts();
-  const machineProductEntries: MetadataRoute.Sitemap = machineProducts.map((p) => ({
-    url: `${SITE_URL}/products/${p.category}/${p.slug}`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.95,
-    alternates: { languages: languageAlternates(`/products/${p.category}/${p.slug}`) },
-  }));
-
   // News articles
-  const newsEntries: MetadataRoute.Sitemap = (newsData.articles as { slug: string }[]).map((a) => ({
+  const newsEntries: MetadataRoute.Sitemap = articles.map((a) => ({
     url: `${SITE_URL}/news/${a.slug}`,
     lastModified: now,
     changeFrequency: "weekly",
@@ -91,10 +78,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Deduplicate entries by URL
   const allEntries = [
     ...staticEntries,
-    ...legacyCategoryEntries,
-    ...machineCategoryEntries,
+    ...categoryEntries,
     ...familyEntries,
-    ...machineProductEntries,
     ...newsEntries,
   ];
 

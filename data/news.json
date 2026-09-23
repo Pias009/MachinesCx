@@ -6,7 +6,7 @@
       "seoTitle": "ABA vs 5-Layer Blown Film Extrusion: Complete Industrial Guide",
       "metaDescription": "Compare 3-layer ABA co-extrusion and 5-layer ABCDE blown film lines. Understand resin savings, barrier properties, and ROI for packaging manufacturers.",
       "date": "2026-08-20",
-      "author": "Ashal Innomach Engineering Team",
+      "author": "Ashal Innomech Engineering Team",
       "category": "Technical Guides",
       "readTime": "6 min read",
       "summary": "When investing in a new blown film line, choosing between a 3-layer ABA co-extrusion system and a 5-layer ABCDE line dictates your raw material cost structure, barrier capabilities, and target market reach.",
@@ -22,11 +22,11 @@
       "links": [
         {
           "label": "ABA Three-Layer Line",
-          "url": "/products/film-blowing-machines/aba-three-layer-blown-film-line"
+          "url": "/products/film-blowing/aba-1000-1500"
         },
         {
           "label": "ABCDE-2200 Five-Layer Line",
-          "url": "/products/film-blowing-machines/abcde-2200-five-layer-co-extrusion-line"
+          "url": "/products/film-blowing/abcde-2200"
         }
       ],
       "body": [
@@ -70,7 +70,7 @@
       "seoTitle": "Processing PBAT + PLA Biodegradable Film: Extrusion & Bag Sealing",
       "metaDescription": "Technical guide to eliminating bubble instability, die buildup, and sealing failures when converting biodegradable PBAT and PLA bioplastics.",
       "date": "2026-08-15",
-      "author": "Ashal Innomach Engineering Team",
+      "author": "Ashal Innomech Engineering Team",
       "category": "Process Optimization",
       "readTime": "5 min read",
       "summary": "With global bans on single-use plastics, packaging manufacturers are shifting to compostable bioplastics like PBAT, PLA, and cornstarch compounds. However, their unique rheology demands precise extrusion and sealing parameters.",
@@ -86,7 +86,7 @@
       "links": [
         {
           "label": "T-PRO Multi-Lane Heat-Seal Converter",
-          "url": "/products/bag-making-machines/t-pro-multi-lane-heat-seal-bag-machine"
+          "url": "/products/bag-making/t-pro-heatseal"
         }
       ],
       "body": [
@@ -122,12 +122,12 @@
       "seoTitle": "CI Flexo vs Stack Flexo Printing Presses: Registration & Speed Comparison",
       "metaDescription": "Understand the differences between CI drum flexo presses and stack flexo printers for flexible packaging film, extensible substrates, and paper.",
       "date": "2026-08-10",
-      "author": "Ashal Innomach Engineering Team",
+      "author": "Ashal Innomech Engineering Team",
       "category": "Printing Technology",
       "readTime": "7 min read",
       "summary": "High-quality graphic reproduction on extensible plastic films requires strict web tension and registration control. Central Impression (CI) technology locks the substrate against a single central cylinder, eliminating print misalignment.",
       "excerpt": "Understand the differences between CI drum flexo presses and stack flexo printers for flexible packaging film, extensible substrates, and paper.",
-      "image": "/machines/flexo-6c.png",
+      "image": "/machines/flexo-6c-nobg.png",
       "tags": [
         "Flexo Printing",
         "CI Flexo",
@@ -138,7 +138,7 @@
       "links": [
         {
           "label": "AI-6C High-Speed CI Flexo Press",
-          "url": "/products/flexo-printing-machines/ai-6c-high-speed-ci-flexo-press"
+          "url": "/products/printing/flexo-6c"
         }
       ],
       "body": [
@@ -596,7 +596,7 @@
         },
         {
           "kind": "paragraph",
-          "text": "Melt flow stability within the die head assembly determines film gauge consistency and eliminates inter-layer flow instabilities (such as zig-zag interfacial shear melt fracture). Ashal Machinery utilizes 3D Computational Fluid Dynamics (CFD) software to design spiral distribution channels with logarithmic depth reduction."
+          "text": "Melt flow stability within the die head assembly determines film gauge consistency and eliminates inter-layer flow instabilities (such as zig-zag interfacial shear melt fracture). Ashal Innomech utilizes 3D Computational Fluid Dynamics (CFD) software to design spiral distribution channels with logarithmic depth reduction."
         },
         {
           "kind": "paragraph",
@@ -699,7 +699,7 @@
         },
         {
           "kind": "paragraph",
-          "text": "Biopolymer film melt exhibits lower melt strength and slower crystallization rates than polyolefins. Standard high-velocity air rings can cause severe film bubble swaying or collapse. Ashal Machinery equips its biodegradable film lines with dual-lip low-velocity air rings paired with chilled air blowers (air temperature 10°C–14°C) to accelerate polymer crystallization right above the die lip."
+          "text": "Biopolymer film melt exhibits lower melt strength and slower crystallization rates than polyolefins. Standard high-velocity air rings can cause severe film bubble swaying or collapse. Ashal Innomech equips its biodegradable film lines with dual-lip low-velocity air rings paired with chilled air blowers (air temperature 10°C–14°C) to accelerate polymer crystallization right above the die lip."
         },
         {
           "kind": "heading",
@@ -792,7 +792,7 @@
       "date": "2026-02-20",
       "category": "Printing Technology",
       "excerpt": "A comprehensive technical whitepaper detailing high-speed flexo printing dynamics, laser ceramic anilox line screen selection, chamber doctor blade fluid mechanics, and automated registration control.",
-      "image": "/machines/flexo-6c.png",
+      "image": "/machines/flexo-6c-nobg.png",
       "tags": [
         "Flexo Printing",
         "Anilox Roller",
@@ -1318,7 +1318,7 @@
       "date": "2025-12-15",
       "category": "Maintenance Guide",
       "excerpt": "A comprehensive preventive maintenance guide for flexo press operators, covering ultrasonic anilox cleaning, doctor blade wear angle adjustment, and color matching repeatability.",
-      "image": "/machines/flexo-4c.png",
+      "image": "/machines/flexo-2-nobg.png",
       "tags": [
         "Flexo Maintenance",
         "Anilox Cleaning",

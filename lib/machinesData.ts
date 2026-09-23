@@ -30,6 +30,7 @@ export interface MachineProduct {
   category: string;
   name: string;
   model: string;
+  familySlug?: string; // catalogue family (data/products.json) this SEO page shows — supplies its photos
   seoTitle: string;
   metaDescription: string;
   specs: Record<string, string>;
@@ -93,10 +94,16 @@ export interface Article {
 export function getRelatedArticlesForMachine(machineSlug: string): Article[] {
   const articles = (newsJson as { articles: Article[] }).articles;
   if (!Array.isArray(articles)) return [];
+  // a catalogue family also inherits articles tagged with the machines.json
+  // SEO page that now redirects to it (via familySlug)
+  const slugs = new Set([
+    machineSlug,
+    ...machinesData.products.filter((p) => p.familySlug === machineSlug).map((p) => p.slug),
+  ]);
   return articles.filter(
     (art) =>
       Array.isArray(art.relatedMachineSlugs) &&
-      art.relatedMachineSlugs.includes(machineSlug)
+      art.relatedMachineSlugs.some((s) => slugs.has(s))
   );
 }
 

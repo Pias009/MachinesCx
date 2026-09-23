@@ -141,7 +141,7 @@ export default async function LocaleLayout({
                 "@context": "https://schema.org",
                 "@type": "Organization",
                 name: BRAND,
-                legalName: "Wenzhou Ashal Innomach Technology Co., Ltd.",
+                legalName: "Wenzhou Ashal Innomech Technology Co., Ltd.",
                 url: SITE_URL,
                 logo: `${SITE_URL}/logo.jpeg`,
                 email: "ashal@ashalinnomech.com",

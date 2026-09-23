@@ -540,18 +540,26 @@ export default function ProductDetail({ family, category, related, relatedArticl
     family.specs.find(s => s.label === key) ??
     family.specs.find(s => s.label.startsWith(key.split(" ")[0]));
 
+  /* the prefix fallback can resolve two different keys to the same row
+     (e.g. two missing "Max …" keys) — skip rows already used so a spec
+     never shows twice or collides on its React key */
+  const usedCallouts = new Set<string>();
+  const usedPanel = new Set<string>();
+
   /* callout pins — same "top spec" pattern as the panel, positioned on the photo */
   const calloutKeys = CALLOUT_SPECS[family.category] ?? CALLOUT_SPECS["film-blowing"];
   const callouts = calloutKeys.flatMap((key, i) => {
     const row = findSpec(key);
-    if (!row) return [];
+    if (!row || usedCallouts.has(row.label)) return [];
+    usedCallouts.add(row.label);
     return [{ label: row.label, value: row.values[Math.min(activeModel, row.values.length - 1)], pos: CALLOUT_POS[i] }];
   });
 
   /* panel specs for active model */
   const panelSpecs = specKeys.flatMap(key => {
     const row = findSpec(key);
-    if (!row) return [];
+    if (!row || usedPanel.has(row.label)) return [];
+    usedPanel.add(row.label);
     return [{ label: row.label, value: row.values[Math.min(activeModel, row.values.length - 1)] }];
   });
 

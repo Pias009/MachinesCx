@@ -10,7 +10,7 @@ export function generateMetadata({ params }: { params: { locale: string } }) {
   return pageMetadata({
     locale: params.locale,
     path: "/news",
-    title: "News — Wenzhou Ashal Innomech Technology",
+    title: "News — Ashal Innomech",
     description: "Product launches, technical guides, and company updates from Ashal Innomech.",
   });
 }

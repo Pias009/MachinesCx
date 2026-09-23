@@ -108,7 +108,7 @@ const newArticles = [
     date: '2026-02-20',
     category: 'Printing Technology',
     excerpt: 'A comprehensive technical whitepaper detailing high-speed flexo printing dynamics, laser ceramic anilox line screen selection, chamber doctor blade fluid mechanics, and automated registration control.',
-    image: '/machines/flexo-6c.png',
+    image: '/machines/flexo-6c-nobg.png',
     tags: ['Flexo Printing', 'Anilox Roller', 'Doctor Blade', 'Print Quality', 'Packaging Ink'],
     links: [
       { label: 'View AI-6C Flexo Press', url: '/products/printing/flexo-6c' },
@@ -322,7 +322,7 @@ const newArticles = [
     date: '2025-12-15',
     category: 'Maintenance Guide',
     excerpt: 'A comprehensive preventive maintenance guide for flexo press operators, covering ultrasonic anilox cleaning, doctor blade wear angle adjustment, and color matching repeatability.',
-    image: '/machines/flexo-4c.png',
+    image: '/machines/flexo-2-nobg.png',
     tags: ['Flexo Maintenance', 'Anilox Cleaning', 'Doctor Blade Setup', 'Color Calibration', 'Print Care'],
     links: [
       { label: 'View AI-4C Flexo Press', url: '/products/printing/flexo-4c' },

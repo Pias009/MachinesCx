@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { BRAND } from "@/lib/products";
+import { BRAND, LEGAL_NAME } from "@/lib/products";
 
 gsap.registerPlugin(useGSAP);
 
@@ -283,7 +283,7 @@ export default function SiteFooter() {
 
         {/* ── Bottom bar ── */}
         <div className="footer-bar footer-reveal">
-          <p className="footer-copyright" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem" }}>{t("copyright", { year: new Date().getFullYear(), brand: BRAND })}</p>
+          <p className="footer-copyright" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.72rem" }}>{t("copyright", { year: new Date().getFullYear(), brand: LEGAL_NAME.replace(/\.$/, "") })}</p>
           <div className="footer-bar__legal" style={{ display: "flex", gap: "1.5rem" }}>
             {LEGAL_LINKS.map((l) => (
               <Link key={l.label} href={l.href} className="footer-legal-link" style={{ fontFamily: "var(--ff-mono)", fontSize: "0.68rem", textDecoration: "none", letterSpacing: "0.04em" }}>{l.label}</Link>

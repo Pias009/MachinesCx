@@ -10,7 +10,7 @@ export function generateMetadata({ params }: { params: { locale: string } }) {
   return pageMetadata({
     locale: params.locale,
     path: "/legal",
-    title: "Legal & Privacy — Wenzhou Ashal Innomech Technology",
+    title: "Legal & Privacy — Ashal Innomech",
     description: "Terms of service, privacy policy, data security protocols, and export compliance standards for Wenzhou Ashal Innomech Technology Co., Ltd.",
   });
 }

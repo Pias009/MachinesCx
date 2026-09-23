@@ -13,7 +13,7 @@ export function generateMetadata({ params }: { params: { locale: string } }) {
   return pageMetadata({
     locale: params.locale,
     path: "/contact",
-    title: "Contact — Wenzhou Ashal Innomech Technology",
+    title: "Contact — Ashal Innomech",
     description: "Reach our engineering team directly by phone, WhatsApp, or email, or send an inquiry — based in Wenzhou, Zhejiang, China, with a 24-hour response time.",
   });
 }
@@ -26,7 +26,7 @@ export default function ContactPage() {
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
           name: BRAND,
-          legalName: "Wenzhou Ashal Innomach Technology Co., Ltd.",
+          legalName: "Wenzhou Ashal Innomech Technology Co., Ltd.",
           url: SITE_URL,
           image: `${SITE_URL}/logo.jpeg`,
           telephone: "+86 159 8877 5831",

@@ -26,8 +26,8 @@ export async function GET(
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>${name} - Technical Datasheet (PDF) | Ashal Innomach</title>
-  <meta name="description" content="Official Engineering Specifications & Technical Datasheet for ${name} (Model: ${model}). Wenzhou Ashal Innomach Technology Co., Ltd.">
+  <title>${name} - Technical Datasheet (PDF) | Ashal Innomech</title>
+  <meta name="description" content="Official Engineering Specifications & Technical Datasheet for ${name} (Model: ${model}). Wenzhou Ashal Innomech Technology Co., Ltd.">
   <style>
     @page {
       size: A4 portrait;

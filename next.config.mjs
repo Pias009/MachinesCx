@@ -1,6 +1,31 @@
+import { readFileSync } from "node:fs";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
+
+// app/data/machines.json SEO pages duplicate catalogue products under a
+// second URL (e.g. /products/film-blowing-machines/aba-three-layer-… vs
+// /products/film-blowing/aba-1000-1500), splitting Google's ranking signals.
+// 301 each one to its catalogue family (familySlug) so only one URL ranks.
+const MACHINE_TO_CATALOGUE_CATEGORY = {
+  "film-blowing-machines": "film-blowing",
+  "bag-making-machines": "bag-making",
+  "flexo-printing-machines": "printing",
+  "recycling-machines": "recycling",
+};
+const machines = JSON.parse(readFileSync(new URL("./app/data/machines.json", import.meta.url), "utf8"));
+const localized = (source, destination) => [
+  { source, destination, permanent: true },
+  { source: `/:locale(ar|hi)${source}`, destination: `/:locale${destination}`, permanent: true },
+];
+const duplicateRedirects = [
+  ...machines.products
+    .filter((p) => p.familySlug && MACHINE_TO_CATALOGUE_CATEGORY[p.category])
+    // any category segment — the old page rendered under whichever one was linked
+    .flatMap((p) => localized(`/products/:category/${p.slug}`, `/products/${MACHINE_TO_CATALOGUE_CATEGORY[p.category]}/${p.familySlug}`)),
+  ...Object.entries(MACHINE_TO_CATALOGUE_CATEGORY)
+    .flatMap(([from, to]) => localized(`/products/${from}`, `/products/${to}`)),
+];
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -23,6 +48,9 @@ const nextConfig = {
       { protocol: "https", hostname: "img.youtube.com" },
       { protocol: "https", hostname: "picsum.photos" },
     ],
+  },
+  async redirects() {
+    return duplicateRedirects;
   },
   async headers() {
     return [

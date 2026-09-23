@@ -3,7 +3,10 @@
 // Transcribed from the source spec deck. English only — all bilingual labels removed for international audience.
 // ---------------------------------------------------------------------------
 
-export const BRAND = "Wenzhou Ashal Innomech Technology";
+// One spelling everywhere so Google resolves a single brand entity —
+// BRAND for titles/product brand, LEGAL_NAME for the registered company.
+export const BRAND = "Ashal Innomech";
+export const LEGAL_NAME = "Wenzhou Ashal Innomech Technology Co., Ltd.";
 export const SITE_URL = "https://www.wzashal.com";
 
 export type CategorySlug = "film-blowing" | "bag-making" | "recycling" | "printing";

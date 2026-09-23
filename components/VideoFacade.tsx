@@ -68,7 +68,7 @@ export default function VideoFacade({ video }: { video: MachineVideo }) {
             <div className="absolute bottom-4 left-4 right-4 z-10 flex justify-between items-end text-white">
               <div className="space-y-1">
                 <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-[var(--brand-teal)]">
-                  Wenzhou Ashal Innomach OEM Facility
+                  Wenzhou Ashal Innomech OEM Facility
                 </span>
               </div>
               {video.duration && (

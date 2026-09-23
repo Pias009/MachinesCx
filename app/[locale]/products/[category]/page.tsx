@@ -3,15 +3,14 @@ import FlexoPrintingPage from "@/components/FlexoPrintingPage";
 import { categories, type CategorySlug } from "@/lib/products";
 import { getLiveCatalogue } from "@/lib/liveCatalogue";
 import { pageMetadata } from "@/lib/seo";
-import { getMachineCategories, getMachineCategoryBySlug, getMachineProductsByCategory } from "@/lib/machinesData";
+import { getMachineCategoryBySlug } from "@/lib/machinesData";
 import CategoryPageClient from "./CategoryPageClient";
 
 export const revalidate = 3600;
 
 export function generateStaticParams() {
-  const legacyCatParams = categories.map((c) => ({ category: c.slug }));
-  const machineCatParams = getMachineCategories().map((c) => ({ category: c.slug }));
-  return [...legacyCatParams, ...machineCatParams];
+  // machines.json categories 301 to their catalogue category (next.config.mjs)
+  return categories.map((c) => ({ category: c.slug }));
 }
 
 export async function generateMetadata({ params }: { params: { locale: string; category: string } }) {

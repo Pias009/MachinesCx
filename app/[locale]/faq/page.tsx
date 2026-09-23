@@ -13,7 +13,7 @@ export function generateMetadata({ params }: { params: { locale: string } }) {
   return pageMetadata({
     locale: params.locale,
     path: "/faq",
-    title: "FAQ — Wenzhou Ashal Innomech Technology",
+    title: "FAQ — Ashal Innomech",
     description: "Answers to common questions about ordering, lead times, customization, and support for our blown-film, bag-making, recycling, and printing machinery.",
   });
 }

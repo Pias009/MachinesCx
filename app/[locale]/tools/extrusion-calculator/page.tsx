@@ -10,7 +10,7 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   return pageMetadata({
-    title: "Blown Film Extrusion & ABA Resin Cost Calculator | Ashal Innomach",
+    title: "Blown Film Extrusion & ABA Resin Cost Calculator | Ashal Innomech",
     description:
       "Free industrial blown film calculator. Calculate extrusion output rate (kg/h), film gauge weight, and ABA 3-layer co-extrusion resin cost savings (up to 35% polymer savings).",
     path: "/tools/extrusion-calculator",
@@ -35,7 +35,7 @@ export default function ExtrusionCalculatorPage() {
     },
     author: {
       "@type": "Organization",
-      name: "Wenzhou Ashal Innomach Technology Co., Ltd.",
+      name: "Wenzhou Ashal Innomech Technology Co., Ltd.",
       url: "https://www.wzashal.com",
     },
   };

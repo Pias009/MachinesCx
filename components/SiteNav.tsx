@@ -21,6 +21,7 @@ export default function SiteNav({ catalogue }: { catalogue: NavCategory[] }) {
   const [navHidden,  setNavHidden]  = useState(false);
   const lastScrollY                 = useRef(0);
   const [open,       setOpen]       = useState<string | null>(null);
+  const [closing,    setClosing]    = useState(false);
   const [menuImg,    setMenuImg]    = useState<string>("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const closeTimer                  = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -45,18 +46,37 @@ export default function SiteNav({ catalogue }: { catalogue: NavCategory[] }) {
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  const openMenu = (slug: string) => {
+  // One pending close at a time — the button's mouseleave and the backdrop's
+  // mouseenter both call closeMenu on the way down to the panel, and a second
+  // timer used to orphan the first, which then closed the menu mid-move.
+  const clearCloseTimer = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = null;
+  };
+  const openMenu = (slug: string) => {
+    clearCloseTimer();
+    setClosing(false);
     const fams = catalogue.find((c) => c.slug === slug)?.families ?? [];
     if (open !== slug) setMenuImg((fams.find((f) => f.image) ?? fams[0])?.slug ?? "");
     setOpen(slug);
   };
+  // Grace period, then a short fade-out; re-entering at any point cancels it.
   const closeMenu = () => {
-    closeTimer.current = setTimeout(() => setOpen(null), 150);
+    clearCloseTimer();
+    closeTimer.current = setTimeout(() => {
+      setClosing(true);
+      closeTimer.current = setTimeout(() => {
+        setOpen(null);
+        setClosing(false);
+        closeTimer.current = null;
+      }, 180);
+    }, 320);
   };
   const keepMenu = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
+    clearCloseTimer();
+    setClosing(false);
   };
+  useEffect(() => clearCloseTimer, []);
 
   const updateScrollState = () => {
     const el = ddListRef.current;
@@ -257,6 +277,7 @@ export default function SiteNav({ catalogue }: { catalogue: NavCategory[] }) {
           .sn__cta { transform: none !important; }
           .sn__cta::before { display: none; }
           .sn__dd { animation: none; }
+          .sn__dd--closing { animation: none; opacity: 0; }
           .sn__backdrop { animation: none; }
         }
 
@@ -282,6 +303,17 @@ export default function SiteNav({ catalogue }: { catalogue: NavCategory[] }) {
         @keyframes snDdIn {
           from { opacity: 0; transform: translateX(-50%) translateY(-12px) scale(0.98); filter: blur(4px); }
           to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); filter: blur(0); }
+        }
+        /* invisible hover bridge over the 8px gap between the bar and the
+           panel, so moving the cursor down never "leaves" the menu */
+        .sn__dd::before {
+          content: ''; position: absolute;
+          left: 0; right: 0; bottom: 100%; height: 18px;
+        }
+        .sn__dd--closing { animation: snDdOut 0.18s ease forwards; }
+        @keyframes snDdOut {
+          from { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+          to   { opacity: 0; transform: translateX(-50%) translateY(-8px) scale(0.985); }
         }
 
         .sn__backdrop {
@@ -749,7 +781,7 @@ export default function SiteNav({ catalogue }: { catalogue: NavCategory[] }) {
       {open && <div className="sn__backdrop" onMouseEnter={closeMenu} />}
 
       {open && (
-        <div className="sn__dd" onMouseEnter={keepMenu} onMouseLeave={closeMenu}>
+        <div className={`sn__dd${closing ? " sn__dd--closing" : ""}`} onMouseEnter={keepMenu} onMouseLeave={closeMenu}>
           <div className="sn__dd-list-wrap">
             <div className="sn__dd-list" ref={ddListRef} onScroll={updateScrollState}>
               {activeFamilies.map((fam) => (

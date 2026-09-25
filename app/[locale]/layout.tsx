@@ -7,6 +7,7 @@ import "../globals.css";
 import SiteNav from "@/components/SiteNav";
 import LoadingScreen from "@/components/LoadingScreen";
 import { BRAND, SITE_URL } from "@/lib/products";
+import { getNavCatalogue } from "@/lib/liveCatalogue";
 import { routing, rtlLocales, type Locale } from "@/i18n/routing";
 
 const SiteFooter = nextDynamic(() => import("@/components/SiteFooter"), { ssr: false });
@@ -60,7 +61,7 @@ export default async function LocaleLayout({
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
 
-  const messages = await getMessages();
+  const [messages, navCatalogue] = await Promise.all([getMessages(), getNavCatalogue()]);
   const dir = rtlLocales.includes(locale as Locale) ? "rtl" : "ltr";
 
   return (
@@ -178,7 +179,7 @@ export default async function LocaleLayout({
       <body>
         <NextIntlClientProvider messages={messages}>
           <LoadingScreen />
-          <SiteNav />
+          <SiteNav catalogue={navCatalogue} />
           <main>{children}</main>
           <SiteFooter />
           <ChatWidget />

@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { connectDB } from "@/lib/mongodb";
 import CmsSection from "@/models/CmsSection";
 
@@ -26,6 +27,11 @@ export type CmsSection = (typeof CMS_SECTIONS)[number];
 export function isCmsSection(s: string): s is CmsSection {
   return (CMS_SECTIONS as readonly string[]).includes(s);
 }
+
+/** Cache tag for data derived from a section (e.g. the nav menu's slim
+ *  product list). writeSection() invalidates it, so admin saves show up on
+ *  the next page load instead of waiting out the cache window. */
+export const cmsTag = (section: CmsSection) => `cms:${section}`;
 
 // Bundled defaults — used as a fallback when a section has not been seeded
 // into the database yet, so new sections are editable/visible immediately.
@@ -82,4 +88,5 @@ export async function writeSection(section: CmsSection, data: unknown): Promise<
     console.error(`CMS: failed to write section "${section}":`, e);
     throw new Error("Database write failed. Check server logs.");
   }
+  revalidateTag(cmsTag(section));
 }

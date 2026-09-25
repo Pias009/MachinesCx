@@ -7,22 +7,14 @@ import TransitionLink from "@/components/TransitionLink";
 import ThemeToggle from "@/components/ThemeToggle";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import RollingNavMenu from "@/components/RollingNavMenu";
-import { categories, familiesByCategory } from "@/lib/products";
+import type { NavCategory } from "@/lib/liveCatalogue";
 
 // Static logo — no cycling, brand name is stable and trustworthy for B2B
 const LOGO_WORDS = ["ASHAL INNOMECH"];
 
-const FLEXO_IMGS: Record<string, string> = {
-  "flexo-2c": "/machines/flexo-1.png",
-  "flexo-4c": "/machines/flexo-2.png",
-  "flexo-6c": "/machines/flexo-4.png",
-  "flexo-8c": "/machines/flexo-3.png",
-};
-function machineImg(slug: string) {
-  return FLEXO_IMGS[slug] ?? `/machines/${slug}.png`;
-}
-
-export default function SiteNav() {
+/* Menu thumbnails come from each product's main photo in the admin panel
+   (live CMS, via the layout), so a photo change there updates the menu. */
+export default function SiteNav({ catalogue }: { catalogue: NavCategory[] }) {
   const pathname = usePathname();
   const t = useTranslations("nav");
   const [scrolled,   setScrolled]   = useState(false);
@@ -55,8 +47,8 @@ export default function SiteNav() {
 
   const openMenu = (slug: string) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
-    const fams = familiesByCategory(slug as Parameters<typeof familiesByCategory>[0]);
-    if (open !== slug) setMenuImg(fams[0]?.slug ?? "");
+    const fams = catalogue.find((c) => c.slug === slug)?.families ?? [];
+    if (open !== slug) setMenuImg((fams.find((f) => f.image) ?? fams[0])?.slug ?? "");
     setOpen(slug);
   };
   const closeMenu = () => {
@@ -87,8 +79,9 @@ export default function SiteNav() {
   }, [open]);
 
   const activeFamilies = open
-    ? familiesByCategory(open as Parameters<typeof familiesByCategory>[0])
+    ? catalogue.find((c) => c.slug === open)?.families ?? []
     : [];
+  const previewImg = activeFamilies.find((f) => f.slug === menuImg)?.image ?? null;
 
   if (pathname?.startsWith("/cx-ops-x7k9q2")) return null;
 
@@ -660,7 +653,7 @@ export default function SiteNav() {
           </TransitionLink>
 
           <div className="sn__links">
-            {categories.map((cat) => (
+            {catalogue.map((cat) => (
               <div
                 key={cat.slug}
                 className={`sn__cat${open === cat.slug ? " sn__cat--open" : ""}`}
@@ -727,7 +720,7 @@ export default function SiteNav() {
 
         {/* Nav links */}
         <div className="sn__mob-links">
-          {categories.map(cat => (
+          {catalogue.map(cat => (
             <TransitionLink key={cat.slug} href={`/products/${cat.slug}`} className="sn__mobile-link" onClick={() => setMobileOpen(false)}>
               {cat.name}
             </TransitionLink>
@@ -766,7 +759,9 @@ export default function SiteNav() {
                   className={`sn__dd-item${menuImg === fam.slug ? " sn__dd-item--on" : ""}`}
                   onMouseEnter={() => setMenuImg(fam.slug)}
                 >
-                  <Image src={machineImg(fam.slug)} alt="" width={52} height={38} className="sn__dd-thumb" />
+                  {fam.image
+                    ? <Image src={fam.image} alt="" width={52} height={38} className="sn__dd-thumb" />
+                    : <span className="sn__dd-thumb" aria-hidden="true" />}
                   <div>
                     <span className="sn__dd-series">{fam.series}</span>
                     <span className="sn__dd-tag">{fam.tagline}</span>
@@ -799,7 +794,9 @@ export default function SiteNav() {
           </div>
           <div className="sn__dd-preview">
             <div className="sn__dd-glow" />
-            <Image key={menuImg} src={machineImg(menuImg)} alt="" width={160} height={160} className="sn__dd-preview-img" />
+            {previewImg && (
+              <Image key={previewImg} src={previewImg} alt="" width={160} height={160} className="sn__dd-preview-img" />
+            )}
           </div>
         </div>
       )}

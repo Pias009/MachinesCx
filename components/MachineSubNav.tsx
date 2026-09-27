@@ -129,7 +129,6 @@ export default function MachineSubNav() {
                   width={46}
                   height={34}
                   className="msn__img-logo"
-                  unoptimized
                 />
                 <span className="msn__name">
                   {cat.name.replace(" Machines", "").replace(" & Lab Lines", "")}

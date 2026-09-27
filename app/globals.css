@@ -54,10 +54,10 @@
   --white:       #ffffff;
 
   /* ── fonts ── */
-  --font-bebas: "Bebas Neue", "Arial Narrow", sans-serif;
-  --font-jakarta: "Plus Jakarta Sans", "Outfit", sans-serif;
-  --font-inter: "Inter", system-ui, -apple-system, sans-serif;
-  --font-jetbrains: "JetBrains Mono", "Courier New", monospace;
+  --font-bebas: var(--nf-bebas, "Bebas Neue"), "Arial Narrow", sans-serif;
+  --font-jakarta: var(--nf-jakarta, "Plus Jakarta Sans"), sans-serif;
+  --font-inter: var(--nf-inter, "Inter"), system-ui, -apple-system, sans-serif;
+  --font-jetbrains: var(--nf-jetbrains, "JetBrains Mono"), "Courier New", monospace;
   --ff-display: var(--font-bebas);
   --ff-body:    var(--font-inter);
   --ff-mono:    var(--font-jetbrains);
@@ -4219,3 +4219,6 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 .cx-toast__desc  { font-size: 0.78rem; color: var(--ink-60); line-height: 1.5; margin-top: 0.15rem; }
 [data-theme="light"] .cx-toast { background: #ffffff; border-color: rgba(13,34,32,0.12); box-shadow: 0 12px 32px rgba(13,34,32,0.12); }
 [data-theme="light"] .cx-toast[data-type="error"] { background: rgba(239,68,68,0.06); }
+
+/* LoadingScreen plays once per session — see components/LoadingScreen.tsx */
+[data-splash-seen] [data-loading-screen] { display: none !important; }

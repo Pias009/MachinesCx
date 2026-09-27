@@ -4,20 +4,31 @@ import Inquiry from "@/models/Inquiry";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 import { parseSessionToken, SESSION_COOKIE } from "@/lib/adminAuth";
+
+const NO_CACHE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+  "Pragma": "no-cache",
+  "Expires": "0",
+  "Surrogate-Control": "no-store",
+};
 
 // Auth is enforced by middleware and validated here for RBAC.
 export async function GET(req: NextRequest) {
   const token = req.cookies.get(SESSION_COOKIE)?.value;
   const user = await parseSessionToken(token);
   if (!user || (user.role !== "super_admin" && user.role !== "analytics_viewer")) {
-    return NextResponse.json({ error: "forbidden: inquiries access not permitted for this role" }, { status: 403 });
+    return NextResponse.json(
+      { error: "forbidden: inquiries access not permitted for this role" },
+      { status: 403, headers: NO_CACHE_HEADERS }
+    );
   }
 
   await connectDB();
   const inquiries = await Inquiry.find().sort({ createdAt: -1 }).lean();
-  return NextResponse.json({ inquiries });
+  return NextResponse.json({ inquiries }, { headers: NO_CACHE_HEADERS });
 }
 
 // DELETE /api/admin/inquiries — body: { ids: string[] } (super_admin only)

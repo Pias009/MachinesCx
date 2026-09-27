@@ -712,6 +712,9 @@ export default function HeroSplash({ h1 }: { h1?: string } = {}) {
           max-width: 360px;
           margin: 1.5rem auto 0;
         }
+        @media(min-width:641px){
+          .hs__mobile-showcase { display: none; }
+        }
 
         .hs__showcase-card {
           position: relative;
@@ -1284,8 +1287,10 @@ export default function HeroSplash({ h1 }: { h1?: string } = {}) {
             </div>
           </div>
 
-          {/* Mobile Product Spotlight Showcase Card */}
-          {isMobile && (() => {
+          {/* Mobile Product Spotlight Showcase Card — server-rendered and
+              shown/hidden by media query, not the post-hydration isMobile
+              flag, so it doesn't pop in and shove the page down ~200px */}
+          {(() => {
             const activeNodeIdx = ((step % (nodes.length || 1)) + (nodes.length || 1)) % (nodes.length || 1);
             const currentProduct = nodes[activeNodeIdx];
             if (!currentProduct) return null;
@@ -1309,7 +1314,6 @@ export default function HeroSplash({ h1 }: { h1?: string } = {}) {
                         sizes="100px"
                         className="hs__showcase-img"
                         priority
-                        unoptimized={currentProduct.image.startsWith("http") || currentProduct.image.startsWith("/uploads")}
                       />
                     </div>
                     <div className="hs__showcase-info">
@@ -1402,7 +1406,6 @@ export default function HeroSplash({ h1 }: { h1?: string } = {}) {
           {/* ── Desktop / tablet layout (unchanged arch) ── */}
           {!isMobile && nodes.map((f, i) => {
             const pos = getTrajectoryPos(i, step, nodes.length);
-            const isUnoptimized = f.image.startsWith("http") || f.image.startsWith("/uploads");
             return (
               <div
                 key={f.key}
@@ -1434,7 +1437,6 @@ export default function HeroSplash({ h1 }: { h1?: string } = {}) {
                         className="hs__node-img"
                         priority={i === 2}
                         loading={i === 2 ? undefined : "lazy"}
-                        unoptimized={isUnoptimized}
                       />
                     </div>
                     <span className="hs__node-meta">
@@ -1459,7 +1461,6 @@ export default function HeroSplash({ h1 }: { h1?: string } = {}) {
               const isCenter = slotIdx === 2;
               // center 38vw, outer cards scale proportionally
               const cardWidth = Math.round(38 * scale);
-              const isUnoptimized = f.image.startsWith("http") || f.image.startsWith("/uploads");
               return (
                 <div
                   key={`mob-slot-${slotIdx}-${f.key}`}
@@ -1487,8 +1488,7 @@ export default function HeroSplash({ h1 }: { h1?: string } = {}) {
                           className="hs__node-img"
                           priority={isCenter}
                           loading={isCenter ? undefined : "lazy"}
-                          unoptimized={isUnoptimized}
-                        />
+                          />
                       </div>
                       <span className="hs__node-meta">
                         <span className="hs__node-series">{f.series}</span>

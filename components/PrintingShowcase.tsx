@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import NextImage from "next/image";
+import NextImage, { getImageProps } from "next/image";
 import { useTranslations } from "next-intl";
 import { useProductImageMap } from "@/components/CatalogueProvider";
 import { productImage, upgradeImage } from "@/lib/productImages";
@@ -15,6 +15,7 @@ import gsap from "gsap";
 
 gsap.registerPlugin(useGSAP);
 
+const SHOWCASE_SIZES = "(max-width: 700px) 90vw, 45vw";
 const ACCENTS = ["#e11d48", "#f59e0b", "#2bbfb3", "#e11d48"];
 
 interface PrintingMachine {
@@ -217,7 +218,15 @@ export default function PrintingShowcase() {
   // the fallback (cms.items only changes reference on that one swap, so
   // this doesn't refire on every render like depending on MACHINES would).
   useEffect(() => {
-    MACHINES.forEach(m => { const img = new Image(); img.src = m.src; });
+    // same srcset/sizes as the rendered <NextImage> below, so the browser
+    // fetches (and caches) the optimized variant it will actually display
+    MACHINES.forEach(m => {
+      const { props } = getImageProps({ src: m.src, alt: "", fill: true, sizes: SHOWCASE_SIZES });
+      const img = new Image();
+      if (props.sizes) img.sizes = props.sizes;
+      if (props.srcSet) img.srcset = props.srcSet;
+      img.src = props.src;
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cms.items]);
 
@@ -614,7 +623,7 @@ export default function PrintingShowcase() {
                   src={machine.src}
                   alt={machine.model}
                   fill
-                  sizes="(max-width: 700px) 90vw, 45vw"
+                  sizes={SHOWCASE_SIZES}
                   draggable={false}
                   style={{
                     objectFit:      "contain",

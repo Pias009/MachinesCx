@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import nextDynamic from "next/dynamic";
 import { notFound } from "next/navigation";
+import localFont from "next/font/local";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages } from "next-intl/server";
 import "../globals.css";
@@ -21,9 +22,14 @@ const VisitorTracker = nextDynamic(() => import("@/components/VisitorTracker"), 
 const ProactiveNudge = nextDynamic(() => import("@/components/ProactiveNudge"), { ssr: false });
 const ProductLeadCapture = nextDynamic(() => import("@/components/ProductLeadCapture"), { ssr: false });
 
-const bebas = { variable: "font-bebas" };
-const inter = { variable: "font-inter" };
-const jetbrains = { variable: "font-jetbrains" };
+// Self-hosted (app/fonts, latin subsets from Google Fonts) via
+// next/font/local: no render-blocking request to fonts.googleapis.com,
+// no build-time network fetch, size-adjusted fallbacks to limit CLS.
+// globals.css reads these --nf-* variables.
+const bebas = localFont({ src: "../fonts/bebas-neue-latin.woff2", weight: "400", display: "swap", variable: "--nf-bebas", fallback: ["Arial Narrow", "sans-serif"] });
+const inter = localFont({ src: "../fonts/inter-latin-var.woff2", weight: "300 800", display: "swap", variable: "--nf-inter", fallback: ["system-ui", "sans-serif"] });
+const jakarta = localFont({ src: "../fonts/plus-jakarta-sans-latin-var.woff2", weight: "400 800", display: "swap", variable: "--nf-jakarta", fallback: ["sans-serif"] });
+const jetbrains = localFont({ src: "../fonts/jetbrains-mono-latin-var.woff2", weight: "400 600", display: "swap", variable: "--nf-jetbrains", fallback: ["Courier New", "monospace"], preload: false });
 
 const title = `${BRAND} — Blown Film, Bag Making & Recycling Machinery`;
 const description = "Multi-layer blown-film lines, bag-making converters and recycling lines. From benchtop trials to 5-layer co-extrusion at 400 kg/h.";
@@ -77,22 +83,15 @@ export default async function LocaleLayout({
       dir={dir}
       data-theme="light"
       suppressHydrationWarning
-      className={`${bebas.variable} ${inter.variable} ${jetbrains.variable}`}
+      className={`${bebas.variable} ${inter.variable} ${jakarta.variable} ${jetbrains.variable}`}
     >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Preload the logo used in the loading screen and navbar — eliminates LCP image delay */}
-        <link rel="preload" as="image" href="/logo.jpeg" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Bebas+Neue&family=Inter:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
         {/* Apply saved theme before first paint — avoids a flash of the
             wrong theme (and pages "stuck" on light) that a useEffect-only
             correction in ThemeToggle can't prevent on a fresh document load */}
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
+            try { if (sessionStorage.getItem('cx_splash') === '1') document.documentElement.setAttribute('data-splash-seen', ''); } catch (e) {}
             var saved = localStorage.getItem('theme');
             if (saved === 'dark') {
               document.documentElement.removeAttribute('data-theme');

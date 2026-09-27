@@ -112,7 +112,13 @@ export default function InquiriesPage() {
   const [lightbox, setLightbox] = useState<{ src: string; title: string } | null>(null);
 
   async function load() {
-    const res = await fetch("/api/admin/inquiries");
+    const res = await fetch(`/api/admin/inquiries?_t=${Date.now()}`, {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache"
+      }
+    });
     const j = await res.json();
     setInquiries(j.inquiries ?? []);
   }

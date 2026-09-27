@@ -10,7 +10,8 @@ import {
   Video, CalendarDays, ChevronDown, MoreVertical, ExternalLink,
   X, Plus, RefreshCw, Download, Filter, Trash2, Eye, Mail, Check,
   Inbox, FileText, Sparkles, Activity, Layers, Send, Loader2,
-  Wrench, Cpu, Factory, Gauge, Box, ShieldCheck, ArrowRight, Copy
+  Wrench, Cpu, Factory, Gauge, Box, ShieldCheck, ArrowRight, Copy,
+  Phone, Building2, Globe, MessageSquare, Tag, AlertCircle, CheckSquare
 } from "lucide-react";
 import AdminShell from "./AdminShell";
 import { ADMIN_PATH, SessionUser } from "@/lib/adminAuth";
@@ -23,9 +24,14 @@ interface InquiryRow {
   company: string;
   email?: string;
   phone?: string;
+  country?: string;
   message?: string;
+  machines?: any[];
+  parts?: any[];
+  images?: string[];
   status: "new" | "read" | "replied";
   source?: string;
+  flow?: string;
   createdAt: string;
 }
 
@@ -40,6 +46,152 @@ interface ScheduleTask {
 }
 
 type TimeframeOption = "7D" | "30D" | "6M" | "1Y";
+
+function detectCountry(phone?: string, countryField?: string, message?: string): { name: string; flag: string } | null {
+  if (countryField && countryField.trim()) {
+    return { name: countryField.trim(), flag: "🌐" };
+  }
+  const clean = (phone || "").replace(/[^0-9+]/g, "");
+  if (clean.startsWith("+256")) return { name: "Uganda", flag: "🇺🇬" };
+  if (clean.startsWith("+254")) return { name: "Kenya", flag: "🇰🇪" };
+  if (clean.startsWith("+234")) return { name: "Nigeria", flag: "🇳🇬" };
+  if (clean.startsWith("+27"))  return { name: "South Africa", flag: "🇿🇦" };
+  if (clean.startsWith("+20"))  return { name: "Egypt", flag: "🇪🇬" };
+  if (clean.startsWith("+971")) return { name: "UAE", flag: "🇦🇪" };
+  if (clean.startsWith("+966")) return { name: "Saudi Arabia", flag: "🇸🇦" };
+  if (clean.startsWith("+91"))  return { name: "India", flag: "🇮🇳" };
+  if (clean.startsWith("+92"))  return { name: "Pakistan", flag: "🇵🇰" };
+  if (clean.startsWith("+86"))  return { name: "China", flag: "🇨🇳" };
+  if (clean.startsWith("+1"))   return { name: "USA / Canada", flag: "🇺🇸" };
+  if (clean.startsWith("+44"))  return { name: "UK", flag: "🇬🇧" };
+  if (clean.startsWith("+49"))  return { name: "Germany", flag: "🇩🇪" };
+  if (clean.startsWith("+33"))  return { name: "France", flag: "🇫🇷" };
+  if (clean.startsWith("+39"))  return { name: "Italy", flag: "🇮🇹" };
+  if (clean.startsWith("+34"))  return { name: "Spain", flag: "🇪🇸" };
+  if (clean.startsWith("+55"))  return { name: "Brazil", flag: "🇧🇷" };
+  if (clean.startsWith("+52"))  return { name: "Mexico", flag: "🇲🇽" };
+  if (clean.startsWith("+62"))  return { name: "Indonesia", flag: "🇮🇩" };
+  if (clean.startsWith("+84"))  return { name: "Vietnam", flag: "🇻🇳" };
+  if (clean.startsWith("+63"))  return { name: "Philippines", flag: "🇵🇭" };
+  if (clean.startsWith("+90"))  return { name: "Turkey", flag: "🇹🇷" };
+  if (clean.startsWith("+7"))   return { name: "Russia / Central Asia", flag: "🇷🇺" };
+
+  if (message) {
+    const lower = message.toLowerCase();
+    if (lower.includes("from uganda")) return { name: "Uganda", flag: "🇺🇬" };
+    if (lower.includes("from kenya")) return { name: "Kenya", flag: "🇰🇪" };
+    if (lower.includes("from nigeria")) return { name: "Nigeria", flag: "🇳🇬" };
+    if (lower.includes("from uae") || lower.includes("dubai")) return { name: "UAE", flag: "🇦🇪" };
+    if (lower.includes("from saudi")) return { name: "Saudi Arabia", flag: "🇸🇦" };
+  }
+  return null;
+}
+
+function getWhatsAppUrl(phone?: string, name?: string) {
+  if (!phone) return null;
+  const digits = phone.replace(/[^0-9]/g, "");
+  if (digits.length < 7) return null;
+  const text = encodeURIComponent(
+    `Hello ${name || "Sir"}, thank you for contacting Ashal Innomech regarding your machinery inquiry. We have reviewed your requirements and would be glad to share technical specifications and pricing.`
+  );
+  return `https://wa.me/${digits}?text=${text}`;
+}
+
+function extractSmartChips(message?: string) {
+  if (!message) return [];
+  const chips: { label: string; value: string; color: string }[] = [];
+  const lower = message.toLowerCase();
+
+  if (lower.includes("ldpe") || lower.includes("lldpe") || lower.includes("hdpe") || lower.includes("pbat") || lower.includes("pla")) {
+    const mats: string[] = [];
+    if (lower.includes("ldpe")) mats.push("LDPE");
+    if (lower.includes("lldpe")) mats.push("LLDPE");
+    if (lower.includes("hdpe")) mats.push("HDPE");
+    if (lower.includes("pbat")) mats.push("PBAT");
+    if (lower.includes("pla")) mats.push("PLA");
+    chips.push({ label: "Resin", value: mats.join(" / "), color: "var(--adm-mint)" });
+  }
+
+  const capMatch = message.match(/(\d+[\s–-]+\d+\s*kg\/h|\d+\s*kg\/h)/i);
+  if (capMatch) {
+    chips.push({ label: "Capacity", value: capMatch[0].trim(), color: "#38bdf8" });
+  }
+
+  const voltMatch = message.match(/(380V|415V|220V|480V)[^\n.,]*/i);
+  if (voltMatch) {
+    chips.push({ label: "Power", value: voltMatch[0].trim(), color: "#fbbf24" });
+  }
+
+  if (lower.includes("recycling") || lower.includes("pelletizing")) {
+    chips.push({ label: "Sector", value: "Recycling & Pelletizing", color: "#a78bfa" });
+  } else if (lower.includes("blown film") || lower.includes("co-extrusion")) {
+    chips.push({ label: "Sector", value: "Blown Film Extrusion", color: "#34d399" });
+  } else if (lower.includes("bag making") || lower.includes("heat seal") || lower.includes("bottom seal")) {
+    chips.push({ label: "Sector", value: "Bag Making Conversion", color: "#f472b6" });
+  } else if (lower.includes("flexo") || lower.includes("printing")) {
+    chips.push({ label: "Sector", value: "Flexographic Printing", color: "#fb923c" });
+  }
+
+  return chips;
+}
+
+function parseCustomerMessage(raw?: string) {
+  if (!raw || !raw.trim()) {
+    return { intro: [], specs: [], deliverables: [], notes: [] };
+  }
+
+  let text = raw.trim();
+  text = text.replace(/([.!?:]|\w)\s+\*\s+/g, "$1\n* ");
+  text = text.replace(/([.!?:]|\w)\s+(\d{1,2}\.\s+)/g, "$1\n$2");
+  text = text.replace(/(Confidentiality:|\bPlease also indicate\b|\bPlease send\b)/gi, "\n\n$1");
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+
+  const intro: string[] = [];
+  const specs: { label: string; value: string }[] = [];
+  const deliverables: string[] = [];
+  const notes: string[] = [];
+
+  let inDeliverables = false;
+
+  for (const line of lines) {
+    if (line.startsWith("* ") || line.startsWith("- ") || line.startsWith("• ")) {
+      const content = line.replace(/^[\*\-•]\s*/, "");
+      const colonIdx = content.indexOf(":");
+      if (colonIdx > 0 && colonIdx < 35) {
+        specs.push({
+          label: content.slice(0, colonIdx).trim(),
+          value: content.slice(colonIdx + 1).trim()
+        });
+      } else {
+        specs.push({ label: "Requirement", value: content });
+      }
+      continue;
+    }
+
+    const numMatch = line.match(/^(\d{1,2})\.\s+(.*)/);
+    if (numMatch) {
+      inDeliverables = true;
+      deliverables.push(numMatch[2].trim());
+      continue;
+    }
+
+    if (
+      inDeliverables ||
+      line.toLowerCase().startsWith("confidentiality:") ||
+      line.toLowerCase().startsWith("please also indicate") ||
+      line.toLowerCase().startsWith("please send") ||
+      line.toLowerCase().startsWith("note:")
+    ) {
+      notes.push(line);
+      continue;
+    }
+
+    intro.push(line);
+  }
+
+  return { intro, specs, deliverables, notes };
+}
 
 function MachineManagerDashboard({ userName }: { userName: string }) {
   const schemas = [
@@ -263,6 +415,10 @@ export default function AdminHome() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedInquiryDetail, setSelectedInquiryDetail] = useState<InquiryRow | null>(null);
   const [copiedDetailEmail, setCopiedDetailEmail] = useState(false);
+  const [copiedDetailPhone, setCopiedDetailPhone] = useState(false);
+  const [copiedDetailBrief, setCopiedDetailBrief] = useState(false);
+  const [copiedRawMessage, setCopiedRawMessage] = useState(false);
+  const [messageViewMode, setMessageViewMode] = useState<"formatted" | "raw">("formatted");
   const [showDateDropdown, setShowDateDropdown] = useState(false);
   const [selectedDate, setSelectedDate] = useState("30 Aug 2026");
   const [activeCardMenu, setActiveCardMenu] = useState<string | null>(null);
@@ -280,6 +436,7 @@ export default function AdminHome() {
   const [scheduleItems, setScheduleItems] = useState<ScheduleTask[]>([]);
   const [scheduleLoaded, setScheduleLoaded] = useState(false);
   const [deletedInquiryIds, setDeletedInquiryIds] = useState<string[]>([]);
+  const [inquiryStatusOverrides, setInquiryStatusOverrides] = useState<Record<string, "new" | "read" | "replied">>({});
 
   useEffect(() => {
     setMounted(true);
@@ -338,6 +495,23 @@ export default function AdminHome() {
       if (savedDeleted) {
         setDeletedInquiryIds(JSON.parse(savedDeleted));
       }
+
+      const savedStatusMap = localStorage.getItem("ashal_admin_inquiry_status_map");
+      if (savedStatusMap) {
+        try {
+          setInquiryStatusOverrides(JSON.parse(savedStatusMap));
+        } catch {}
+      }
+
+      const savedCachedInquiries = localStorage.getItem("ashal_admin_cached_inquiries");
+      if (savedCachedInquiries) {
+        try {
+          const cached = JSON.parse(savedCachedInquiries);
+          if (Array.isArray(cached) && cached.length > 0) {
+            setInquiries(cached);
+          }
+        } catch {}
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -362,17 +536,39 @@ export default function AdminHome() {
   const fetchInquiries = async () => {
     setIsRefreshing(true);
     try {
-      const res = await fetch("/api/admin/inquiries");
+      const res = await fetch(`/api/admin/inquiries?_t=${Date.now()}`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache",
+        },
+      });
       if (!res.ok) {
-        setInquiries([]);
+        setInquiries(prev => prev ?? []);
         return;
       }
       const data = await res.json();
       if (Array.isArray(data.inquiries)) {
-        setInquiries(data.inquiries);
+        let localOverrides: Record<string, "new" | "read" | "replied"> = {};
+        try {
+          const raw = localStorage.getItem("ashal_admin_inquiry_status_map");
+          if (raw) localOverrides = JSON.parse(raw);
+        } catch {}
+
+        const merged = data.inquiries.map((inq: InquiryRow) => {
+          if (localOverrides[inq._id]) {
+            return { ...inq, status: localOverrides[inq._id] };
+          }
+          return inq;
+        });
+
+        setInquiries(merged);
+        try {
+          localStorage.setItem("ashal_admin_cached_inquiries", JSON.stringify(merged));
+        } catch {}
       }
     } catch {
-      setInquiries([]);
+      setInquiries(prev => prev ?? []);
     } finally {
       setTimeout(() => setIsRefreshing(false), 500);
     }
@@ -396,14 +592,17 @@ export default function AdminHome() {
 
   // Compute stat totals dynamically from real inquiries data
   const stats = useMemo(() => {
-    const list = inquiries ?? [];
+    const rawList = inquiries ?? [];
+    const list = rawList
+      .filter(r => !deletedInquiryIds.includes(r._id))
+      .map(r => inquiryStatusOverrides[r._id] ? { ...r, status: inquiryStatusOverrides[r._id] } : r);
     const total = list.length;
     const newCount = list.filter(i => i.status === "new").length;
     const replied = list.filter(i => (i.status as string) === "replied" || (i.status as string) === "resolved").length;
     const activeQuotes = list.filter(i => (i.inquiryType as string) === "talk-to-engineer" || (i.inquiryType as string) === "parts").length;
     const conversionRate = total > 0 ? Math.round((replied / total) * 100) : 0;
     return { total, newCount, replied, activeQuotes, conversionRate };
-  }, [inquiries]);
+  }, [inquiries, deletedInquiryIds, inquiryStatusOverrides]);
 
   // Real graph series dynamic data generator based on selected timeframe & actual inquiries
   const chartDataSeries = useMemo(() => {
@@ -500,17 +699,20 @@ export default function AdminHome() {
     ];
   }, [inquiries]);
 
-  // Filter table rows (excluding any deleted inquiry IDs permanently)
+  // Filter table rows (excluding any deleted inquiry IDs permanently & applying status overrides)
   const tableRows = useMemo(() => {
     const rawList: InquiryRow[] = inquiries ?? [];
-    const list = rawList.filter(r => !deletedInquiryIds.includes(r._id));
+    const list = rawList
+      .filter(r => !deletedInquiryIds.includes(r._id))
+      .map(r => inquiryStatusOverrides[r._id] ? { ...r, status: inquiryStatusOverrides[r._id] } : r);
     if (!tableSearch.trim()) return list;
     return list.filter(r =>
       r.name.toLowerCase().includes(tableSearch.toLowerCase()) ||
       r.company.toLowerCase().includes(tableSearch.toLowerCase()) ||
-      (r.email && r.email.toLowerCase().includes(tableSearch.toLowerCase()))
+      (r.email && r.email.toLowerCase().includes(tableSearch.toLowerCase())) ||
+      r.status.toLowerCase().includes(tableSearch.toLowerCase())
     );
-  }, [inquiries, tableSearch, deletedInquiryIds]);
+  }, [inquiries, tableSearch, deletedInquiryIds, inquiryStatusOverrides]);
 
   // Real CSV Export Handler
   const exportDataToCSV = () => {
@@ -572,7 +774,13 @@ export default function AdminHome() {
   // Row actions
   const handleDeleteRow = async (id: string) => {
     // 1. Filter out locally
-    setInquiries(prev => prev ? prev.filter(r => r._id !== id) : []);
+    setInquiries(prev => {
+      const next = prev ? prev.filter(r => r._id !== id) : [];
+      try {
+        localStorage.setItem("ashal_admin_cached_inquiries", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     
     // 2. Add to deletedInquiryIds & persist in localStorage
     setDeletedInquiryIds(prev => {
@@ -583,7 +791,17 @@ export default function AdminHome() {
       return next;
     });
 
-    // 3. Delete from database permanently
+    // 3. Remove from status overrides
+    setInquiryStatusOverrides(prev => {
+      const next = { ...prev };
+      delete next[id];
+      try {
+        localStorage.setItem("ashal_admin_inquiry_status_map", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    // 4. Delete from database permanently
     try {
       await fetch("/api/admin/inquiries", {
         method: "DELETE",
@@ -606,6 +824,10 @@ export default function AdminHome() {
 
     const idsToDelete = tableRows.map(r => r._id);
     setInquiries([]);
+    try {
+      localStorage.setItem("ashal_admin_cached_inquiries", JSON.stringify([]));
+    } catch {}
+
     setDeletedInquiryIds(prev => {
       const next = Array.from(new Set([...prev, ...idsToDelete]));
       try {
@@ -613,6 +835,11 @@ export default function AdminHome() {
       } catch {}
       return next;
     });
+
+    setInquiryStatusOverrides({});
+    try {
+      localStorage.removeItem("ashal_admin_inquiry_status_map");
+    } catch {}
 
     try {
       await fetch("/api/admin/inquiries", {
@@ -628,9 +855,80 @@ export default function AdminHome() {
   };
 
   const handleToggleStatus = (id: string, currentStatus: string) => {
-    const nextStatus = currentStatus === "new" ? "read" : currentStatus === "read" ? "replied" : "new";
-    setInquiries(prev => prev ? prev.map(r => r._id === id ? { ...r, status: nextStatus as any } : r) : []);
-    showToast(`Inquiry status updated to ${nextStatus}`);
+    const effectiveCurrent = inquiryStatusOverrides[id] || currentStatus;
+    const nextStatus = effectiveCurrent === "new" ? "read" : effectiveCurrent === "read" ? "replied" : "new";
+    handleUpdateInquiryStatus(id, nextStatus as "new" | "read" | "replied");
+  };
+
+  const handleUpdateInquiryStatus = async (id: string, newStatus: "new" | "read" | "replied") => {
+    // 1. Immediately update in-memory inquiries state and cache
+    setInquiries(prev => {
+      const next = prev ? prev.map(r => r._id === id ? { ...r, status: newStatus } : r) : [];
+      try {
+        localStorage.setItem("ashal_admin_cached_inquiries", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    if (selectedInquiryDetail && selectedInquiryDetail._id === id) {
+      setSelectedInquiryDetail(prev => prev ? { ...prev, status: newStatus } : null);
+    }
+
+    // 2. Immediately persist to localStorage status map
+    setInquiryStatusOverrides(prev => {
+      const next = { ...prev, [id]: newStatus };
+      try {
+        localStorage.setItem("ashal_admin_inquiry_status_map", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    showToast(`Status updated to ${newStatus.toUpperCase()}`);
+
+    // 3. Persist to MongoDB database via PATCH
+    try {
+      const res = await fetch(`/api/admin/inquiries/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) {
+        console.error("Failed to persist status on server:", res.status);
+      }
+    } catch (e) {
+      console.error("Failed to persist inquiry status:", e);
+    }
+  };
+
+  const handleCopyDealBrief = (inq: InquiryRow) => {
+    const country = detectCountry(inq.phone, inq.country, inq.message);
+    const text = [
+      `==========================================`,
+      `ASHAL INNOMECH — B2B DEAL & RFQ DOSSIER`,
+      `==========================================`,
+      `Client: ${inq.name}`,
+      `Company: ${inq.company || "N/A"}`,
+      `Country / Region: ${country ? `${country.flag} ${country.name}` : "N/A"}`,
+      `Email: ${inq.email || "N/A"}`,
+      `Phone / WhatsApp: ${inq.phone || "N/A"}`,
+      `Status: ${inq.status.toUpperCase()}`,
+      `Lead Type: ${inq.inquiryType || "direct"}`,
+      `Source: ${inq.source || "Website Inquiries"}`,
+      `Date: ${inq.createdAt ? inq.createdAt.split("T")[0] : "N/A"}`,
+      `------------------------------------------`,
+      `CLIENT REQUIREMENTS & SPECIFICATIONS:`,
+      `------------------------------------------`,
+      inq.message || "No text requirements provided",
+      `==========================================`,
+    ].join("\n");
+
+    navigator.clipboard.writeText(text);
+    setCopiedDetailBrief(true);
+    showToast("Full deal dossier copied to clipboard!");
+    setTimeout(() => setCopiedDetailBrief(false), 2000);
   };
 
   const filteredSchedule = scheduleItems.filter(i => i.category === activeTab);
@@ -1390,180 +1688,751 @@ export default function AdminHome() {
         </motion.div>
       </motion.div>
 
-      {/* Inquiry Detail Modal */}
+      {/* Inquiry Detail Modal / Executive Deal Dossier */}
       <AnimatePresence>
-        {selectedInquiryDetail && (
-          <div style={{
-            position: "fixed", inset: 0, zIndex: 99999,
-            background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            padding: "1rem"
-          }} onClick={() => setSelectedInquiryDetail(null)}>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 15 }}
+        {selectedInquiryDetail && (() => {
+          const countryInfo = detectCountry(selectedInquiryDetail.phone, selectedInquiryDetail.country, selectedInquiryDetail.message);
+          const whatsAppUrl = getWhatsAppUrl(selectedInquiryDetail.phone, selectedInquiryDetail.name);
+          const smartChips = extractSmartChips(selectedInquiryDetail.message);
+          const parsedMsg = parseCustomerMessage(selectedInquiryDetail.message);
+
+          return (
+            <div
               style={{
-                background: "#121B2D", border: "1px solid var(--adm-border)",
-                borderRadius: 20, padding: "2rem", width: "100%", maxWidth: 540,
-                boxShadow: "0 28px 70px rgba(0,0,0,0.8)"
+                position: "fixed",
+                inset: 0,
+                zIndex: 99999,
+                background: "rgba(3, 7, 18, 0.85)",
+                backdropFilter: "blur(10px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "clamp(0.75rem, 2vw, 1.5rem)"
               }}
-              onClick={e => e.stopPropagation()}
+              onClick={() => setSelectedInquiryDetail(null)}
             >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "1.15rem", fontWeight: 800, color: "#fff" }}>
-                  <Inbox size={22} color="var(--adm-mint)" /> Inquiry Details
-                </div>
-                <button onClick={() => setSelectedInquiryDetail(null)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.5)", cursor: "pointer" }}>
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div style={{ background: "#162338", borderRadius: 14, padding: "1.25rem", marginBottom: "1.25rem", display: "flex", flexDirection: "column", gap: "0.85rem", border: "1px solid rgba(255,255,255,0.06)" }}>
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
-                  <div>
-                    <div style={{ fontSize: "0.72rem", color: "var(--adm-text-sub)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Customer / Contact</div>
-                    <div style={{ fontSize: "1.15rem", fontWeight: 800, color: "#fff", marginTop: "0.2rem" }}>{selectedInquiryDetail.name}</div>
-                    <div style={{ fontSize: "0.85rem", color: "var(--adm-mint)", fontWeight: 600 }}>{selectedInquiryDetail.company}</div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const nextStatus = selectedInquiryDetail.status === "new" ? "read" : selectedInquiryDetail.status === "read" ? "replied" : "new";
-                      handleToggleStatus(selectedInquiryDetail._id, selectedInquiryDetail.status);
-                      setSelectedInquiryDetail({ ...selectedInquiryDetail, status: nextStatus });
-                    }}
-                    style={{
-                      cursor: "pointer",
-                      padding: "0.3rem 0.75rem",
-                      borderRadius: 20,
-                      fontSize: "0.72rem",
-                      fontWeight: 800,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.06em",
-                      background: selectedInquiryDetail.status === "new" ? "rgba(0, 210, 148, 0.15)" : selectedInquiryDetail.status === "read" ? "rgba(59, 130, 246, 0.15)" : "rgba(255, 255, 255, 0.08)",
-                      color: selectedInquiryDetail.status === "new" ? "#00D294" : selectedInquiryDetail.status === "read" ? "#60a5fa" : "rgba(255,255,255,0.7)",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      display: "inline-flex",
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: 15 }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+                style={{
+                  background: "#0c1527",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  borderRadius: 22,
+                  width: "100%",
+                  maxWidth: 960,
+                  maxHeight: "92vh",
+                  display: "flex",
+                  flexDirection: "column",
+                  boxShadow: "0 35px 90px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(0, 210, 148, 0.15)",
+                  overflow: "hidden"
+                }}
+                onClick={e => e.stopPropagation()}
+              >
+                {/* ── Modal Header ── */}
+                <div style={{
+                  padding: "1.25rem 1.75rem",
+                  borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+                  background: "linear-gradient(180deg, rgba(22, 35, 56, 0.8) 0%, rgba(12, 21, 39, 0.8) 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "1rem"
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
+                    <div style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 12,
+                      background: "rgba(0, 210, 148, 0.12)",
+                      border: "1px solid rgba(0, 210, 148, 0.25)",
+                      color: "var(--adm-mint)",
+                      display: "flex",
                       alignItems: "center",
-                      gap: "0.35rem"
-                    }}
-                    title="Click to cycle status: new → read → replied"
-                  >
-                    <span>●</span> {selectedInquiryDetail.status}
-                  </button>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "0.75rem", paddingTop: "0.6rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                  <div>
-                    <div style={{ fontSize: "0.7rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>Email</div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.2rem" }}>
-                      <span style={{ fontSize: "0.82rem", color: "#fff", fontWeight: 600, wordBreak: "break-all" }}>{selectedInquiryDetail.email || "N/A"}</span>
-                      {selectedInquiryDetail.email && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(selectedInquiryDetail.email || "");
-                            setCopiedDetailEmail(true);
-                            setTimeout(() => setCopiedDetailEmail(false), 2000);
-                          }}
-                          style={{
-                            background: "rgba(255,255,255,0.08)",
-                            border: "1px solid rgba(255,255,255,0.15)",
-                            borderRadius: 6,
-                            padding: "0.2rem 0.45rem",
-                            color: copiedDetailEmail ? "#00D294" : "rgba(255,255,255,0.7)",
-                            cursor: "pointer",
+                      justifyContent: "center",
+                      fontSize: "1rem",
+                      fontWeight: 800,
+                      flexShrink: 0
+                    }}>
+                      {selectedInquiryDetail.name ? selectedInquiryDetail.name.slice(0, 2).toUpperCase() : "IN"}
+                    </div>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
+                        <span style={{ fontSize: "1.25rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.01em" }}>
+                          {selectedInquiryDetail.name}
+                        </span>
+                        {countryInfo && (
+                          <span style={{
+                            fontSize: "0.75rem",
+                            padding: "0.2rem 0.6rem",
+                            borderRadius: 999,
+                            background: "rgba(255, 255, 255, 0.07)",
+                            color: "#e2e8f0",
                             display: "inline-flex",
                             alignItems: "center",
                             gap: "0.3rem",
-                            fontSize: "0.7rem",
-                            fontWeight: 700,
-                            flexShrink: 0
-                          }}
-                          title="Copy Email"
-                        >
-                          {copiedDetailEmail ? <Check size={11} /> : <Copy size={11} />}
-                          {copiedDetailEmail ? "Copied" : "Copy"}
-                        </button>
+                            border: "1px solid rgba(255, 255, 255, 0.1)"
+                          }}>
+                            <span>{countryInfo.flag}</span>
+                            <span>{countryInfo.name}</span>
+                          </span>
+                        )}
+                        <span style={{
+                          fontSize: "0.7rem",
+                          padding: "0.2rem 0.55rem",
+                          borderRadius: 6,
+                          background: "rgba(56, 189, 248, 0.12)",
+                          color: "#38bdf8",
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                          border: "1px solid rgba(56, 189, 248, 0.25)"
+                        }}>
+                          {selectedInquiryDetail.inquiryType || "Direct RFQ"}
+                        </span>
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", color: "var(--adm-mint)", fontSize: "0.85rem", fontWeight: 600, marginTop: "0.2rem" }}>
+                        <Building2 size={14} />
+                        <span>{selectedInquiryDetail.company || "Individual Buyer / Unspecified Enterprise"}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status Segmented Control & Close Button */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div style={{
+                      display: "flex",
+                      background: "rgba(0, 0, 0, 0.4)",
+                      padding: "0.25rem",
+                      borderRadius: 10,
+                      border: "1px solid rgba(255, 255, 255, 0.08)",
+                      gap: "0.25rem"
+                    }}>
+                      {(["new", "read", "replied"] as const).map((st) => {
+                        const isActive = selectedInquiryDetail.status === st;
+                        const colors = {
+                          new: { bg: "rgba(239, 68, 68, 0.2)", text: "#f87171", border: "rgba(239, 68, 68, 0.4)" },
+                          read: { bg: "rgba(56, 189, 248, 0.2)", text: "#38bdf8", border: "rgba(56, 189, 248, 0.4)" },
+                          replied: { bg: "rgba(0, 210, 148, 0.2)", text: "#00D294", border: "rgba(0, 210, 148, 0.4)" }
+                        }[st];
+                        return (
+                          <button
+                            key={st}
+                            type="button"
+                            onClick={() => handleUpdateInquiryStatus(selectedInquiryDetail._id, st)}
+                            style={{
+                              border: isActive ? `1px solid ${colors.border}` : "1px solid transparent",
+                              background: isActive ? colors.bg : "transparent",
+                              color: isActive ? colors.text : "rgba(255, 255, 255, 0.5)",
+                              fontSize: "0.72rem",
+                              fontWeight: 800,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.05em",
+                              padding: "0.35rem 0.75rem",
+                              borderRadius: 7,
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "0.35rem",
+                              transition: "all 0.15s ease"
+                            }}
+                          >
+                            <span style={{ fontSize: "0.6rem" }}>●</span>
+                            {st === "new" ? "New" : st === "read" ? "In Review" : "Replied / Quoted"}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedInquiryDetail(null)}
+                      style={{
+                        background: "rgba(255, 255, 255, 0.07)",
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                        borderRadius: 8,
+                        width: 34,
+                        height: 34,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "rgba(255, 255, 255, 0.7)",
+                        cursor: "pointer",
+                        transition: "all 0.15s ease"
+                      }}
+                      title="Close dossier"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── Quick Action Ribbon ── */}
+                <div style={{
+                  padding: "0.75rem 1.75rem",
+                  background: "rgba(10, 18, 32, 0.8)",
+                  borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "0.6rem"
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
+                    {whatsAppUrl ? (
+                      <a
+                        href={whatsAppUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.45rem",
+                          background: "#25D366",
+                          color: "#052e16",
+                          fontWeight: 800,
+                          fontSize: "0.78rem",
+                          padding: "0.45rem 0.9rem",
+                          borderRadius: 8,
+                          textDecoration: "none",
+                          boxShadow: "0 2px 10px rgba(37, 211, 102, 0.3)",
+                          transition: "transform 0.15s ease"
+                        }}
+                      >
+                        <MessageSquare size={14} />
+                        <span>Chat on WhatsApp</span>
+                      </a>
+                    ) : null}
+
+                    {selectedInquiryDetail.email ? (
+                      <a
+                        href={`mailto:${selectedInquiryDetail.email}?subject=Ashal%20Innomech%20-%20Technical%20Proposal%20%26%20Quotation`}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.45rem",
+                          background: "rgba(56, 189, 248, 0.15)",
+                          border: "1px solid rgba(56, 189, 248, 0.3)",
+                          color: "#38bdf8",
+                          fontWeight: 700,
+                          fontSize: "0.78rem",
+                          padding: "0.45rem 0.85rem",
+                          borderRadius: 8,
+                          textDecoration: "none"
+                        }}
+                      >
+                        <Mail size={14} />
+                        <span>Send Email</span>
+                      </a>
+                    ) : null}
+
+                    <button
+                      type="button"
+                      onClick={() => handleCopyDealBrief(selectedInquiryDetail)}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "0.45rem",
+                        background: "rgba(255, 255, 255, 0.08)",
+                        border: "1px solid rgba(255, 255, 255, 0.12)",
+                        color: copiedDetailBrief ? "var(--adm-mint)" : "rgba(255, 255, 255, 0.85)",
+                        fontWeight: 700,
+                        fontSize: "0.78rem",
+                        padding: "0.45rem 0.85rem",
+                        borderRadius: 8,
+                        cursor: "pointer"
+                      }}
+                    >
+                      {copiedDetailBrief ? <Check size={14} /> : <Copy size={14} />}
+                      <span>{copiedDetailBrief ? "Dossier Copied!" : "Copy Deal Brief"}</span>
+                    </button>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <span style={{ fontSize: "0.72rem", color: "var(--adm-text-sub)" }}>
+                      Channel: <strong style={{ color: "#fff" }}>{selectedInquiryDetail.source || "Website Inquiries"}</strong> · {selectedInquiryDetail.createdAt.split("T")[0]}
+                    </span>
+                  </div>
+                </div>
+
+                {/* ── Scrollable Body: 2-Column Executive Dossier ── */}
+                <div style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "1.5rem 1.75rem",
+                  display: "grid",
+                  gridTemplateColumns: "clamp(260px, 32%, 310px) 1fr",
+                  gap: "1.25rem"
+                }}>
+                  {/* ── Left Column: Contact Profile & Commercial Parameters ── */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                    {/* Client Profile Card */}
+                    <div style={{
+                      background: "#121d33",
+                      border: "1px solid rgba(255, 255, 255, 0.08)",
+                      borderRadius: 14,
+                      padding: "1.15rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.85rem"
+                    }}>
+                      <div style={{ fontSize: "0.72rem", color: "var(--adm-text-sub)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                        <Users size={13} color="var(--adm-mint)" /> Buyer Profile
+                      </div>
+
+                      {/* Email row */}
+                      <div>
+                        <div style={{ fontSize: "0.68rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>Email Address</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.2rem" }}>
+                          <span style={{ fontSize: "0.82rem", color: "#fff", fontWeight: 600, wordBreak: "break-all" }}>
+                            {selectedInquiryDetail.email || "N/A"}
+                          </span>
+                          {selectedInquiryDetail.email && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(selectedInquiryDetail.email || "");
+                                setCopiedDetailEmail(true);
+                                setTimeout(() => setCopiedDetailEmail(false), 2000);
+                              }}
+                              style={{
+                                background: "rgba(255, 255, 255, 0.08)",
+                                border: "1px solid rgba(255, 255, 255, 0.14)",
+                                borderRadius: 6,
+                                padding: "0.2rem 0.45rem",
+                                color: copiedDetailEmail ? "var(--adm-mint)" : "rgba(255, 255, 255, 0.7)",
+                                cursor: "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                fontSize: "0.68rem",
+                                fontWeight: 700,
+                                flexShrink: 0
+                              }}
+                              title="Copy Email"
+                            >
+                              {copiedDetailEmail ? <Check size={11} /> : <Copy size={11} />}
+                              {copiedDetailEmail ? "Copied" : "Copy"}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Phone row */}
+                      <div style={{ paddingTop: "0.65rem", borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}>
+                        <div style={{ fontSize: "0.68rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>Phone / WhatsApp</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.2rem" }}>
+                          <span style={{ fontSize: "0.84rem", color: "#fff", fontWeight: 700, fontFamily: "var(--ff-mono)" }}>
+                            {selectedInquiryDetail.phone || "No phone provided"}
+                          </span>
+                          {selectedInquiryDetail.phone && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(selectedInquiryDetail.phone || "");
+                                setCopiedDetailPhone(true);
+                                setTimeout(() => setCopiedDetailPhone(false), 2000);
+                              }}
+                              style={{
+                                background: "rgba(255, 255, 255, 0.08)",
+                                border: "1px solid rgba(255, 255, 255, 0.14)",
+                                borderRadius: 6,
+                                padding: "0.2rem 0.45rem",
+                                color: copiedDetailPhone ? "var(--adm-mint)" : "rgba(255, 255, 255, 0.7)",
+                                cursor: "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "0.25rem",
+                                fontSize: "0.68rem",
+                                fontWeight: 700,
+                                flexShrink: 0
+                              }}
+                              title="Copy Phone"
+                            >
+                              {copiedDetailPhone ? <Check size={11} /> : <Copy size={11} />}
+                              {copiedDetailPhone ? "Copied" : "Copy"}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Country row */}
+                      {countryInfo && (
+                        <div style={{ paddingTop: "0.65rem", borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}>
+                          <div style={{ fontSize: "0.68rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>Country / Region</div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginTop: "0.2rem", fontSize: "0.82rem", color: "#fff", fontWeight: 600 }}>
+                            <span style={{ fontSize: "1rem" }}>{countryInfo.flag}</span>
+                            <span>{countryInfo.name}</span>
+                          </div>
+                        </div>
                       )}
                     </div>
+
+                    {/* Smart Extracted Parameters Card */}
+                    {smartChips.length > 0 && (
+                      <div style={{
+                        background: "#121d33",
+                        border: "1px solid rgba(255, 255, 255, 0.08)",
+                        borderRadius: 14,
+                        padding: "1.15rem",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.65rem"
+                      }}>
+                        <div style={{ fontSize: "0.72rem", color: "var(--adm-text-sub)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <Sparkles size={13} color="var(--adm-mint)" /> Extracted Parameters
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
+                          {smartChips.map((chip, idx) => (
+                            <div key={idx} style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: "0.5rem",
+                              background: "rgba(0, 0, 0, 0.25)",
+                              padding: "0.4rem 0.65rem",
+                              borderRadius: 8,
+                              border: "1px solid rgba(255, 255, 255, 0.05)"
+                            }}>
+                              <span style={{ fontSize: "0.7rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>{chip.label}</span>
+                              <span style={{ fontSize: "0.78rem", fontWeight: 700, color: chip.color }}>{chip.value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Attached Machines if any */}
+                    {selectedInquiryDetail.machines && selectedInquiryDetail.machines.length > 0 && (
+                      <div style={{
+                        background: "#121d33",
+                        border: "1px solid rgba(255, 255, 255, 0.08)",
+                        borderRadius: 14,
+                        padding: "1.15rem",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.65rem"
+                      }}>
+                        <div style={{ fontSize: "0.72rem", color: "var(--adm-text-sub)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                          <Factory size={13} color="var(--adm-mint)" /> Selected Equipment
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
+                          {selectedInquiryDetail.machines.map((m, idx) => (
+                            <div key={idx} style={{
+                              background: "rgba(0, 0, 0, 0.25)",
+                              padding: "0.5rem 0.75rem",
+                              borderRadius: 8,
+                              border: "1px solid rgba(255, 255, 255, 0.05)"
+                            }}>
+                              <div style={{ fontSize: "0.82rem", fontWeight: 700, color: "#fff" }}>{m.name || m.model}</div>
+                              <div style={{ fontSize: "0.7rem", color: "var(--adm-mint)", marginTop: "0.15rem" }}>Qty: {m.qty || 1}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <div style={{ fontSize: "0.7rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>Inquiry Type</div>
-                    <div style={{ fontSize: "0.82rem", color: "#fff", fontWeight: 600, textTransform: "capitalize", marginTop: "0.2rem" }}>{selectedInquiryDetail.inquiryType}</div>
+
+                  {/* ── Right Column: Requirements & RFP Dossier ── */}
+                  <div style={{
+                    background: "#121d33",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    borderRadius: 14,
+                    padding: "1.25rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "1rem"
+                  }}>
+                    {/* Header bar of requirements */}
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      flexWrap: "wrap",
+                      gap: "0.5rem",
+                      paddingBottom: "0.75rem",
+                      borderBottom: "1px solid rgba(255, 255, 255, 0.06)"
+                    }}>
+                      <div style={{ fontSize: "0.78rem", color: "var(--adm-text-sub)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "0.45rem" }}>
+                        <FileText size={15} color="var(--adm-mint)" /> Customer Requirements &amp; Scope
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                        <div style={{
+                          display: "inline-flex",
+                          background: "rgba(0, 0, 0, 0.35)",
+                          padding: "0.2rem",
+                          borderRadius: 6,
+                          border: "1px solid rgba(255, 255, 255, 0.06)"
+                        }}>
+                          <button
+                            type="button"
+                            onClick={() => setMessageViewMode("formatted")}
+                            style={{
+                              background: messageViewMode === "formatted" ? "rgba(0, 210, 148, 0.15)" : "transparent",
+                              color: messageViewMode === "formatted" ? "var(--adm-mint)" : "rgba(255, 255, 255, 0.6)",
+                              border: "none",
+                              borderRadius: 4,
+                              fontSize: "0.68rem",
+                              fontWeight: 700,
+                              padding: "0.25rem 0.5rem",
+                              cursor: "pointer"
+                            }}
+                          >
+                            Structured
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setMessageViewMode("raw")}
+                            style={{
+                              background: messageViewMode === "raw" ? "rgba(0, 210, 148, 0.15)" : "transparent",
+                              color: messageViewMode === "raw" ? "var(--adm-mint)" : "rgba(255, 255, 255, 0.6)",
+                              border: "none",
+                              borderRadius: 4,
+                              fontSize: "0.68rem",
+                              fontWeight: 700,
+                              padding: "0.25rem 0.5rem",
+                              cursor: "pointer"
+                            }}
+                          >
+                            Raw
+                          </button>
+                        </div>
+
+                        {selectedInquiryDetail.message && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(selectedInquiryDetail.message || "");
+                              setCopiedRawMessage(true);
+                              setTimeout(() => setCopiedRawMessage(false), 2000);
+                            }}
+                            style={{
+                              background: "rgba(255, 255, 255, 0.06)",
+                              border: "1px solid rgba(255, 255, 255, 0.1)",
+                              borderRadius: 6,
+                              padding: "0.25rem 0.5rem",
+                              color: copiedRawMessage ? "var(--adm-mint)" : "rgba(255, 255, 255, 0.7)",
+                              fontSize: "0.68rem",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "0.25rem"
+                            }}
+                            title="Copy message text"
+                          >
+                            {copiedRawMessage ? <Check size={11} /> : <Copy size={11} />}
+                            {copiedRawMessage ? "Copied" : "Copy"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Message Content: Formatted vs Raw */}
+                    {!selectedInquiryDetail.message ? (
+                      <div style={{ textAlign: "center", padding: "2.5rem 1rem", color: "var(--adm-text-sub)", fontSize: "0.85rem" }}>
+                        No text requirements provided with this inquiry.
+                      </div>
+                    ) : messageViewMode === "raw" ? (
+                      <pre style={{
+                        background: "rgba(0, 0, 0, 0.35)",
+                        border: "1px solid rgba(255, 255, 255, 0.06)",
+                        borderRadius: 10,
+                        padding: "1rem",
+                        color: "rgba(255, 255, 255, 0.9)",
+                        fontSize: "0.82rem",
+                        fontFamily: "var(--ff-mono)",
+                        lineHeight: 1.6,
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
+                        margin: 0
+                      }}>
+                        {selectedInquiryDetail.message}
+                      </pre>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                        {/* Intro Paragraphs */}
+                        {parsedMsg.intro.length > 0 && (
+                          <div style={{
+                            background: "rgba(0, 0, 0, 0.25)",
+                            borderLeft: "3px solid var(--adm-mint)",
+                            borderRadius: "0 8px 8px 0",
+                            padding: "0.85rem 1rem",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "0.5rem"
+                          }}>
+                            {parsedMsg.intro.map((p, idx) => (
+                              <p key={idx} style={{ margin: 0, fontSize: "0.85rem", color: "rgba(255, 255, 255, 0.92)", lineHeight: 1.6 }}>
+                                {p}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Extracted Specifications Grid */}
+                        {parsedMsg.specs.length > 0 && (
+                          <div>
+                            <div style={{ fontSize: "0.72rem", color: "var(--adm-text-sub)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.5rem" }}>
+                              Key Technical Specifications
+                            </div>
+                            <div style={{
+                              display: "grid",
+                              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                              gap: "0.5rem"
+                            }}>
+                              {parsedMsg.specs.map((sp, idx) => (
+                                <div key={idx} style={{
+                                  background: "rgba(0, 0, 0, 0.35)",
+                                  border: "1px solid rgba(255, 255, 255, 0.07)",
+                                  borderRadius: 8,
+                                  padding: "0.55rem 0.8rem",
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: "0.2rem"
+                                }}>
+                                  <span style={{ fontSize: "0.68rem", color: "var(--adm-mint)", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                                    {sp.label}
+                                  </span>
+                                  <span style={{ fontSize: "0.82rem", color: "#fff", fontWeight: 600, wordBreak: "break-word" }}>
+                                    {sp.value}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Deliverables Checklist */}
+                        {parsedMsg.deliverables.length > 0 && (
+                          <div>
+                            <div style={{ fontSize: "0.72rem", color: "var(--adm-text-sub)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.5rem" }}>
+                              Quotation Scope &amp; Deliverables Required ({parsedMsg.deliverables.length} Items)
+                            </div>
+                            <div style={{
+                              display: "grid",
+                              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                              gap: "0.45rem"
+                            }}>
+                              {parsedMsg.deliverables.map((item, idx) => (
+                                <div key={idx} style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "0.6rem",
+                                  background: "rgba(255, 255, 255, 0.03)",
+                                  border: "1px solid rgba(255, 255, 255, 0.06)",
+                                  borderRadius: 8,
+                                  padding: "0.45rem 0.75rem"
+                                }}>
+                                  <span style={{
+                                    fontFamily: "var(--ff-mono)",
+                                    fontSize: "0.68rem",
+                                    color: "var(--adm-mint)",
+                                    background: "rgba(0, 210, 148, 0.12)",
+                                    padding: "0.15rem 0.4rem",
+                                    borderRadius: 4,
+                                    fontWeight: 700,
+                                    flexShrink: 0
+                                  }}>
+                                    {String(idx + 1).padStart(2, "0")}
+                                  </span>
+                                  <span style={{ fontSize: "0.8rem", color: "rgba(255, 255, 255, 0.9)", lineHeight: 1.35 }}>
+                                    {item}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Commercial Notes / Confidentiality */}
+                        {parsedMsg.notes.length > 0 && (
+                          <div style={{
+                            background: "rgba(245, 158, 11, 0.08)",
+                            border: "1px solid rgba(245, 158, 11, 0.25)",
+                            borderRadius: 10,
+                            padding: "0.85rem 1rem",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "0.45rem"
+                          }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", color: "#fbbf24", fontSize: "0.75rem", fontWeight: 800, textTransform: "uppercase" }}>
+                              <ShieldCheck size={14} /> Commercial Terms &amp; Confidentiality
+                            </div>
+                            {parsedMsg.notes.map((note, idx) => (
+                              <p key={idx} style={{ margin: 0, fontSize: "0.8rem", color: "rgba(255, 255, 255, 0.88)", lineHeight: 1.55 }}>
+                                {note}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {selectedInquiryDetail.phone && (
-                  <div style={{ paddingTop: "0.6rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                    <div style={{ fontSize: "0.7rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>Phone / WhatsApp</div>
-                    <div style={{ fontSize: "0.82rem", color: "#fff", marginTop: "0.15rem", fontFamily: "var(--ff-mono)" }}>
-                      {selectedInquiryDetail.phone}
-                    </div>
+                {/* ── Modal Footer ── */}
+                <div style={{
+                  padding: "1rem 1.75rem",
+                  borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+                  background: "#080e1a",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "1rem"
+                }}>
+                  <div style={{ fontSize: "0.75rem", color: "var(--adm-text-sub)", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                    <ShieldCheck size={14} color="var(--adm-mint)" />
+                    <span>Direct factory quotation workflow · Ashal Innomech CRM</span>
                   </div>
-                )}
 
-                {selectedInquiryDetail.message && (
-                  <div style={{ paddingTop: "0.6rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                    <div style={{ fontSize: "0.7rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>Customer Message</div>
-                    <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.8)", marginTop: "0.25rem", lineHeight: 1.5, background: "rgba(0,0,0,0.25)", padding: "0.6rem 0.8rem", borderRadius: 8 }}>
-                      {selectedInquiryDetail.message}
-                    </div>
-                  </div>
-                )}
+                  <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedInquiryDetail(null)}
+                      style={{
+                        padding: "0.65rem 1.25rem",
+                        borderRadius: 10,
+                        background: "rgba(255, 255, 255, 0.06)",
+                        border: "1px solid rgba(255, 255, 255, 0.12)",
+                        color: "rgba(255, 255, 255, 0.85)",
+                        fontWeight: 700,
+                        fontSize: "0.82rem",
+                        cursor: "pointer"
+                      }}
+                    >
+                      Close Dossier
+                    </button>
 
-                <div style={{ paddingTop: "0.6rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                  <div style={{ fontSize: "0.7rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>Lead Source / Timestamp</div>
-                  <div style={{ fontSize: "0.82rem", color: "var(--adm-text-sub)", marginTop: "0.15rem" }}>
-                    {selectedInquiryDetail.source || "Website Inquiries"} · {selectedInquiryDetail.createdAt.split("T")[0]}
+                    <Link
+                      href={`/${ADMIN_PATH}/inquiries`}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        background: "var(--adm-mint)",
+                        color: "#061814",
+                        padding: "0.65rem 1.35rem",
+                        borderRadius: 10,
+                        fontWeight: 800,
+                        fontSize: "0.82rem",
+                        textDecoration: "none",
+                        boxShadow: "0 4px 15px rgba(0, 210, 148, 0.3)"
+                      }}
+                    >
+                      <Send size={14} /> Open in Customer Inbox <ArrowRight size={14} />
+                    </Link>
                   </div>
                 </div>
-              </div>
-
-              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-                <Link
-                  href={`/${ADMIN_PATH}/inquiries`}
-                  style={{
-                    flex: 1,
-                    minWidth: 200,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "0.5rem",
-                    background: "var(--adm-mint)",
-                    color: "#061814",
-                    padding: "0.75rem 1rem",
-                    borderRadius: 12,
-                    fontWeight: 800,
-                    fontSize: "0.85rem",
-                    textDecoration: "none",
-                    boxShadow: "0 4px 15px rgba(0, 210, 148, 0.3)"
-                  }}
-                >
-                  <Send size={15} /> Open in Customer Inbox <ArrowRight size={14} />
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => setSelectedInquiryDetail(null)}
-                  style={{
-                    padding: "0.75rem 1.25rem",
-                    borderRadius: 12,
-                    background: "#162338",
-                    border: "1px solid var(--adm-border)",
-                    color: "rgba(255,255,255,0.85)",
-                    fontWeight: 700,
-                    fontSize: "0.85rem",
-                    cursor: "pointer"
-                  }}
-                >
-                  Close
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
+              </motion.div>
+            </div>
+          );
+        })()}
       </AnimatePresence>
 
       {/* Calendar Modal */}

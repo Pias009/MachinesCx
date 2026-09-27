@@ -43,8 +43,11 @@ const nextConfig = {
     optimizeCss: true,
   },
   images: {
-    unoptimized: true, // Bypasses Vercel's 5,000 transformation/month limit and eliminates serverless CPU usage — images serve directly from global Edge CDN
-    formats: ["image/avif", "image/webp"],
+    // Custom loader instead of Vercel's optimizer (avoids its monthly
+    // transformation limit): Cloudinary does the resize/format work via
+    // URL transforms, local rasters get pre-built .webp siblings
+    loader: "custom",
+    loaderFile: "./lib/imageLoader.ts",
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "img.youtube.com" },
@@ -64,6 +67,12 @@ const nextConfig = {
     return [
       {
         source: "/machines/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public,max-age=31536000,immutable" },
+        ],
+      },
+      {
+        source: "/about-photos/:path*",
         headers: [
           { key: "Cache-Control", value: "public,max-age=31536000,immutable" },
         ],

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 const DURATION = 800;
+const SEEN_KEY = "cx_splash";
 
 export default function LoadingScreen() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -11,10 +12,23 @@ export default function LoadingScreen() {
   const [pct,     setPct]     = useState(0);
   const [label,   setLabel]   = useState("Wenzhou Ashal Innomech Technology Co., Ltd.");
 
-  useEffect(() => { setMounted(true); }, []);
+  // Once per browser session: repeat loads skip the splash entirely (the
+  // inline head script in layout.tsx sets data-splash-seen before first
+  // paint so CSS hides the server-rendered overlay too)
+  const [seen] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try { return sessionStorage.getItem(SEEN_KEY) === "1"; } catch { return false; }
+  });
+
+  useEffect(() => {
+    setMounted(true);
+    if (seen) { setGone(true); return; }
+    try { sessionStorage.setItem(SEEN_KEY, "1"); } catch {}
+  }, [seen]);
 
   // Smooth progress — slow cubic ease
   useEffect(() => {
+    if (seen) return;
     const start = Date.now();
     const iv = setInterval(() => {
       const p = Math.min((Date.now() - start) / DURATION, 1);
@@ -23,10 +37,11 @@ export default function LoadingScreen() {
       if (p >= 1) clearInterval(iv);
     }, 16); // ~60fps
     return () => clearInterval(iv);
-  }, []);
+  }, [seen]);
 
   // Exit — fade + scale down
   useEffect(() => {
+    if (seen) return;
     const t = setTimeout(() => {
       setLabel("Ready");
       const el = rootRef.current;
@@ -38,7 +53,7 @@ export default function LoadingScreen() {
       setTimeout(() => setGone(true), 320);
     }, DURATION + 200);
     return () => clearTimeout(t);
-  }, []);
+  }, [seen]);
 
   if (gone) return null;
 

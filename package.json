@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --port 3333",
     "dev:clean": "rm -rf .next && next dev --port 3333",
+    "prebuild": "node scripts/optimize-images.mjs",
     "build": "next build",
     "start": "next start",
     "seed": "node scripts/seed.mjs",

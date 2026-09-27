@@ -7,6 +7,7 @@ import { useScrollReveal } from "@/lib/useScrollReveal";
 const PHONE_DISPLAY = "+86 159 8877 5831";
 const PHONE_TEL = "+8615988775831";
 const WHATSAPP_NUMBER = "8615988775831";
+// TODO_OWNER: confirm ashal@ashalinnomech.com receives mail; otherwise switch to a working address.
 const EMAIL = "ashal@ashalinnomech.com";
 
 const METHOD_ICONS = {

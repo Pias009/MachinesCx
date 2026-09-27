@@ -215,7 +215,7 @@ function PartsInquiryInner() {
                 <Field label={t("referencePhoto")} hint={t("referencePhotoHint")}>
                   <div style={{ display: "flex", gap: ".5rem", alignItems: "center", flexWrap: "wrap" }}>
                     {draftImages.map((src, i) => (
-                      <Image key={i} src={src} alt="" width={40} height={40} style={{ objectFit: "cover", borderRadius: 8, border: "1px solid var(--bg-line)" }} />
+                      <Image key={i} src={src} alt={`Attached photo ${i + 1}`} width={40} height={40} style={{ objectFit: "cover", borderRadius: 8, border: "1px solid var(--bg-line)" }} />
                     ))}
                     <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
                       style={{ padding: ".5rem .8rem", borderRadius: ".6rem", border: "1px dashed var(--bg-line)", background: "var(--bg-raise)", color: "var(--ink-60)", fontSize: ".8rem", cursor: "pointer" }}>

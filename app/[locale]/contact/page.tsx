@@ -1,6 +1,7 @@
 import { pageMetadata } from "@/lib/seo";
 import { SITE_URL, BRAND } from "@/lib/products";
 import JsonLd from "@/components/JsonLd";
+import { ORG_ID } from "@/lib/siteConfig";
 import ContactClient from "./ContactClient";
 
 import { routing } from "@/i18n/routing";
@@ -25,11 +26,14 @@ export default function ContactPage() {
         data={{
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
+          "@id": `${SITE_URL}/contact#localbusiness`,
+          parentOrganization: { "@id": ORG_ID },
           name: BRAND,
           legalName: "Wenzhou Ashal Innomech Technology Co., Ltd.",
           url: SITE_URL,
           image: `${SITE_URL}/logo.jpeg`,
           telephone: "+86 159 8877 5831",
+          // TODO_OWNER: confirm ashal@ashalinnomech.com receives mail; otherwise switch to a working address.
           email: "ashal@ashalinnomech.com",
           priceRange: "$$$$",
           address: {

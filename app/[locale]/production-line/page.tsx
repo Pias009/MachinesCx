@@ -1,15 +1,10 @@
-import { pageMetadata } from "@/lib/seo";
+import { staticPageMetadata } from "@/lib/pageSeo";
 import { SITE_URL } from "@/lib/products";
 import JsonLd from "@/components/JsonLd";
 import ProductionLineClient from "./ProductionLineClient";
 
 export function generateMetadata({ params }: { params: { locale: string } }) {
-  return pageMetadata({
-    locale: params.locale,
-    path: "/production-line",
-    title: "Production Line Builder — Ashal Innomech",
-    description: "Build the line that makes your final product. Start from a ready-made template or configure your own from film-blowing, bag-making, recycling, and printing machines.",
-  });
+  return staticPageMetadata("/production-line", params.locale);
 }
 
 export default function ProductionLinePage() {

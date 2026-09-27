@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SITE_URL, BRAND } from "@/lib/products";
-import { locales, defaultLocale, type Locale } from "@/i18n/routing";
+import { defaultLocale } from "@/i18n/routing";
 
 /** Builds the locale-prefixed absolute path for a route, matching the
  *  "as-needed" prefix strategy in i18n/routing.ts (en is unprefixed). */
@@ -9,25 +9,24 @@ export function localePath(locale: string, path: string): string {
   return locale === defaultLocale ? clean || "/" : `/${locale}${clean}`;
 }
 
-/** Canonical URL + hreflang alternates for a route, for spreading into
- *  a page's `metadata.alternates`. `path` is locale-agnostic, e.g. "/about"
- *  or "/products/film-blowing/abcde-2200". */
+/** Self-referencing absolute canonical for a route, for spreading into a
+ *  page's `metadata.alternates`. No hreflang: the site is English-only
+ *  (see i18n/routing.ts) — re-add `languages` only alongside real
+ *  translations. `path` is e.g. "/about" or "/products/film-blowing/abcde-2200". */
 export function alternates(locale: string, path: string): Metadata["alternates"] {
-  const languages: Record<string, string> = {};
-  for (const l of locales) {
-    languages[l] = `${SITE_URL}${localePath(l, path)}`;
-  }
-  languages["x-default"] = `${SITE_URL}${localePath(defaultLocale, path)}`;
-
   return {
     canonical: `${SITE_URL}${localePath(locale, path)}`,
-    languages,
   };
 }
 
-/** Shared page metadata: title, description, canonical/hreflang, and
- *  OG/Twitter overrides so shared links show page-specific info instead
- *  of the site-wide default set in the root layout. */
+// 1200×630 site share image — the default og:image/twitter:image for any
+// page without its own photo (the homepage included)
+export const DEFAULT_OG_IMAGE = { url: `${SITE_URL}/og/home.jpg`, width: 1200, height: 630 };
+
+/** Shared page metadata: title, description, canonical, and OG/Twitter
+ *  overrides so shared links show page-specific info. Title/description
+ *  are used verbatim — never suffixed or truncated here, so they must be
+ *  written to length at the source (lib/pageSeo.ts, lib/productSeo.ts). */
 export function pageMetadata(opts: {
   locale: string;
   path: string;
@@ -36,8 +35,12 @@ export function pageMetadata(opts: {
   image?: string;
 }): Metadata {
   const { locale, path, title, description, image } = opts;
+  const og = image
+    ? { url: image.startsWith("/") ? `${SITE_URL}${image}` : image }
+    : DEFAULT_OG_IMAGE;
   return {
-    title,
+    // absolute: bypasses any parent title.template so <title> is exact
+    title: { absolute: title },
     description,
     alternates: alternates(locale, path),
     openGraph: {
@@ -45,14 +48,14 @@ export function pageMetadata(opts: {
       description,
       url: `${SITE_URL}${localePath(locale, path)}`,
       siteName: BRAND,
-      images: image ? [{ url: image }] : undefined,
+      images: [og],
       type: "website",
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title,
       description,
-      images: image ? [image] : undefined,
+      images: [og.url],
     },
   };
 }

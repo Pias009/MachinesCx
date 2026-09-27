@@ -8,9 +8,8 @@ import Link from "next/link";
 import { useCms } from "@/lib/useCms";
 import type { ProductFamily } from "@/lib/products";
 import localProducts from "@/data/products.json";
+import { applyProductSeo } from "@/lib/productSeo";
 import localHeroEn from "@/data/home-hero.json";
-import localHeroAr from "@/data/home-hero.ar.json";
-import localHeroHi from "@/data/home-hero.hi.json";
 import WispBackground from "@/components/WispBackground";
 
 /* the CMS/DB only stores one (English-shaped) copy of this section, so a
@@ -18,8 +17,6 @@ import WispBackground from "@/components/WispBackground";
    locale fallbacks only cover the case where no DB override exists yet */
 const HERO_BY_LOCALE: Record<string, typeof localHeroEn> = {
   en: localHeroEn,
-  ar: localHeroAr,
-  hi: localHeroHi,
 };
 
 // react-three-fiber Canvas must be client-only (SSR breaks the hero subtree)
@@ -143,7 +140,7 @@ interface ResolvedHeroNode {
   href: string;
 }
 
-const localFamilies = (localProducts as { families: ProductFamily[] }).families;
+const localFamilies = (localProducts as { families: ProductFamily[] }).families.map(applyProductSeo);
 
 function getFamilyImage(f: Pick<ProductFamily, "slug" | "image" | "images">): string {
   if (f.images && f.images.length > 0 && f.images[0]?.trim()) return f.images[0];
@@ -186,7 +183,10 @@ const HERO_PHRASES = [
   "Engineered for 24/7 Industrial Output"
 ];
 
-export default function HeroSplash() {
+/** `h1` is the page's SEO heading (lib/pageSeo.ts). It renders as the
+ *  small eyebrow line; the big "Built for the floor." tagline is a <p>
+ *  so the page has exactly one, descriptive, <h1>. */
+export default function HeroSplash({ h1 }: { h1?: string } = {}) {
   const archRef   = useRef<HTMLDivElement>(null);
   const shapesRef = useRef<HTMLDivElement>(null);
   const [isLight, setIsLight] = useState(false);
@@ -227,7 +227,7 @@ export default function HeroSplash() {
   const locale = useLocale();
   const localHero = HERO_BY_LOCALE[locale] ?? localHeroEn;
   const hero = useCms<HeroCms>("home-hero", localHero as unknown as HeroCms);
-  const products = useCms<{ categories?: CategoryItem[]; families: ProductFamily[] }>("products", localProducts as any);
+  const products = useCms<{ categories?: CategoryItem[]; families: ProductFamily[] }>("products", { categories: localProducts.categories as CategoryItem[], families: localFamilies });
   const categories: CategoryItem[] = products.categories ?? (localProducts.categories as CategoryItem[]);
   const families: ProductFamily[] = products.families ?? localFamilies;
 
@@ -526,7 +526,7 @@ export default function HeroSplash() {
         [data-theme="light"] .hs__shape--3 {
           background: radial-gradient(circle, rgba(225,29,72,0.06) 0%, transparent 70%);
         }
-        [data-theme="light"] section.hs h1.hs__h1 { color: #0d2220 !important; }
+        [data-theme="light"] section.hs .hs__h1 { color: #0d2220 !important; }
         [data-theme="light"] .hs__h1 em { color: var(--brand-teal) !important; }
         [data-theme="light"] .hs__ticker-text { color: rgba(13,34,32,0.85) !important; }
         [data-theme="light"] .hs__desc-ticker { background: rgba(13,34,32,0.05) !important; border-color: rgba(13,34,32,0.15) !important; }
@@ -624,6 +624,12 @@ export default function HeroSplash() {
           letter-spacing: .26em; text-transform: uppercase;
           color: var(--brand-teal); margin-bottom: 1.4rem;
           opacity: 1; animation: hs-rise .8s cubic-bezier(.2,.7,.2,1) .05s both;
+        }
+        /* the SEO h1 is a full sentence — tighter tracking so it wraps
+           cleanly on phones instead of squeezing the rule lines */
+        .hs__seo-h1 {
+          font-weight: 500; letter-spacing: .14em; line-height: 1.5;
+          max-width: min(92vw, 44rem); justify-content: center; text-wrap: balance;
         }
         .hs__eyebrow::before, .hs__eyebrow::after {
           content: ""; width: 2rem; height: 1px; background: var(--brand-teal); opacity: .6;
@@ -1235,11 +1241,13 @@ export default function HeroSplash() {
 
         {/* Hero copy — pinned to the top */}
         <div className="hs__main">
-          {hero.eyebrow && <span className="hs__eyebrow" suppressHydrationWarning>{hero.eyebrow}</span>}
-          <h1 className="hs__h1">
+          {h1
+            ? <h1 className="hs__eyebrow hs__seo-h1">{h1}</h1>
+            : hero.eyebrow && <span className="hs__eyebrow" suppressHydrationWarning>{hero.eyebrow}</span>}
+          <p className="hs__h1">
             <span>{hero.headline1}</span>
             {hero.headline2 && <em>{hero.headline2}</em>}
-          </h1>
+          </p>
           {hero.description && (
             <div className="hs__desc-ticker">
               <span className="hs__ticker-dot" aria-hidden="true" />

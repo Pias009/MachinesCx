@@ -7,7 +7,9 @@ import "../globals.css";
 import SiteNav from "@/components/SiteNav";
 import { CatalogueProvider } from "@/components/CatalogueProvider";
 import LoadingScreen from "@/components/LoadingScreen";
-import { BRAND, SITE_URL } from "@/lib/products";
+import { BRAND, LEGAL_NAME, SITE_URL } from "@/lib/products";
+import { ORG_ID, CONTACT_EMAIL, CONTACT_PHONE, socialProfileEntries } from "@/lib/siteConfig";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import { getNavCatalogue } from "@/lib/liveCatalogue";
 import { routing, rtlLocales, type Locale } from "@/i18n/routing";
 
@@ -35,14 +37,14 @@ export const metadata: Metadata = {
     description,
     url: SITE_URL,
     siteName: BRAND,
-    images: [{ url: "/logo.jpeg", width: 1042, height: 1042, alt: BRAND }],
+    images: [DEFAULT_OG_IMAGE],
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title,
     description,
-    images: ["/logo.jpeg"],
+    images: [DEFAULT_OG_IMAGE.url],
   },
 };
 
@@ -62,7 +64,11 @@ export default async function LocaleLayout({
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
 
-  const [messages, navCatalogue] = await Promise.all([getMessages(), getNavCatalogue()]);
+  const [allMessages, navCatalogue] = await Promise.all([getMessages(), getNavCatalogue()]);
+  // "about" (~7 KB, incl. its capability table) is only used by /about,
+  // which adds it back with its own provider — keep it out of every
+  // other page's HTML payload
+  const { about: _about, ...messages } = allMessages;
   const dir = rtlLocales.includes(locale as Locale) ? "rtl" : "ltr";
 
   return (
@@ -138,42 +144,33 @@ export default async function LocaleLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify([
-              {
-                "@context": "https://schema.org",
-                "@type": "Organization",
-                name: BRAND,
-                legalName: "Wenzhou Ashal Innomech Technology Co., Ltd.",
-                url: SITE_URL,
-                logo: `${SITE_URL}/logo.jpeg`,
-                email: "ashal@ashalinnomech.com",
-                telephone: "+86 159 8877 5831",
-                address: {
-                  "@type": "PostalAddress",
-                  addressLocality: "Wenzhou",
-                  addressRegion: "Zhejiang",
-                  addressCountry: "China",
-                },
-                contactPoint: {
-                  "@type": "ContactPoint",
-                  telephone: "+86 159 8877 5831",
-                  contactType: "sales",
-                  email: "ashal@ashalinnomech.com",
-                  availableLanguage: ["English", "Arabic", "Hindi", "Chinese"],
-                },
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "@id": ORG_ID,
+              name: BRAND,
+              legalName: LEGAL_NAME,
+              url: SITE_URL,
+              logo: `${SITE_URL}/logo.jpeg`,
+              foundingDate: "2008",
+              // TODO_OWNER: confirm ashal@ashalinnomech.com receives mail; otherwise switch to a working address.
+              email: CONTACT_EMAIL,
+              telephone: CONTACT_PHONE,
+              address: {
+                "@type": "PostalAddress",
+                addressLocality: "Wenzhou",
+                addressRegion: "Zhejiang",
+                addressCountry: "CN",
               },
-              {
-                "@context": "https://schema.org",
-                "@type": "WebSite",
-                name: BRAND,
-                url: SITE_URL,
-                potentialAction: {
-                  "@type": "SearchAction",
-                  target: `${SITE_URL}/products?q={search_term_string}`,
-                  "query-input": "required name=search_term_string",
-                },
+              contactPoint: {
+                "@type": "ContactPoint",
+                telephone: CONTACT_PHONE,
+                contactType: "sales",
+                email: CONTACT_EMAIL,
+                availableLanguage: ["English", "Arabic", "Hindi", "Chinese"],
               },
-            ]),
+              ...(socialProfileEntries().length > 0 && { sameAs: socialProfileEntries().map(([, url]) => url) }),
+            }),
           }}
         />
       </head>

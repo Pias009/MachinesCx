@@ -98,7 +98,7 @@ function generateSeoDataForFamily(f) {
       },
       {
         question: `What warranty and commissioning support does Wenzhou Ashal Innomech provide?`,
-        answer: `Ashal Machinery provides a 12-month comprehensive mechanical warranty, pre-shipment Factory Acceptance Testing (FAT) with video proof, on-site engineer installation and commissioning, and lifetime spare parts replacement support.`
+        answer: `Ashal Innomech provides a 12-month comprehensive mechanical warranty, pre-shipment Factory Acceptance Testing (FAT) with video proof, on-site engineer installation and commissioning, and lifetime spare parts replacement support.`
       }
     ];
 
@@ -231,8 +231,8 @@ function generateSeoDataForFamily(f) {
         answer: `Filter change frequency depends on raw material contamination levels. The non-stop hydraulic screen changer allows screen replacement in under 2 seconds without shutting down the extruder.`
       },
       {
-        question: `What post-sale technical support does Ashal Machinery offer?`,
-        answer: `Ashal Machinery provides full factory testing, 1-year warranty coverage, on-site commissioning by experienced engineers, spare cutter blades, and ongoing remote technical service.`
+        question: `What post-sale technical support does Ashal Innomech offer?`,
+        answer: `Ashal Innomech provides full factory testing, 1-year warranty coverage, on-site commissioning by experienced engineers, spare cutter blades, and ongoing remote technical service.`
       }
     ];
 
@@ -299,7 +299,7 @@ function generateSeoDataForFamily(f) {
       },
       {
         question: `What installation and warranty support is provided by Wenzhou Ashal Innomech?`,
-        answer: `Ashal Machinery provides a 12-month warranty, complete factory acceptance testing prior to dispatch, on-site commissioning and print operator training by senior technicians, and lifetime spare parts support.`
+        answer: `Ashal Innomech provides a 12-month warranty, complete factory acceptance testing prior to dispatch, on-site commissioning and print operator training by senior technicians, and lifetime spare parts support.`
       }
     ];
 
@@ -324,7 +324,7 @@ function generateSeoDataForFamily(f) {
   return {
     wordCount,
     overviewHeading: `Engineered Overview & Technical Deep-Dive — ${name}`,
-    metaTitle: `${name} | Technical Specs & Output | Ashal Machinery`,
+    metaTitle: `${name} | Technical Specs & Output | Ashal Innomech`,
     metaDescription: `Explore technical specifications, output capacity (${maxOutput}), resin compatibility & direct factory pricing for the ${name} by Ashal Innomech.`.slice(0, 160),
     focusKeywords,
     technicalArchitecture,

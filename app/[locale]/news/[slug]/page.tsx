@@ -6,8 +6,10 @@ import AetherBtn from "@/components/AetherBtn";
 import { articleBySlug, renderNewsBody } from "@/lib/news";
 import { getLiveNews } from "@/lib/liveNews";
 import { pageMetadata, localePath } from "@/lib/seo";
-import { SITE_URL, BRAND } from "@/lib/products";
+import { SITE_URL } from "@/lib/products";
 import JsonLd from "@/components/JsonLd";
+import { MODEL_MENTIONS } from "@/lib/productSeo";
+import { ORG_ID } from "@/lib/siteConfig";
 
 export const revalidate = 3600;
 
@@ -20,7 +22,7 @@ export async function generateMetadata({ params }: { params: { locale: string; s
   return pageMetadata({
     locale: params.locale,
     path: `/news/${params.slug}`,
-    title: `${a.title} — Ashal Innomech`,
+    title: `${a.title} | Ashal Innomech`,
     description: a.excerpt,
     image: a.image,
   });
@@ -56,8 +58,8 @@ export default async function ArticlePage({ params }: { params: { locale: string
           image: a.image ? (a.image.startsWith("/") ? `${SITE_URL}${a.image}` : a.image) : undefined,
           datePublished: a.date,
           dateModified: a.date,
-          author: { "@type": "Organization", name: BRAND, url: SITE_URL },
-          publisher: { "@type": "Organization", name: BRAND, logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.jpeg` } },
+          author: { "@id": ORG_ID },
+          publisher: { "@id": ORG_ID },
           mainEntityOfPage: url,
         }}
       />
@@ -193,7 +195,7 @@ export default async function ArticlePage({ params }: { params: { locale: string
              bigger restructure, and the content is injected via
              dangerouslySetInnerHTML anyway. */}
         <div className="article-body"
-          dangerouslySetInnerHTML={{ __html: renderNewsBody(a.body) }}
+          dangerouslySetInnerHTML={{ __html: renderNewsBody(a.body, MODEL_MENTIONS) }}
         />
 
         {/* sidebar */}
@@ -328,6 +330,8 @@ export default async function ArticlePage({ params }: { params: { locale: string
         .article-body ul { padding-left: 1.25rem; margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.45rem; }
         .article-body li { position: relative; color: var(--ink-60); }
         .article-body strong { color: var(--ink); font-weight: 600; }
+        .article-body a { color: var(--brand-teal-dk, var(--brand-teal)); text-decoration: underline; text-underline-offset: 2px; }
+        .article-body a:hover { color: var(--ink); }
 
         .article-sidebar-link {
           font-family: var(--ff-mono); font-size: 0.65rem;

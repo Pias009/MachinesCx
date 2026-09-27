@@ -75,10 +75,35 @@ export async function readSection(section: CmsSection): Promise<unknown> {
   throw new Error(`section "${section}" not found`);
 }
 
+type Stamped = { slug?: string; updatedAt?: string } & Record<string, unknown>;
+
+/** Sets `updatedAt` (ISO date) on each product family whose content changed
+ *  in this save, keeping the previous stamp on untouched ones — so the
+ *  sitemap's <lastmod> reflects real per-product edits instead of one
+ *  section-wide timestamp. */
+async function stampFamilyDates(data: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const next = data.families;
+  if (!Array.isArray(next)) return data;
+  const prevDoc = await CmsSection.findOne({ section: "products" }).lean();
+  const prevFams = ((prevDoc?.data as { families?: Stamped[] } | undefined)?.families ?? []) as Stamped[];
+  const prevBySlug = new Map(prevFams.map((f) => [f.slug, f]));
+  const strip = ({ updatedAt: _u, ...rest }: Stamped) => JSON.stringify(rest);
+  const today = new Date().toISOString().slice(0, 10);
+  return {
+    ...data,
+    families: (next as Stamped[]).map((f) => {
+      const prev = prevBySlug.get(f.slug);
+      const changed = !prev || strip(prev) !== strip(f);
+      return { ...f, updatedAt: changed ? today : prev?.updatedAt ?? f.updatedAt };
+    }),
+  };
+}
+
 export async function writeSection(section: CmsSection, data: unknown): Promise<void> {
   if (typeof data !== "object" || data === null) throw new Error("payload must be an object");
   try {
     await connectDB();
+    if (section === "products") data = await stampFamilyDates(data as Record<string, unknown>);
     await CmsSection.updateOne(
       { section },
       { $set: { data, updatedAt: new Date() } },

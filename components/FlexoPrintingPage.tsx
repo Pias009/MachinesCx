@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import ModelComparisonTable from "@/components/ModelComparisonTable";
 import AetherBtn from "@/components/AetherBtn";
 import Image from "next/image";
 import { useProductImage } from "@/components/CatalogueProvider";
@@ -33,7 +34,7 @@ const KEY_SPECS: Record<string, { speed: string; reg: string; drive: "semiServo"
 
 /* families come live from the CMS (category page passes them); the bundled
    list is only a fallback. Photos are each machine's current admin photo. */
-export default function FlexoPrintingPage({ families: liveFamilies }: { families?: ProductFamily[] } = {}) {
+export default function FlexoPrintingPage({ families: liveFamilies, h1 }: { families?: ProductFamily[]; h1?: string } = {}) {
   const t = useTranslations("flexoPrintingPage");
   const families = liveFamilies && liveFamilies.length ? liveFamilies : familiesByCategory("printing");
   const productImg = useProductImage();
@@ -251,7 +252,7 @@ export default function FlexoPrintingPage({ families: liveFamilies }: { families
               {/* thumbnail strip */}
               <div className="fp-hero-thumbs" style={{ position:"absolute", bottom:"1rem", left:"1rem", display:"flex", gap:".5rem" }}>
                 {GALLERY.map((g,i) => (
-                  <Image key={i} src={g.src} alt="" onClick={() => setActiveImg(i)}
+                  <Image key={i} src={g.src} alt={g.alt} onClick={() => setActiveImg(i)}
                     width={144} height={104} sizes="72px"
                     className={`fp-gallery-thumb${activeImg===i?" fp-gallery-thumb--active":""}`} />
                 ))}
@@ -264,7 +265,7 @@ export default function FlexoPrintingPage({ families: liveFamilies }: { families
                 {t("heroEyebrow")}
               </span>
               <h1 style={{ fontFamily:"var(--ff-display)", fontSize:"clamp(2.4rem,4.5vw,3.8rem)", color:"#fff", lineHeight:.9, letterSpacing:".01em" }}>
-                {t.rich("heroTitle", { br: () => <br /> })}
+                {h1 ?? t.rich("heroTitle", { br: () => <br /> })}
               </h1>
               <p style={{ fontFamily:"var(--ff-body)", fontSize:".95rem", lineHeight:1.7, color:"rgba(255,255,255,0.75)", maxWidth:"38ch" }}>
                 {t("heroDescription")}
@@ -450,6 +451,8 @@ export default function FlexoPrintingPage({ families: liveFamilies }: { families
           </div>
         </div>
       </section>
+
+      <ModelComparisonTable families={families} caption="Compare Flexographic Printing Machines" />
 
       {/* ── CTA ── */}
       <section className="fp-cta-section" style={{

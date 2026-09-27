@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isCmsSection, readSection } from "@/lib/cmsStore";
+import { applyProductSeo } from "@/lib/productSeo";
+import type { ProductFamily } from "@/lib/products";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,7 +13,14 @@ export async function GET(_req: NextRequest, { params }: { params: { section: st
     return NextResponse.json({ error: "unknown section" }, { status: 404 });
   }
   try {
-    const res = NextResponse.json(await readSection(params.section));
+    let data = await readSection(params.section);
+    // same SEO overlay the server-rendered pages use, so client-fetched
+    // homepage cards show the product H1 rather than the raw CMS name
+    if (params.section === "products") {
+      const d = data as { families?: ProductFamily[] };
+      if (Array.isArray(d.families)) data = { ...d, families: d.families.map(applyProductSeo) };
+    }
+    const res = NextResponse.json(data);
     res.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=600");
     return res;
   } catch {

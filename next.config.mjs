@@ -14,9 +14,11 @@ const MACHINE_TO_CATALOGUE_CATEGORY = {
   "recycling-machines": "recycling",
 };
 const machines = JSON.parse(readFileSync(new URL("./app/data/machines.json", import.meta.url), "utf8"));
+// old /ar and /hi copies of these pages go straight to the final English
+// URL in one hop instead of chaining through the generic locale redirect
 const localized = (source, destination) => [
   { source, destination, permanent: true },
-  { source: `/:locale(ar|hi)${source}`, destination: `/:locale${destination}`, permanent: true },
+  { source: `/:locale(ar|hi)${source}`, destination, permanent: true },
 ];
 const duplicateRedirects = [
   ...machines.products
@@ -50,7 +52,13 @@ const nextConfig = {
     ],
   },
   async redirects() {
-    return duplicateRedirects;
+    return [
+      ...duplicateRedirects,
+      // ar/hi locales removed (English titles/bodies under lang="ar"/"hi"
+      // were indexed as duplicates) — 301 every old URL to its English page
+      { source: "/:locale(ar|hi)", destination: "/", permanent: true },
+      { source: "/:locale(ar|hi)/:path*", destination: "/:path*", permanent: true },
+    ];
   },
   async headers() {
     return [

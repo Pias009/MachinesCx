@@ -1,16 +1,11 @@
 import { getLiveCatalogue } from "@/lib/liveCatalogue";
-import { pageMetadata } from "@/lib/seo";
+import { staticPageMetadata } from "@/lib/pageSeo";
 import CatalogueClient from "./CatalogueClient";
 
 export const dynamic = "force-dynamic";
 
 export function generateMetadata({ params }: { params: { locale: string } }) {
-  return pageMetadata({
-    locale: params.locale,
-    path: "/products",
-    title: "Full Catalogue — Ashal Innomech",
-    description: "Browse the full range: multi-layer blown-film lines, bag-making converters, recycling and pelletizing lines, and flexographic printing machines.",
-  });
+  return staticPageMetadata("/products", params.locale);
 }
 
 export default async function ProductsIndex() {

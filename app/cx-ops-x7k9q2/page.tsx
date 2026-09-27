@@ -10,7 +10,7 @@ import {
   Video, CalendarDays, ChevronDown, MoreVertical, ExternalLink,
   X, Plus, RefreshCw, Download, Filter, Trash2, Eye, Mail, Check,
   Inbox, FileText, Sparkles, Activity, Layers, Send, Loader2,
-  Wrench, Cpu, Factory, Gauge, Box, ShieldCheck, ArrowRight
+  Wrench, Cpu, Factory, Gauge, Box, ShieldCheck, ArrowRight, Copy
 } from "lucide-react";
 import AdminShell from "./AdminShell";
 import { ADMIN_PATH, SessionUser } from "@/lib/adminAuth";
@@ -22,6 +22,8 @@ interface InquiryRow {
   name: string;
   company: string;
   email?: string;
+  phone?: string;
+  message?: string;
   status: "new" | "read" | "replied";
   source?: string;
   createdAt: string;
@@ -92,7 +94,7 @@ function MachineManagerDashboard({ userName }: { userName: string }) {
   ];
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "1rem 0" }}>
+    <div className="adm-content-container" style={{ padding: "1rem 0" }}>
       {/* Top Banner */}
       <div
         style={{
@@ -162,7 +164,7 @@ function MachineManagerDashboard({ userName }: { userName: string }) {
       </div>
 
       {/* Grid of 6 Allowed Machinery Schemas */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: "1.25rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))", gap: "1.5rem" }}>
         {schemas.map((s) => {
           const Icon = s.icon;
           return (
@@ -260,6 +262,7 @@ export default function AdminHome() {
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedInquiryDetail, setSelectedInquiryDetail] = useState<InquiryRow | null>(null);
+  const [copiedDetailEmail, setCopiedDetailEmail] = useState(false);
   const [showDateDropdown, setShowDateDropdown] = useState(false);
   const [selectedDate, setSelectedDate] = useState("30 Aug 2026");
   const [activeCardMenu, setActiveCardMenu] = useState<string | null>(null);
@@ -670,12 +673,13 @@ export default function AdminHome() {
 
   return (
     <AdminShell>
-      <motion.div
-        className="adm-rise"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
+      <div className="adm-content-container">
+        <motion.div
+          className="adm-rise"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
         {/* Toast Notification */}
         <AnimatePresence>
           {toastMessage && (
@@ -1392,7 +1396,8 @@ export default function AdminHome() {
           <div style={{
             position: "fixed", inset: 0, zIndex: 99999,
             background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)",
-            display: "flex", alignItems: "center", justifyContent: "center"
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "1rem"
           }} onClick={() => setSelectedInquiryDetail(null)}>
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 15 }}
@@ -1400,7 +1405,7 @@ export default function AdminHome() {
               exit={{ opacity: 0, scale: 0.9, y: 15 }}
               style={{
                 background: "#121B2D", border: "1px solid var(--adm-border)",
-                borderRadius: 20, padding: "2rem", width: "90%", maxWidth: 520,
+                borderRadius: 20, padding: "2rem", width: "100%", maxWidth: 540,
                 boxShadow: "0 28px 70px rgba(0,0,0,0.8)"
               }}
               onClick={e => e.stopPropagation()}
@@ -1414,25 +1419,102 @@ export default function AdminHome() {
                 </button>
               </div>
 
-              <div style={{ background: "#162338", borderRadius: 14, padding: "1.2rem", marginBottom: "1.25rem", display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-                <div>
-                  <div style={{ fontSize: "0.72rem", color: "var(--adm-text-sub)", fontWeight: 700, textTransform: "uppercase" }}>Customer / Contact</div>
-                  <div style={{ fontSize: "1.1rem", fontWeight: 800, color: "#fff", marginTop: "0.15rem" }}>{selectedInquiryDetail.name}</div>
-                  <div style={{ fontSize: "0.82rem", color: "var(--adm-mint)", fontWeight: 600 }}>{selectedInquiryDetail.company}</div>
+              <div style={{ background: "#162338", borderRadius: 14, padding: "1.25rem", marginBottom: "1.25rem", display: "flex", flexDirection: "column", gap: "0.85rem", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
+                  <div>
+                    <div style={{ fontSize: "0.72rem", color: "var(--adm-text-sub)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Customer / Contact</div>
+                    <div style={{ fontSize: "1.15rem", fontWeight: 800, color: "#fff", marginTop: "0.2rem" }}>{selectedInquiryDetail.name}</div>
+                    <div style={{ fontSize: "0.85rem", color: "var(--adm-mint)", fontWeight: 600 }}>{selectedInquiryDetail.company}</div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextStatus = selectedInquiryDetail.status === "new" ? "read" : selectedInquiryDetail.status === "read" ? "replied" : "new";
+                      handleToggleStatus(selectedInquiryDetail._id, selectedInquiryDetail.status);
+                      setSelectedInquiryDetail({ ...selectedInquiryDetail, status: nextStatus });
+                    }}
+                    style={{
+                      cursor: "pointer",
+                      padding: "0.3rem 0.75rem",
+                      borderRadius: 20,
+                      fontSize: "0.72rem",
+                      fontWeight: 800,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
+                      background: selectedInquiryDetail.status === "new" ? "rgba(0, 210, 148, 0.15)" : selectedInquiryDetail.status === "read" ? "rgba(59, 130, 246, 0.15)" : "rgba(255, 255, 255, 0.08)",
+                      color: selectedInquiryDetail.status === "new" ? "#00D294" : selectedInquiryDetail.status === "read" ? "#60a5fa" : "rgba(255,255,255,0.7)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.35rem"
+                    }}
+                    title="Click to cycle status: new → read → replied"
+                  >
+                    <span>●</span> {selectedInquiryDetail.status}
+                  </button>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", paddingTop: "0.5rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "0.75rem", paddingTop: "0.6rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                   <div>
                     <div style={{ fontSize: "0.7rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>Email</div>
-                    <div style={{ fontSize: "0.82rem", color: "#fff", fontWeight: 600 }}>{selectedInquiryDetail.email || "N/A"}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.2rem" }}>
+                      <span style={{ fontSize: "0.82rem", color: "#fff", fontWeight: 600, wordBreak: "break-all" }}>{selectedInquiryDetail.email || "N/A"}</span>
+                      {selectedInquiryDetail.email && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(selectedInquiryDetail.email || "");
+                            setCopiedDetailEmail(true);
+                            setTimeout(() => setCopiedDetailEmail(false), 2000);
+                          }}
+                          style={{
+                            background: "rgba(255,255,255,0.08)",
+                            border: "1px solid rgba(255,255,255,0.15)",
+                            borderRadius: 6,
+                            padding: "0.2rem 0.45rem",
+                            color: copiedDetailEmail ? "#00D294" : "rgba(255,255,255,0.7)",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "0.3rem",
+                            fontSize: "0.7rem",
+                            fontWeight: 700,
+                            flexShrink: 0
+                          }}
+                          title="Copy Email"
+                        >
+                          {copiedDetailEmail ? <Check size={11} /> : <Copy size={11} />}
+                          {copiedDetailEmail ? "Copied" : "Copy"}
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div>
-                    <div style={{ fontSize: "0.7rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>Type</div>
-                    <div style={{ fontSize: "0.82rem", color: "#fff", fontWeight: 600, textTransform: "capitalize" }}>{selectedInquiryDetail.inquiryType}</div>
+                    <div style={{ fontSize: "0.7rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>Inquiry Type</div>
+                    <div style={{ fontSize: "0.82rem", color: "#fff", fontWeight: 600, textTransform: "capitalize", marginTop: "0.2rem" }}>{selectedInquiryDetail.inquiryType}</div>
                   </div>
                 </div>
 
-                <div style={{ paddingTop: "0.5rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                {selectedInquiryDetail.phone && (
+                  <div style={{ paddingTop: "0.6rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                    <div style={{ fontSize: "0.7rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>Phone / WhatsApp</div>
+                    <div style={{ fontSize: "0.82rem", color: "#fff", marginTop: "0.15rem", fontFamily: "var(--ff-mono)" }}>
+                      {selectedInquiryDetail.phone}
+                    </div>
+                  </div>
+                )}
+
+                {selectedInquiryDetail.message && (
+                  <div style={{ paddingTop: "0.6rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                    <div style={{ fontSize: "0.7rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>Customer Message</div>
+                    <div style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.8)", marginTop: "0.25rem", lineHeight: 1.5, background: "rgba(0,0,0,0.25)", padding: "0.6rem 0.8rem", borderRadius: 8 }}>
+                      {selectedInquiryDetail.message}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ paddingTop: "0.6rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                   <div style={{ fontSize: "0.7rem", color: "var(--adm-text-sub)", fontWeight: 600 }}>Lead Source / Timestamp</div>
                   <div style={{ fontSize: "0.82rem", color: "var(--adm-text-sub)", marginTop: "0.15rem" }}>
                     {selectedInquiryDetail.source || "Website Inquiries"} · {selectedInquiryDetail.createdAt.split("T")[0]}
@@ -1440,20 +1522,41 @@ export default function AdminHome() {
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "0.75rem" }}>
-                <button
-                  className="adm-btn"
-                  style={{ flex: 1, justifyContent: "center" }}
-                  onClick={() => {
-                    handleToggleStatus(selectedInquiryDetail._id, "new");
-                    setSelectedInquiryDetail(null);
+              <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                <Link
+                  href={`/${ADMIN_PATH}/inquiries`}
+                  style={{
+                    flex: 1,
+                    minWidth: 200,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.5rem",
+                    background: "var(--adm-mint)",
+                    color: "#061814",
+                    padding: "0.75rem 1rem",
+                    borderRadius: 12,
+                    fontWeight: 800,
+                    fontSize: "0.85rem",
+                    textDecoration: "none",
+                    boxShadow: "0 4px 15px rgba(0, 210, 148, 0.3)"
                   }}
                 >
-                  <Send size={15} /> Mark as Replied
-                </button>
+                  <Send size={15} /> Open in Customer Inbox <ArrowRight size={14} />
+                </Link>
                 <button
+                  type="button"
                   onClick={() => setSelectedInquiryDetail(null)}
-                  style={{ padding: "0.7rem 1.2rem", borderRadius: 10, background: "#162338", border: "1px solid var(--adm-border)", color: "#fff", fontWeight: 700, cursor: "pointer" }}
+                  style={{
+                    padding: "0.75rem 1.25rem",
+                    borderRadius: 12,
+                    background: "#162338",
+                    border: "1px solid var(--adm-border)",
+                    color: "rgba(255,255,255,0.85)",
+                    fontWeight: 700,
+                    fontSize: "0.85rem",
+                    cursor: "pointer"
+                  }}
                 >
                   Close
                 </button>
@@ -1583,6 +1686,7 @@ export default function AdminHome() {
           </form>
         </div>
       )}
+      </div>
     </AdminShell>
   );
 }

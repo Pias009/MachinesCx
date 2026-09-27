@@ -3,6 +3,7 @@ import FlexoPrintingPage from "@/components/FlexoPrintingPage";
 import { categories, type CategorySlug } from "@/lib/products";
 import { getLiveCatalogue } from "@/lib/liveCatalogue";
 import { pageMetadata } from "@/lib/seo";
+import { PAGE_SEO, staticPageMetadata } from "@/lib/pageSeo";
 import { getMachineCategoryBySlug } from "@/lib/machinesData";
 import CategoryPageClient from "./CategoryPageClient";
 
@@ -15,6 +16,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: { locale: string; category: string } }) {
   const { locale, category } = params;
+  if (PAGE_SEO[`/products/${category}`]) return staticPageMetadata(`/products/${category}`, locale);
   const { categories: liveCategories } = await getLiveCatalogue();
   const c = liveCategories.find((x) => x.slug === category);
   const mCat = getMachineCategoryBySlug(category);
@@ -41,7 +43,7 @@ export default async function CategoryPage({ params }: { params: { category: str
   if (!cat && !mCat) notFound();
 
   if (params.category === "printing" || params.category === "flexo-printing-machines") {
-    return <FlexoPrintingPage families={liveFamilies.filter((f) => f.category === "printing")} />;
+    return <FlexoPrintingPage families={liveFamilies.filter((f) => f.category === "printing")} h1={PAGE_SEO["/products/printing"].h1} />;
   }
 
   const fams = liveFamilies.filter((f) => f.category === (params.category as CategorySlug));
@@ -57,6 +59,7 @@ export default async function CategoryPage({ params }: { params: { category: str
   return (
     <CategoryPageClient
       category={currentCategory}
+      h1={PAGE_SEO[`/products/${params.category}`]?.h1 ?? currentCategory.name}
       families={fams}
       allCategories={liveCategories}
     />

@@ -9,6 +9,7 @@ import TransitionLink from "@/components/TransitionLink";
 import type { Category, ProductFamily } from "@/lib/products";
 import { familyImage } from "@/lib/products";
 import { useScrollReveal } from "@/lib/useScrollReveal";
+import ModelComparisonTable from "@/components/ModelComparisonTable";
 
 /* ── per-category feature badges — icon + ordering only; the display
    label text is translated and pulled from the categoryPage.features.*
@@ -123,11 +124,13 @@ const CARD_STATS: Record<string, string[]> = {
 
 interface Props {
   category: Category;
+  /** page H1 from lib/pageSeo.ts — may differ from the CMS category name */
+  h1: string;
   families: ProductFamily[];
   allCategories: Category[];
 }
 
-export default function CategoryPageClient({ category, families, allCategories }: Props) {
+export default function CategoryPageClient({ category, h1, families, allCategories }: Props) {
   const t = useTranslations("categoryPage");
   // hero mosaic follows the live catalogue (CMS / Cloudinary uploads); the
   // static list only fills in when no family in this category has a photo
@@ -179,6 +182,7 @@ export default function CategoryPageClient({ category, families, allCategories }
                 <Image
                   src={src}
                   alt=""
+                  aria-hidden="true"
                   fill
                   sizes="(max-width: 880px) 0px, 26vw"
                   priority={i === 0}
@@ -200,7 +204,7 @@ export default function CategoryPageClient({ category, families, allCategories }
           </nav>
 
           <p className="ccp-hero__tag">{category.tagline}</p>
-          <h1 className="ccp-hero__h1">{category.name}</h1>
+          <h1 className="ccp-hero__h1">{h1}</h1>
           <p className="ccp-hero__blurb">{category.blurb}</p>
 
           {/* category tabs — on mobile this collapses into a tap-to-expand
@@ -340,6 +344,8 @@ export default function CategoryPageClient({ category, families, allCategories }
           </div>
         </div>
       </section>
+
+      <ModelComparisonTable families={families} caption={`Compare ${category.name}`} />
 
       {/* ── CTA BAND ── */}
       <section className="ccp-cta" aria-label={t("contactAria")} data-reveal>

@@ -1,7 +1,5 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/products";
-import { locales, defaultLocale } from "@/i18n/routing";
-import { localePath } from "@/lib/seo";
 import { getLiveCatalogue } from "@/lib/liveCatalogue";
 import { getLiveNews } from "@/lib/liveNews";
 
@@ -9,86 +7,70 @@ import { getLiveNews } from "@/lib/liveNews";
 // that actually renders — a slug renamed in the admin panel previously left
 // the sitemap pointing Google at a not-found page. machines.json pages are
 // omitted: they 301 to their catalogue family (next.config.mjs).
+//
+// <lastmod> is always a real content date, never the generation time:
+// Google ignores lastmod when every URL shares the same timestamp.
+// English only — no hreflang alternates (see i18n/routing.ts).
 export const revalidate = 3600;
 
-const STATIC_PATHS = [
-  "",
-  "/about",
-  "/contact",
-  "/production-line",
-  "/products",
-  "/products/printing",
-  "/faq",
-  "/legal",
-  "/tools/extrusion-calculator",
-];
+/* Static pages → date of their last real content edit. Update the date
+   whenever a page's visible content or its title/description changes. */
+const STATIC_PAGES: Record<string, string> = {
+  "": "2026-09-27",
+  "/about": "2026-09-27",
+  "/contact": "2026-09-23",
+  "/inquiries": "2026-09-27",
+  "/production-line": "2026-09-27",
+  "/products": "2026-09-27",
+  "/news": "2026-09-27",
+  "/faq": "2026-09-27",
+  "/legal": "2026-09-23",
+  "/tools/extrusion-calculator": "2026-09-27",
+};
 
-/** hreflang alternates for a locale-agnostic path, keyed by locale
- *  (plus x-default) — matches the "as-needed" prefix strategy so en
- *  stays unprefixed while ar/hi get /ar and /hi. */
-function languageAlternates(path: string): Record<string, string> {
-  const languages: Record<string, string> = {};
-  for (const l of locales) {
-    languages[l] = `${SITE_URL}${localePath(l, path)}`;
-  }
-  languages["x-default"] = `${SITE_URL}${localePath(defaultLocale, path)}`;
-  return languages;
-}
+// category pages gained the model comparison table on this date; bump
+// alongside category copy edits (a newer product date also bumps it)
+const CATEGORIES_UPDATED = "2026-09-27";
+
+const latest = (...dates: (string | undefined)[]) =>
+  dates.filter((d): d is string => !!d && !Number.isNaN(Date.parse(d))).sort().pop();
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
   const [{ categories, families }, { articles }] = await Promise.all([getLiveCatalogue(), getLiveNews()]);
 
-  // Static pages
-  const staticEntries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({
+  const familyDate = (f: (typeof families)[number]) => latest(f.updatedAt, f.seo?.updatedAt);
+
+  const staticEntries: MetadataRoute.Sitemap = Object.entries(STATIC_PAGES).map(([path, date]) => ({
     url: `${SITE_URL}${path}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: path === "" ? "weekly" : "monthly",
     priority: path === "" ? 1.0 : 0.7,
-    alternates: { languages: languageAlternates(path) },
   }));
 
-  // Categories
   const categoryEntries: MetadataRoute.Sitemap = categories.map((c) => ({
     url: `${SITE_URL}/products/${c.slug}`,
-    lastModified: now,
+    lastModified: latest(CATEGORIES_UPDATED, ...families.filter((f) => f.category === c.slug).map(familyDate)),
     changeFrequency: "monthly",
     priority: 0.8,
-    alternates: { languages: languageAlternates(`/products/${c.slug}`) },
   }));
 
-  // Product families
   const familyEntries: MetadataRoute.Sitemap = families.map((f) => ({
     url: `${SITE_URL}/products/${f.category}/${f.slug}`,
-    lastModified: now,
-    changeFrequency: "weekly",
+    lastModified: familyDate(f),
+    changeFrequency: "monthly",
     priority: 0.9,
-    alternates: { languages: languageAlternates(`/products/${f.category}/${f.slug}`) },
   }));
 
-  // News articles
   const newsEntries: MetadataRoute.Sitemap = articles.map((a) => ({
     url: `${SITE_URL}/news/${a.slug}`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.8,
-    alternates: { languages: languageAlternates(`/news/${a.slug}`) },
+    lastModified: a.date,
+    changeFrequency: "yearly",
+    priority: 0.6,
   }));
 
-  // Deduplicate entries by URL
-  const allEntries = [
-    ...staticEntries,
-    ...categoryEntries,
-    ...familyEntries,
-    ...newsEntries,
-  ];
-
-  const uniqueEntriesMap = new Map<string, MetadataRoute.Sitemap[number]>();
-  for (const entry of allEntries) {
-    if (!uniqueEntriesMap.has(entry.url)) {
-      uniqueEntriesMap.set(entry.url, entry);
-    }
+  const unique = new Map<string, MetadataRoute.Sitemap[number]>();
+  for (const e of [...staticEntries, ...categoryEntries, ...familyEntries, ...newsEntries]) {
+    if (!unique.has(e.url)) unique.set(e.url, e);
   }
-
-  return Array.from(uniqueEntriesMap.values());
+  return Array.from(unique.values());
 }

@@ -33,7 +33,7 @@ function PartPhotos({ images, name }: { images: string[]; name: string }) {
               className={`pdv2-mp-thumb${active === i ? " pdv2-mp-thumb--on" : ""}`}
               onClick={() => setActive(i)}
             >
-              <Image src={p} alt="" fill sizes="44px" />
+              <Image src={p} alt={`${name} – view ${i + 1}`} fill sizes="44px" />
             </button>
           ))}
         </div>

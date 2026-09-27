@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('🔍 Starting Ashal Innomach Full Project Diagnostic...\n');
+console.log('🔍 Starting Ashal Innomech Full Project Diagnostic...\n');
 
 let errorCount = 0;
 let warnCount = 0;

@@ -83,7 +83,7 @@ export default function ExtrusionCalculator() {
   const [copied, setCopied] = useState(false);
 
   const handleCopyReport = () => {
-    const reportText = `--- ASHAL INNOMACH EXTRUSION CALCULATOR REPORT ---
+    const reportText = `--- ASHAL INNOMECH EXTRUSION CALCULATOR REPORT ---
 Width: ${flatWidth} mm | Thickness: ${thickness} microns | Speed: ${lineSpeed} m/min
 Polymer: ${DENSITY_PRESETS[selectedDensityIdx]?.name || "Custom"} (${density} g/cm³)
 --------------------------------------------------
@@ -114,7 +114,7 @@ Calculated at https://www.wzashal.com/tools/extrusion-calculator`;
             <span>Free B2B Cost Estimator</span>
           </div>
           <h1 className="text-[clamp(1.8rem,4vw,3rem)] font-bold leading-tight text-white" style={{ fontFamily: "var(--ff-display)" }}>
-            Blown Film Extrusion & <em className="text-[var(--brand-teal)] not-italic">ABA Resin Cost</em> Calculator
+            Blown Film Extrusion <em className="text-[var(--brand-teal)] not-italic">Calculator</em>
           </h1>
           <p className="text-[1rem] leading-relaxed text-[var(--ink-60)]">
             Calculate your hourly extrusion throughput rate (kg/h), linear film gauge weight, and precise polymer savings when upgrading from monolayer to 3-Layer ABA co-extrusion technology.

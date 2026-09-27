@@ -4,6 +4,7 @@
 import { unstable_cache } from "next/cache";
 import { readSection, cmsTag } from "@/lib/cmsStore";
 import { categories, families, type Catalogue } from "@/lib/products";
+import { applyProductSeo } from "@/lib/productSeo";
 
 /** Live catalogue from the CMS store (MongoDB), falling back to the bundled
  *  JSON if the DB is unreachable. Use in server components that render
@@ -12,7 +13,9 @@ export async function getLiveCatalogue(): Promise<Catalogue> {
   const data = (await readSection("products")) as Catalogue;
   return {
     categories: data.categories ?? categories,
-    families: data.families ?? families,
+    // explicit SEO fields + spec-consistent copy win over whatever the
+    // DB holds, so the live pages match lib/productSeo.ts exactly
+    families: (data.families ?? families).map(applyProductSeo),
   };
 }
 

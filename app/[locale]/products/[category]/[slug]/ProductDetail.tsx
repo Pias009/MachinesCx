@@ -18,7 +18,7 @@ import MachineSeoSection from "@/components/MachineSeoSection";
 import VideoFacade from "@/components/VideoFacade";
 import { Grain, PlusMark, SectionHead, SubHead } from "@/components/EditorialKit";
 import type { ProductFamily, Category, DeliveryPhase, SetupStep } from "@/lib/products";
-import { familyImage, familyImages, parseYouTubeId, stagePhotos, BRAND } from "@/lib/products";
+import { familyImage, familyImages, isStockImage, parseYouTubeId, stagePhotos, BRAND } from "@/lib/products";
 import type { Article, MachineVideo } from "@/lib/machinesData";
 
 const MachineDiagram = dynamic(() => import("@/components/MachineDiagram"), { ssr: false });
@@ -166,7 +166,7 @@ function RoadmapDetailModal({
 
         <div className="pdv2-rmodal__mark">
           {photo ? (
-            <span className="pdv2-rmodal__photo"><Image src={photo} alt="" fill sizes="120px" /></span>
+            <span className="pdv2-rmodal__photo"><Image src={photo} alt={title} fill sizes="120px" /></span>
           ) : (
             <span className="pdv2-rmodal__icon">{icon}</span>
           )}
@@ -286,7 +286,7 @@ const PLACEHOLDER_INSTALL_IMAGES = new Set([
    at a time behind a tab strip. Each marker carries the step icon; the
    card under it holds the full title + detail text, no line-clamping.
    Clicking a card opens the same shared RoadmapDetailModal. */
-function InstallationWalkthrough({ steps }: { steps: SetupStep[] }) {
+function InstallationWalkthrough({ steps, altBase }: { steps: SetupStep[]; altBase?: string }) {
   const t = useTranslations("productDetail");
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const open = openIdx !== null ? steps[openIdx] : null;
@@ -313,7 +313,7 @@ function InstallationWalkthrough({ steps }: { steps: SetupStep[] }) {
               <span className="pdv2-roadmap-node__marker" aria-hidden="true">
                 {step.image && !stepIsPlaceholder ? (
                   <span className="pdv2-roadmap-node__photo">
-                    <Image src={step.image} alt="" fill sizes="68px" />
+                    <Image src={step.image} alt={altBase ? `${altBase} – ${step.title}` : step.title} fill sizes="68px" />
                   </span>
                 ) : (
                   <ProcessIcon name={resolveIcon(step.title)} size={32} />
@@ -509,6 +509,9 @@ export default function ProductDetail({ family, category, related, relatedArticl
   const parts = PART_CROPS[partCategoryKey].map((p, i) => ({ ...p, ...partCropsCopy[partCategoryKey][i] }));
   const materials = family.materials?.split(",").map(s => s.trim()) ?? [];
   const photos    = familyImages(family);
+  /* image alt pattern "{MODEL} {machine type} – {view}" — the H1 without
+     its size suffix carries the model code + machine type */
+  const altBase = family.seo?.short ?? family.name.split(" — ")[0];
   const heroImg = photos[Math.min(activePhoto, photos.length - 1)];
 
   /* facility strip — 3 diagonal panels of real machines from this category
@@ -627,7 +630,7 @@ export default function ProductDetail({ family, category, related, relatedArticl
           {family.name}
         </h1>
         <p className="mt-3 max-w-[52ch] text-[1rem] leading-[1.65] text-white/75">
-          {family.tagline}
+          {family.seo?.intro ?? family.tagline}
         </p>
 
         {/* trust row */}
@@ -688,7 +691,7 @@ export default function ProductDetail({ family, category, related, relatedArticl
         <div className="relative aspect-[4/3] w-full sm:aspect-[16/9] lg:aspect-[2/1] xl:aspect-[21/9]">
           <ProductStage3D
             src={heroImg}
-            alt={family.name}
+            alt={isStockImage(heroImg) ? "" : `${altBase} – view ${activePhoto + 1}`}
             photoKey={activePhoto}
             priority
             bare
@@ -733,7 +736,7 @@ export default function ProductDetail({ family, category, related, relatedArticl
                   onClick={() => setActivePhoto(i)}
                   aria-label={t("photoOfLabel", { num: i + 1, total: photos.length })}
                 >
-                  <Image src={p} alt="" fill loading="eager" sizes="48px" style={{ objectFit: "contain", padding: "3px" }} />
+                  <Image src={p} alt={isStockImage(p) ? "" : `${altBase} – view ${i + 1}`} aria-hidden={isStockImage(p) || undefined} fill loading="eager" sizes="48px" style={{ objectFit: "contain", padding: "3px" }} />
                 </button>
               ))}
             </div>
@@ -758,7 +761,7 @@ export default function ProductDetail({ family, category, related, relatedArticl
             <div className="flex h-16 gap-px overflow-hidden rounded-md bg-[var(--bg-line)]">
               {collagePool.map((f, i) => (
                 <div key={`${f.slug}-${i}`} className="relative flex-1 bg-[var(--bg-raise)]">
-                  <Image src={familyImage(f)} alt="" fill sizes="20vw" style={{ objectFit: "contain", padding: "6px", opacity: 0.85 }} />
+                  <Image src={familyImage(f)} alt={`${f.seo?.short ?? f.name} – view 1`} fill sizes="20vw" style={{ objectFit: "contain", padding: "6px", opacity: 0.85 }} />
                 </div>
               ))}
             </div>
@@ -826,7 +829,7 @@ export default function ProductDetail({ family, category, related, relatedArticl
                     onClick={() => { setActiveVideo(i); setVideoPlaying(false); }}
                   >
                     <div className="relative h-[52px] w-[72px] shrink-0 overflow-hidden rounded-md">
-                      <Image src={`https://img.youtube.com/vi/${v.id}/mqdefault.jpg`} alt="" fill sizes="72px" style={{ objectFit: "cover" }} />
+                      <Image src={`https://img.youtube.com/vi/${v.id}/mqdefault.jpg`} alt={`${altBase} – video: ${v.title}`} fill sizes="72px" style={{ objectFit: "cover" }} />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/30 text-white">
                         <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12"><path d="M5 3.5l8 4.5-8 4.5z"/></svg>
                       </div>
@@ -932,7 +935,7 @@ export default function ProductDetail({ family, category, related, relatedArticl
               {/* machine breakdown — callout pins on the photo */}
               {callouts.length > 0 && (
                 <div className="pdv2-breakdown-frame" data-reveal="scale">
-                  <Image src={heroImg} alt={family.name} fill sizes="(max-width: 900px) 90vw, 70vw" className="pdv2-breakdown-frame__img" />
+                  <Image src={heroImg} alt={`${altBase} – component overview`} fill sizes="(max-width: 900px) 90vw, 70vw" className="pdv2-breakdown-frame__img" />
                   {callouts.map((c) => (
                     <div key={c.label} className="pdv2-pin" style={{ left: `${c.pos.x}%`, top: `${c.pos.y}%` }}>
                       <span className="pdv2-pin__dot" aria-hidden="true" />
@@ -950,7 +953,7 @@ export default function ProductDetail({ family, category, related, relatedArticl
                 <div key={part.title} className="pdv2-part" data-reveal>
                   <div className="pdv2-part__head">{t("partHeading", { num: i + 1, title: part.title })}</div>
                   <div className="pdv2-part__shot">
-                    <Image src={heroImg} alt={`${family.name} — ${part.title}`} fill sizes="(max-width: 900px) 90vw, 70vw" />
+                    <Image src={heroImg} alt={`${altBase} – ${part.title}`} fill sizes="(max-width: 900px) 90vw, 70vw" />
                     <span className="pdv2-part__icon"><ProcessIcon name={part.icon} size={26} /></span>
                   </div>
                   <p className="pdv2-part__detail">{part.detail}</p>
@@ -963,7 +966,7 @@ export default function ProductDetail({ family, category, related, relatedArticl
               {family.installation && family.installation.length > 0 && (
                 <>
                   <SubHead title={t("setupInstallationGuide")} />
-                  <InstallationWalkthrough steps={family.installation} />
+                  <InstallationWalkthrough steps={family.installation} altBase={altBase} />
                 </>
               )}
 
@@ -1351,7 +1354,7 @@ export default function ProductDetail({ family, category, related, relatedArticl
           style={{ clipPath: "polygon(0 0, 100% 0, 100% 92%, 0 100%)" }}
           aria-hidden="true"
         >
-          <Image src="/machines/bag-samples.png" alt="" fill sizes="(max-width: 700px) 100vw, 50vw" style={{ objectFit: "cover", opacity: 0.4 }} />
+          <Image src="/machines/bag-samples.png" alt="" aria-hidden="true" fill sizes="(max-width: 700px) 100vw, 50vw" style={{ objectFit: "cover", opacity: 0.4 }} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
           <Grain opacity={0.12} />
           <p className="relative z-[1] max-w-md text-[1.4rem] font-light leading-snug text-white">

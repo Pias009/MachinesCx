@@ -118,6 +118,7 @@ export default function ProductStage3D({ src, alt, badge, photoKey, priority, va
           <Image
             src={src}
             alt={alt}
+            aria-hidden={alt === "" ? true : undefined}
             key={photoKey}
             fill
             priority={priority}

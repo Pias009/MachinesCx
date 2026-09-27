@@ -2,17 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { getLiveNews } from "@/lib/liveNews";
-import { pageMetadata } from "@/lib/seo";
+import { staticPageMetadata } from "@/lib/pageSeo";
 
 export const dynamic = "force-dynamic";
 
 export function generateMetadata({ params }: { params: { locale: string } }) {
-  return pageMetadata({
-    locale: params.locale,
-    path: "/news",
-    title: "News — Ashal Innomech",
-    description: "Product launches, technical guides, and company updates from Ashal Innomech.",
-  });
+  return staticPageMetadata("/news", params.locale);
 }
 
 function fmt(iso: string) {

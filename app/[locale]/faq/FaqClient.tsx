@@ -102,9 +102,9 @@ export default function FaqClient() {
       <div className="fq-page" ref={rootRef}>
         <div className="fq-wrap">
           <div className="fq-header" data-reveal="blur">
-            <div className="fq-eyebrow">Frequently Asked</div>
+            <div className="fq-eyebrow">Before you order</div>
             <h1 className="fq-h1">
-              Questions, <em>answered.</em>
+              Frequently Asked <em>Questions</em>
             </h1>
             <p className="fq-sub">
               What buyers usually ask before ordering blown-film, bag-making, recycling, or printing machinery from us.

@@ -5,7 +5,6 @@ import { usePathname } from "@/i18n/navigation";
 import Image from "next/image";
 import TransitionLink from "@/components/TransitionLink";
 import ThemeToggle from "@/components/ThemeToggle";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 import RollingNavMenu from "@/components/RollingNavMenu";
 import type { NavCategory } from "@/lib/liveCatalogue";
 
@@ -710,7 +709,6 @@ export default function SiteNav({ catalogue }: { catalogue: NavCategory[] }) {
           <div className="sn__actions">
             <div className="sn__desktop-only">
               <RollingNavMenu />
-              <LanguageSwitcher />
             </div>
             <ThemeToggle />
             <TransitionLink href="/inquiries" className="sn__cta">{t("getQuote")}</TransitionLink>
@@ -767,7 +765,6 @@ export default function SiteNav({ catalogue }: { catalogue: NavCategory[] }) {
         {/* Language + Theme + CTA pinned to bottom */}
         <div style={{ padding:"1.25rem", borderTop:"1px solid var(--bg-line)", flexShrink:0, display:"flex", flexDirection:"column", gap:"0.85rem" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
-            <LanguageSwitcher />
             <ThemeToggle />
           </div>
           <TransitionLink href="/inquiries" className="sn__mobile-cta" onClick={() => setMobileOpen(false)}>
@@ -792,7 +789,7 @@ export default function SiteNav({ catalogue }: { catalogue: NavCategory[] }) {
                   onMouseEnter={() => setMenuImg(fam.slug)}
                 >
                   {fam.image
-                    ? <Image src={fam.image} alt="" width={52} height={38} className="sn__dd-thumb" />
+                    ? <Image src={fam.image} alt="" aria-hidden="true" width={52} height={38} className="sn__dd-thumb" />
                     : <span className="sn__dd-thumb" aria-hidden="true" />}
                   <div>
                     <span className="sn__dd-series">{fam.series}</span>
@@ -827,7 +824,7 @@ export default function SiteNav({ catalogue }: { catalogue: NavCategory[] }) {
           <div className="sn__dd-preview">
             <div className="sn__dd-glow" />
             {previewImg && (
-              <Image key={previewImg} src={previewImg} alt="" width={160} height={160} className="sn__dd-preview-img" />
+              <Image key={previewImg} src={previewImg} alt="" aria-hidden="true" width={160} height={160} className="sn__dd-preview-img" />
             )}
           </div>
         </div>

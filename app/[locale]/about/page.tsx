@@ -1,4 +1,6 @@
-import { pageMetadata } from "@/lib/seo";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { staticPageMetadata } from "@/lib/pageSeo";
 import AboutClient from "./AboutClient";
 
 import { routing } from "@/i18n/routing";
@@ -8,14 +10,15 @@ export function generateStaticParams() {
 }
 
 export function generateMetadata({ params }: { params: { locale: string } }) {
-  return pageMetadata({
-    locale: params.locale,
-    path: "/about",
-    title: "About — Ashal Innomech",
-    description: "Founded in 2008, we design and manufacture blown-film lines, bag-making converters, and recycling systems from a 12,000 m² Wenzhou facility, with 18+ machine families running across six continents.",
-  });
+  return staticPageMetadata("/about", params.locale);
 }
 
-export default function AboutPage() {
-  return <AboutClient />;
+export default async function AboutPage() {
+  // the root layout's provider omits the "about" namespace (see layout.tsx)
+  const messages = await getMessages();
+  return (
+    <NextIntlClientProvider messages={messages}>
+      <AboutClient />
+    </NextIntlClientProvider>
+  );
 }

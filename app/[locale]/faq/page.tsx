@@ -1,4 +1,4 @@
-import { pageMetadata } from "@/lib/seo";
+import { staticPageMetadata } from "@/lib/pageSeo";
 import { FAQ_ITEMS } from "@/lib/faqData";
 import JsonLd from "@/components/JsonLd";
 import FaqClient from "./FaqClient";
@@ -10,12 +10,7 @@ export function generateStaticParams() {
 }
 
 export function generateMetadata({ params }: { params: { locale: string } }) {
-  return pageMetadata({
-    locale: params.locale,
-    path: "/faq",
-    title: "FAQ — Ashal Innomech",
-    description: "Answers to common questions about ordering, lead times, customization, and support for our blown-film, bag-making, recycling, and printing machinery.",
-  });
+  return staticPageMetadata("/faq", params.locale);
 }
 
 export default function FaqPage() {

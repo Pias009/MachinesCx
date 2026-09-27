@@ -531,7 +531,7 @@ export default function ParticlePortfolio(){
                   boxShadow: isOn ? `0 0 18px ${rgbFromHex(a.hex, 0.5)}` : "none",
                   transition: "background 0.4s, color 0.4s, box-shadow 0.4s, border-color 0.4s",
                 }}>{i+1}</span>
-                <NextImage src={s.img} alt="" className="pp-node__img" width={320} height={320} style={{
+                <NextImage src={s.img} alt="" aria-hidden="true" className="pp-node__img" width={320} height={320} style={{
                   height: "auto",
                   transform:`scale(${sc})`,
                   filter: isOn

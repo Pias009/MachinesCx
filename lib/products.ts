@@ -127,6 +127,27 @@ export interface MachinePart {
   installation?: SetupStep[]; // optional per-part install guide
 }
 
+/** Explicit per-product SEO fields (lib/productSeo.ts) — never generated
+ *  from a template. `short` is the H1 without its " — sizes" suffix. */
+export interface ProductSeo {
+  model: string;        // model code — JSON-LD name/model/mpn/sku
+  title: string;        // <title>, og:title, twitter:title
+  h1: string;           // <h1>, JSON-LD name, breadcrumb, card label
+  description: string;  // meta/og/twitter description, JSON-LD description (≤155 chars)
+  intro: string;        // first body paragraph (≤60 words, spec-table facts)
+  short: string;
+  updatedAt: string;    // ISO date the SEO copy last changed — sitemap lastmod
+}
+
+/** Optional FOB price range. Empty by default — Product JSON-LD only emits
+ *  `offers` when this is filled with real numbers.
+ *  TODO_OWNER: fill real FOB price ranges. */
+export interface PriceRange {
+  lowPrice: number;
+  highPrice: number;
+  currency: string;     // ISO 4217, e.g. "USD"
+}
+
 export interface ProductFamily {
   slug: string;
   category: CategorySlug;
@@ -151,6 +172,9 @@ export interface ProductFamily {
   radarImage?: string;                // dedicated center image for the radar chart spider web
   radarSpecs?: string[];              // spec labels to display on the radar chart
   seoData?: MachineSeoData;           // 700-1000 word rich SEO/GEO/AEO data block
+  seo?: ProductSeo;                   // explicit SEO fields, overlaid from lib/productSeo.ts
+  priceRange?: PriceRange;            // TODO_OWNER: fill real FOB price ranges
+  updatedAt?: string;                 // ISO date of the last real content edit, if tracked
 }
 
 /** Extracts a YouTube video ID from a full URL or a bare 11-char ID. */
@@ -175,9 +199,10 @@ export const parseYouTubeId = (input: string): string | null => {
 // never pulls the server-only mongoose/mongodb chain into the browser bundle.
 // ---------------------------------------------------------------------------
 import productsData from "@/data/products.json";
+import { applyProductSeo } from "@/lib/productSeo";
 
 export const categories = productsData.categories as Category[];
-export const families = productsData.families as ProductFamily[];
+export const families = (productsData.families as ProductFamily[]).map(applyProductSeo);
 
 export interface Catalogue {
   categories: Category[];
@@ -208,6 +233,10 @@ export const stagePhotos = (v: string | string[] | undefined): string[] => {
   const arr = Array.isArray(v) ? v : v ? [v] : [];
   return arr.filter((s) => s && s.trim());
 };
+
+/** Stock/decorative art uploaded into a product gallery (e.g. an Unsplash
+ *  texture) — not a photo of the machine, so it gets alt="" + aria-hidden. */
+export const isStockImage = (src: string) => /unsplash/i.test(src);
 
 // First/primary product photo — for card thumbnails, related-machine tiles
 // and anywhere only one image is shown.

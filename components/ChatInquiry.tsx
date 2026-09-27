@@ -156,7 +156,7 @@ export function MachineGrid({
             onClick={() => { onFamily(f); onModel(0); }}
           >
             <span className="ci-mgrid__card-img-wrap">
-              <Image src={productImg(f.slug, familyImage(f))} alt="" fill sizes="(max-width: 700px) 45vw, 180px" className="ci-mgrid__card-img" />
+              <Image src={productImg(f.slug, familyImage(f))} alt={f.name} fill sizes="(max-width: 700px) 45vw, 180px" className="ci-mgrid__card-img" />
               {family?.slug === f.slug && (
                 <span className="ci-mgrid__card-check">
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="#04211e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -295,7 +295,7 @@ export function ImageGallery({
     <div className="ci-gallery">
       {images.map((src, i) => (
         <div key={i} className="ci-gallery__item">
-          <Image src={src} alt="" fill sizes="56px" />
+          <Image src={src} alt="" aria-hidden="true" fill sizes="56px" />
           <button type="button" className="ci-gallery__remove" onClick={() => onRemove(i)} aria-label={t("removePhoto")}>
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6m0-6l-6 6" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" /></svg>
           </button>
@@ -502,7 +502,7 @@ export function InsightPanel({
           <span className="ci-related__label">{t("relatedMachines")}</span>
           {related.slice(0, 3).map(r => (
             <Link key={r.slug} href={`/products/${r.category}/${r.slug}`} className="ci-related__row" target="_blank" rel="noopener noreferrer">
-              <Image src={productImg(r.slug, familyImage(r))} alt="" width={40} height={40} className="ci-related__img" />
+              <Image src={productImg(r.slug, familyImage(r))} alt={r.name} width={40} height={40} className="ci-related__img" />
               <span className="ci-related__name">{r.name}</span>
             </Link>
           ))}

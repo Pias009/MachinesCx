@@ -3,8 +3,8 @@
   "site": {
     "name": "Ashal Innomech",
     "legalName": "Wenzhou Ashal Innomech Technology Co., Ltd.",
-    "url": "https://ashalinnomech.com",
-    "logo": "https://ashalinnomech.com/logo.jpeg",
+    "url": "https://www.wzashal.com",
+    "logo": "https://www.wzashal.com/logo.jpeg",
     "foundingYear": 2008,
     "address": {
       "city": "Wenzhou",
@@ -31,8 +31,8 @@
       ],
       "seo": {
         "h1": "BUILT FOR THE FLOOR. PROVEN WORLDWIDE.",
-        "canonical": "https://ashalinnomech.com",
-        "ogImage": "https://ashalinnomech.com/machines/hero-preview.png"
+        "canonical": "https://www.wzashal.com",
+        "ogImage": "https://www.wzashal.com/og/home.jpg"
       },
       "geo": {
         "entityName": "Ashal Innomech Industrial Extrusion & Converting Equipment",
@@ -70,11 +70,11 @@
       ],
       "seo": {
         "h1": "INDUSTRIAL MACHINERY CATALOGUE",
-        "canonical": "https://ashalinnomech.com/products",
-        "ogImage": "https://ashalinnomech.com/machines/catalogue-og.png"
+        "canonical": "https://www.wzashal.com/products",
+        "ogImage": "https://www.wzashal.com/og/home.jpg"
       },
       "geo": {
-        "entityName": "Ashal Machinery Catalogue & Equipment Range",
+        "entityName": "Ashal Innomech Catalogue & Equipment Range",
         "factualSummary": "Comprehensive machinery catalogue comprising four core divisions: Blown Film Extrusion (ABA 3-layer & mono-layer), Bag Converting (t-shirt, side-seal, roll bags), Flexographic Printing (2, 4, 6, 8 color), and Plastic Recycling (water-ring & strand pelletizers).",
         "citations": [
           "Precision CNC machined components with strict tolerance standards",
@@ -109,8 +109,8 @@
       ],
       "seo": {
         "h1": "BLOWN FILM EXTRUSION LINES",
-        "canonical": "https://ashalinnomech.com/products/film-blowing",
-        "ogImage": "https://ashalinnomech.com/machines/film-blowing-og.png"
+        "canonical": "https://www.wzashal.com/products/film-blowing",
+        "ogImage": "https://www.wzashal.com/og/home.jpg"
       },
       "geo": {
         "entityName": "Ashal ABA 3-Layer & Mono-Layer Blown Film Extruders",
@@ -147,8 +147,8 @@
       ],
       "seo": {
         "h1": "AUTOMATIC BAG MAKING MACHINERY",
-        "canonical": "https://ashalinnomech.com/products/bag-making",
-        "ogImage": "https://ashalinnomech.com/machines/bag-making-og.png"
+        "canonical": "https://www.wzashal.com/products/bag-making",
+        "ogImage": "https://www.wzashal.com/og/home.jpg"
       },
       "geo": {
         "entityName": "Ashal High-Speed Servo Bag Making Lines",
@@ -185,8 +185,8 @@
       ],
       "seo": {
         "h1": "FLEXOGRAPHIC PRINTING PRESSES",
-        "canonical": "https://ashalinnomech.com/products/printing",
-        "ogImage": "https://ashalinnomech.com/machines/printing-og.png"
+        "canonical": "https://www.wzashal.com/products/printing",
+        "ogImage": "https://www.wzashal.com/og/home.jpg"
       },
       "geo": {
         "entityName": "Ashal Precision Flexographic Printing Machinery",
@@ -223,8 +223,8 @@
       ],
       "seo": {
         "h1": "PLASTIC RECYCLING & PELLETIZING LINES",
-        "canonical": "https://ashalinnomech.com/products/recycling",
-        "ogImage": "https://ashalinnomech.com/machines/recycling-og.png"
+        "canonical": "https://www.wzashal.com/products/recycling",
+        "ogImage": "https://www.wzashal.com/og/home.jpg"
       },
       "geo": {
         "entityName": "Ashal Eco-Pelletizing Plastic Recycling Systems",
@@ -259,8 +259,8 @@
       ],
       "seo": {
         "h1": "PRODUCTION LINE ARCHITECT",
-        "canonical": "https://ashalinnomech.com/production-line",
-        "ogImage": "https://ashalinnomech.com/machines/builder-og.png"
+        "canonical": "https://www.wzashal.com/production-line",
+        "ogImage": "https://www.wzashal.com/og/home.jpg"
       },
       "geo": {
         "entityName": "Ashal Turnkey Factory Layout & Line Architect",
@@ -295,8 +295,8 @@
       ],
       "seo": {
         "h1": "ENGINEERING EXCELLENCE. WORLDWIDE TRUST.",
-        "canonical": "https://ashalinnomech.com/about",
-        "ogImage": "https://ashalinnomech.com/machines/factory-about.png"
+        "canonical": "https://www.wzashal.com/about",
+        "ogImage": "https://www.wzashal.com/og/home.jpg"
       },
       "geo": {
         "entityName": "Wenzhou Ashal Innomech Manufacturing Plant",
@@ -331,8 +331,8 @@
       ],
       "seo": {
         "h1": "REQUEST A DIRECT FACTORY QUOTE",
-        "canonical": "https://ashalinnomech.com/inquiries",
-        "ogImage": "https://ashalinnomech.com/machines/rfq-og.png"
+        "canonical": "https://www.wzashal.com/inquiries",
+        "ogImage": "https://www.wzashal.com/og/home.jpg"
       },
       "geo": {
         "entityName": "Ashal Innomech B2B Inquiry & Quotation Desk",
@@ -366,8 +366,8 @@
       ],
       "seo": {
         "h1": "TECHNICAL KNOWLEDGE BASE & FAQ",
-        "canonical": "https://ashalinnomech.com/faq",
-        "ogImage": "https://ashalinnomech.com/machines/faq-og.png"
+        "canonical": "https://www.wzashal.com/faq",
+        "ogImage": "https://www.wzashal.com/og/home.jpg"
       },
       "geo": {
         "entityName": "Ashal Industrial Machinery Knowledge Repository",
@@ -401,8 +401,8 @@
       ],
       "seo": {
         "h1": "EXTRUSION OUTPUT & ENERGY CALCULATOR",
-        "canonical": "https://ashalinnomech.com/tools/extrusion-calculator",
-        "ogImage": "https://ashalinnomech.com/machines/calculator-og.png"
+        "canonical": "https://www.wzashal.com/tools/extrusion-calculator",
+        "ogImage": "https://www.wzashal.com/og/home.jpg"
       },
       "geo": {
         "entityName": "Ashal Industrial Extrusion Engineering Calculator",

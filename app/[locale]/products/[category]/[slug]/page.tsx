@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { families, SITE_URL, BRAND, LEGAL_NAME, familyImage, familyImages, type CategorySlug, type ProductFamily, type Category } from "@/lib/products";
 import { getLiveCatalogue } from "@/lib/liveCatalogue";
 import { pageMetadata, localePath } from "@/lib/seo";
+import { ORG_ID } from "@/lib/siteConfig";
+import { DOWNSTREAM } from "@/lib/productSeo";
 import { getMachineProductBySlug, getMachineCategoryBySlug, getRelatedArticlesForMachine } from "@/lib/machinesData";
 import JsonLd from "@/components/JsonLd";
 import ProductDetail from "./ProductDetail";
@@ -21,16 +23,13 @@ export async function generateMetadata({ params }: { params: { locale: string; c
 
   if (!f && !mProduct) return { title: `Industrial Machinery Manufacturer | ${BRAND}` };
 
-  // Lead with the buyer's search term (set per product in the CMS), keep
-  // it within Google's ~60-char display width, and tie it to one brand name.
-  let title = f?.seoData?.metaTitle || mProduct?.seoTitle || f?.name || mProduct?.name || slug;
-  if (!title.includes("Ashal") && title.length + BRAND.length + 3 <= 65) {
-    title = `${title} | ${BRAND}`;
-  }
+  // explicit per-product fields (lib/productSeo.ts), used verbatim — no
+  // suffixing or truncation; the fallbacks only cover a product added in
+  // the CMS that has no entry there yet
+  const title = f?.seo?.title || f?.seoData?.metaTitle || mProduct?.seoTitle || f?.name || mProduct?.name || slug;
+  const description = f?.seo?.description || f?.seoData?.metaDescription || mProduct?.metaDescription || f?.tagline || "";
 
-  const description = mProduct?.metaDescription || f?.seoData?.metaDescription || [f?.tagline, f?.specs.slice(0, 2).map((s) => `${s.label} ${s.values[0]}`).join(" · ")].filter(Boolean).join(" — ").slice(0, 160);
-
-  const modelNumber = mProduct?.model || f?.models?.[0] || f?.series || slug;
+  const modelNumber = f?.seo?.model || mProduct?.model || f?.models?.[0] || f?.series || slug;
 
   const meta = pageMetadata({
     locale,
@@ -122,59 +121,52 @@ export default async function ProductPage({ params }: { params: { locale: string
 
   if (!f || !cat) notFound();
 
-  const related = liveFamilies
-    .filter((r) => r.category === (f!.category as CategorySlug) && r.slug !== f!.slug)
-    .slice(0, 4);
+  // ≥3 related models: up to 2 from the same category, then the matching
+  // downstream machine(s) — film blowing → printing → bag making
+  const sameCat = liveFamilies.filter((r) => r.category === f!.category && r.slug !== f!.slug);
+  const downstream = (DOWNSTREAM[f.category] ?? [])
+    .map((c) => liveFamilies.find((r) => r.category === c))
+    .filter((r): r is ProductFamily => !!r);
+  // a category with one model (recycling) tops up from its downstream ones
+  const moreDownstream = liveFamilies.filter((r) => (DOWNSTREAM[f!.category] ?? []).includes(r.category));
+  const related = Array.from(
+    new Map([...sameCat.slice(0, 2), ...downstream, ...sameCat.slice(2), ...moreDownstream].map((r) => [r.slug, r])).values(),
+  ).slice(0, 4);
 
   const url = `${SITE_URL}${localePath(params.locale, `/products/${params.category}/${params.slug}`)}`;
   const image = familyImage(f);
 
-  const exactModel = mProduct?.model || f.models[0] || f.series || f.slug;
-  const reviews = (f.reviews ?? []).filter((r) => r.rating >= 1 && r.rating <= 5 && r.text?.trim());
+  const exactModel = f.seo?.model || mProduct?.model || f.models[0] || f.series || f.slug;
+  const pr = f.priceRange;
+  const hasPrice = !!pr && pr.lowPrice > 0 && pr.highPrice >= pr.lowPrice && !!pr.currency?.trim();
 
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: f.name,
-    description: f.seoData?.metaDescription || f.tagline,
+    name: f.seo?.h1 || f.name,
+    description: f.seo?.description || f.seoData?.metaDescription || f.tagline,
     url,
     // most product photos are absolute Cloudinary URLs — only prefix local paths
     image: image ? (image.startsWith("/") ? `${SITE_URL}${image}` : image) : undefined,
-    brand: { "@type": "Brand", name: BRAND, url: SITE_URL },
-    manufacturer: {
-      "@type": "Organization",
-      name: LEGAL_NAME,
-      url: SITE_URL,
-      email: "ashal@ashalinnomech.com",
-      telephone: "+86 159 8877 5831",
-      address: {
-        "@type": "PostalAddress",
-        addressLocality: "Wenzhou, Zhejiang",
-        addressCountry: "China",
-      },
-    },
+    // one Organization node site-wide (layout.tsx) — referenced, not repeated
+    brand: { "@id": ORG_ID },
+    manufacturer: { "@id": ORG_ID },
     category: cat.name,
     model: exactModel,
     mpn: exactModel,
     sku: exactModel,
-    // No Offer: machines are quoted per order, and a placeholder price
-    // (previously a fixed US$100,000 on every product) violates Google's
-    // structured-data policy. Rating/reviews only when real admin-entered
-    // reviews exist — they're rendered visibly on the page, as Google requires.
-    ...(reviews.length > 0 && {
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: (reviews.reduce((n, r) => n + r.rating, 0) / reviews.length).toFixed(1),
-        reviewCount: String(reviews.length),
-        bestRating: "5",
-        worstRating: "1",
+    // Offers only from a real, owner-entered FOB range (product.priceRange) —
+    // never a placeholder price. Never aggregateRating/review markup.
+    ...(hasPrice && {
+      offers: {
+        "@type": "AggregateOffer",
+        priceCurrency: pr!.currency,
+        lowPrice: pr!.lowPrice,
+        highPrice: pr!.highPrice,
+        offerCount: f.models.length,
+        availability: "https://schema.org/InStock",
+        seller: { "@id": ORG_ID },
       },
-      review: reviews.map((r) => ({
-        "@type": "Review",
-        author: { "@type": "Person", name: r.name },
-        reviewRating: { "@type": "Rating", ratingValue: String(r.rating), bestRating: "5", worstRating: "1" },
-        reviewBody: r.text,
-      })),
     }),
     additionalProperty: f.specs.map((s) => ({
       "@type": "PropertyValue",
@@ -207,11 +199,7 @@ export default async function ProductPage({ params }: { params: { locale: string
     duration: machineVideo.duration,
     contentUrl: `https://www.youtube.com/watch?v=${machineVideo.youtubeId}`,
     embedUrl: `https://www.youtube-nocookie.com/embed/${machineVideo.youtubeId}`,
-    publisher: {
-      "@type": "Organization",
-      name: LEGAL_NAME,
-      url: SITE_URL,
-    },
+    publisher: { "@id": ORG_ID },
   } : null;
 
   const relatedArticles = getRelatedArticlesForMachine(params.slug);
@@ -228,7 +216,7 @@ export default async function ProductPage({ params }: { params: { locale: string
           itemListElement: [
             { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
             { "@type": "ListItem", position: 2, name: cat.name, item: `${SITE_URL}${localePath(params.locale, `/products/${params.category}`)}` },
-            { "@type": "ListItem", position: 3, name: f.name, item: url },
+            { "@type": "ListItem", position: 3, name: f.seo?.h1 || f.name, item: url },
           ],
         }}
       />

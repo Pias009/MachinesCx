@@ -14,5 +14,8 @@ export async function getLiveNews(): Promise<NewsData> {
   // articles seeded with legacy /machines/ photos show the product's
   // current admin photo instead; custom article images are untouched
   const images = buildImageMap(catalogue);
-  return { articles: (data.articles ?? []).map((a) => ({ ...a, image: upgradeImage(a.image, images) })) };
+  // one brand spelling everywhere, whatever older DB copy still says
+  const brand = (a: NewsData["articles"][number]) =>
+    JSON.parse(JSON.stringify(a).replace(/Ashal machinery/gi, "Ashal Innomech").replace(/Innomach/g, "Innomech")) as typeof a;
+  return { articles: (data.articles ?? []).map((a) => ({ ...brand(a), image: upgradeImage(a.image, images) })) };
 }

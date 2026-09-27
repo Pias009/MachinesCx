@@ -570,14 +570,14 @@ export default function ScrollHome() {
             );
           })()}
 
-          <h1 style={{
+          <h2 className="sh-hero-title" style={{
             fontFamily: "var(--ff-display)",
             fontSize: "clamp(3rem, 9vw, 7rem)",
             lineHeight: 0.92, color: "#fff",
           }}>
             {t("hero1.titleLine1")}<br />
             <span style={{ color: "var(--brand-red)" }}>{t("hero1.titleLine2")}</span>
-          </h1>
+          </h2>
 
           <p style={{
             fontFamily: "var(--ff-body)", fontSize: "1.08rem", fontWeight: 400,
@@ -881,7 +881,7 @@ export default function ScrollHome() {
         </div>
 
         {/* section heading */}
-        <h1 ref={hotHeadingRef} className="sh-hot-head" style={{
+        <h2 ref={hotHeadingRef} className="sh-hot-head" style={{
           fontFamily: "var(--ff-display)",
           fontSize: "clamp(2.4rem, 6vw, 4.5rem)",
           letterSpacing: "0.01em",
@@ -894,7 +894,7 @@ export default function ScrollHome() {
         }}>
           <span data-hot-word style={{ display: "inline-block" }}>{t("hot.wordHot")}</span>{" "}
           <span data-hot-word style={{ display: "inline-block", color: "var(--brand-red)" }}>{t("hot.wordMachines")}</span>
-        </h1>
+        </h2>
 
         {/* top content row */}
         <div className="sh-3col" style={{
@@ -1114,7 +1114,7 @@ export default function ScrollHome() {
            see the comment there. Only the bits unique to this file's own
            style tag stay here. */
         @media (max-width: 768px) {
-          .sh-sec h1 { font-size: clamp(2rem, 9vw, 3rem) !important; }
+          .sh-sec h2.sh-hero-title { font-size: clamp(2rem, 9vw, 3rem) !important; }
           .sh-sec h2 { font-size: clamp(1.7rem, 8vw, 2.8rem) !important; }
           .sh-sec p  { font-size: 0.88rem !important; max-width: 100% !important; }
           .sh-stat-grid { grid-template-columns: repeat(2, 1fr) !important; }

@@ -1,6 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Inbox, Wrench, ClipboardList, Package, Mail, CheckCircle2, Send, Trash2 } from "lucide-react";
+import {
+  Inbox, Wrench, ClipboardList, Package, Mail, CheckCircle2, Send, Trash2,
+  X, ExternalLink, Download, Copy, Check, ZoomIn, Sparkles
+} from "lucide-react";
 import AdminShell from "../AdminShell";
 import { familyBySlug, familyImages } from "@/lib/products";
 import type { InquiryMachine, InquiryPart, InquiryReply, InquiryRoadmap, InquiryType } from "@/models/Inquiry";
@@ -106,6 +109,7 @@ export default function InquiriesPage() {
   const [typeFilter, setTypeFilter] = useState<"all" | InquiryType>("all");
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
+  const [lightbox, setLightbox] = useState<{ src: string; title: string } | null>(null);
 
   async function load() {
     const res = await fetch("/api/admin/inquiries");
@@ -207,43 +211,44 @@ export default function InquiriesPage() {
 
   return (
     <AdminShell>
-      <div className="adm-page-head adm-rise">
-        <div className="adm-page-head__eyebrow">
-          <Inbox size={13} />
-          Customer inbox
-        </div>
-        <h1 className="adm-page-head__title">Inquiries</h1>
-        <p className="adm-page-head__sub">
-          Every inquiry submitted from the site — machine requests, parts requests, and engineering consultations. Click one to read the full request and reply.
-        </p>
-      </div>
-
-      {!inquiries ? (
-        <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: "1.25rem" }}>
-          <div className="adm-skel" style={{ height: 420, borderRadius: 16 }} />
-          <div className="adm-skel" style={{ height: 420, borderRadius: 16 }} />
-        </div>
-      ) : inquiries.length === 0 ? (
-        <div className="adm-panel adm-rise" style={{ padding: "3rem", textAlign: "center" }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: 16, margin: "0 auto 1rem",
-            background: "rgba(43,191,179,0.12)", color: "var(--brand-teal)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <Inbox size={26} />
+      <div className="adm-content-container">
+        <div className="adm-page-head adm-rise">
+          <div className="adm-page-head__eyebrow">
+            <Inbox size={13} />
+            Customer inbox
           </div>
-          <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: "rgba(255,255,255,0.6)" }}>
-            No inquiries yet — they&apos;ll show up here as soon as a customer submits the contact form.
+          <h1 className="adm-page-head__title">Inquiries</h1>
+          <p className="adm-page-head__sub">
+            Every inquiry submitted from the site — machine requests, parts requests, and engineering consultations. Click one to read the full request and reply.
           </p>
         </div>
-      ) : (
-        <div className="adm-rise" style={{ animationDelay: "0.06s", display: "grid", gridTemplateColumns: "360px 1fr", gap: "1.25rem", alignItems: "start" }}>
-          {/* ── list ── */}
-          <div className="adm-panel" style={{ overflow: "hidden" }}>
-            {/* type filter tabs */}
-            <div style={{ display: "flex", gap: "0.35rem", padding: "0.9rem 0.9rem 0.5rem", flexWrap: "wrap" }}>
-              {typeTabs.map(tab => {
-                const active = typeFilter === tab.key;
+
+        {!inquiries ? (
+          <div style={{ display: "grid", gridTemplateColumns: "minmax(350px, 400px) 1fr", gap: "1.5rem" }}>
+            <div className="adm-skel" style={{ height: 420, borderRadius: 16 }} />
+            <div className="adm-skel" style={{ height: 420, borderRadius: 16 }} />
+          </div>
+        ) : inquiries.length === 0 ? (
+          <div className="adm-panel adm-rise" style={{ padding: "3rem", textAlign: "center" }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: 16, margin: "0 auto 1rem",
+              background: "rgba(43,191,179,0.12)", color: "var(--brand-teal)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <Inbox size={26} />
+            </div>
+            <p style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: "rgba(255,255,255,0.6)" }}>
+              No inquiries yet — they&apos;ll show up here as soon as a customer submits the contact form.
+            </p>
+          </div>
+        ) : (
+          <div className="adm-rise" style={{ animationDelay: "0.06s", display: "grid", gridTemplateColumns: "minmax(350px, 400px) 1fr", gap: "1.5rem", alignItems: "start" }}>
+            {/* ── list ── */}
+            <div className="adm-panel" style={{ overflow: "hidden" }}>
+              {/* type filter tabs */}
+              <div style={{ display: "flex", gap: "0.35rem", padding: "0.9rem 0.9rem 0.5rem", flexWrap: "wrap" }}>
+                {typeTabs.map(tab => {
+                  const active = typeFilter === tab.key;
                 const count = typeCounts[tab.key];
                 const TabIcon = tab.key !== "all" ? typeConfig(tab.key as InquiryType).icon : Inbox;
                 return (
@@ -424,7 +429,15 @@ export default function InquiriesPage() {
 
           {/* ── detail + reply ── */}
           {selected ? (
-            <InquiryDetail key={selected._id} inquiry={selected} allInquiries={inquiries ?? []} onReplied={load} onDelete={() => deleteOne(selected._id)} deleting={deleting} />
+            <InquiryDetail
+              key={selected._id}
+              inquiry={selected}
+              allInquiries={inquiries ?? []}
+              onReplied={load}
+              onDelete={() => deleteOne(selected._id)}
+              deleting={deleting}
+              onOpenLightbox={(src, title) => setLightbox({ src, title })}
+            />
           ) : (
             <div className="adm-panel" style={{ padding: "3rem", textAlign: "center" }}>
               <Mail size={22} color="rgba(255,255,255,0.25)" style={{ marginBottom: "0.75rem" }} />
@@ -434,19 +447,74 @@ export default function InquiriesPage() {
         </div>
       )}
 
+      {/* Interactive Photo Lightbox Modal */}
+      {lightbox && (
+        <div className="adm-lightbox-overlay" onClick={() => setLightbox(null)}>
+          <div className="adm-lightbox-card" onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", marginBottom: "0.85rem" }}>
+              <span style={{ color: "#fff", fontWeight: 700, fontSize: "0.95rem" }}>{lightbox.title}</span>
+              <button
+                onClick={() => setLightbox(null)}
+                style={{ background: "none", border: "none", color: "rgba(255,255,255,0.8)", cursor: "pointer", padding: "0.3rem" }}
+                aria-label="Close photo preview"
+              >
+                <X size={22} />
+              </button>
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={lightbox.src} alt={lightbox.title} className="adm-lightbox-img" />
+            <div className="adm-lightbox-actions">
+              <a
+                href={lightbox.src}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="adm-btn-pill"
+                style={{ textDecoration: "none" }}
+              >
+                <ExternalLink size={13} /> Open in New Tab ↗
+              </a>
+              <a
+                href={lightbox.src}
+                download
+                className="adm-btn-pill adm-btn-pill--primary"
+                style={{ textDecoration: "none" }}
+              >
+                <Download size={13} /> Download Photo
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         .inq-row-del:hover:not(:disabled) { background: rgba(255,107,125,0.12); color: var(--adm-danger); }
       `}</style>
+      </div>
     </AdminShell>
   );
 }
 
-function InquiryDetail({ inquiry, allInquiries, onReplied, onDelete, deleting }: { inquiry: InquiryRow; allInquiries: InquiryRow[]; onReplied: () => void; onDelete: () => void; deleting: boolean }) {
+function InquiryDetail({
+  inquiry,
+  allInquiries,
+  onReplied,
+  onDelete,
+  deleting,
+  onOpenLightbox
+}: {
+  inquiry: InquiryRow;
+  allInquiries: InquiryRow[];
+  onReplied: () => void;
+  onDelete: () => void;
+  deleting: boolean;
+  onOpenLightbox: (src: string, title: string) => void;
+}) {
   const [message, setMessage] = useState("");
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [sentOk, setSentOk] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
 
   const inqTypeInfo = typeConfig(inquiry.inquiryType);
 
@@ -460,6 +528,25 @@ function InquiryDetail({ inquiry, allInquiries, onReplied, onDelete, deleting }:
   function toggleImage(src: string) {
     setSelectedImages(prev => prev.includes(src) ? prev.filter(s => s !== src) : [...prev, src]);
   }
+
+  const RESPONSE_TEMPLATES = [
+    {
+      label: "📋 Formal Machinery Quote",
+      text: `Dear ${inquiry.name},\n\nThank you for reaching out to Ashal Innomech regarding your machinery requirements. We have reviewed your request and prepared a preliminary FOB quotation along with technical specifications.\n\nPlease find the details outlined and let us know if you require custom screw configurations or auxiliary equipment options.\n\nBest regards,\nAshal Innomech Engineering Team`
+    },
+    {
+      label: "⚡ Technical Specs Request",
+      text: `Dear ${inquiry.name},\n\nThank you for your interest in our machinery lines. To ensure we size the exact motor power, screw diameter, and take-up tower height for your operation, could you please confirm:\n1. Target resin materials (e.g. LDPE, LLDPE, HDPE, Biodegradable)?\n2. Target film thickness and layflat width?\n3. Desired output capacity (kg/hr)?\n\nLooking forward to your reply.\n\nBest regards,\nAshal Innomech Engineering Team`
+    },
+    {
+      label: "🤝 Schedule Technical Consultation",
+      text: `Dear ${inquiry.name},\n\nThank you for contacting Ashal Innomech. We would like to invite you to a live technical consultation call with our senior mechanical engineers to review plant layouts and line integration.\n\nPlease let us know what time this week works best for your schedule.\n\nBest regards,\nAshal Innomech Engineering Team`
+    },
+    {
+      label: "📦 Spare Parts Availability",
+      text: `Dear ${inquiry.name},\n\nThank you for your spare parts inquiry. We have checked our central inventory for the requested part numbers and confirmed stock availability with immediate FOB dispatch.\n\nPlease review and confirm delivery address to proceed with the proforma invoice.\n\nBest regards,\nAshal Innomech Parts & Service Department`
+    }
+  ];
 
   async function sendReply() {
     if (!message.trim()) return;
@@ -483,7 +570,7 @@ function InquiryDetail({ inquiry, allInquiries, onReplied, onDelete, deleting }:
     }
   }
 
-  const rowStyle: React.CSSProperties = { display: "flex", justifyContent: "space-between", padding: "0.5rem 0", borderBottom: "1px solid rgba(255,255,255,0.06)" };
+  const rowStyle: React.CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.6rem 0", borderBottom: "1px solid rgba(255,255,255,0.06)" };
   const keyStyle: React.CSSProperties = { fontFamily: "var(--ff-body)", fontSize: "0.85rem", color: "rgba(255,255,255,0.5)" };
   const valStyle: React.CSSProperties = { fontFamily: "var(--ff-body)", fontSize: "0.9rem", color: "#fff", fontWeight: 600, textAlign: "right" };
 
@@ -554,29 +641,65 @@ function InquiryDetail({ inquiry, allInquiries, onReplied, onDelete, deleting }:
           ["Phone", inquiry.phone],
           ["Country", inquiry.country],
         ].filter(([, v]) => v).map(([k, v]) => (
-          <div key={k} style={rowStyle}><span style={keyStyle}>{k}</span><span style={valStyle}>{v}</span></div>
+          <div key={k} style={rowStyle}>
+            <span style={keyStyle}>{k}</span>
+            {k === "Email" ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <span style={valStyle}>{v}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(String(v));
+                    setCopiedEmail(true);
+                    setTimeout(() => setCopiedEmail(false), 2000);
+                  }}
+                  className="adm-btn-pill"
+                  style={{ padding: "0.2rem 0.5rem", fontSize: "0.72rem" }}
+                  title="Copy Customer Email"
+                >
+                  {copiedEmail ? <Check size={12} color="#00D294" /> : <Copy size={12} />}
+                  <span>{copiedEmail ? "Copied" : "Copy"}</span>
+                </button>
+              </div>
+            ) : (
+              <span style={valStyle}>{v}</span>
+            )}
+          </div>
         ))}
       </div>
 
       {/* customer analytics + AI relationship roadmap */}
       <CustomerRoadmap inquiry={inquiry} allInquiries={allInquiries} />
 
-      {/* customer-attached reference photos (talk-to-engineer, not tied to a machine/part) */}
+      {/* customer-attached reference photos with Lightbox Viewer */}
       {(inquiry.images ?? []).length > 0 && (
         <div>
-          <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 700, color: "var(--brand-teal)", marginBottom: "0.6rem" }}>Attached photos</div>
-          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 700, color: "var(--brand-teal)", marginBottom: "0.6rem" }}>Attached photos (Click to preview)</div>
+          <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
             {inquiry.images.map((src, j) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <a key={j} href={src} target="_blank" rel="noopener noreferrer">
-                <img src={src} alt="" style={{ width: 72, height: 72, objectFit: "cover", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)" }} />
-              </a>
+              <button
+                key={j}
+                type="button"
+                onClick={() => onOpenLightbox(src, `Attached Photo #${j + 1} from ${inquiry.name}`)}
+                style={{
+                  position: "relative", width: 76, height: 76, borderRadius: 10, overflow: "hidden",
+                  border: "1px solid rgba(255,255,255,0.15)", background: "rgba(0,0,0,0.3)",
+                  cursor: "pointer", padding: 0
+                }}
+                title="Click to open full photo preview"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <span style={{ position: "absolute", bottom: 4, right: 4, background: "rgba(0,0,0,0.7)", borderRadius: 4, padding: "2px 4px", color: "#5eead4", display: "flex" }}>
+                  <ZoomIn size={12} />
+                </span>
+              </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* machines requested (talk-to-engineer & direct — and legacy rows with no inquiryType, which default to "direct") */}
+      {/* machines requested */}
       {inquiry.inquiryType !== "parts" && inquiry.machines.length > 0 && (
         <div>
           <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 700, color: "var(--brand-teal)", marginBottom: "0.6rem" }}>Machines requested</div>
@@ -589,10 +712,22 @@ function InquiryDetail({ inquiry, allInquiries, onReplied, onDelete, deleting }:
                 </div>
                 {m.notes && <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.82rem", color: "rgba(255,255,255,0.45)", marginTop: "0.3rem", fontStyle: "italic" }}>&quot;{m.notes}&quot;</div>}
                 {(m.images ?? []).length > 0 && (
-                  <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                  <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
                     {(m.images ?? []).map((src, j) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img key={j} src={src} alt="" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 6, border: "1px solid rgba(255,255,255,0.1)" }} />
+                      <button
+                        key={j}
+                        type="button"
+                        onClick={() => onOpenLightbox(src, `${m.name} (Model: ${m.model})`)}
+                        style={{
+                          width: 52, height: 52, borderRadius: 8, overflow: "hidden",
+                          border: "1px solid rgba(255,255,255,0.15)", background: "rgba(0,0,0,0.3)",
+                          cursor: "pointer", padding: 0
+                        }}
+                        title="Click to preview machine image"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </button>
                     ))}
                   </div>
                 )}
@@ -602,7 +737,7 @@ function InquiryDetail({ inquiry, allInquiries, onReplied, onDelete, deleting }:
         </div>
       )}
 
-      {/* parts requested (parts) */}
+      {/* parts requested */}
       {inquiry.inquiryType === "parts" && inquiry.parts.length > 0 && (
         <div>
           <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 700, color: "var(--brand-teal)", marginBottom: "0.6rem" }}>Parts requested</div>
@@ -624,10 +759,18 @@ function InquiryDetail({ inquiry, allInquiries, onReplied, onDelete, deleting }:
                     <td style={{ padding: "0.6rem 0.75rem", fontSize: "0.82rem", color: "rgba(255,255,255,0.5)", fontStyle: p.notes ? "italic" : "normal", maxWidth: 180, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.notes || "—"}</td>
                     <td style={{ padding: "0.6rem 0.75rem" }}>
                       {p.images.length > 0 && (
-                        <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap" }}>
+                        <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
                           {p.images.map((src, j) => (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img key={j} src={src} alt="" style={{ width: 36, height: 36, objectFit: "contain", borderRadius: 5, background: "rgba(255,255,255,0.06)" }} />
+                            <button
+                              key={j}
+                              type="button"
+                              onClick={() => onOpenLightbox(src, `${p.name} (Part Item #${j + 1})`)}
+                              style={{ width: 38, height: 38, borderRadius: 6, overflow: "hidden", border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.06)", cursor: "pointer", padding: 0 }}
+                              title="Click to preview part image"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                            </button>
                           ))}
                         </div>
                       )}
@@ -659,8 +802,15 @@ function InquiryDetail({ inquiry, allInquiries, onReplied, onDelete, deleting }:
                 {r.images.length > 0 && (
                   <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginBottom: "0.4rem" }}>
                     {r.images.map((src, j) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img key={j} src={src} alt="" style={{ width: 44, height: 44, objectFit: "contain", borderRadius: 6, background: "rgba(255,255,255,0.06)" }} />
+                      <button
+                        key={j}
+                        type="button"
+                        onClick={() => onOpenLightbox(src, `Sent Machine Attachment #${j + 1}`)}
+                        style={{ width: 44, height: 44, borderRadius: 6, overflow: "hidden", border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.06)", cursor: "pointer", padding: 0 }}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                      </button>
                     ))}
                   </div>
                 )}
@@ -673,13 +823,47 @@ function InquiryDetail({ inquiry, allInquiries, onReplied, onDelete, deleting }:
 
       {/* reply composer */}
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "1.5rem" }}>
-        <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.85rem", fontWeight: 700, color: "#fff", marginBottom: "0.6rem" }}>Reply to {inquiry.name}</div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem", flexWrap: "wrap", gap: "0.5rem" }}>
+          <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.9rem", fontWeight: 700, color: "#fff" }}>
+            Reply to {inquiry.name}
+          </div>
+          <span style={{ fontSize: "0.75rem", color: "var(--adm-text-sub)" }}>
+            Tip: Press <kbd style={{ padding: "0.15rem 0.4rem", background: "rgba(255,255,255,0.1)", borderRadius: 4, fontFamily: "var(--ff-mono)" }}>Ctrl + Enter</kbd> to send
+          </span>
+        </div>
+
+        {/* Quick Response Templates Selector */}
+        <div style={{ marginBottom: "0.85rem" }}>
+          <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.5)", marginBottom: "0.4rem", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            <Sparkles size={12} color="var(--brand-teal)" /> Quick Response Templates:
+          </div>
+          <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+            {RESPONSE_TEMPLATES.map(t => (
+              <button
+                key={t.label}
+                type="button"
+                onClick={() => setMessage(prev => prev ? `${prev}\n\n${t.text}` : t.text)}
+                className="adm-btn-pill"
+                style={{ fontSize: "0.72rem", padding: "0.3rem 0.65rem" }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <textarea
           value={message}
           onChange={e => setMessage(e.target.value)}
-          placeholder="Write your reply — it will be emailed directly to the customer…"
+          onKeyDown={e => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+              e.preventDefault();
+              sendReply();
+            }
+          }}
+          placeholder="Write your reply — it will be emailed directly to the customer… (Ctrl+Enter to send)"
           style={{
-            width: "100%", minHeight: 120, padding: "0.85rem 1rem", borderRadius: 10,
+            width: "100%", minHeight: 130, padding: "0.85rem 1rem", borderRadius: 10,
             background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)",
             color: "#fff", fontFamily: "var(--ff-body)", fontSize: "0.95rem", resize: "vertical", outline: "none",
           }}
@@ -688,7 +872,7 @@ function InquiryDetail({ inquiry, allInquiries, onReplied, onDelete, deleting }:
         {availableImages.length > 0 && (
           <div style={{ marginTop: "1rem" }}>
             <div style={{ fontFamily: "var(--ff-body)", fontSize: "0.82rem", color: "rgba(255,255,255,0.55)", marginBottom: "0.5rem" }}>
-              Attach machine photos (optional)
+              Attach machine photos ({selectedImages.length} selected):
             </div>
             <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
               {availableImages.map(src => {
@@ -696,11 +880,17 @@ function InquiryDetail({ inquiry, allInquiries, onReplied, onDelete, deleting }:
                 return (
                   <button key={src} type="button" onClick={() => toggleImage(src)} style={{
                     width: 64, height: 64, borderRadius: 10, cursor: "pointer", padding: 4,
-                    background: "rgba(255,255,255,0.06)",
-                    border: on ? "2px solid var(--brand-teal)" : "2px solid transparent",
+                    background: on ? "rgba(13,148,136,0.2)" : "rgba(255,255,255,0.06)",
+                    border: on ? "2px solid var(--brand-teal)" : "2px solid rgba(255,255,255,0.1)",
+                    position: "relative"
                   }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                    {on && (
+                      <span style={{ position: "absolute", top: 2, right: 2, width: 16, height: 16, borderRadius: "50%", background: "var(--brand-teal)", color: "#04211e", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.65rem", fontWeight: 800 }}>
+                        ✓
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -717,7 +907,7 @@ function InquiryDetail({ inquiry, allInquiries, onReplied, onDelete, deleting }:
 
         <button onClick={sendReply} disabled={sending || !message.trim()} className="adm-btn" style={{ marginTop: "1.1rem" }}>
           {sending ? <span className="adm-spinner" /> : <Send size={15} />}
-          {sending ? "Sending…" : "Send reply"}
+          {sending ? "Sending…" : "Send reply (Ctrl+Enter)"}
         </button>
       </div>
     </div>

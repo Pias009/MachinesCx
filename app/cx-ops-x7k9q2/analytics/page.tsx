@@ -79,7 +79,8 @@ export default function AnalyticsPage() {
 
   return (
     <AdminShell>
-      <div className="trm-root adm-rise">
+      <div className="adm-content-container">
+        <div className="trm-root adm-rise">
         <div className="trm-head">
           <Terminal size={15} />
           <span className="trm-head__line">
@@ -361,6 +362,7 @@ export default function AnalyticsPage() {
           .trm-live-dot { animation: none; }
         }
       `}</style>
+      </div>
     </AdminShell>
   );
 }

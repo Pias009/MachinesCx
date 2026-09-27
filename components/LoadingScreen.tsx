@@ -138,7 +138,7 @@ export default function LoadingScreen() {
             borderRadius: "50%", overflow: "hidden",
             animation: "ls-breath 4s 1s ease-in-out infinite, ls-glow 4s 1s ease-in-out infinite",
           }}>
-            <Image src="/logo.jpeg" alt="" fill sizes="150px" priority style={{ objectFit: "cover" }} />
+            <Image src="/logo.jpeg" alt="" aria-hidden="true" fill sizes="150px" priority style={{ objectFit: "cover" }} />
           </div>
         </div>
 

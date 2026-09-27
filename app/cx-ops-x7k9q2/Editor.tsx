@@ -3,7 +3,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Camera, Star, X, Plus, CheckCircle2, Package, Loader2,
-  AlertTriangle, Search, Eye, Copy, Trash2, ArrowLeft, ExternalLink, Sparkles
+  AlertTriangle, Search, Eye, Copy, Trash2, ArrowLeft, ExternalLink, Sparkles,
+  Monitor, Smartphone, FileSpreadsheet, ArrowUp, ArrowDown
 } from "lucide-react";
 import type { Field, Collection, SectionSchema } from "@/lib/cmsSchemas";
 import { CATEGORY_ICON as SHARED_CATEGORY_ICON } from "./adminIcons";
@@ -1741,8 +1742,10 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
   // full-page product/item editor state (replaces popup modal)
   const [editingItem, setEditingItem] = useState<{ item: Item; index: number; collection: Collection } | null>(null);
 
-  // live preview card modal state
-  const [previewItem, setPreviewItem] = useState<{ item: Item; title: string } | null>(null);
+  // live preview card modal state with device switcher
+  const [previewItem, setPreviewItem] = useState<{ item: Item; title: string; index?: number; collection?: Collection } | null>(null);
+  const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile" | "specs">("desktop");
+  const [previewCopiedSlug, setPreviewCopiedSlug] = useState(false);
 
   // slug → current main product photo, for thumbnails of items that only
   // reference a machine (machine-catalog, hero, scroll-story, …)
@@ -1860,7 +1863,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
   }, []);
 
   // actual save (called after validation passes)
-  async function doSave() {
+  const doSave = useCallback(async () => {
     if (!data) return;
     setStatus("saving"); setErrMsg("");
     try {
@@ -1878,7 +1881,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
     } catch (e) {
       setStatus("error"); setErrMsg((e as Error).message);
     }
-  }
+  }, [data, schema.slug]);
 
   // save with validation check
   const save = useCallback(() => {
@@ -1890,7 +1893,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
     } else {
       doSave();
     }
-  }, [data, schema]);
+  }, [data, schema, doSave]);
 
   // Keyboard shortcut Ctrl+S / Cmd+S
   useEffect(() => {
@@ -1909,7 +1912,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
       return <div style={{ fontFamily: "var(--ff-body)", fontSize: "1rem", color: "#ff8a97", padding: "2rem 0" }}>{errMsg}</div>;
     }
     return (
-      <div style={{ maxWidth: 1200 }}>
+      <div style={{ maxWidth: 1640, width: "100%", margin: "0 auto" }}>
         <div className="adm-skel" style={{ width: "40%", height: 38, borderRadius: 8, marginBottom: "0.75rem" }} />
         <div className="adm-skel" style={{ width: "65%", height: 16, borderRadius: 6, marginBottom: "2rem" }} />
         <div className="adm-skel" style={{ height: 140, borderRadius: 16 }} />
@@ -1921,7 +1924,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
   // If an item is being edited, render it as a dedicated full page instead of a popup box
   if (editingItem) {
     return (
-      <div style={{ maxWidth: 1360, position: "relative" }} className="adm-rise">
+      <div style={{ maxWidth: 1640, width: "100%", margin: "0 auto", position: "relative" }} className="adm-rise">
         {pendingWarnings && (
           <WarningModal
             title="Review before saving"
@@ -1961,7 +1964,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
   }
 
   return (
-    <div style={{ maxWidth: 1200, position: "relative" }} className="adm-rise">
+    <div style={{ maxWidth: 1640, width: "100%", margin: "0 auto", position: "relative" }} className="adm-rise">
       {/* validation warning modal */}
       {pendingWarnings && (
         <WarningModal
@@ -1972,59 +1975,287 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
         />
       )}
 
-      {/* Live Card Preview Modal */}
+      {/* Upgraded Live Card Preview Modal with Device Switcher */}
       {previewItem && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 9999,
-          background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)",
-          display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem"
-        }} onClick={() => setPreviewItem(null)}>
-          <div style={{
-            background: "#121b2d", border: "1px solid var(--adm-mint-glow)",
-            borderRadius: 20, padding: "1.75rem", maxWidth: 520, width: "100%",
-            boxShadow: "0 24px 60px rgba(0,0,0,0.8)", position: "relative"
-          }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-              <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--adm-mint)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                Live Card Preview
-              </span>
-              <button onClick={() => setPreviewItem(null)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.6)", cursor: "pointer" }}>
-                <X size={18} />
+        <div className="adm-preview-backdrop" onClick={() => setPreviewItem(null)}>
+          <div
+            className={`adm-preview-dialog ${previewDevice === "mobile" ? "adm-preview-dialog--mobile" : ""}`}
+            onClick={e => e.stopPropagation()}
+            style={{ width: "100%", maxWidth: previewDevice === "mobile" ? 440 : 760 }}
+          >
+            {/* Modal Header */}
+            <div className="adm-preview-header">
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--adm-mint)", textTransform: "uppercase", letterSpacing: "0.06em", display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                  <Eye size={16} /> Live Preview
+                </span>
+                <span style={{ fontSize: "0.75rem", color: "var(--adm-text-sub)", background: "rgba(255,255,255,0.06)", padding: "0.15rem 0.5rem", borderRadius: 6 }}>
+                  {String(previewItem.item.category || schema.slug)}
+                </span>
+              </div>
+
+              {/* Device Mode Switcher */}
+              <div className="adm-preview-device-switch">
+                <button
+                  type="button"
+                  onClick={() => setPreviewDevice("desktop")}
+                  className={`adm-preview-device-btn ${previewDevice === "desktop" ? "is-active" : ""}`}
+                  title="Desktop Card View"
+                >
+                  <Monitor size={14} /> Desktop Card
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDevice("mobile")}
+                  className={`adm-preview-device-btn ${previewDevice === "mobile" ? "is-active" : ""}`}
+                  title="Mobile 2-Column Catalog View"
+                >
+                  <Smartphone size={14} /> Mobile Phone
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDevice("specs")}
+                  className={`adm-preview-device-btn ${previewDevice === "specs" ? "is-active" : ""}`}
+                  title="Full Spec Sheet"
+                >
+                  <FileSpreadsheet size={14} /> Specs Sheet
+                </button>
+              </div>
+
+              <button
+                onClick={() => setPreviewItem(null)}
+                style={{ background: "none", border: "none", color: "rgba(255,255,255,0.6)", cursor: "pointer", padding: "0.3rem" }}
+                aria-label="Close Preview"
+              >
+                <X size={20} />
               </button>
             </div>
-            <div style={{
-              background: "#162338", border: "1px solid var(--adm-border)", borderRadius: 16, overflow: "hidden", padding: "1.25rem"
-            }}>
-              {Boolean(itemImage(previewItem.item, listPhotos)) ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={itemImage(previewItem.item, listPhotos)}
-                  alt=""
-                  style={{ width: "100%", height: 180, objectFit: "contain", borderRadius: 12, background: "rgba(0,0,0,0.2)", marginBottom: "1rem" }}
-                />
-              ) : (
-                <div style={{ width: "100%", height: 120, borderRadius: 12, background: "rgba(255,255,255,0.03)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.3)", fontSize: "0.85rem", marginBottom: "1rem" }}>
-                  <Camera size={24} style={{ marginRight: 8 }} /> No Image Uploaded
-                </div>
-              )}
-              <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "1.3rem", color: "#fff", margin: "0 0 0.4rem" }}>
-                {previewItem.title}
-              </h3>
-              {Boolean(previewItem.item.tagline) && (
-                <p style={{ fontSize: "0.88rem", color: "var(--adm-text-sub)", margin: "0 0 0.8rem" }}>
-                  {String(previewItem.item.tagline)}
-                </p>
-              )}
-              {Array.isArray(previewItem.item.specs) && previewItem.item.specs.length > 0 && (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", background: "rgba(0,0,0,0.2)", padding: "0.75rem", borderRadius: 10, fontSize: "0.78rem" }}>
-                  {(previewItem.item.specs as Array<{ label?: string; value?: string }>).slice(0, 4).map((s, idx) => (
-                    <div key={idx} style={{ color: "rgba(255,255,255,0.8)" }}>
-                      <span style={{ color: "var(--adm-text-sub)" }}>{s.label}: </span>
-                      <strong>{s.value}</strong>
+
+            {/* Modal Body */}
+            <div className="adm-preview-body">
+              {previewDevice === "desktop" && (
+                <div style={{
+                  background: "#121b2d", border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 20, overflow: "hidden", padding: "1.5rem",
+                  boxShadow: "0 20px 50px rgba(0,0,0,0.6)"
+                }}>
+                  {/* High-res Image Stage */}
+                  <div style={{
+                    width: "100%", height: 260, borderRadius: 16,
+                    background: "radial-gradient(ellipse at center, rgba(13,148,136,0.18) 0%, rgba(8,13,24,0.9) 100%)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    position: "relative", overflow: "hidden", marginBottom: "1.25rem", padding: "1rem"
+                  }}>
+                    {Boolean(itemImage(previewItem.item, listPhotos)) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={itemImage(previewItem.item, listPhotos)}
+                        alt={previewItem.title}
+                        style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", filter: "drop-shadow(0 15px 30px rgba(0,0,0,0.8))" }}
+                      />
+                    ) : (
+                      <div style={{ color: "rgba(255,255,255,0.35)", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
+                        <Camera size={32} />
+                        <span style={{ fontSize: "0.85rem" }}>No Machine Image Configured</span>
+                      </div>
+                    )}
+                    <span style={{
+                      position: "absolute", top: 12, left: 12,
+                      background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)",
+                      border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20,
+                      padding: "0.25rem 0.65rem", fontSize: "0.72rem", fontWeight: 700, color: "#5eead4"
+                    }}>
+                      ⚡ {String(previewItem.item.series || previewItem.item.category || "INDUSTRIAL SERIES").toUpperCase()}
+                    </span>
+                    {Boolean(previewItem.item.badge) && (
+                      <span style={{
+                        position: "absolute", top: 12, right: 12,
+                        background: "rgba(245,196,81,0.2)", border: "1px solid rgba(245,196,81,0.5)",
+                        borderRadius: 20, padding: "0.25rem 0.65rem", fontSize: "0.72rem", fontWeight: 800, color: "#f5c451"
+                      }}>
+                        {String(previewItem.item.badge)}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Title & Tagline */}
+                  <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "1.5rem", color: "#fff", margin: "0 0 0.4rem", lineHeight: 1.2 }}>
+                    {previewItem.title}
+                  </h3>
+                  {Boolean(previewItem.item.tagline) && (
+                    <p style={{ fontSize: "0.9rem", color: "var(--adm-text-sub)", margin: "0 0 1.1rem", lineHeight: 1.5 }}>
+                      {String(previewItem.item.tagline)}
+                    </p>
+                  )}
+
+                  {/* Spec Chips Grid */}
+                  {Array.isArray(previewItem.item.specs) && previewItem.item.specs.length > 0 && (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.6rem", background: "rgba(0,0,0,0.3)", padding: "1rem", borderRadius: 14, border: "1px solid rgba(255,255,255,0.06)", marginBottom: "1.25rem" }}>
+                      {(previewItem.item.specs as Array<{ label?: string; value?: string; values?: string[] }>).slice(0, 6).map((s, idx) => (
+                        <div key={idx} style={{ fontSize: "0.8rem" }}>
+                          <span style={{ color: "rgba(255,255,255,0.5)", display: "block", fontSize: "0.72rem", textTransform: "uppercase" }}>{s.label}</span>
+                          <strong style={{ color: "#fff" }}>{Array.isArray(s.values) ? s.values.join(" / ") : String(s.value || s.values || "—")}</strong>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
+
+                  {/* Simulated Customer Action Bar */}
+                  <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+                    <div style={{ flex: 1, padding: "0.65rem 1rem", borderRadius: 10, background: "rgba(13,148,136,0.18)", border: "1px solid rgba(13,148,136,0.4)", color: "#5eead4", fontSize: "0.85rem", fontWeight: 700, textAlign: "center" }}>
+                      Simulated CTA: Request Technical FOB Quote
+                    </div>
+                    {Boolean(previewItem.item.datasheetPdf) && (
+                      <div style={{ padding: "0.65rem 1rem", borderRadius: 10, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#fff", fontSize: "0.85rem", fontWeight: 600 }}>
+                        PDF Spec Sheet Attached
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
+
+              {previewDevice === "mobile" && (
+                <div className="adm-phone-shell">
+                  <div className="adm-phone-notch" />
+                  <div style={{ padding: "1rem" }}>
+                    <div style={{
+                      background: "#121b2d", border: "1px solid rgba(255,255,255,0.1)",
+                      borderRadius: 16, overflow: "hidden", padding: "0.85rem",
+                      display: "flex", flexDirection: "column", gap: "0.65rem"
+                    }}>
+                      <div style={{
+                        width: "100%", height: 140, borderRadius: 12,
+                        background: "radial-gradient(circle, rgba(13,148,136,0.15) 0%, rgba(0,0,0,0.5) 100%)",
+                        display: "flex", alignItems: "center", justifyContent: "center", padding: "0.5rem"
+                      }}>
+                        {Boolean(itemImage(previewItem.item, listPhotos)) ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={itemImage(previewItem.item, listPhotos)}
+                            alt=""
+                            style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+                          />
+                        ) : (
+                          <Camera size={24} color="rgba(255,255,255,0.3)" />
+                        )}
+                      </div>
+                      <div style={{ fontSize: "0.68rem", fontWeight: 700, color: "var(--brand-teal)", textTransform: "uppercase" }}>
+                        {String(previewItem.item.category || "SERIES")}
+                      </div>
+                      <h4 style={{ fontFamily: "var(--ff-display)", fontSize: "1.1rem", color: "#fff", margin: 0, lineHeight: 1.2 }}>
+                        {previewItem.title}
+                      </h4>
+                      {Boolean(previewItem.item.tagline) && (
+                        <p style={{ margin: 0, fontSize: "0.75rem", color: "rgba(255,255,255,0.6)", lineHeight: 1.3 }}>
+                          {String(previewItem.item.tagline)}
+                        </p>
+                      )}
+                      <div style={{ padding: "0.5rem", borderRadius: 8, background: "rgba(0,0,0,0.3)", fontSize: "0.72rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                        {(previewItem.item.specs as Array<{ label?: string; value?: string }> || []).slice(0, 3).map((s, idx) => (
+                          <div key={idx} style={{ display: "flex", justifyContent: "space-between" }}>
+                            <span style={{ color: "rgba(255,255,255,0.5)" }}>{s.label}:</span>
+                            <span style={{ color: "#fff", fontWeight: 700 }}>{s.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ padding: "0.5rem", borderRadius: 8, background: "var(--adm-mint)", color: "#061814", fontWeight: 800, fontSize: "0.75rem", textAlign: "center" }}>
+                        Request Quote
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {previewDevice === "specs" && (
+                <div style={{ background: "#121b2d", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, overflow: "hidden" }}>
+                  <div style={{ padding: "1rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}>
+                    <h4 style={{ margin: 0, fontSize: "1.05rem", color: "#fff", fontWeight: 700 }}>
+                      Complete Technical Parameters — {previewItem.title}
+                    </h4>
+                  </div>
+                  {Array.isArray(previewItem.item.specs) && previewItem.item.specs.length > 0 ? (
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
+                      <thead>
+                        <tr style={{ background: "rgba(0,0,0,0.2)", borderBottom: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)", textAlign: "left", fontSize: "0.75rem", textTransform: "uppercase" }}>
+                          <th style={{ padding: "0.75rem 1.25rem" }}>Parameter</th>
+                          <th style={{ padding: "0.75rem 1.25rem" }}>Engineering Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(previewItem.item.specs as Array<{ label?: string; value?: string; values?: string[] }>).map((s, idx) => (
+                          <tr key={idx} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                            <td style={{ padding: "0.7rem 1.25rem", color: "rgba(255,255,255,0.65)" }}>{s.label}</td>
+                            <td style={{ padding: "0.7rem 1.25rem", color: "#fff", fontWeight: 700 }}>
+                              {Array.isArray(s.values) ? s.values.join(" / ") : String(s.value || s.values || "—")}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div style={{ padding: "2rem", textAlign: "center", color: "rgba(255,255,255,0.4)" }}>
+                      No technical specifications added yet.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="adm-preview-footer">
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (previewItem.item.slug) {
+                      navigator.clipboard.writeText(String(previewItem.item.slug));
+                      setPreviewCopiedSlug(true);
+                      setTimeout(() => setPreviewCopiedSlug(false), 2000);
+                    }
+                  }}
+                  className="adm-btn-pill"
+                  title="Copy Machine URL Slug"
+                >
+                  <Copy size={13} /> {previewCopiedSlug ? "Copied Slug!" : `Slug: ${previewItem.item.slug || "n/a"}`}
+                </button>
+                {Boolean(previewItem.item.slug) && (
+                  <a
+                    href={`/en/products/${previewItem.item.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="adm-btn-pill"
+                    style={{ textDecoration: "none", color: "#5eead4" }}
+                  >
+                    <ExternalLink size={13} /> Public URL ↗
+                  </a>
+                )}
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                <button
+                  type="button"
+                  onClick={() => setPreviewItem(null)}
+                  className="adm-btn-pill"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const it = previewItem.item;
+                    const idx = previewItem.index;
+                    const col = previewItem.collection;
+                    setPreviewItem(null);
+                    if (col !== undefined && idx !== undefined) {
+                      handleOpenEdit(it, idx, col);
+                    }
+                  }}
+                  className="adm-btn-pill adm-btn-pill--primary"
+                >
+                  Edit Machine Full Page →
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -2343,20 +2574,58 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
                           </div>
                         </div>
 
-                        {/* Actions: Edit Page Button + Secondary Actions */}
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
+                        {/* Actions: Reorder, Preview, Clone, Edit, and Delete */}
+                        <div className="adm-item-action-bar">
+                          {i > 0 && (
+                            <button
+                              type="button"
+                              title="Move Up in Catalogue"
+                              className="adm-btn-pill"
+                              style={{ padding: "0.45rem 0.55rem" }}
+                              onClick={() => {
+                                mutate(d => {
+                                  const n = [...allItems];
+                                  const temp = n[i];
+                                  n[i] = n[i - 1];
+                                  n[i - 1] = temp;
+                                  return { ...d, [col.key]: n };
+                                });
+                              }}
+                            >
+                              <ArrowUp size={13} />
+                            </button>
+                          )}
+                          {i < allItems.length - 1 && (
+                            <button
+                              type="button"
+                              title="Move Down in Catalogue"
+                              className="adm-btn-pill"
+                              style={{ padding: "0.45rem 0.55rem" }}
+                              onClick={() => {
+                                mutate(d => {
+                                  const n = [...allItems];
+                                  const temp = n[i];
+                                  n[i] = n[i + 1];
+                                  n[i + 1] = temp;
+                                  return { ...d, [col.key]: n };
+                                });
+                              }}
+                            >
+                              <ArrowDown size={13} />
+                            </button>
+                          )}
                           <button
                             type="button"
-                            title="Live Card Preview"
-                            style={{ ...iconBtn, padding: "0.45rem 0.7rem", display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.78rem" }}
-                            onClick={() => setPreviewItem({ item, title })}
+                            title="Live Card Preview (Desktop & Mobile)"
+                            className="adm-btn-pill"
+                            onClick={() => setPreviewItem({ item, title, index: i, collection: col })}
                           >
                             <Eye size={13} /> Preview
                           </button>
                           <button
                             type="button"
-                            title="Clone / Duplicate"
-                            style={{ ...iconBtn, padding: "0.45rem 0.7rem", display: "flex", alignItems: "center", gap: "0.3rem", fontSize: "0.78rem" }}
+                            title="Clone Machine Record"
+                            className="adm-btn-pill"
                             onClick={() => {
                               const clone = JSON.parse(JSON.stringify(item));
                               if (clone.name) clone.name = `${clone.name} (Copy)`;
@@ -2368,16 +2637,17 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
                           <button
                             type="button"
                             onClick={() => handleOpenEdit(item, i, col)}
-                            className="adm-btn"
-                            style={{
-                              padding: "0.45rem 0.95rem", fontSize: "0.8rem", gap: "0.35rem"
-                            }}
+                            className="adm-btn-pill adm-btn-pill--primary"
                           >
                             Edit Page →
                           </button>
                           {col.canAdd && (
-                            <button type="button" title="Delete item" style={{ ...dangerBtn, padding: "0.45rem 0.75rem", fontSize: "0.78rem" }}
-                              onClick={() => { if (confirm('Delete "' + title + '"?')) mutate(d => ({ ...d, [col.key]: allItems.filter((_, j) => j !== i) })); }}>
+                            <button
+                              type="button"
+                              title="Delete Machine Record"
+                              className="adm-btn-pill adm-btn-pill--danger"
+                              onClick={() => { if (confirm('Delete "' + title + '"?')) mutate(d => ({ ...d, [col.key]: allItems.filter((_, j) => j !== i) })); }}
+                            >
                               <Trash2 size={13} /> Delete
                             </button>
                           )}
@@ -2395,24 +2665,38 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
       {/* Floating Bottom Sticky Bar when unsaved */}
       {status === "dirty" && (
         <div style={{
-          position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 9000,
-          background: "#121b2d", border: "1px solid var(--adm-mint)",
-          borderRadius: 30, padding: "0.6rem 1.5rem",
-          boxShadow: "0 10px 30px rgba(0,210,148,0.3)",
+          position: "fixed", bottom: 28, left: "50%", transform: "translateX(-50%)", zIndex: 9000,
+          background: "rgba(18, 27, 45, 0.94)", backdropFilter: "blur(16px)",
+          border: "1px solid var(--adm-mint)",
+          borderRadius: 40, padding: "0.6rem 1.6rem",
+          boxShadow: "0 12px 35px rgba(0,210,148,0.35), 0 20px 50px rgba(0,0,0,0.8)",
           display: "flex", alignItems: "center", gap: "1.25rem",
           animation: "admRise 0.3s ease"
         }}>
-          <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#f5c451" }} />
-            Unsaved changes detected
+          <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: "0.6rem" }}>
+            <span style={{ width: 9, height: 9, borderRadius: "50%", background: "#f5c451", boxShadow: "0 0 10px #f5c451" }} />
+            <span>Unsaved Changes in <strong>{schema.title}</strong></span>
           </div>
-          <button
-            onClick={save}
-            className="adm-btn"
-            style={{ padding: "0.45rem 1rem", fontSize: "0.82rem" }}
-          >
-            Save Now (Ctrl+S)
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+            <button
+              onClick={() => {
+                if (confirm("Discard all unsaved changes and reload original data?")) {
+                  window.location.reload();
+                }
+              }}
+              className="adm-btn-pill"
+              style={{ background: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.15)" }}
+            >
+              Discard
+            </button>
+            <button
+              onClick={save}
+              className="adm-btn"
+              style={{ padding: "0.45rem 1.25rem", fontSize: "0.82rem" }}
+            >
+              Save Now (Ctrl+S)
+            </button>
+          </div>
         </div>
       )}
     </div>

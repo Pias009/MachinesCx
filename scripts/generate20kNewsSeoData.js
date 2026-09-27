@@ -34,7 +34,7 @@ const newArticles = [
         'Layer E (Inner Contact Layer): Food-grade HDPE/LDPE for mechanical puncture resistance (45% thickness).'
       ] },
       { kind: 'heading', text: '3. Polymer Rheology & Spiral Die Head Mandrel Geometry' },
-      { kind: 'paragraph', text: 'Melt flow stability within the die head assembly determines film gauge consistency and eliminates inter-layer flow instabilities (such as zig-zag interfacial shear melt fracture). Ashal Machinery utilizes 3D Computational Fluid Dynamics (CFD) software to design spiral distribution channels with logarithmic depth reduction.' },
+      { kind: 'paragraph', text: 'Melt flow stability within the die head assembly determines film gauge consistency and eliminates inter-layer flow instabilities (such as zig-zag interfacial shear melt fracture). Ashal Innomech utilizes 3D Computational Fluid Dynamics (CFD) software to design spiral distribution channels with logarithmic depth reduction.' },
       { kind: 'paragraph', text: 'In 5-layer ABCDE die heads, heating zones are individually controlled using multi-channel PID temperature modules. Thermal isolation rings between die modules prevent heat transfer from high-temperature nylon layers (typically 240°C–260°C) to heat-sensitive EVOH layers (200°C–220°C), guaranteeing zero resin degradation or yellowing during prolonged manufacturing runs.' },
       { kind: 'heading', text: '4. Raw Material Cost Optimization & ABA Fillers' },
       { kind: 'paragraph', text: 'The primary financial advantage of 3-layer ABA lines lies in raw material cost reduction. Because Screw B feeds only the core layer, processors can incorporate high percentages of low-cost calcium carbonate (CaCO3) masterbatch (up to 40%–50%) or post-industrial recycled PE flakes into the middle B layer without compromising the glossy aesthetic or printability of the virgin A skin layers.' },
@@ -70,7 +70,7 @@ const newArticles = [
         'Adapter & Die Head: 165°C – 170°C (optimum melt viscosity for bubble expansion)'
       ] },
       { kind: 'heading', text: '3. Air Ring Design & Bubble Stabilization' },
-      { kind: 'paragraph', text: 'Biopolymer film melt exhibits lower melt strength and slower crystallization rates than polyolefins. Standard high-velocity air rings can cause severe film bubble swaying or collapse. Ashal Machinery equips its biodegradable film lines with dual-lip low-velocity air rings paired with chilled air blowers (air temperature 10°C–14°C) to accelerate polymer crystallization right above the die lip.' },
+      { kind: 'paragraph', text: 'Biopolymer film melt exhibits lower melt strength and slower crystallization rates than polyolefins. Standard high-velocity air rings can cause severe film bubble swaying or collapse. Ashal Innomech equips its biodegradable film lines with dual-lip low-velocity air rings paired with chilled air blowers (air temperature 10°C–14°C) to accelerate polymer crystallization right above the die lip.' },
       { kind: 'heading', text: '4. Heat Sealing & Converting Parameters' },
       { kind: 'paragraph', text: 'Converting compostable film into finished bags requires precise thermal control during heat sealing. Traditional high-temperature copper sealing bars can melt through PBAT film or cause severe seal distortion. Recommended sealing knife temperatures range from 135°C to 155°C with increased dwell pressure (0.4–0.5 MPa) and extended dwell time.' },
       { kind: 'heading', text: '5. Quality Compliance & Certification Standards' },
@@ -256,7 +256,7 @@ const newArticles = [
       { kind: 'heading', text: '2. Factory Acceptance Testing (FAT) Protocol' },
       { kind: 'paragraph', text: 'Prior to dispatch from Wenzhou Ashal manufacturing facility, every machine undergoes a 48-hour continuous Factory Acceptance Test (FAT). Customer resin samples are processed under full load while engineers record high-definition video documentation of speed, temperature stability, and film sample quality.' },
       { kind: 'heading', text: '3. Vacuum Barrier Foil Anti-Rust Export Packaging' },
-      { kind: 'paragraph', text: 'Ocean transit exposes machinery to high humidity and salt air corrosion. Ashal machinery components are sprayed with anti-corrosion protective oil, wrapped in thick vacuum-sealed aluminum foil barrier bags containing desiccant packs, and secured inside heavy wooden crate bases.' }
+      { kind: 'paragraph', text: 'Ocean transit exposes machinery to high humidity and salt air corrosion. Ashal Innomech components are sprayed with anti-corrosion protective oil, wrapped in thick vacuum-sealed aluminum foil barrier bags containing desiccant packs, and secured inside heavy wooden crate bases.' }
     ]
   },
   {

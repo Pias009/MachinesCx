@@ -12,7 +12,8 @@ import { SECTION_ELEMENT_DELAY } from "@/components/SectionReveal";
 
 gsap.registerPlugin(useGSAP);
 import localData from "@/data/products.json";
-const localFamilies = (localData as { families: ProductFamily[] }).families;
+import { applyProductSeo } from "@/lib/productSeo";
+const localFamilies = ((localData as { families: ProductFamily[] }).families).map(applyProductSeo);
 
 /* helpers that work with both local and live CMS product data */
 function familyImage(f: Pick<ProductFamily, "slug" | "image" | "images">, customImage?: string): string {
@@ -769,7 +770,7 @@ export default function MachineCatalogSection() {
       <section ref={sectionRef} className="mcs" data-no-anim aria-label={t("sectionAria")}>
         <div ref={shutterRef} className="mcs__shutter" aria-hidden="true">
           <div ref={shutterMarkRef} className="mcs__shutter-mark">
-            <Image src="/logo.jpeg" alt="" width={40} height={40} />
+            <Image src="/logo.jpeg" alt="" aria-hidden="true" width={40} height={40} />
           </div>
         </div>
         <div className="mcs__blob mcs__blob--t" aria-hidden="true" />
@@ -848,7 +849,7 @@ export default function MachineCatalogSection() {
                   <div className="mcs-card__inner">
                     <div className="mcs-card__scrim" aria-hidden="true" />
                     <div className="mcs-card__bg" aria-hidden="true">
-                      <Image src={CUSTOM_IMAGES[fam.slug]?.trim() ? live(CUSTOM_IMAGES[fam.slug]) : productImg(fam.slug, familyImage(fam))} alt="" fill sizes="(max-width: 900px) 65vw, 320px" loading="lazy" />
+                      <Image src={CUSTOM_IMAGES[fam.slug]?.trim() ? live(CUSTOM_IMAGES[fam.slug]) : productImg(fam.slug, familyImage(fam))} alt={fam.name.split("—")[0].trim()} fill sizes="(max-width: 900px) 65vw, 320px" loading="lazy" />
                     </div>
 
                     <div className="mcs-card__top">

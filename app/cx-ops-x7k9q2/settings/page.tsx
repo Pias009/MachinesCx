@@ -583,27 +583,29 @@ export default function AdminSettingsPage() {
 
   return (
     <AdminShell>
-      <div className="adm-page-head adm-rise">
-        <div className="adm-page-head__eyebrow">
-          <ShieldCheck size={13} />
-          Privacy, Access Control & Security
-        </div>
-        <h1 className="adm-page-head__title">Admin Roles & Permissions</h1>
-        <p className="adm-page-head__sub">
-          Manage member access, create Gmail Magic Link invitations with temporary passwords,
-          update role privileges, and inspect the real-time security audit log.
-        </p>
-      </div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem", marginTop: "1.5rem" }}>
-        {/* Top Grid: Invitation Generator + User Role Table */}
-        <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
-          <GmailMagicLinkCard onInviteSuccess={loadRolesData} />
-          <UserRoleManagementTable users={users} invitations={invitations} onRefresh={loadRolesData} />
+      <div className="adm-content-container">
+        <div className="adm-page-head adm-rise">
+          <div className="adm-page-head__eyebrow">
+            <ShieldCheck size={13} />
+            Privacy, Access Control & Security
+          </div>
+          <h1 className="adm-page-head__title">Admin Roles & Permissions</h1>
+          <p className="adm-page-head__sub">
+            Manage member access, create Gmail Magic Link invitations with temporary passwords,
+            update role privileges, and inspect the real-time security audit log.
+          </p>
         </div>
 
-        {/* Security Audit Log */}
-        <SecurityAuditLogTable auditLog={auditLog} />
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem", marginTop: "1.5rem" }}>
+          {/* Top Grid: Invitation Generator + User Role Table */}
+          <div className="adm-settings-grid">
+            <GmailMagicLinkCard onInviteSuccess={loadRolesData} />
+            <UserRoleManagementTable users={users} invitations={invitations} onRefresh={loadRolesData} />
+          </div>
+
+          {/* Security Audit Log */}
+          <SecurityAuditLogTable auditLog={auditLog} />
+        </div>
       </div>
     </AdminShell>
   );

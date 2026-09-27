@@ -41,7 +41,7 @@ export function getSeoEntry(pageId: string): PageSeoEntry {
       seo: {
         h1: "BUILT FOR THE FLOOR. PROVEN WORLDWIDE.",
         canonical: SITE_URL,
-        ogImage: `${SITE_URL}/machines/hero-preview.png`,
+        ogImage: `${SITE_URL}/og/home.jpg`,
       },
       geo: {
         entityName: "Ashal Innomech Technology",

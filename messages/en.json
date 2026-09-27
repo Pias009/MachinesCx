@@ -14,12 +14,6 @@
     "back": "Back",
     "home": "Home"
   },
-  "languageSwitcher": {
-    "label": "Language",
-    "en": "English",
-    "ar": "Arabic",
-    "hi": "Hindi"
-  },
   "footer": {
     "blurb": "Designing and manufacturing blown-film lines, bag-making converters, and recycling systems shipped to 60+ countries.",
     "since": "SINCE 2008 · WENZHOU, CHINA",
@@ -1082,7 +1076,7 @@
     "pageTitle": "About — Wenzhou Ashal Innomech Technology",
     "hero": {
       "eyebrow": "Company Profile",
-      "titleLine1": "Wenzhou Ashal",
+      "titleLine1": "About Wenzhou Ashal",
       "titleLine2": "Innomech Technology",
       "imgAlt": "Ashal Innomech Technology headquarters building"
     },
@@ -1419,8 +1413,8 @@
   },
   "inquiriesHub": {
     "eyebrow": "Inquiries",
-    "titlePrefix": "How can we",
-    "titleEm": "help?",
+    "titlePrefix": "Request a",
+    "titleEm": "Quote",
     "sub": "Pick the option that matches what you need. Every inquiry is reviewed by our engineering team and answered within 24 hours.",
     "lead": {
       "badge": "Recommended",
@@ -1591,9 +1585,9 @@
     "successSub": "Our engineering team will review your production line and reply to {email} within 24 hours.",
     "hub": {
       "eyebrow": "Production Line Builder",
-      "titlePrefix": "Build the line that makes your",
-      "titleEm": "final product.",
-      "sub": "Start from a ready-made line built around a real end product, or build your own from scratch — either way, our AI reviews it with you before it goes to an engineer.",
+      "titlePrefix": "Complete",
+      "titleEm": "Production Lines",
+      "sub": "Build the line that makes your final product. Start from a ready-made line built around a real end product, or build your own from scratch — either way, our AI reviews it with you before it goes to an engineer.",
       "templateCardBadge": "Ready-made line",
       "customCardTitle": "Build a custom line",
       "customCardDesc": "Choose your own machines step by step, get live AI feedback as you go, and send the full line to our engineering team."
@@ -1784,7 +1778,7 @@
   "catalogueClient": {
     "breadcrumbHome": "Home",
     "breadcrumbCatalogue": "Catalogue",
-    "heroTitle": "The full line-up.",
+    "heroTitle": "All Machines",
     "heroSub": "{familyCount} machine families across {categoryCount} process lines, each with full bilingual specification tables.",
     "searchPlaceholder": "Search machines, models, keywords",
     "searchAria": "Search catalogue",
@@ -2012,7 +2006,7 @@
     "breadcrumbHome": "Home",
     "breadcrumbCatalogue": "Catalogue",
     "breadcrumbCurrent": "Flexographic Printing",
-    "heroEyebrow": "Flexographic Printing",
+    "heroEyebrow": "AI Series CI Flexo Presses",
     "heroTitle": "AI Series<br></br>Flexo Press",
     "heroDescription": "2 to 8 printing colours. Web widths 500–2000 mm. Full servo gearless drive with ±0.1 mm registration on PE, PP, PET, BOPP, paper and non-woven substrates.",
     "maxSpeed": "Max speed",
@@ -2086,7 +2080,7 @@
   },
   "newsListPage": {
     "eyebrow": "News & updates",
-    "heading": "From the factory floor.",
+    "heading": "News & Engineering Guides",
     "empty": "No articles published yet.",
     "readArticle": "Read article →"
   },

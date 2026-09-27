@@ -2,7 +2,7 @@
 import { useTranslations } from "next-intl";
 import TransitionLink from "@/components/TransitionLink";
 
-export default function InquiriesPage() {
+export default function InquiriesClient() {
   const t = useTranslations("inquiriesHub");
   return (
     <>

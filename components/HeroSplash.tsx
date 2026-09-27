@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
+import { useProductImage, useLiveImage } from "@/components/CatalogueProvider";
 import Link from "next/link";
 import { useCms } from "@/lib/useCms";
 import type { ProductFamily } from "@/lib/products";
@@ -221,6 +222,8 @@ export default function HeroSplash() {
   }, []);
 
   const t = useTranslations("heroSplash");
+  const productImg = useProductImage();
+  const live = useLiveImage();
   const locale = useLocale();
   const localHero = HERO_BY_LOCALE[locale] ?? localHeroEn;
   const hero = useCms<HeroCms>("home-hero", localHero as unknown as HeroCms);
@@ -238,10 +241,8 @@ export default function HeroSplash() {
       return cmsItems.map((item, idx) => {
         const family = bySlug.get(item.slug) ?? localBySlug.get(item.slug);
         const image = item.customImage?.trim()
-          ? item.customImage
-          : family
-          ? getFamilyImage(family)
-          : `/machines/${item.slug || "abcde-2200"}.png`;
+          ? live(item.customImage)
+          : productImg(item.slug || "abcde-2200", family ? getFamilyImage(family) : undefined);
 
         const category = family?.category || "film-blowing";
         const categoryName = categories.find((c) => c.slug === category)?.name || category;
@@ -281,7 +282,7 @@ export default function HeroSplash() {
       categoryName: categories.find((c) => c.slug === f.category)?.name || f.category,
       series: f.series,
       name: f.name,
-      image: getFamilyImage(f),
+      image: productImg(f.slug, getFamilyImage(f)),
       href: `/products/${f.category}/${f.slug}`,
     }));
   })();

@@ -52,7 +52,8 @@ export default async function ArticlePage({ params }: { params: { locale: string
           "@type": "NewsArticle",
           headline: a.title,
           description: a.excerpt,
-          image: a.image ? `${SITE_URL}${a.image}` : undefined,
+          // live photos are absolute Cloudinary URLs — only prefix local paths
+          image: a.image ? (a.image.startsWith("/") ? `${SITE_URL}${a.image}` : a.image) : undefined,
           datePublished: a.date,
           dateModified: a.date,
           author: { "@type": "Organization", name: BRAND, url: SITE_URL },

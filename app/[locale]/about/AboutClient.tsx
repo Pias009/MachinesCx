@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, type CSSProperties } from "react";
 import { useTranslations } from "next-intl";
+import { useProductImage } from "@/components/CatalogueProvider";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import TransitionLink from "@/components/TransitionLink";
@@ -211,6 +212,7 @@ function StatItem({ v, suffix, l }: { v: number; suffix: string; l: string }) {
 
 export default function AboutPage() {
   const t = useTranslations("about");
+  const productImg = useProductImage();
   const [isDark, setIsDark] = useState(true);
   const atmosphereSectionRef = useRef<HTMLElement>(null);
   const atmosphereCopyRef = useRef<HTMLDivElement>(null);
@@ -513,10 +515,10 @@ export default function AboutPage() {
             <h3 style={{ fontFamily: "var(--ff-display)", fontSize: "clamp(2rem,4vw,3.2rem)", color: textPrimary, lineHeight: 0.95, marginBottom: "clamp(2rem,4vw,3rem)" }}>{t("categories.title")}</h3>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "1px", background: gridBg }} className="about-categories">
               {[
-                { name: t("categories.items.0.name"), img: "/machines/abc-multilayer-large.png", desc: t("categories.items.0.desc") },
-                { name: t("categories.items.1.name"), img: "/machines/f-pro-bottomseal.png", desc: t("categories.items.1.desc") },
-                { name: t("categories.items.2.name"), img: "/machines/rgb-rollbag.png", desc: t("categories.items.2.desc") },
-                { name: t("categories.items.3.name"), img: "/machines/flexo-4.png", desc: t("categories.items.3.desc") },
+                { name: t("categories.items.0.name"), img: productImg("abc-multilayer-large"), desc: t("categories.items.0.desc") },
+                { name: t("categories.items.1.name"), img: productImg("f-pro-bottomseal"), desc: t("categories.items.1.desc") },
+                { name: t("categories.items.2.name"), img: productImg("rgb-rollbag"), desc: t("categories.items.2.desc") },
+                { name: t("categories.items.3.name"), img: productImg("flexo-8c"), desc: t("categories.items.3.desc") },
               ].map((c) => (
                 <div key={c.name} style={{ background: cardBg, padding: "2rem 1.5rem", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
                   <div style={{ position: "relative", width: "100%", height: 140, marginBottom: "1.5rem", filter: "drop-shadow(0 4px 20px rgba(0,0,0,0.4))" }}>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
+import { useLiveImage } from "@/components/CatalogueProvider";
 import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
 import ProcessIcon, { resolveIcon, type IconName } from "@/components/ProcessIcon";
@@ -483,6 +484,7 @@ const TABS = ["details", "sample", "packing"] as const;
 type TabKey = (typeof TABS)[number];
 
 export default function ProductDetail({ family, category, related, relatedArticles = [], machineVideo }: Props) {
+  const live = useLiveImage();
   const t = useTranslations("productDetail");
   const [activeModel,  setActiveModel]  = useState(0);
   const [activeVideo,  setActiveVideo]  = useState(0);
@@ -501,7 +503,7 @@ export default function ProductDetail({ family, category, related, relatedArticl
   const specKeys = PANEL_SPEC_KEYS[family.category]  ?? PANEL_SPEC_KEYS["film-blowing"];
   const sampleTabCopy = t.raw("sampleTab") as Record<string, { label: string; heading: string; blurb: string }>;
   const sampleCategoryKey = SAMPLE_TAB_IMG[family.category] ? family.category : "film-blowing";
-  const sample = { ...sampleTabCopy[sampleCategoryKey], img: SAMPLE_TAB_IMG[sampleCategoryKey] };
+  const sample = { ...sampleTabCopy[sampleCategoryKey], img: live(SAMPLE_TAB_IMG[sampleCategoryKey]) };
   const partCropsCopy = t.raw("partCrops") as Record<string, { title: string; detail: string }[]>;
   const partCategoryKey = PART_CROPS[family.category] ? family.category : "film-blowing";
   const parts = PART_CROPS[partCategoryKey].map((p, i) => ({ ...p, ...partCropsCopy[partCategoryKey][i] }));

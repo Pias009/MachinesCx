@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { useProductImage, useLiveImage } from "@/components/CatalogueProvider";
 import Image from "next/image";
 import TransitionLink from "@/components/TransitionLink";
 import { latestArticles, type NewsArticle } from "@/lib/news";
@@ -757,11 +758,13 @@ export default function NewsStrip() {
 }
 
 function ArticleCard({ article, readLabel }: { article: NewsArticle; readLabel: string }) {
+  const productImg = useProductImage();
+  const live = useLiveImage();
   return (
     <TransitionLink href={`/news/${article.slug}`} className="ns-card">
       <div className="ns-card-img-wrap">
         <Image
-          src={article.image || "/machines/s-standard.png"}
+          src={live(article.image) || productImg("s-standard")}
           alt={article.title}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"

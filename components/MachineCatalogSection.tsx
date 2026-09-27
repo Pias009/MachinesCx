@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { useProductImage, useLiveImage } from "@/components/CatalogueProvider";
 import TransitionLink from "@/components/TransitionLink";
 import { useCms } from "@/lib/useCms";
 import type { ProductFamily } from "@/lib/products";
@@ -43,6 +44,8 @@ interface CatalogCms {
 
 export default function MachineCatalogSection() {
   const t = useTranslations("machineCatalog");
+  const productImg = useProductImage();
+  const live = useLiveImage();
   const CAT_LABELS = t.raw("categories") as Record<string, string>;
   const DEFAULT_KEY_SPECS = t.raw("specs") as Record<string, { stat: string; label: string }>;
 
@@ -845,7 +848,7 @@ export default function MachineCatalogSection() {
                   <div className="mcs-card__inner">
                     <div className="mcs-card__scrim" aria-hidden="true" />
                     <div className="mcs-card__bg" aria-hidden="true">
-                      <Image src={familyImage(fam, CUSTOM_IMAGES[fam.slug])} alt="" fill sizes="(max-width: 900px) 65vw, 320px" loading="lazy" />
+                      <Image src={CUSTOM_IMAGES[fam.slug]?.trim() ? live(CUSTOM_IMAGES[fam.slug]) : productImg(fam.slug, familyImage(fam))} alt="" fill sizes="(max-width: 900px) 65vw, 320px" loading="lazy" />
                     </div>
 
                     <div className="mcs-card__top">

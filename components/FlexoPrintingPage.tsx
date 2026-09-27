@@ -4,19 +4,11 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import AetherBtn from "@/components/AetherBtn";
-import { CldImage } from "next-cloudinary";
+import Image from "next/image";
+import { useProductImage } from "@/components/CatalogueProvider";
 import { familiesByCategory, type ProductFamily } from "@/lib/products";
 import SpecTable from "@/components/SpecTable";
 import { useScrollReveal } from "@/lib/useScrollReveal";
-
-/* ── gallery photo src list; alt text is translated and pulled from
-   flexoPrintingPage.gallery.* at render time, keyed by array index ── */
-const GALLERY = [
-  { src: "cx-machinery/printing/flexo-2" },
-  { src: "cx-machinery/printing/flexo-1" },
-  { src: "cx-machinery/printing/flexo-3" },
-  { src: "cx-machinery/printing/flexo-4" },
-];
 
 /* ── colour-tier selector — slug/sub(speed)/order only; label + badge text
    come from flexoPrintingPage.colourTiers.* at render time ── */
@@ -39,9 +31,14 @@ const KEY_SPECS: Record<string, { speed: string; reg: string; drive: "semiServo"
   "flexo-8c": { speed: "244–350 m/min", reg: "±0.1 mm",  drive: "fullServoGearless" },
 };
 
-export default function FlexoPrintingPage() {
+/* families come live from the CMS (category page passes them); the bundled
+   list is only a fallback. Photos are each machine's current admin photo. */
+export default function FlexoPrintingPage({ families: liveFamilies }: { families?: ProductFamily[] } = {}) {
   const t = useTranslations("flexoPrintingPage");
-  const families = familiesByCategory("printing");
+  const families = liveFamilies && liveFamilies.length ? liveFamilies : familiesByCategory("printing");
+  const productImg = useProductImage();
+  // hero gallery = the printing machines' own photos, so it follows the admin
+  const GALLERY = families.map((f) => ({ src: productImg(f.slug, f.images?.[0] || f.image), alt: f.name }));
   const [activeImg,    setActiveImg]    = useState(0);
   const [activeTier,   setActiveTier]   = useState("flexo-4c");
   const [activeWidth,  setActiveWidth]  = useState(1); // index into WIDTHS
@@ -124,7 +121,7 @@ export default function FlexoPrintingPage() {
         .fp-gallery-thumb:hover { opacity:.85; transform:translateY(-2px); }
 
         /* main hero photo crossfades in on gallery swap instead of popping
-           — key={activeImg} on the <CldImage> forces a fresh mount per
+           — key={activeImg} on the <Image> forces a fresh mount per
            photo so this animation replays every time. */
         @keyframes fp-photo-in { from { opacity:0; transform:scale(1.02); } to { opacity:1; transform:scale(1); } }
         .fp-hero-photo { animation:fp-photo-in .45s cubic-bezier(.16,1,.3,1) both; }
@@ -242,10 +239,10 @@ export default function FlexoPrintingPage() {
 
             {/* main image */}
             <div className="fp-hero-img" data-reveal="scale" style={{ position:"relative", aspectRatio:"16/9", background:"#0d1614", display:"flex", alignItems:"center", justifyContent:"center" }}>
-              <CldImage
+              <Image
                 key={activeImg}
-                src={GALLERY[activeImg].src}
-                alt={galleryCopy[activeImg]?.alt ?? ""}
+                src={GALLERY[activeImg]?.src ?? GALLERY[0]?.src}
+                alt={GALLERY[activeImg]?.alt ?? galleryCopy[activeImg]?.alt ?? ""}
                 width={1280} height={720}
                 className="fp-hero-photo"
                 style={{ width:"100%", height:"100%", objectFit:"contain", padding:"1.5rem" }}
@@ -254,7 +251,7 @@ export default function FlexoPrintingPage() {
               {/* thumbnail strip */}
               <div className="fp-hero-thumbs" style={{ position:"absolute", bottom:"1rem", left:"1rem", display:"flex", gap:".5rem" }}>
                 {GALLERY.map((g,i) => (
-                  <CldImage key={i} src={g.src} alt="" onClick={() => setActiveImg(i)}
+                  <Image key={i} src={g.src} alt="" onClick={() => setActiveImg(i)}
                     width={144} height={104} sizes="72px"
                     className={`fp-gallery-thumb${activeImg===i?" fp-gallery-thumb--active":""}`} />
                 ))}
@@ -389,8 +386,8 @@ export default function FlexoPrintingPage() {
 
                 {/* left — machine image + tier info */}
                 <div style={{ display:"flex", flexDirection:"column", gap:"1.2rem" }}>
-                  <CldImage
-                    src={GALLERY[fi % GALLERY.length].src}
+                  <Image
+                    src={productImg(f.slug, f.images?.[0] || f.image)}
                     alt={f.name}
                     width={560} height={420}
                     sizes="280px"

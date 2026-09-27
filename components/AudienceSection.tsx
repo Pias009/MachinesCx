@@ -2,6 +2,7 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { useProductImage } from "@/components/CatalogueProvider";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -15,6 +16,7 @@ const ROLE_KEYS = ["plantManagers", "procurement", "factoryOwners"] as const;
 
 export default function AudienceSection() {
   const t = useTranslations("journeyExtras.audience");
+  const productImg = useProductImage();
 
   const sectionRef = useRef<HTMLElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -137,7 +139,7 @@ export default function AudienceSection() {
           style={{ background: "var(--bg-raise)" }}
         >
           <Image
-            src="/machines/abcde-2200.png"
+            src={productImg("abcde-2200")}
             alt={t("imageAlt")}
             fill
             sizes="(max-width: 1024px) 90vw, 480px"

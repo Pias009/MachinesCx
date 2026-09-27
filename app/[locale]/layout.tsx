@@ -5,6 +5,7 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages } from "next-intl/server";
 import "../globals.css";
 import SiteNav from "@/components/SiteNav";
+import { CatalogueProvider } from "@/components/CatalogueProvider";
 import LoadingScreen from "@/components/LoadingScreen";
 import { BRAND, SITE_URL } from "@/lib/products";
 import { getNavCatalogue } from "@/lib/liveCatalogue";
@@ -178,6 +179,7 @@ export default async function LocaleLayout({
       </head>
       <body>
         <NextIntlClientProvider messages={messages}>
+          <CatalogueProvider catalogue={navCatalogue}>
           <LoadingScreen />
           <SiteNav catalogue={navCatalogue} />
           <main>{children}</main>
@@ -188,6 +190,7 @@ export default async function LocaleLayout({
           <ProactiveNudge />
           <ProductLeadCapture />
           <AppToaster />
+          </CatalogueProvider>
         </NextIntlClientProvider>
       </body>
     </html>

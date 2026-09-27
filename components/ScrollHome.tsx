@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import TransitionLink from "@/components/TransitionLink";
 import AetherBtn from "@/components/AetherBtn";
 import { useCms } from "@/lib/useCms";
+import { useProductImage } from "@/components/CatalogueProvider";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
@@ -37,6 +38,8 @@ type ProductDetail = {
 
 export default function ScrollHome() {
   const t = useTranslations("scrollHome");
+  // current admin-set product photo (Cloudinary), not the old bundled file
+  const productImg = useProductImage();
 
   // live CMS content (admin panel, English-only) overrides the translated
   // fallback below when the admin has edited this section
@@ -504,7 +507,7 @@ export default function ScrollHome() {
         }}
       >
         <Image
-          src={`/machines/${selectedProduct}.png`}
+          src={productImg(selectedProduct)}
           alt={CARDS.find(c => c.slug === selectedProduct)?.name ?? ""}
           width={600}
           height={600}
@@ -688,7 +691,7 @@ export default function ScrollHome() {
             padding: "1rem",
           }}>
             <Image
-              src={`/machines/${mobileCard.slug}.png`}
+              src={productImg(mobileCard.slug)}
               alt={mobileCard.name}
               fill
               sizes="90vw"
@@ -746,7 +749,7 @@ export default function ScrollHome() {
                 }}
               >
                 <Image
-                  src={`/machines/${card.slug}.png`}
+                  src={productImg(card.slug)}
                   alt={card.name}
                   width={48}
                   height={36}
@@ -996,7 +999,7 @@ export default function ScrollHome() {
                 >
                   <div className="sh-card__photo">
                     <Image
-                      src={`/machines/${card.slug}.png`}
+                      src={productImg(card.slug)}
                       alt={card.name}
                       fill
                       sizes="(max-width: 700px) 45vw, 22vw"

@@ -129,7 +129,10 @@ interface Props {
 
 export default function CategoryPageClient({ category, families, allCategories }: Props) {
   const t = useTranslations("categoryPage");
-  const heroImgs  = HERO_IMAGES[category.slug] ?? [];
+  // hero mosaic follows the live catalogue (CMS / Cloudinary uploads); the
+  // static list only fills in when no family in this category has a photo
+  const liveHeroImgs = Array.from(new Set(families.map((f) => familyImage(f)).filter(Boolean)));
+  const heroImgs  = liveHeroImgs.length > 0 ? liveHeroImgs : HERO_IMAGES[category.slug] ?? [];
   const featureLabels = (t.raw("features") as Record<string, string[]>)[category.slug] ?? [];
   const features  = (CATEGORY_FEATURES[category.slug] ?? []).map((f, i) => ({ ...f, label: featureLabels[i] ?? "" }));
   const statKeys  = CARD_STATS[category.slug] ?? [];

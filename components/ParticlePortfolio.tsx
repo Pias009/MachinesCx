@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import NextImage from "next/image";
 import { useTranslations } from "next-intl";
+import { useProductImage, useLiveImage } from "@/components/CatalogueProvider";
 import { useCms } from "@/lib/useCms";
 import TransitionLink from "@/components/TransitionLink";
 
@@ -44,6 +45,8 @@ function rgbFromHex(hex: string, a = 1) {
 
 export default function ParticlePortfolio(){
   const t = useTranslations("particlePortfolio");
+  const productImg = useProductImage();
+  const live = useLiveImage();
   const stepsCopy = t.raw("steps") as Record<string, { stage: string; name: string; role: string; quality: [string, string][] }>;
   const DEFAULT_STEPS: Step[] = STEP_ORDER.map((s) => ({ ...s, ...stepsCopy[s.slug] }));
 
@@ -57,7 +60,9 @@ export default function ParticlePortfolio(){
   // skip unfinished admin drafts (blank slug/name) so a half-filled CMS
   // entry can never surface a broken card on the live site
   const cmsItems = (cms.items ?? []).filter(it => it.slug && it.name);
-  const STEPS = cmsItems.length ? cmsItems : DEFAULT_STEPS;
+  // legacy /machines/ paths → the product's current admin photo
+  const STEPS = (cmsItems.length ? cmsItems : DEFAULT_STEPS)
+    .map((s) => ({ ...s, img: live(s.img) || productImg(s.slug) }));
   const N     = STEPS.length;
 
   // Simple, reliable entrance — fade the whole section in once when it

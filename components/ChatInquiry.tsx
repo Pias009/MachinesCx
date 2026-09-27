@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import type { ProductFamily, CategorySlug } from "@/lib/products";
 import { categories, familiesByCategory, familyImage, familyBySlug, familyImages } from "@/lib/products";
+import { useProductImage } from "@/components/CatalogueProvider";
 
 /** Extracts a numeric magnitude from a spec value string (e.g. "2,100 mm"
  *  -> 2100) so it can be drawn as a bar. Non-numeric values (e.g. bag
@@ -128,6 +129,7 @@ export function MachineGrid({
   onModel: (i: number) => void;
 }) {
   const t = useTranslations("chatInquiryShared");
+  const productImg = useProductImage();
   const options = familiesByCategory(category);
 
   return (
@@ -154,7 +156,7 @@ export function MachineGrid({
             onClick={() => { onFamily(f); onModel(0); }}
           >
             <span className="ci-mgrid__card-img-wrap">
-              <Image src={familyImage(f)} alt="" fill sizes="(max-width: 700px) 45vw, 180px" className="ci-mgrid__card-img" />
+              <Image src={productImg(f.slug, familyImage(f))} alt="" fill sizes="(max-width: 700px) 45vw, 180px" className="ci-mgrid__card-img" />
               {family?.slug === f.slug && (
                 <span className="ci-mgrid__card-check">
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-6" stroke="#04211e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -363,6 +365,7 @@ export interface SummaryPart {
 
 export function LineSummaryCard({ machines, parts }: { machines: SummaryMachine[]; parts?: SummaryPart[] }) {
   const t = useTranslations("chatInquiryShared");
+  const productImg = useProductImage();
   return (
     <div className="ci-linesum">
       <span className="ci-linesum__label">{t("productionLine")}</span>
@@ -377,7 +380,7 @@ export function LineSummaryCard({ machines, parts }: { machines: SummaryMachine[
             <div key={`${m.slug}-${i}`} className="ci-linesum__item">
               <span className="ci-linesum__step">{String(i + 1).padStart(2, "0")}</span>
               <div className="ci-linesum__img-wrap">
-                {fam && <Image src={familyImages(fam)[0]} alt={m.name} fill sizes="72px" className="ci-linesum__img" />}
+                {fam && <Image src={productImg(fam.slug, familyImages(fam)[0])} alt={m.name} fill sizes="72px" className="ci-linesum__img" />}
               </div>
               <div className="ci-linesum__body">
                 {m.stage && <span className="ci-linesum__stage">{m.stage}</span>}
@@ -426,6 +429,7 @@ export function InsightPanel({
   related?: ProductFamily[];
 }) {
   const t = useTranslations("chatInquiryShared");
+  const productImg = useProductImage();
   const [expanded, setExpanded] = useState(false);
 
   if (!family) {
@@ -452,7 +456,7 @@ export function InsightPanel({
   return (
     <aside className="ci-insight">
       <div className="ci-insight__img-wrap">
-        <Image src={familyImage(family)} alt={family.name} fill sizes="320px" className="ci-insight__img" />
+        <Image src={productImg(family.slug, familyImage(family))} alt={family.name} fill sizes="320px" className="ci-insight__img" />
         <span className="ci-insight__live"><span className="ci-insight__live-dot" />{t("specSheet")}</span>
       </div>
       <div className="ci-insight__series">{family.series}</div>
@@ -498,7 +502,7 @@ export function InsightPanel({
           <span className="ci-related__label">{t("relatedMachines")}</span>
           {related.slice(0, 3).map(r => (
             <Link key={r.slug} href={`/products/${r.category}/${r.slug}`} className="ci-related__row" target="_blank" rel="noopener noreferrer">
-              <Image src={familyImage(r)} alt="" width={40} height={40} className="ci-related__img" />
+              <Image src={productImg(r.slug, familyImage(r))} alt="" width={40} height={40} className="ci-related__img" />
               <span className="ci-related__name">{r.name}</span>
             </Link>
           ))}

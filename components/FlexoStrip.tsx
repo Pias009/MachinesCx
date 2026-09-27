@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { useProductImage, useLiveImage } from "@/components/CatalogueProvider";
 import AetherBtn from "@/components/AetherBtn";
 import TransitionLink from "@/components/TransitionLink";
 import { useCms } from "@/lib/useCms";
@@ -75,13 +76,16 @@ const CATEGORY_TABS = ["All Series", "Entry Level", "Mid-Range", "High Speed", "
 
 export default function FlexoStrip() {
   const t = useTranslations("flexoStrip");
+  const productImg = useProductImage();
+  const live = useLiveImage();
   const modelTags = t.raw("models") as Record<string, { tag: string }>;
   const localFamilies: ProductFamily[] = FAMILY_BASE.map((f) => ({ ...f, tagline: modelTags[f.slug]?.tag ?? "" }));
   const DEFAULT_MODELS: FlexoModel[] = buildModels(localFamilies);
   const SPECS = t.raw("specs") as { label: string; value: string }[];
 
   const cms = useCms<{ items?: FlexoModel[] }>("flexo-strip", { items: DEFAULT_MODELS });
-  const MODELS = cms.items && cms.items.length ? cms.items : DEFAULT_MODELS;
+  const MODELS = (cms.items && cms.items.length ? cms.items : DEFAULT_MODELS)
+    .map((m) => ({ ...m, img: live(m.img) || productImg(m.slug) }));
 
   const [activeCategory, setActiveCategory] = useState<string>("All Series");
   const sliderRef   = useRef<HTMLDivElement>(null);

@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import NextImage from "next/image";
 import { useTranslations } from "next-intl";
+import { useProductImageMap } from "@/components/CatalogueProvider";
+import { productImage, upgradeImage } from "@/lib/productImages";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import TransitionLink from "@/components/TransitionLink";
 import { useCms } from "@/lib/useCms";
@@ -16,6 +18,7 @@ gsap.registerPlugin(useGSAP);
 const ACCENTS = ["#e11d48", "#f59e0b", "#2bbfb3", "#e11d48"];
 
 interface PrintingMachine {
+  slug?: string;
   src: string;
   model: string;
   series: string;
@@ -33,6 +36,7 @@ function familyToMachine(f: ProductFamily, idx: number): PrintingMachine {
   const model = f.series?.split("·")[0]?.trim() || f.series;
   const numColours = colourSpec ? colourSpec.values[0] : "";
   return {
+    slug: f.slug,
     src: images[0],
     model,
     series: numColours ? `${numColours}-Colour Press` : f.name,
@@ -54,7 +58,14 @@ const DURATION = 650;
 export default function PrintingShowcase() {
   const t = useTranslations("printingShowcase");
   const cms = useCms<{ items?: PrintingMachine[] }>("printing-showcase", { items: FALLBACK_MACHINES });
-  const MACHINES = cms.items && cms.items.length ? cms.items : FALLBACK_MACHINES;
+  const imageMap = useProductImageMap();
+  // memoized: effects below key off cms.items, and a fresh array every
+  // render would churn them; images → the product's current admin photo
+  const MACHINES = useMemo(
+    () => (cms.items && cms.items.length ? cms.items : FALLBACK_MACHINES)
+      .map((m) => ({ ...m, src: m.slug ? productImage(m.slug, imageMap, m.src) : upgradeImage(m.src, imageMap) })),
+    [cms.items, imageMap],
+  );
   const N = MACHINES.length;
 
   const [active,      setActive]      = useState(0);

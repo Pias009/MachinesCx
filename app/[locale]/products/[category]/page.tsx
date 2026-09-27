@@ -41,7 +41,7 @@ export default async function CategoryPage({ params }: { params: { category: str
   if (!cat && !mCat) notFound();
 
   if (params.category === "printing" || params.category === "flexo-printing-machines") {
-    return <FlexoPrintingPage />;
+    return <FlexoPrintingPage families={liveFamilies.filter((f) => f.category === "printing")} />;
   }
 
   const fams = liveFamilies.filter((f) => f.category === (params.category as CategorySlug));

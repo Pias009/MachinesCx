@@ -7,6 +7,29 @@ import {
 } from "lucide-react";
 import type { Field, Collection, SectionSchema } from "@/lib/cmsSchemas";
 import { CATEGORY_ICON as SHARED_CATEGORY_ICON } from "./adminIcons";
+import { upgradeImage, type ProductImageMap } from "@/lib/productImages";
+
+/** Photo to show for a CMS list item: its own image field if set, otherwise
+ *  the current main photo of the machine it links to (by slug). Legacy
+ *  /machines/ paths are upgraded to that live photo. */
+function itemImage(item: Item, photos: ProductImageMap): string {
+  const own = [item.customImage, item.img, item.src, item.image, item.heroImage, Array.isArray(item.images) ? item.images[0] : ""]
+    .map((v) => (typeof v === "string" ? v.trim() : ""))
+    .find(Boolean);
+  if (own) return upgradeImage(own, photos);
+  return (typeof item.slug === "string" && photos[item.slug]) || "";
+}
+
+/** category slug → photo of the first machine in it (categories have no
+ *  photo of their own) */
+function categoryPhotos(families: Item[], photos: ProductImageMap): ProductImageMap {
+  const m: ProductImageMap = {};
+  for (const f of families) {
+    const cat = String(f.category ?? ""), img = photos[String(f.slug ?? "")];
+    if (cat && img && !m[cat]) m[cat] = img;
+  }
+  return m;
+}
 
 type Json = Record<string, unknown>;
 type Item = Record<string, unknown>;
@@ -1417,7 +1440,9 @@ function FullPageItemEditor({
   onFieldChange,
   onFieldItemChange,
   status,
+  photos,
 }: {
+  photos: ProductImageMap;
   item: Item;
   index: number;
   collection: Collection;
@@ -1440,14 +1465,7 @@ function FullPageItemEditor({
     onFieldItemChange(key, v);
   }, [onFieldItemChange]);
 
-  const imgUrl = String(
-    item.customImage ||
-    item.img ||
-    item.src ||
-    item.image ||
-    (Array.isArray(item.images) ? item.images[0] : "") ||
-    ""
-  );
+  const imgUrl = itemImage(item, photos);
 
   const titleText = String(item.name || item.series || item.label || item.slug || `Item #${index + 1}`);
   const statVal = item.stat ? String(item.stat) : (item.speed ? `${item.speed} m/min` : "");
@@ -1726,6 +1744,31 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
   // live preview card modal state
   const [previewItem, setPreviewItem] = useState<{ item: Item; title: string } | null>(null);
 
+  // slug → current main product photo, for thumbnails of items that only
+  // reference a machine (machine-catalog, hero, scroll-story, …)
+  const [fetchedPhotos, setFetchedPhotos] = useState<ProductImageMap>({});
+  useEffect(() => {
+    if (schema.slug === "products") return; // derived from `data` below
+    let alive = true;
+    fetch("/api/admin/data/products")
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => {
+        if (!alive || !Array.isArray(j?.families)) return;
+        const m: ProductImageMap = {};
+        for (const f of j.families) { const img = (f.images ?? []).find((x: string) => x?.trim()) || f.image; if (f.slug && img) m[f.slug] = img; }
+        setFetchedPhotos(m);
+      })
+      .catch(() => { /* thumbnails just fall back to the number badge */ });
+    return () => { alive = false; };
+  }, [schema.slug]);
+  const productPhotos: ProductImageMap = schema.slug === "products" && Array.isArray(data?.families)
+    ? Object.fromEntries((data!.families as Item[]).map(f => [String(f.slug ?? ""), String((Array.isArray(f.images) && f.images[0]) || f.image || "")]).filter(([k, v]) => k && v))
+    : fetchedPhotos;
+  // on the products page, category rows share the slug → photo lookup
+  const listPhotos: ProductImageMap = schema.slug === "products" && Array.isArray(data?.families)
+    ? { ...categoryPhotos(data!.families as Item[], productPhotos), ...productPhotos }
+    : productPhotos;
+
   // Helper to sync URL params without reload
   const updateUrlParam = useCallback((key: string, val: string | null) => {
     if (typeof window === "undefined") return;
@@ -1911,6 +1954,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
             setEditingItem(prev => prev ? { ...prev, item: { ...prev.item, [key]: v } } : null);
           }}
           status={status}
+          photos={productPhotos}
         />
       </div>
     );
@@ -1951,10 +1995,10 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
             <div style={{
               background: "#162338", border: "1px solid var(--adm-border)", borderRadius: 16, overflow: "hidden", padding: "1.25rem"
             }}>
-              {Boolean(previewItem.item.image || previewItem.item.heroImage || (Array.isArray(previewItem.item.images) && previewItem.item.images.length > 0)) ? (
+              {Boolean(itemImage(previewItem.item, listPhotos)) ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={String(previewItem.item.image || previewItem.item.heroImage || (Array.isArray(previewItem.item.images) ? previewItem.item.images[0] : ""))}
+                  src={itemImage(previewItem.item, listPhotos)}
                   alt=""
                   style={{ width: "100%", height: 180, objectFit: "contain", borderRadius: 12, background: "rgba(0,0,0,0.2)", marginBottom: "1rem" }}
                 />
@@ -2055,7 +2099,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
         }
 
         if (filterType === "has_image") {
-          itemsWithIndices = itemsWithIndices.filter(({ item }) => Boolean(item.image || item.heroImage || (Array.isArray(item.images) && item.images.length > 0)));
+          itemsWithIndices = itemsWithIndices.filter(({ item }) => Boolean(itemImage(item, listPhotos)));
         } else if (filterType === "warnings") {
           itemsWithIndices = itemsWithIndices.filter(({ item }) => isFamilies ? validateFamily(item).length > 0 : false);
         }
@@ -2240,7 +2284,7 @@ export default function Editor({ schema }: { schema: SectionSchema }) {
                   const itemWarnings = isFamilies ? validateFamily(item) : [];
                   const hasErrors = itemWarnings.some(w => w.severity === "error");
                   const hasWarnings = itemWarnings.some(w => w.severity === "warning");
-                  const itemImg = String(item.image || item.heroImage || (Array.isArray(item.images) && item.images[0]) || "");
+                  const itemImg = itemImage(item, listPhotos);
                   const specCount = Array.isArray(item.specs) ? item.specs.length : 0;
                   const photoCount = Array.isArray(item.images) ? item.images.length : (itemImg ? 1 : 0);
                   const itemCat = String(item.category || "");

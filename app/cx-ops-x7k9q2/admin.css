@@ -133,8 +133,12 @@
   50% { transform: scale(1.06); opacity: 0.85; }
 }
 
+/* fill-mode `backwards`, not `both`: a kept end transform (even an identity
+   matrix) makes .adm-rise the containing block for position:fixed children,
+   so preview/warning pop-ups and the unsaved-changes bar pinned to this tall
+   wrapper instead of the screen — you had to scroll to find them. */
 .adm-rise {
-  animation: admRise 0.45s var(--adm-ease) both;
+  animation: admRise 0.45s var(--adm-ease) backwards;
 }
 
 /* ── Main Shell Layout ── */

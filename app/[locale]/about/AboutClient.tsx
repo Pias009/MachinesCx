@@ -34,7 +34,7 @@ const OUTPUT_CAPACITY_VALUES = [
   { label: "ABCDE-2200", value: 400, subKey: "abcde" },
 ];
 
-const STAT_VALUES = [2008, 60, 400, 18];
+const STAT_VALUES = [2016, 45, 400, 18];
 
 // ─────────────────────────────────────────────
 // Count-up hook — triggers once on intersection

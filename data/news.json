@@ -301,10 +301,10 @@
     },
     {
       "slug": "cx-recycling-pelletizing-line",
-      "title": "CX Recycling Line: Closing the Loop on Edge Trim",
+      "title": "AI CX Recycling Line: Closing the Loop on Edge Trim",
       "date": "2025-09-10",
       "category": "Sustainability",
-      "excerpt": "Post-industrial PE edge trim and start-up scrap can be converted back to usable pellets on-site. We look at how the CX pelletizing line fits into a zero-waste extrusion floor.",
+      "excerpt": "Post-industrial PE edge trim and start-up scrap can be converted back to usable pellets on-site. We look at how the AI CX pelletizing line fits into a zero-waste extrusion floor.",
       "image": "/machines/cx-pelletizing.png",
       "tags": [
         "Recycling",
@@ -313,14 +313,14 @@
       ],
       "links": [
         {
-          "label": "CX pelletizing line specs",
+          "label": "AI CX pelletizing line specs",
           "url": "/products/recycling/cx-pelletizing"
         }
       ],
       "body": [
         {
           "kind": "paragraph",
-          "text": "Every blown-film line generates edge trim — the narrow strips of film removed by the slitter before winding. On a 2,000 mm line running 24/7, that trim can add up to 800–1,200 kg per shift. Sending it off-site for recycling costs money and introduces supply-chain risk. The **CX Recycling & Pelletizing Line** brings that loop on-site."
+          "text": "Every blown-film line generates edge trim — the narrow strips of film removed by the slitter before winding. On a 2,000 mm line running 24/7, that trim can add up to 800–1,200 kg per shift. Sending it off-site for recycling costs money and introduces supply-chain risk. The **AI CX Recycling & Pelletizing Line** brings that loop on-site."
         },
         {
           "kind": "heading",
@@ -336,7 +336,7 @@
         },
         {
           "kind": "paragraph",
-          "text": "Properly processed CX pellets are suitable for direct re-use in the inner layers of co-extruded film. MFI deviation from virgin resin is typically less than 8 % when using clean, single-resin trim. Mixed-material or printed scrap will need a compatibiliser."
+          "text": "Properly processed AI CX pellets are suitable for direct re-use in the inner layers of co-extruded film. MFI deviation from virgin resin is typically less than 8 % when using clean, single-resin trim. Mixed-material or printed scrap will need a compatibiliser."
         },
         {
           "kind": "heading",
@@ -344,7 +344,7 @@
         },
         {
           "kind": "paragraph",
-          "text": "The CX line is sized at 100 or 120 kg/h, which balances with the trim output of two or three blown-film lines running simultaneously. Power draw is 75–160 kW depending on configuration."
+          "text": "The AI CX line is sized at 100 or 120 kg/h, which balances with the trim output of two or three blown-film lines running simultaneously. Power draw is 75–160 kW depending on configuration."
         },
         {
           "kind": "heading",
@@ -452,7 +452,7 @@
           "items": [
             "ABCDE-2200 five-layer blown-film line",
             "T-PRO heat-seal converter — PE and PBAT+PLA",
-            "CX Recycling & Pelletizing Line",
+            "AI CX Recycling & Pelletizing Line",
             "ABA Three-layer lines — 1000 to 1500 mm"
           ]
         },
@@ -479,7 +479,7 @@
       "title": "RGB Roll-Bag Machine: New Motorised Width Adjustment",
       "date": "2025-04-18",
       "category": "Product Update",
-      "excerpt": "The CX-RGB roll-bag machine now ships with motorised width adjustment and a digital position readout, cutting changeover time from 40 minutes to under 10.",
+      "excerpt": "The AI CX-RGB roll-bag machine now ships with motorised width adjustment and a digital position readout, cutting changeover time from 40 minutes to under 10.",
       "image": "/machines/rgb-rollbag.png",
       "tags": [
         "Bag Making",
@@ -495,7 +495,7 @@
       "body": [
         {
           "kind": "paragraph",
-          "text": "Following customer feedback from high-mix production environments, we have upgraded the **CX-RGB Roll Bag Machine** with motorised width adjustment and a digital position readout as standard equipment across all models."
+          "text": "Following customer feedback from high-mix production environments, we have upgraded the **AI CX-RGB Roll Bag Machine** with motorised width adjustment and a digital position readout as standard equipment across all models."
         },
         {
           "kind": "heading",
@@ -655,7 +655,7 @@
       ],
       "links": [
         {
-          "label": "View CX-SB PBAT/PLA Bag Machine",
+          "label": "View AI CX-SB PBAT/PLA Bag Machine",
           "url": "/products/bag-making/sb-pe-pbat"
         },
         {
@@ -735,7 +735,7 @@
       ],
       "links": [
         {
-          "label": "View CX Pelletizing Line",
+          "label": "View AI CX Pelletizing Line",
           "url": "/products/recycling/cx-pelletizing"
         },
         {
@@ -758,7 +758,7 @@
         },
         {
           "kind": "paragraph",
-          "text": "Traditional recycling systems require pre-shredding film scrap before feeding into an extruder hopper. Ashal CX Series recycling lines utilize an integrated cutter compactor unit directly connected to the extruder barrel. High-speed rotating knives shred soft film scrap, generate frictional heat to pre-dry and densify the polymer, and force-feed semi-molten material into the extruder screw at constant velocity."
+          "text": "Traditional recycling systems require pre-shredding film scrap before feeding into an extruder hopper. Ashal AI CX Series recycling lines utilize an integrated cutter compactor unit directly connected to the extruder barrel. High-speed rotating knives shred soft film scrap, generate frictional heat to pre-dry and densify the polymer, and force-feed semi-molten material into the extruder screw at constant velocity."
         },
         {
           "kind": "heading",
@@ -1101,7 +1101,7 @@
           "url": "/products/bag-making/rollbag-continuous"
         },
         {
-          "label": "View CX Pelletizing Line",
+          "label": "View AI CX Pelletizing Line",
           "url": "/products/recycling/cx-pelletizing"
         }
       ],
@@ -1199,11 +1199,11 @@
       ],
       "links": [
         {
-          "label": "View CX-RB Vest Bag Machine",
+          "label": "View AI CX-RB Vest Bag Machine",
           "url": "/products/bag-making/rb-vegetable"
         },
         {
-          "label": "View CX-RGB Roll Bag Machine",
+          "label": "View AI CX-RGB Roll Bag Machine",
           "url": "/products/bag-making/rgb-rollbag"
         }
       ],
@@ -1242,7 +1242,7 @@
       ],
       "links": [
         {
-          "label": "View CX-TB-320 Multi-Lane Machine",
+          "label": "View AI CX-TB-320 Multi-Lane Machine",
           "url": "/products/bag-making/tb-320"
         },
         {
@@ -1265,7 +1265,7 @@
         },
         {
           "kind": "paragraph",
-          "text": "Ashal CX-TB-320 features six independent photoelectric sensor tracks and individual tension control arms, allowing each lane to feed and seal smoothly even if raw film rolls vary slightly in thickness."
+          "text": "Ashal AI CX-TB-320 features six independent photoelectric sensor tracks and individual tension control arms, allowing each lane to feed and seal smoothly even if raw film rolls vary slightly in thickness."
         }
       ]
     },
@@ -1371,7 +1371,7 @@
       ],
       "links": [
         {
-          "label": "View CX-25 Lab Film Line",
+          "label": "View AI CX-25 Lab Film Line",
           "url": "/products/film-blowing/cx-25-lab"
         },
         {

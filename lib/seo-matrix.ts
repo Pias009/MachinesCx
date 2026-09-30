@@ -52,7 +52,7 @@ export function getSeoEntry(pageId: string): PageSeoEntry {
       aeo: {
         question: "What machinery does Ashal Innomech manufacture?",
         directAnswer: "Ashal Innomech manufactures blown film extruders, bag making machines, flexo printing presses, and plastic recycling lines.",
-        bulletKeyPoints: ["24/7 continuous industrial production", "Global export to 80+ countries"],
+        bulletKeyPoints: ["24/7 continuous industrial production", "Global export to 45+ countries"],
       },
     }
   );

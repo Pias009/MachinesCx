@@ -15,7 +15,7 @@
     "home": "Home"
   },
   "footer": {
-    "blurb": "Designing and manufacturing blown-film lines, bag-making converters, and recycling systems shipped to 60+ countries.",
+    "blurb": "Designing and manufacturing blown-film lines, bag-making converters, and recycling systems shipped to 45+ countries.",
     "since": "SINCE 2008 · WENZHOU, CHINA",
     "whatsapp": "WhatsApp",
     "website": "Website",
@@ -57,7 +57,7 @@
       "iso": "ISO 9001",
       "sgs": "SGS Verified"
     },
-    "stats": "60+ Countries · 6 Continents · 18+ Machine Families",
+    "stats": "45+ Countries · 6 Continents · 18+ Machine Families",
     "copyright": "© {year} {brand}. All specifications subject to change without notice.",
     "companyName": "Wenzhou Ashal Innomech Technology Co., Ltd."
   },
@@ -74,7 +74,7 @@
     "sectionAria": "Wenzhou Ashal Innomech — Hero",
     "archAria": "Featured machines",
     "statsAria": "Company highlights",
-    "stat1v": "80+",
+    "stat1v": "45+",
     "stat1l": "Countries served",
     "stat2v": "ISO 9001",
     "stat2l": "Certified factory",
@@ -130,7 +130,7 @@
       "abcde-2200": "ABCDE-2200 · 5-layer co-ex line",
       "abc-multilayer-large": "ABC · Multi-layer blown film",
       "s-wide": "S · Single-layer wide",
-      "cx-pelletizing": "CX · Recycling pelletizer"
+      "cx-pelletizing": "AI CX · Recycling pelletizer"
     },
     "products": {
       "t-pro-heatseal": {
@@ -487,7 +487,7 @@
         "specs": [
           {
             "label": "Series",
-            "value": "CX"
+            "value": "AI CX"
           },
           {
             "label": "Type",
@@ -595,8 +595,8 @@
       "delivery": {
         "label": "Delivery",
         "tagline": "Door-to-door, worldwide",
-        "desc": "Seaworthy packaging, full export documentation, and real-time container tracking. We handle customs HS codes. Delivery to 80+ countries.",
-        "metric1v": "80+",
+        "desc": "Seaworthy packaging, full export documentation, and real-time container tracking. We handle customs HS codes. Delivery to 45+ countries.",
+        "metric1v": "45+",
         "metric1l": "Countries",
         "metric2v": "Full",
         "metric2l": "Documentation"
@@ -657,7 +657,7 @@
         },
         {
           "title": "Export",
-          "body": "Direct factory pricing with full documentation for customs in 80+ countries."
+          "body": "Direct factory pricing with full documentation for customs in 45+ countries."
         },
         {
           "title": "Aftercare",
@@ -690,7 +690,7 @@
       "Bag Making.",
       "Recycling Lines.",
       "Flexographic Printing.",
-      "80+ Countries.",
+      "45+ Countries.",
       "Lifetime Support."
     ],
     "dossier": [
@@ -700,7 +700,7 @@
       },
       {
         "title": "Export",
-        "copy": "Direct factory pricing with full documentation for customs in 80+ countries."
+        "copy": "Direct factory pricing with full documentation for customs in 45+ countries."
       },
       {
         "title": "Aftercare",
@@ -709,12 +709,12 @@
     ],
     "stats": [
       {
-        "value": "25+",
+        "value": "10+",
         "label": "Years Manufacturing",
-        "sub": "Est. since the early 2000s"
+        "sub": "Est. 2016"
       },
       {
-        "value": "80+",
+        "value": "45+",
         "label": "Countries Served",
         "sub": "Active global export network"
       },
@@ -806,7 +806,7 @@
       },
       "rgb-rollbag": {
         "stage": "Roll Winding",
-        "name": "CX-RGB Roll Bag Machine",
+        "name": "AI CX-RGB Roll Bag Machine",
         "role": "Bags are perforated and wound onto rolls with automatic core cutting for retail-ready packs.",
         "quality": [
           [
@@ -825,7 +825,7 @@
       },
       "cx-pelletizing": {
         "stage": "Closed-Loop Recycling",
-        "name": "CX Pelletizing Line",
+        "name": "AI CX Pelletizing Line",
         "role": "Edge trim and scrap from every stage return here — recovered into resin and fed back to step 01.",
         "quality": [
           [
@@ -908,7 +908,7 @@
     "headline2": "Find your perfect fit.",
     "subFamilies": "product families",
     "subModels": "models",
-    "subShipped": "shipped to 80+ countries",
+    "subShipped": "shipped to 45+ countries",
     "fullCatalogue": "Full catalogue",
     "filterAria": "Filter by category",
     "allMachines": "All machines",
@@ -949,7 +949,7 @@
       },
       "aba-cx-series": {
         "stat": "3-layer",
-        "label": "CX Series"
+        "label": "AI CX Series"
       },
       "s-mini-double": {
         "stat": "×2 heads",
@@ -1082,7 +1082,7 @@
     },
     "whoWeAre": {
       "kicker": "Who We Are",
-      "p1": "Designs and manufactures blown-film lines, bag-making converters, and recycling systems for polymer film processors across six continents. Founded in 2008, we have grown from a single machine type to a full portfolio of 18+ machine families — every product designed in-house, fabricated in our 12,000 m² Wenzhou facility, and tested before it ships.",
+      "p1": "Designs and manufactures blown-film lines, bag-making converters, and recycling systems for polymer film processors across six continents. Founded in 2008, we have grown from a single machine type to a full portfolio of 18+ machine families — every product designed in-house, fabricated in our 9,000 m² Wenzhou facility, and tested before it ships.",
       "p2": "Our customers range from single-line converters running one shift a day to multi-site groups running 24/7 on four continents. The machine has to work the same way for both."
     },
     "stats": [
@@ -1092,7 +1092,7 @@
       },
       {
         "suffix": "+",
-        "label": "Countries"
+        "label": "Shipped"
       },
       {
         "suffix": "",
@@ -1141,7 +1141,7 @@
       "kicker": "Our Story",
       "title": "From one line to a full machinery portfolio",
       "p1": "Ashal Innomech started with a single-layer blown-film line and a small team of mechanical engineers who had spent the previous decade on the shop floors of Wenzhou's established machinery makers. The founding premise was simple: build fewer machine types, but build them better.",
-      "p2": "Today we produce eighteen machine families across blown film, bag making, and recycling. Every product is designed in-house, fabricated in our 12,000 m² Wenzhou facility, and tested before it ships."
+      "p2": "Today we produce eighteen machine families across blown film, bag making, and recycling. Every product is designed in-house, fabricated in our 9,000 m² Wenzhou facility, and tested before it ships."
     },
     "timeline": {
       "kicker": "Timeline",
@@ -1164,7 +1164,7 @@
         },
         {
           "y": "2019",
-          "e": "CX recycling line released. Factory expanded to 12,000 m²."
+          "e": "AI CX recycling line released. Factory expanded to 9,000 m²."
         },
         {
           "y": "2022",
@@ -1319,9 +1319,9 @@
     },
     "global": {
       "kicker": "Global Reach",
-      "title": "60+ Countries Across Six Continents",
+      "title": "45+ Countries Across Six Continents",
       "marketsTitle": "Key Markets",
-      "markets": "Vietnam, Indonesia, Thailand, Philippines, India, Bangladesh, Pakistan, Turkey, Egypt, Nigeria, Kenya, Colombia, Peru, Germany, and 45+ more countries.",
+      "markets": "Vietnam, Indonesia, Thailand, Philippines, India, Bangladesh, Pakistan, Turkey, Egypt, Nigeria, Kenya, Colombia, Peru, Germany, and 30+ more countries.",
       "officesTitle": "Regional Offices",
       "officeGermany": "Germany:",
       "officeGermanyDesc": "European sales & support",
@@ -1373,7 +1373,7 @@
         ],
         [
           "Factory",
-          "12,000 m² manufacturing facility"
+          "9,000 m² manufacturing facility"
         ],
         [
           "Website",
@@ -1385,7 +1385,7 @@
         ],
         [
           "Languages",
-          "English, Chinese, Vietnamese, German"
+          "English, Chinese, Portuguese, Arabic"
         ]
       ],
       "cardTitle": "Ready to talk about your next line?",

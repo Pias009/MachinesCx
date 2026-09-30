@@ -98,7 +98,7 @@
       "faqs": [
         {
           "question": "Where can I buy factory-direct ABA 3-layer blown film machines (ABA-1000 / ABA-1200)?",
-          "answer": "Wenzhou Ashal Innomech Technology Co., Ltd. manufactures ABA-1000, ABA-1200, and ABA-1500 series 3-layer extruders in Wenzhou, China, exporting to over 80 countries with CE certification."
+          "answer": "Wenzhou Ashal Innomech Technology Co., Ltd. manufactures ABA-1000, ABA-1200, and ABA-1500 series 3-layer extruders in Wenzhou, China, exporting to over 45 countries with CE certification."
         },
         {
           "question": "How much raw material cost can an ABA 3-layer line save compared to single layer?",
@@ -207,13 +207,13 @@
     {
       "slug": "cx-closed-loop-recycling-pelletizing-line",
       "category": "recycling-machines",
-      "name": "CX Closed-Loop Plastic Film Recycling & Pelletizing Line",
-      "model": "CX-Pelletizer",
+      "name": "AI CX Closed-Loop Plastic Film Recycling & Pelletizing Line",
+      "model": "AI CX-Pelletizer",
       "familySlug": "cx-pelletizing",
-      "seoTitle": "CX Plastic Film Recycling & Pelletizing Machine Manufacturer | Ashal",
-      "metaDescription": "Integrated cutter-compactor CX plastic film recycling extruder & pelletizing line manufacturer. 99% resin recovery rate with dual-zone vacuum degassing.",
+      "seoTitle": "AI CX Plastic Film Recycling & Pelletizing Machine Manufacturer | Ashal",
+      "metaDescription": "Integrated cutter-compactor AI CX plastic film recycling extruder & pelletizing line manufacturer. 99% resin recovery rate with dual-zone vacuum degassing.",
       "specs": {
-        "Model": "CX-Pelletizer (CX Recycling Line)",
+        "Model": "AI CX-Pelletizer (AI CX Recycling Line)",
         "Resin Recovery Rate": "99%",
         "Throughput Capacity": "150 – 500 kg/h",
         "Degassing System": "Dual-zone high vacuum venting",
@@ -221,14 +221,14 @@
         "Suitable Scrap": "Blown film edge trim, bag cutoffs, printed film waste"
       },
       "features": [
-        "Direct feeding from film roll or scrap scrap without pre-shredding on CX pelletizing line",
+        "Direct feeding from film roll or scrap scrap without pre-shredding on AI CX pelletizing line",
         "Dual-piston non-stop hydraulic screen changer for continuous operation",
         "High-density uniform pellet output ready for immediate re-extrusion"
       ],
       "faqs": [
         {
-          "question": "Can printed scrap film be recycled without pre-washing using the CX line?",
-          "answer": "Yes. The CX closed-loop recycling line integrates dual-zone high-vacuum degassing to remove volatile printing ink vapors and moisture, producing bubble-free, high-density granules ready for immediate re-extrusion."
+          "question": "Can printed scrap film be recycled without pre-washing using the AI CX line?",
+          "answer": "Yes. The AI CX closed-loop recycling line integrates dual-zone high-vacuum degassing to remove volatile printing ink vapors and moisture, producing bubble-free, high-density granules ready for immediate re-extrusion."
         }
       ]
     }

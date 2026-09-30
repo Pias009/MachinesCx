@@ -14,7 +14,7 @@ import type { ProductFamily, ProductSeo } from "@/lib/products";
 type Entry = Omit<ProductSeo, "short">;
 
 // the date these SEO fields last changed — feeds sitemap <lastmod>
-const SEO_UPDATED = "2026-09-27";
+const SEO_UPDATED = "2026-09-30";
 
 const d = (e: Omit<Entry, "updatedAt">): Entry => ({ ...e, updatedAt: SEO_UPDATED });
 
@@ -42,11 +42,11 @@ export const PRODUCT_SEO: Record<string, Entry> = {
     intro: "The ABC Multi-layer Blown Film Line in 1500, 1800 and 2300 sizes produces 1000–2300 mm wide film at 240–400 kg/h. It co-extrudes 0.02–0.15 mm multi-layer film for wide-web and heavy-duty applications.",
   }),
   "abc-cx-series": d({
-    model: "CX-ABC",
-    title: "CX-ABC Multi-Layer Blown Film Line 1300–2200mm | Ashal",
-    h1: "CX-ABC Multi-layer Blown Film Line — 1300 / 1600 / 2200",
-    description: "CX-ABC multi-layer blown film line in 1300, 1600 and 2200 mm widths, up to 180 kg/h. Compare sizes, specs and request a quote.",
-    intro: "The CX-ABC Multi-layer Blown Film Line in 1300, 1600 and 2200 sizes produces 800–2000 mm wide film at 180–280 kg/h. It co-extrudes LDPE, LLDPE and PBAT+PLA blends into 0.02–0.15 mm film for packaging and bag making.",
+    model: "AI CX-ABC",
+    title: "AI CX-ABC Multi-Layer Blown Film Line 1300–2200mm | Ashal",
+    h1: "AI CX-ABC Multi-layer Blown Film Line — 1300 / 1600 / 2200",
+    description: "AI CX-ABC multi-layer blown film line in 1300, 1600 and 2200 mm widths, up to 180 kg/h. Compare sizes, specs and request a quote.",
+    intro: "The AI CX-ABC Multi-layer Blown Film Line in 1300, 1600 and 2200 sizes produces 800–2000 mm wide film at 180–280 kg/h. It co-extrudes LDPE, LLDPE and PBAT+PLA blends into 0.02–0.15 mm film for packaging and bag making.",
   }),
   "aba-1000-1500": d({
     model: "ABA",
@@ -63,11 +63,11 @@ export const PRODUCT_SEO: Record<string, Entry> = {
     intro: "The ABA Three-layer Film Blowing Machine (Four-Screw) in 800, 1000 and 1200 sizes produces 400–1200 mm wide film at up to 240 kg/h HDPE or 320 kg/h LDPE. Twin die heads make 0.006–0.10 mm three-layer film for bag production.",
   }),
   "aba-cx-series": d({
-    model: "CX-ABA",
-    title: "CX-ABA 3-Layer Film Blowing Machine 700–1100mm | Ashal",
-    h1: "CX-ABA Three-layer Film Blowing Machine — 700 / 900 / 1100",
-    description: "Compact CX-ABA 3-layer film blowing machine in 700, 900 and 1100 mm widths for shopping and garbage bag film. Specs and quote.",
-    intro: "The CX-ABA Three-layer Film Blowing Machine in 700, 900 and 1100 sizes produces 100–1000 mm wide film at up to 100 kg/h HDPE or 120 kg/h LDPE. It makes 0.006–0.10 mm HDPE, LDPE and LLDPE film for shopping and garbage bags.",
+    model: "AI CX-ABA",
+    title: "AI CX-ABA 3-Layer Film Blowing Machine 700–1100mm | Ashal",
+    h1: "AI CX-ABA Three-layer Film Blowing Machine — 700 / 900 / 1100",
+    description: "Compact AI CX-ABA 3-layer film blowing machine in 700, 900 and 1100 mm widths for shopping and garbage bag film. Specs and quote.",
+    intro: "The AI CX-ABA Three-layer Film Blowing Machine in 700, 900 and 1100 sizes produces 100–1000 mm wide film at up to 100 kg/h HDPE or 120 kg/h LDPE. It makes 0.006–0.10 mm HDPE, LDPE and LLDPE film for shopping and garbage bags.",
   }),
   "s-mini-double": d({
     model: "S-Mini",
@@ -98,11 +98,11 @@ export const PRODUCT_SEO: Record<string, Entry> = {
     intro: "The SB Film Blowing & Inline Printing Line in 600, 800 and 1000 sizes blows 100–1000 mm wide film at up to 120 kg/h LDPE and prints it in the same pass with ±0.2 mm registration. It produces printed 0.006–0.10 mm PE bag film.",
   }),
   "cx-25-lab": d({
-    model: "CX-25",
-    title: "CX-25 Lab Blown Film Machine 5–10 kg/h | Ashal Innomech",
-    h1: "CX-25 Laboratory Blown Film Line",
-    description: "CX-25 benchtop lab blown film line, 5–10 kg/h, for testing PE, PBAT and PLA resins and masterbatch in R&D and QC labs. Specs and quote.",
-    intro: "The CX-25 Laboratory Blown Film Line is a benchtop 25 mm single-screw line producing 100–220 mm wide film at 5–10 kg/h. It makes 0.006–0.10 mm HDPE, LDPE and PBAT test film for resin, masterbatch and QC trials.",
+    model: "AI CX-25",
+    title: "AI CX-25 Lab Blown Film Machine 5–10 kg/h | Ashal Innomech",
+    h1: "AI CX-25 Laboratory Blown Film Line",
+    description: "AI CX-25 benchtop lab blown film line, 5–10 kg/h, for testing PE, PBAT and PLA resins and masterbatch in R&D and QC labs. Specs and quote.",
+    intro: "The AI CX-25 Laboratory Blown Film Line is a benchtop 25 mm single-screw line producing 100–220 mm wide film at 5–10 kg/h. It makes 0.006–0.10 mm HDPE, LDPE and PBAT test film for resin, masterbatch and QC trials.",
   }),
 
   // ── Bag making ──
@@ -121,11 +121,11 @@ export const PRODUCT_SEO: Record<string, Entry> = {
     intro: "The TG-500×2 PRO Twin-Lane Bag Making Machine converts bags 200–500 mm wide and 450–850 mm long at up to 250 pcs/min. It runs thin 0.01–0.04 mm film for T-shirt and flat bags.",
   }),
   "tb-320": d({
-    model: "CX-TB-320×6",
-    title: "CX-TB-320×6 Six-Lane Small Bag Making Machine | Ashal",
-    h1: "CX-TB-320×6 Six-Lane Bag Making Machine",
-    description: "CX-TB-320×6 six-lane bag making machine for small bags, 100 pcs/min per lane (600 total). Full specs and factory quote.",
-    intro: "The CX-TB-320×6 Six-Lane Bag Making Machine makes bags up to 320 mm wide and 250–600 mm long on six lanes at 100 pcs/min each (600 pcs/min total). It converts 0.01–0.04 mm film into small bags.",
+    model: "AI CX-TB-320×6",
+    title: "AI CX-TB-320×6 Six-Lane Small Bag Making Machine | Ashal",
+    h1: "AI CX-TB-320×6 Six-Lane Bag Making Machine",
+    description: "AI CX-TB-320×6 six-lane bag making machine for small bags, 100 pcs/min per lane (600 total). Full specs and factory quote.",
+    intro: "The AI CX-TB-320×6 Six-Lane Bag Making Machine makes bags up to 320 mm wide and 250–600 mm long on six lanes at 100 pcs/min each (600 pcs/min total). It converts 0.01–0.04 mm film into small bags.",
   }),
   "f-pro-bottomseal": d({
     model: "F-PRO",
@@ -156,18 +156,18 @@ export const PRODUCT_SEO: Record<string, Entry> = {
     intro: "The Narrow Heat Seal Bag Making Machine in 350 and 450 widths makes bags 50–450 mm wide and 100–1800 mm long at up to 150 pcs/min. It seals film of 0.01–0.10 mm per layer into small flat and T-shirt bags.",
   }),
   "rb-vegetable": d({
-    model: "CX-RB",
-    title: "CX-RB T-Shirt Vest & Vegetable Bag Machine | Ashal Innomech",
-    h1: "CX-RB T-Shirt Vest & Vegetable Bag Making Machine — 400×2 / 500×2",
-    description: "CX-RB two-lane machine for T-shirt vest bags and vegetable bags on roll, 400×2 or 500×2 mm. Full specs and factory quote.",
-    intro: "The CX-RB T-Shirt Vest & Vegetable Bag Making Machine in 400×2 and 500×2 sizes makes bags 80–400 mm wide on two lanes, at up to 230 flat or 190 T-shirt bags per minute per lane. It converts 0.01–0.10 mm film into vest and vegetable bags.",
+    model: "AI CX-RB",
+    title: "AI CX-RB T-Shirt Vest & Vegetable Bag Machine | Ashal Innomech",
+    h1: "AI CX-RB T-Shirt Vest & Vegetable Bag Making Machine — 400×2 / 500×2",
+    description: "AI CX-RB two-lane machine for T-shirt vest bags and vegetable bags on roll, 400×2 or 500×2 mm. Full specs and factory quote.",
+    intro: "The AI CX-RB T-Shirt Vest & Vegetable Bag Making Machine in 400×2 and 500×2 sizes makes bags 80–400 mm wide on two lanes, at up to 230 flat or 190 T-shirt bags per minute per lane. It converts 0.01–0.10 mm film into vest and vegetable bags.",
   }),
   "rgb-rollbag": d({
-    model: "CX-RGB",
-    title: "CX-RGB Bag on Roll Making Machine 1000/1200mm | Ashal",
-    h1: "CX-RGB Bag on Roll Making Machine — 1000 / 1200",
-    description: "CX-RGB bag-on-roll making machine in 1000 and 1200 mm widths, 60–140 pcs/min, with perforation and auto roll change. Specs and quote.",
-    intro: "The CX-RGB Bag on Roll Making Machine in 1000 and 1200 sizes makes bags up to 1100 mm wide and 1500 mm long at 40–140 pcs/min. It converts thin 0.008–0.05 mm PE film into perforated bags on roll.",
+    model: "AI CX-RGB",
+    title: "AI CX-RGB Bag on Roll Making Machine 1000/1200mm | Ashal",
+    h1: "AI CX-RGB Bag on Roll Making Machine — 1000 / 1200",
+    description: "AI CX-RGB bag-on-roll making machine in 1000 and 1200 mm widths, 60–140 pcs/min, with perforation and auto roll change. Specs and quote.",
+    intro: "The AI CX-RGB Bag on Roll Making Machine in 1000 and 1200 sizes makes bags up to 1100 mm wide and 1500 mm long at 40–140 pcs/min. It converts thin 0.008–0.05 mm PE film into perforated bags on roll.",
   }),
   "rollbag-continuous": d({
     model: "Continuous Roll Bag",
@@ -177,34 +177,34 @@ export const PRODUCT_SEO: Record<string, Entry> = {
     intro: "The Continuous Bag on Roll Making Machine makes finished bags 80–300 mm wide and 500–1500 mm long at 60–220 pcs/min. It converts ultra-thin 0.006–0.025 mm film into coreless or cored rolls of produce, garbage and freezer bags.",
   }),
   "sb-pe-pbat": d({
-    model: "CX-SB",
-    title: "CX-SB Biodegradable PBAT & PE Bag Making Machine | Ashal",
-    h1: "CX-SB PBAT & PE Bag Making Machine — 800 / 500×2",
-    description: "CX-SB bag making machine for biodegradable PBAT/PLA and PE film, 800 or 500×2 mm, up to 200 pcs/min. Specs and factory quote.",
-    intro: "The CX-SB PBAT & PE Bag Making Machine in 800 and 500×2 sizes makes bags up to 700 mm wide at 200 pcs/min, or 200 pcs/min per lane on the twin-lane model. It converts 0.008–0.05 mm PE and biodegradable PBAT film into bags.",
+    model: "AI CX-SB",
+    title: "AI CX-SB Biodegradable PBAT & PE Bag Making Machine | Ashal",
+    h1: "AI CX-SB PBAT & PE Bag Making Machine — 800 / 500×2",
+    description: "AI CX-SB bag making machine for biodegradable PBAT/PLA and PE film, 800 or 500×2 mm, up to 200 pcs/min. Specs and factory quote.",
+    intro: "The AI CX-SB PBAT & PE Bag Making Machine in 800 and 500×2 sizes makes bags up to 700 mm wide at 200 pcs/min, or 200 pcs/min per lane on the twin-lane model. It converts 0.008–0.05 mm PE and biodegradable PBAT film into bags.",
   }),
   "cx-260": d({
-    model: "CX-260",
-    title: "CX-260 Compact PE & PBAT Bag Making Machine | Ashal Innomech",
-    h1: "CX-260 Compact Bag Making Machine",
-    description: "CX-260 compact bag making machine for PE and PBAT bags under 235 mm wide, 150–180 pcs/min. Full specs and direct factory quote.",
-    intro: "The CX-260 Compact Bag Making Machine makes bags under 235 mm wide and 250–450 mm long at 150–180 pcs/min. It converts 0.008–0.03 mm PE and PBAT film into small bags.",
+    model: "AI CX-260",
+    title: "AI CX-260 Compact PE & PBAT Bag Making Machine | Ashal Innomech",
+    h1: "AI CX-260 Compact Bag Making Machine",
+    description: "AI CX-260 compact bag making machine for PE and PBAT bags under 235 mm wide, 150–180 pcs/min. Full specs and direct factory quote.",
+    intro: "The AI CX-260 Compact Bag Making Machine makes bags under 235 mm wide and 250–450 mm long at 150–180 pcs/min. It converts 0.008–0.03 mm PE and PBAT film into small bags.",
   }),
   "gb-garbage": d({
-    model: "CX-GB",
-    title: "CX-GB Garbage Bag on Roll Making Machine | Ashal Innomech",
-    h1: "CX-GB Garbage Bag on Roll Making Machine — 1000 / 1200",
-    description: "CX-GB garbage bag on roll machine in 1000 and 1200 mm widths, 40–140 pcs/min, for star-seal and flat garbage bags. Specs and quote.",
-    intro: "The CX-GB Garbage Bag on Roll Making Machine in 1000 and 1200 sizes makes garbage bags 500–1000 mm wide at up to 140 pcs/min. It converts 0.007–0.04 mm HDPE or 0.02–0.05 mm LDPE film into garbage bags on roll.",
+    model: "AI CX-GB",
+    title: "AI CX-GB Garbage Bag on Roll Making Machine | Ashal Innomech",
+    h1: "AI CX-GB Garbage Bag on Roll Making Machine — 1000 / 1200",
+    description: "AI CX-GB garbage bag on roll machine in 1000 and 1200 mm widths, 40–140 pcs/min, for star-seal and flat garbage bags. Specs and quote.",
+    intro: "The AI CX-GB Garbage Bag on Roll Making Machine in 1000 and 1200 sizes makes garbage bags 500–1000 mm wide at up to 140 pcs/min. It converts 0.007–0.04 mm HDPE or 0.02–0.05 mm LDPE film into garbage bags on roll.",
   }),
 
   // ── Recycling ──
   "cx-pelletizing": d({
-    model: "CX",
-    title: "CX Plastic Film Recycling & Pelletizing Line | Ashal Innomech",
-    h1: "CX Recycling & Pelletizing Line — 100 / 120",
-    description: "CX recycling and pelletizing line for PE/PP film, woven bags and printed scrap, 100–120 kg/h. Full specs and factory quote.",
-    intro: "The CX Recycling & Pelletizing Line turns film scrap into pellets at 100–120 kg/h (CX-100, 100 mm screw) or 120–150 kg/h (CX-120, 120 mm screw). It processes HDPE, LDPE and LLDPE film up to 0.50 mm thick, including edge trim.",
+    model: "AI CX",
+    title: "AI CX Plastic Film Recycling & Pelletizing Line | Ashal Innomech",
+    h1: "AI CX Recycling & Pelletizing Line — 100 / 120",
+    description: "AI CX recycling and pelletizing line for PE/PP film, woven bags and printed scrap, 100–120 kg/h. Full specs and factory quote.",
+    intro: "The AI CX Recycling & Pelletizing Line turns film scrap into pellets at 100–120 kg/h (AI CX-100, 100 mm screw) or 120–150 kg/h (AI CX-120, 120 mm screw). It processes HDPE, LDPE and LLDPE film up to 0.50 mm thick, including edge trim.",
   }),
 
   // ── Printing ──
@@ -316,7 +316,7 @@ function normaliseText(text: string, f: ProductFamily, oldName: string, newName:
   t = t.replace(/ to guarantee superior plasticization, thermal stability, and melt homogeneity across all resin grade spectrums/g, " for consistent plasticization, thermal stability and melt homogeneity");
   t = t.replace(/state-of-the-art/gi, "modern");
 
-  t = t.replace(/AIT\s+Recycling/g, "CX Recycling");
+  t = t.replace(/AIT\s+Recycling/g, "AI CX Recycling");
   t = t.replace(/Innomach/g, "Innomech").replace(/Ashal machinery/gi, "Ashal Innomech");
 
   if (oldName && oldName !== newName) t = t.split(oldName).join(newName);
@@ -373,23 +373,23 @@ export const DOWNSTREAM: Record<string, string[]> = {
 };
 
 // Model names as they appear in news/guide copy → product page. Longer,
-// more specific codes first so "CX-ABA" is matched before "ABA".
+// more specific codes first so "AI CX-ABA" is matched before "ABA".
 export const MODEL_MENTIONS: [string, string][] = [
   ["ABCDE-2200", "/products/film-blowing/abcde-2200"],
-  ["CX-ABC", "/products/film-blowing/abc-cx-series"],
-  ["CX-ABA", "/products/film-blowing/aba-cx-series"],
-  ["CX-25", "/products/film-blowing/cx-25-lab"],
+  ["AI CX-ABC", "/products/film-blowing/abc-cx-series"],
+  ["AI CX-ABA", "/products/film-blowing/aba-cx-series"],
+  ["AI CX-25", "/products/film-blowing/cx-25-lab"],
   ["TG-500×2 PRO", "/products/bag-making/tg-pro"],
-  ["CX-TB-320×6", "/products/bag-making/tb-320"],
-  ["CX-TB-320", "/products/bag-making/tb-320"],
-  ["CX-RGB", "/products/bag-making/rgb-rollbag"],
-  ["CX-RB", "/products/bag-making/rb-vegetable"],
-  ["CX-SB", "/products/bag-making/sb-pe-pbat"],
-  ["CX-260", "/products/bag-making/cx-260"],
-  ["CX-GB", "/products/bag-making/gb-garbage"],
+  ["AI CX-TB-320×6", "/products/bag-making/tb-320"],
+  ["AI CX-TB-320", "/products/bag-making/tb-320"],
+  ["AI CX-RGB", "/products/bag-making/rgb-rollbag"],
+  ["AI CX-RB", "/products/bag-making/rb-vegetable"],
+  ["AI CX-SB", "/products/bag-making/sb-pe-pbat"],
+  ["AI CX-260", "/products/bag-making/cx-260"],
+  ["AI CX-GB", "/products/bag-making/gb-garbage"],
   ["T-PRO", "/products/bag-making/t-pro-heatseal"],
   ["F-PRO", "/products/bag-making/f-pro-bottomseal"],
-  ["CX Recycling & Pelletizing Line", "/products/recycling/cx-pelletizing"],
+  ["AI CX Recycling & Pelletizing Line", "/products/recycling/cx-pelletizing"],
   ["AI-2C", "/products/printing/flexo-2c"],
   ["AI-4C", "/products/printing/flexo-4c"],
   ["AI-6C", "/products/printing/flexo-6c"],

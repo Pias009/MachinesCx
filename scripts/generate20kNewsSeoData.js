@@ -54,7 +54,7 @@ const newArticles = [
     image: '/machines/sb-pe-pbat.png',
     tags: ['PBAT', 'PLA', 'Biodegradable Bags', 'Compostable Film', 'Green Packaging'],
     links: [
-      { label: 'View CX-SB PBAT/PLA Bag Machine', url: '/products/bag-making/sb-pe-pbat' },
+      { label: 'View AI CX-SB PBAT/PLA Bag Machine', url: '/products/bag-making/sb-pe-pbat' },
       { label: 'View Film Blowing Machinery', url: '/products/film-blowing' }
     ],
     body: [
@@ -86,14 +86,14 @@ const newArticles = [
     image: '/machines/cx-pelletizing.png',
     tags: ['Plastic Recycling', 'Pelletizing Line', 'Scrap Recovery', 'PE Recycler', 'Degassing'],
     links: [
-      { label: 'View CX Pelletizing Line', url: '/products/recycling/cx-pelletizing' },
+      { label: 'View AI CX Pelletizing Line', url: '/products/recycling/cx-pelletizing' },
       { label: 'View Bag Making Machinery', url: '/products/bag-making' }
     ],
     body: [
       { kind: 'heading', text: '1. Circular Economy & In-House Scrap Recovery' },
       { kind: 'paragraph', text: 'In modern plastic converting plants, edge trim, setup roll scrap, and defective bags represent 5% to 12% of total raw material throughput. Implementing a high-efficiency plastic recycling pelletizing line allows factory owners to achieve a zero-waste closed-loop manufacturing model, converting factory scrap into clean, uniform plastic pellets.' },
       { kind: 'heading', text: '2. Cutter Compactor vs Conventional Hopper Feeding' },
-      { kind: 'paragraph', text: 'Traditional recycling systems require pre-shredding film scrap before feeding into an extruder hopper. Ashal CX Series recycling lines utilize an integrated cutter compactor unit directly connected to the extruder barrel. High-speed rotating knives shred soft film scrap, generate frictional heat to pre-dry and densify the polymer, and force-feed semi-molten material into the extruder screw at constant velocity.' },
+      { kind: 'paragraph', text: 'Traditional recycling systems require pre-shredding film scrap before feeding into an extruder hopper. Ashal AI CX Series recycling lines utilize an integrated cutter compactor unit directly connected to the extruder barrel. High-speed rotating knives shred soft film scrap, generate frictional heat to pre-dry and densify the polymer, and force-feed semi-molten material into the extruder screw at constant velocity.' },
       { kind: 'heading', text: '3. Dual-Stage Vacuum Degassing Architecture' },
       { kind: 'paragraph', text: 'Printed scrap film and post-consumer plastics contain residual moisture, printing inks, organic contaminants, and volatile solvents. Without adequate venting, trapped gas causes porosity, bubbles, and brittle mechanical properties in recycled pellets. Ashal twin-vent vacuum degassing chambers extract volatile gases under high vacuum (-0.09 MPa), ensuring high-density, bubble-free pellets.' },
       { kind: 'heading', text: '4. Non-Stop Hydraulic Screen Changer Technology' },
@@ -227,7 +227,7 @@ const newArticles = [
     tags: ['Zero Waste', 'Inline Recycling', 'Edge Trim', 'Roll Bag Machine', 'Automation'],
     links: [
       { label: 'View Continuous Roll Bag Machine', url: '/products/bag-making/rollbag-continuous' },
-      { label: 'View CX Pelletizing Line', url: '/products/recycling/cx-pelletizing' }
+      { label: 'View AI CX Pelletizing Line', url: '/products/recycling/cx-pelletizing' }
     ],
     body: [
       { kind: 'heading', text: '1. The Automated Zero-Waste Packaging Factory' },
@@ -268,8 +268,8 @@ const newArticles = [
     image: '/machines/rb-vegetable.png',
     tags: ['Retail Bags', 'Roll Bag Converter', 'Labour Reduction', 'Speed Benchmark', 'Buying Guide'],
     links: [
-      { label: 'View CX-RB Vest Bag Machine', url: '/products/bag-making/rb-vegetable' },
-      { label: 'View CX-RGB Roll Bag Machine', url: '/products/bag-making/rgb-rollbag' }
+      { label: 'View AI CX-RB Vest Bag Machine', url: '/products/bag-making/rb-vegetable' },
+      { label: 'View AI CX-RGB Roll Bag Machine', url: '/products/bag-making/rgb-rollbag' }
     ],
     body: [
       { kind: 'heading', text: '1. Retail Packaging Market Demand Analysis' },
@@ -287,14 +287,14 @@ const newArticles = [
     image: '/machines/tb-320.png',
     tags: ['Multi-Lane Bag Machine', 'Produce Bags', '6-Lane Converter', 'High Output', 'Food Packaging'],
     links: [
-      { label: 'View CX-TB-320 Multi-Lane Machine', url: '/products/bag-making/tb-320' },
+      { label: 'View AI CX-TB-320 Multi-Lane Machine', url: '/products/bag-making/tb-320' },
       { label: 'View All Bag Making Machines', url: '/products/bag-making' }
     ],
     body: [
       { kind: 'heading', text: '1. Mass Production Strategy for Counter Bags' },
       { kind: 'paragraph', text: 'Produce counter bags and butcher wrap bags require immense production volumes at low unit prices. Operating 6 narrow lanes simultaneously quadruples plant converting capacity without increasing floor space.' },
       { kind: 'heading', text: '2. Multi-Track Photocell & Sealing Knife Technology' },
-      { kind: 'paragraph', text: 'Ashal CX-TB-320 features six independent photoelectric sensor tracks and individual tension control arms, allowing each lane to feed and seal smoothly even if raw film rolls vary slightly in thickness.' }
+      { kind: 'paragraph', text: 'Ashal AI CX-TB-320 features six independent photoelectric sensor tracks and individual tension control arms, allowing each lane to feed and seal smoothly even if raw film rolls vary slightly in thickness.' }
     ]
   },
   {
@@ -344,7 +344,7 @@ const newArticles = [
     image: '/machines/cx-25-lab.png',
     tags: ['Factory Setup', 'Chilled Water', 'Compressor Load', 'Electrical Hookup', 'Plant Engineering'],
     links: [
-      { label: 'View CX-25 Lab Film Line', url: '/products/film-blowing/cx-25-lab' },
+      { label: 'View AI CX-25 Lab Film Line', url: '/products/film-blowing/cx-25-lab' },
       { label: 'Contact Plant Design Engineers', url: '/contact' }
     ],
     body: [

@@ -797,7 +797,7 @@ export default function AllModelsIndex({
                     className="ami__search-input"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by machine model, width, or series (e.g. ABCDE, CX-260, 2200, blown film)..."
+                    placeholder="Search by machine model, width, or series (e.g. ABCDE, AI CX-260, 2200, blown film)..."
                     aria-label="Search machine models"
                   />
                   {searchQuery && (

@@ -27,7 +27,7 @@ export const PAGE_SEO: Record<string, PageSeo> = {
   "/products/film-blowing": {
     title: "Film Blowing Machines – ABA, ABC & 5-Layer | Ashal Innomech",
     h1: "Film Blowing Machines",
-    description: "Single-layer, ABA 3-layer, ABC and 5-layer ABCDE blown film lines from 400 mm to 2300 mm width, plus a CX-25 lab line. Compare models and specs.",
+    description: "Single-layer, ABA 3-layer, ABC and 5-layer ABCDE blown film lines from 400 mm to 2300 mm width, plus a AI CX-25 lab line. Compare models and specs.",
   },
   "/products/bag-making": {
     title: "Bag Making Machines – T-Shirt, Roll & Bottom Seal | Ashal",
@@ -37,7 +37,7 @@ export const PAGE_SEO: Record<string, PageSeo> = {
   "/products/recycling": {
     title: "Plastic Recycling & Pelletizing Machines | Ashal Innomech",
     h1: "Plastic Recycling & Lab Lines",
-    description: "CX recycling and pelletizing lines for PE/PP film and bag scrap at 100–120 kg/h, plus lab-scale film lines for R&D.",
+    description: "AI CX recycling and pelletizing lines for PE/PP film and bag scrap at 100–120 kg/h, plus lab-scale film lines for R&D.",
   },
   "/products/printing": {
     title: "CI Flexo Printing Machines 2–8 Color | Ashal Innomech",
@@ -47,7 +47,7 @@ export const PAGE_SEO: Record<string, PageSeo> = {
   "/about": {
     title: "About Ashal Innomech – Wenzhou Machinery Factory Since 2008",
     h1: "About Wenzhou Ashal Innomech Technology",
-    description: "Founded 2008 in Wenzhou, Zhejiang. 12,000 m² factory building blown film, bag making, printing and recycling machines, with support in Europe and Vietnam.",
+    description: "Founded 2008 in Wenzhou, Zhejiang. 9,000 m² factory building blown film, bag making, printing and recycling machines, with support in Europe and Vietnam.",
   },
   "/production-line": {
     title: "Complete Plastic Bag Production Lines | Ashal Innomech",

@@ -44,7 +44,7 @@
       "img": "/machines/rgb-rollbag.png",
       "cat": "bag-making",
       "stage": "Roll Winding",
-      "name": "CX-RGB Roll Bag Machine",
+      "name": "AI CX-RGB Roll Bag Machine",
       "role": "Bags are perforated and wound onto rolls with automatic core cutting for retail-ready packs.",
       "quality": [
         ["Roll width", "1000–1200 mm"],
@@ -57,7 +57,7 @@
       "img": "/machines/cx-pelletizing.png",
       "cat": "recycling",
       "stage": "Closed-Loop Recycling",
-      "name": "CX Pelletizing Line",
+      "name": "AI CX Pelletizing Line",
       "role": "Edge trim and scrap from every stage return here — recovered into resin and fed back to step 01.",
       "quality": [
         ["Resin recovery", "99%"],

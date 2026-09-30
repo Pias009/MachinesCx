@@ -13,7 +13,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: "Do you offer benchtop or trial-scale machines before a full production order?",
-    a: "Yes — the CX-25 Lab line is a benchtop recycling/pelletizing machine built for lab and trial runs, so film-processing tests can be validated at small scale before committing to full production equipment.",
+    a: "Yes — the AI CX-25 Lab line is a benchtop recycling/pelletizing machine built for lab and trial runs, so film-processing tests can be validated at small scale before committing to full production equipment.",
   },
   {
     q: "Is your factory certified?",
@@ -21,7 +21,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: "Where is Ashal Innomech based, and do you ship internationally?",
-    a: "We're based in Wenzhou, Zhejiang, China, and our machines run in 80+ countries across six continents. Export packing, ocean/air freight, and on-site installation are handled as part of every order.",
+    a: "We're based in Wenzhou, Zhejiang, China, and our machines run in 45+ countries across six continents. Export packing, ocean/air freight, and on-site installation are handled as part of every order.",
   },
   {
     q: "How fast do you respond to inquiries?",

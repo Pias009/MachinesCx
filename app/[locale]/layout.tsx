@@ -151,7 +151,7 @@ export default async function LocaleLayout({
               legalName: LEGAL_NAME,
               url: SITE_URL,
               logo: `${SITE_URL}/logo.jpeg`,
-              foundingDate: "2008",
+              foundingDate: "2016",
               // TODO_OWNER: confirm ashal@ashalinnomech.com receives mail; otherwise switch to a working address.
               email: CONTACT_EMAIL,
               telephone: CONTACT_PHONE,

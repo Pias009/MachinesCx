@@ -17,7 +17,7 @@ export const PAGE_SEO: Record<string, PageSeo> = {
   "/": {
     title: "Blown Film, Bag Making & Flexo Machines | Ashal Innomech",
     h1: "Blown Film, Bag Making & Flexo Printing Machine Manufacturer",
-    description: "Wenzhou factory making blown film lines, bag making machines, CI flexo presses and recycling lines since 2008. Specs, videos and quotes within 24 h.",
+    description: "Wenzhou factory making blown film lines, bag making machines, CI flexo presses and recycling lines since 2016. Specs, videos and quotes within 24 h.",
   },
   "/products": {
     title: "All Machines – Blown Film, Bag Making, Flexo | Ashal Innomech",
@@ -45,9 +45,9 @@ export const PAGE_SEO: Record<string, PageSeo> = {
     description: "AI-series CI flexographic printing presses, 2 to 8 colours, 500–2000 mm web width, up to 350 m/min for PE, PP, BOPP, PET and paper.",
   },
   "/about": {
-    title: "About Ashal Innomech – Wenzhou Machinery Factory Since 2008",
+    title: "About Ashal Innomech – Wenzhou Machinery Factory Since 2016",
     h1: "About Wenzhou Ashal Innomech Technology",
-    description: "Founded 2008 in Wenzhou, Zhejiang. 9,000 m² factory building blown film, bag making, printing and recycling machines, with support in Europe and Vietnam.",
+    description: "Founded 2016 in Wenzhou, Zhejiang. 9,000 m² factory building blown film, bag making, printing and recycling machines, with support in Europe and Vietnam.",
   },
   "/production-line": {
     title: "Complete Plastic Bag Production Lines | Ashal Innomech",

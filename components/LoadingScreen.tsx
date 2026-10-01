@@ -269,7 +269,7 @@ export default function LoadingScreen() {
           animation: "ls-bar-up 1.0s 2.0s cubic-bezier(0.22,1,0.36,1) both",
         }}>
           <span style={{ fontSize: "0.62rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "rgba(255,255,255,0.1)" }}>
-            Wenzhou · China · Est. 2008
+            Wenzhou · China · Est. 2016
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
             <div style={{
